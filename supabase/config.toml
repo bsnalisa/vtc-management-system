@@ -1,0 +1,43 @@
+project_id = "osiokcprjgwypmamvjhm"
+
+[functions.ai-chat]
+verify_jwt = true
+
+[functions.api-gateway]
+verify_jwt = false
+
+[functions.backup-organization-data]
+verify_jwt = true
+
+[functions.check-overdue-hostel-fees]
+verify_jwt = false
+
+[functions.create-notification]
+verify_jwt = true
+
+[functions.create-user]
+verify_jwt = false
+
+[functions.delete-user]
+verify_jwt = false
+
+[functions.update-user]
+verify_jwt = false
+
+[functions.expire-trials-and-notify]
+verify_jwt = false
+
+[functions.generate-hostel-fees]
+verify_jwt = true
+
+[functions.generate-pdf-document]
+verify_jwt = true
+
+[functions.scheduled-reports]
+verify_jwt = false
+
+[functions.send-hostel-notification]
+verify_jwt = true
+
+[functions.subscription-monitor]
+verify_jwt = false

@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 215 25% 15%;
+
+    /* Role-specific accent colors */
+    --role-super-admin: 280 100% 60%;
+    --role-admin: 221 83% 53%;
+    --role-registration: 217 91% 60%;
+    --role-debtor: 142 76% 36%;
+    --role-hod: 262 83% 58%;
+    --role-assessment: 24 95% 53%;
+    --role-stock: 173 58% 39%;
+    --role-asset: 43 96% 56%;
+    --role-procurement: 16 100% 50%;
+    --role-placement: 340 82% 52%;
+    --role-trainer: 263 70% 50%;
+    --role-trainee: 199 89% 48%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    --primary: 215 85% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 187 85% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 215 20% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 187 75% 92%;
+    --accent-foreground: 215 85% 25%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 215 85% 25%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 215 85% 25%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 187 85% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 75% 30%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 75% 20%;
+    --sidebar-ring: 187 85% 45%;
+  }
+
+  .dark {
+    --background: 215 30% 10%;
+    --foreground: 0 0% 98%;
+
+    /* Role-specific accent colors (same in dark mode) */
+    --role-super-admin: 280 100% 60%;
+    --role-admin: 221 83% 53%;
+    --role-registration: 217 91% 60%;
+    --role-debtor: 142 76% 36%;
+    --role-hod: 262 83% 58%;
+    --role-assessment: 24 95% 53%;
+    --role-stock: 173 58% 39%;
+    --role-asset: 43 96% 56%;
+    --role-procurement: 16 100% 50%;
+    --role-placement: 340 82% 52%;
+    --role-trainer: 263 70% 50%;
+    --role-trainee: 199 89% 48%;
+
+    --card: 215 28% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 215 28% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 187 85% 45%;
+    --primary-foreground: 215 30% 10%;
+
+    --secondary: 215 75% 30%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 215 25% 20%;
+    --muted-foreground: 215 15% 65%;
+
+    --accent: 215 25% 20%;
+    --accent-foreground: 187 85% 45%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 187 85% 45%;
+    --sidebar-background: 215 35% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 187 85% 45%;
+    --sidebar-primary-foreground: 215 30% 10%;
+    --sidebar-accent: 215 30% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 215 30% 15%;
+    --sidebar-ring: 187 85% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
