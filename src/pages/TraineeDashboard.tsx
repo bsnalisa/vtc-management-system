@@ -87,14 +87,6 @@ const TraineeDashboard = () => {
       subtitle="Always stay updated in your trainee portal"
       navItems={traineeNavItems}
       groupLabel="Trainee iEnabler"
-      headerActions={
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
-          </Button>
-        </div>
-      }
     >
       {/* Modern Hero Header */}
       <div className="mb-8">
@@ -109,13 +101,13 @@ const TraineeDashboard = () => {
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={profile?.avatar} />
+              <AvatarImage src={profile?.avatar_url} />
               <AvatarFallback className="bg-primary/10 text-primary">
                 <User className="h-6 w-6" />
               </AvatarFallback>
             </Avatar>
             <div className="text-right">
-              <p className="font-medium">{profile?.firstname} {profile?.lastname}</p>
+              <p className="font-medium">{profile?.firstname} {profile?.surname}</p>
               <Badge variant="outline" className="mt-1">
                 <CheckCircle2 className="h-3 w-3 mr-1" />
                 Active
