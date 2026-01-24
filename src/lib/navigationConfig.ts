@@ -20,11 +20,12 @@ import {
   CreditCard,
   ShieldCheck,
   Home,
+  LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {
   title: string;
-  url?: string; // optional if parent has children
+  url: string;
   icon: LucideIcon;
   children?: NavItem[];
 }
@@ -83,163 +84,16 @@ export const trainerNavItems: NavItem[] = [
 
 // --------------------- Trainee Navigation ---------------------
 export const traineeNavItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    url: "/trainee-dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "My Profile",
-    url: "/profile",
-    icon: UserCircle,
-  },
-  {
-    title: "Registration",
-    icon: ClipboardList,
-    children: [
-      {
-        title: "Qualification Registration",
-        url: "/trainee/registration",
-        icon: ClipboardList,
-      },
-      {
-        title: "Add / Cancel Subjects",
-        url: "/trainee/registration/subjects",
-        icon: ClipboardList,
-      },
-      {
-        title: "Proof of Registration",
-        url: "/trainee/registration/proof",
-        icon: ClipboardList,
-      },
-    ],
-  },
-  {
-    title: "Application",
-    icon: FileText,
-    children: [
-      {
-        title: "Personal Information",
-        url: "/trainee/application/profile",
-        icon: FileText,
-      },
-      {
-        title: "Upload Documents",
-        url: "/trainee/application/documents",
-        icon: FileText,
-      },
-      {
-        title: "Admission Status",
-        url: "/trainee/application/status",
-        icon: FileText,
-      },
-    ],
-  },
-  {
-    title: "Hostel",
-    icon: Building,
-    children: [
-      {
-        title: "Hostel Registration",
-        url: "/trainee/hostel",
-        icon: Building,
-      },
-      {
-        title: "Meals",
-        url: "/trainee/hostel/meals",
-        icon: Building,
-      },
-    ],
-  },
-  {
-    title: "Student Admin",
-    icon: GraduationCap,
-    children: [
-      {
-        title: "Graduation",
-        url: "/trainee/graduation",
-        icon: GraduationCap,
-      },
-      {
-        title: "International Students",
-        url: "/trainee/international",
-        icon: GraduationCap,
-      },
-    ],
-  },
-  {
-    title: "Student Enquiry",
-    icon: BookOpen,
-    children: [
-      {
-        title: "Exam Timetable",
-        url: "/trainee/exams/timetable",
-        icon: BookOpen,
-      },
-      {
-        title: "Results & Academic Record",
-        url: "/trainee/exams/results",
-        icon: BookOpen,
-      },
-      {
-        title: "Correspondence",
-        url: "/trainee/correspondence",
-        icon: BookOpen,
-      },
-    ],
-  },
-  {
-    title: "Student Finance",
-    icon: DollarSign,
-    children: [
-      {
-        title: "Fee Statement",
-        url: "/trainee/finance",
-        icon: DollarSign,
-      },
-      {
-        title: "Acknowledgement of Debt",
-        url: "/trainee/finance/debt",
-        icon: FileText,
-      },
-      {
-        title: "Refunds",
-        url: "/trainee/finance/refunds",
-        icon: DollarSign,
-      },
-    ],
-  },
-  {
-    title: "Payments",
-    icon: CreditCard,
-    children: [
-      {
-        title: "Online Payments",
-        url: "/trainee/payments",
-        icon: CreditCard,
-      },
-      {
-        title: "Instant EFT (SID)",
-        url: "/trainee/payments/eft",
-        icon: CreditCard,
-      },
-      {
-        title: "Upload Proof of Payment",
-        url: "/trainee/payments/proof",
-        icon: CreditCard,
-      },
-      {
-        title: "Payment History",
-        url: "/trainee/payments/history",
-        icon: CreditCard,
-      },
-    ],
-  },
-  {
-    title: "Biographical Verification",
-    url: "/trainee/biographical-verification",
-    icon: ShieldCheck,
-  },
+  { title: "Dashboard", url: "/trainee-dashboard", icon: LayoutDashboard },
+  { title: "My Profile", url: "/profile", icon: UserCircle },
+  { title: "Registration", url: "/trainee/registration", icon: ClipboardList },
+  { title: "Documents", url: "/trainee/application/documents", icon: FileText },
+  { title: "Admission Status", url: "/trainee/application/status", icon: FileText },
+  { title: "Hostel", url: "/trainee/hostel", icon: Building },
+  { title: "Exam Timetable", url: "/trainee/exams/timetable", icon: BookOpen },
+  { title: "Results", url: "/trainee/exams/results", icon: BookOpen },
+  { title: "Fee Statement", url: "/trainee/finance", icon: DollarSign },
+  { title: "Payments", url: "/trainee/payments", icon: CreditCard },
 ];
 
 // HOD Navigation
