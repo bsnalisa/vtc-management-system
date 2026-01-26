@@ -3942,6 +3942,70 @@ export type Database = {
           },
         ]
       }
+      proof_of_registrations: {
+        Row: {
+          academic_year: string
+          created_at: string
+          file_path: string | null
+          generated_at: string
+          generated_by: string
+          id: string
+          organization_id: string
+          qualification_id: string
+          reference_number: string
+          registration_date: string
+          trainee_id: string
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          file_path?: string | null
+          generated_at?: string
+          generated_by: string
+          id?: string
+          organization_id: string
+          qualification_id: string
+          reference_number: string
+          registration_date?: string
+          trainee_id: string
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          file_path?: string | null
+          generated_at?: string
+          generated_by?: string
+          id?: string
+          organization_id?: string
+          qualification_id?: string
+          reference_number?: string
+          registration_date?: string
+          trainee_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proof_of_registrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proof_of_registrations_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proof_of_registrations_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_order_items: {
         Row: {
           created_at: string
@@ -4160,6 +4224,153 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      qualification_approvals: {
+        Row: {
+          action: Database["public"]["Enums"]["approval_action"]
+          comments: string | null
+          created_at: string
+          id: string
+          performed_by: string
+          qualification_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["approval_action"]
+          comments?: string | null
+          created_at?: string
+          id?: string
+          performed_by: string
+          qualification_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["approval_action"]
+          comments?: string | null
+          created_at?: string
+          id?: string
+          performed_by?: string
+          qualification_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_approvals_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qualification_unit_standards: {
+        Row: {
+          created_at: string
+          credit_value: number | null
+          id: string
+          is_mandatory: boolean
+          level: number
+          qualification_id: string
+          unit_standard_id: string
+          unit_standard_title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credit_value?: number | null
+          id?: string
+          is_mandatory?: boolean
+          level: number
+          qualification_id: string
+          unit_standard_id: string
+          unit_standard_title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credit_value?: number | null
+          id?: string
+          is_mandatory?: boolean
+          level?: number
+          qualification_id?: string
+          unit_standard_id?: string
+          unit_standard_title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_unit_standards_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qualifications: {
+        Row: {
+          active: boolean
+          approval_date: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string
+          duration_unit: Database["public"]["Enums"]["duration_unit"]
+          duration_value: number
+          id: string
+          nqf_level: number
+          organization_id: string
+          qualification_code: string
+          qualification_title: string
+          qualification_type: Database["public"]["Enums"]["qualification_type"]
+          rejection_comments: string | null
+          status: Database["public"]["Enums"]["qualification_status"]
+          updated_at: string
+          version_number: number
+        }
+        Insert: {
+          active?: boolean
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by: string
+          duration_unit?: Database["public"]["Enums"]["duration_unit"]
+          duration_value: number
+          id?: string
+          nqf_level: number
+          organization_id: string
+          qualification_code: string
+          qualification_title: string
+          qualification_type: Database["public"]["Enums"]["qualification_type"]
+          rejection_comments?: string | null
+          status?: Database["public"]["Enums"]["qualification_status"]
+          updated_at?: string
+          version_number?: number
+        }
+        Update: {
+          active?: boolean
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string
+          duration_unit?: Database["public"]["Enums"]["duration_unit"]
+          duration_value?: number
+          id?: string
+          nqf_level?: number
+          organization_id?: string
+          qualification_code?: string
+          qualification_title?: string
+          qualification_type?: Database["public"]["Enums"]["qualification_type"]
+          rejection_comments?: string | null
+          status?: Database["public"]["Enums"]["qualification_status"]
+          updated_at?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       receiving_report_items: {
         Row: {
@@ -5546,6 +5757,7 @@ export type Database = {
           national_id: string
           organization_id: string | null
           phone: string
+          qualification_id: string | null
           status: Database["public"]["Enums"]["trainee_status"]
           trade_id: string
           trainee_id: string
@@ -5568,6 +5780,7 @@ export type Database = {
           national_id: string
           organization_id?: string | null
           phone: string
+          qualification_id?: string | null
           status?: Database["public"]["Enums"]["trainee_status"]
           trade_id: string
           trainee_id: string
@@ -5590,6 +5803,7 @@ export type Database = {
           national_id?: string
           organization_id?: string | null
           phone?: string
+          qualification_id?: string | null
           status?: Database["public"]["Enums"]["trainee_status"]
           trade_id?: string
           trainee_id?: string
@@ -5603,6 +5817,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainees_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
             referencedColumns: ["id"]
           },
           {
@@ -6013,6 +6234,14 @@ export type Database = {
         Returns: number
       }
       calculate_trainee_gpa: { Args: { _trainee_id: string }; Returns: number }
+      can_approve_qualifications: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      can_manage_qualifications: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       can_trainee_enroll: {
         Args: {
           _trainee_id: string
@@ -6062,6 +6291,7 @@ export type Database = {
         | { Args: never; Returns: string }
         | { Args: { org_id: string }; Returns: string }
       generate_invoice_number: { Args: { _org_id: string }; Returns: string }
+      generate_por_reference: { Args: { _org_id: string }; Returns: string }
       generate_trainee_id:
         | { Args: never; Returns: string }
         | { Args: { org_id: string }; Returns: string }
@@ -6195,6 +6425,7 @@ export type Database = {
         | "bdl_coordinator"
         | "rpl_coordinator"
         | "head_trainee_support"
+      approval_action: "submitted" | "approved" | "rejected" | "returned"
       asset_condition: "excellent" | "good" | "fair" | "poor" | "needs_repair"
       asset_status:
         | "active"
@@ -6204,6 +6435,7 @@ export type Database = {
         | "retired"
       bed_status: "available" | "occupied" | "reserved" | "maintenance"
       borrowing_status: "borrowed" | "returned" | "overdue"
+      duration_unit: "months" | "years"
       employment_type: "fulltime" | "parttime" | "contract"
       fine_status: "pending" | "paid" | "waived"
       gender: "male" | "female" | "other"
@@ -6229,6 +6461,12 @@ export type Database = {
         | "cancelled"
       maintenance_type: "corrective" | "preventive" | "predictive" | "breakdown"
       package_type: "basic" | "extended" | "professional"
+      qualification_status:
+        | "draft"
+        | "pending_approval"
+        | "approved"
+        | "rejected"
+      qualification_type: "nvc" | "diploma"
       room_status: "available" | "occupied" | "maintenance" | "reserved"
       room_type: "single" | "double" | "dormitory" | "suite"
       trainee_status: "active" | "completed" | "deferred" | "withdrawn"
@@ -6391,6 +6629,7 @@ export const Constants = {
         "rpl_coordinator",
         "head_trainee_support",
       ],
+      approval_action: ["submitted", "approved", "rejected", "returned"],
       asset_condition: ["excellent", "good", "fair", "poor", "needs_repair"],
       asset_status: [
         "active",
@@ -6401,6 +6640,7 @@ export const Constants = {
       ],
       bed_status: ["available", "occupied", "reserved", "maintenance"],
       borrowing_status: ["borrowed", "returned", "overdue"],
+      duration_unit: ["months", "years"],
       employment_type: ["fulltime", "parttime", "contract"],
       fine_status: ["pending", "paid", "waived"],
       gender: ["male", "female", "other"],
@@ -6429,6 +6669,13 @@ export const Constants = {
       ],
       maintenance_type: ["corrective", "preventive", "predictive", "breakdown"],
       package_type: ["basic", "extended", "professional"],
+      qualification_status: [
+        "draft",
+        "pending_approval",
+        "approved",
+        "rejected",
+      ],
+      qualification_type: ["nvc", "diploma"],
       room_status: ["available", "occupied", "maintenance", "reserved"],
       room_type: ["single", "double", "dormitory", "suite"],
       trainee_status: ["active", "completed", "deferred", "withdrawn"],
