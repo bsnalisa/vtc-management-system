@@ -49,6 +49,7 @@ export const adminNavItems: NavItem[] = [
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
 export const organizationAdminNavItems: NavItem[] = [
   { title: "Dashboard", url: "/organization-admin-dashboard", icon: LayoutDashboard },
+  { title: "Qualifications", url: "/qualifications", icon: GraduationCap },
   { title: "User Management", url: "/users", icon: Users },
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
@@ -60,6 +61,7 @@ export const organizationAdminNavItems: NavItem[] = [
 // Head of Training Navigation (All Academic & Training Operations)
 export const headOfTrainingNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-training-dashboard", icon: LayoutDashboard },
+  { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
   { title: "Course Management", url: "/course-management", icon: BookOpen },
   { title: "Training Modules", url: "/training-modules", icon: BookOpen },
   { title: "Trainee List", url: "/trainees", icon: Users },

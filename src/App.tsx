@@ -79,6 +79,8 @@ import RPLCoordinatorDashboard from "./pages/RPLCoordinatorDashboard";
 import PendingApprovals from "./pages/PendingApprovals";
 import EntryRequirementsManagement from "./pages/EntryRequirementsManagement";
 import CourseManagement from "./pages/CourseManagement";
+import QualificationManagement from "./pages/QualificationManagement";
+import QualificationApprovals from "./pages/QualificationApprovals";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -348,6 +350,8 @@ const App = () => (
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
+          <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
+          <Route path="/qualification-approvals" element={<ProtectedRoute><QualificationApprovals /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           </Routes>
