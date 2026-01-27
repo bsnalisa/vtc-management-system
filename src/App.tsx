@@ -81,6 +81,14 @@ import EntryRequirementsManagement from "./pages/EntryRequirementsManagement";
 import CourseManagement from "./pages/CourseManagement";
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationApprovals from "./pages/QualificationApprovals";
+import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
+import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
+import TraineeAdmissionStatusPage from "./pages/trainee/TraineeAdmissionStatusPage";
+import TraineeHostelPage from "./pages/trainee/TraineeHostelPage";
+import TraineeExamTimetablePage from "./pages/trainee/TraineeExamTimetablePage";
+import TraineeResultsPage from "./pages/trainee/TraineeResultsPage";
+import TraineeFinancePage from "./pages/trainee/TraineeFinancePage";
+import TraineePaymentsPage from "./pages/trainee/TraineePaymentsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -352,6 +360,15 @@ const App = () => (
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
           <Route path="/qualification-approvals" element={<ProtectedRoute><QualificationApprovals /></ProtectedRoute>} />
+          {/* Trainee Portal Routes */}
+          <Route path="/trainee/registration" element={<ProtectedRoute><TraineeRegistrationPage /></ProtectedRoute>} />
+          <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
+          <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
+          <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />
+          <Route path="/trainee/exams/timetable" element={<ProtectedRoute><TraineeExamTimetablePage /></ProtectedRoute>} />
+          <Route path="/trainee/exams/results" element={<ProtectedRoute><TraineeResultsPage /></ProtectedRoute>} />
+          <Route path="/trainee/finance" element={<ProtectedRoute><TraineeFinancePage /></ProtectedRoute>} />
+          <Route path="/trainee/payments" element={<ProtectedRoute><TraineePaymentsPage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           </Routes>
