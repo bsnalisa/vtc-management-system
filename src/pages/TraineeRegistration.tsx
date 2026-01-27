@@ -6,18 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRegisterTrainee } from "@/hooks/useTrainees";
-import { useTrades } from "@/hooks/useTrades";
+import { useApprovedQualifications } from "@/hooks/useQualifications";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { registrationOfficerNavItems } from "@/lib/navigationConfig";
 import { FormFieldError } from "@/components/ui/form-field-error";
-import { validateTraineeRegistration, ValidationResult } from "@/lib/validationUtils";
+import { validateTraineeRegistration } from "@/lib/validationUtils";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, GraduationCap } from "lucide-react";
 
 const TraineeRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: trades, isLoading: tradesLoading } = useTrades();
+  const { data: qualifications, isLoading: qualificationsLoading } = useApprovedQualifications();
   const { organizationId } = useOrganizationContext();
   const registerTrainee = useRegisterTrainee();
   
@@ -30,11 +32,15 @@ const TraineeRegistration = () => {
     phone: "",
     email: "",
     address: "",
-    trade: "",
+    qualification: "", // Changed from trade to qualification
     trainingMode: "",
     level: "",
-    academicYear: "2025",
+    academicYear: new Date().getFullYear().toString(),
+    needsHostel: false,
   });
+
+  // Get selected qualification details
+  const selectedQualification = qualifications?.find(q => q.id === formData.qualification);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -81,11 +87,12 @@ const TraineeRegistration = () => {
         phone: formData.phone,
         email: formData.email || undefined,
         address: formData.address,
-        trade_id: formData.trade,
+        trade_id: formData.qualification, // Use qualification ID
         training_mode: formData.trainingMode,
         level: parseInt(formData.level),
         academic_year: formData.academicYear,
         organization_id: organizationId || undefined,
+        qualification_id: formData.qualification,
       });
 
       navigate("/trainees");
@@ -246,29 +253,48 @@ const TraineeRegistration = () => {
               <CardDescription>Select training program and level</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+            {/* Approved Qualifications Notice */}
+            {qualifications && qualifications.length === 0 && (
+              <Alert variant="default" className="border-yellow-500 bg-yellow-50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  No approved qualifications available. Please ensure qualifications have been submitted and approved by the Head of Training before registration.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="trade">Trade / Program *</Label>
+                  <Label htmlFor="qualification">Qualification / Program *</Label>
                   <Select 
-                    value={formData.trade} 
+                    value={formData.qualification} 
                     onValueChange={(value) => {
-                      setFormData({ ...formData, trade: value });
+                      setFormData({ ...formData, qualification: value });
                       setTouched(prev => ({ ...prev, trade: true }));
                     }} 
-                    disabled={tradesLoading}
+                    disabled={qualificationsLoading}
                   >
                     <SelectTrigger className={touched.trade && errors.trade ? "border-destructive" : ""}>
-                      <SelectValue placeholder="Select trade" />
+                      <SelectValue placeholder="Select approved qualification" />
                     </SelectTrigger>
                     <SelectContent>
-                      {trades?.map((trade) => (
-                        <SelectItem key={trade.id} value={trade.id}>
-                          {trade.name}
+                      {qualifications?.map((qualification) => (
+                        <SelectItem key={qualification.id} value={qualification.id}>
+                          <div className="flex items-center gap-2">
+                            <GraduationCap className="h-4 w-4" />
+                            <span>{qualification.qualification_title}</span>
+                            <span className="text-muted-foreground">({qualification.qualification_code})</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <FormFieldError error={touched.trade ? errors.trade : undefined} />
+                  {selectedQualification && (
+                    <p className="text-sm text-muted-foreground">
+                      NQF Level {selectedQualification.nqf_level} • {selectedQualification.duration_value} {selectedQualification.duration_unit}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="trainingMode">Training Mode *</Label>
