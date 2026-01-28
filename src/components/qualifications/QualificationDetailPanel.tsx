@@ -43,8 +43,13 @@ export const QualificationDetailPanel = ({
   const statusInfo = statusConfig[qualification.status];
 
   const confirmSubmit = async () => {
-    await submitMutation.mutateAsync(qualification.id);
-    setSubmitDialogOpen(false);
+    try {
+      await submitMutation.mutateAsync(qualification.id);
+      setSubmitDialogOpen(false);
+    } catch (error) {
+      // Error is handled by the mutation's onError callback
+      console.error("Submit failed:", error);
+    }
   };
 
   return (

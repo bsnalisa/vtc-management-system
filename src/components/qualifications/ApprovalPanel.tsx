@@ -33,22 +33,30 @@ export const ApprovalPanel = ({ qualification, onBack, onComplete }: ApprovalPan
   const totalCredits = unitStandards?.reduce((sum, us) => sum + (us.credit_value || 0), 0) || 0;
 
   const handleApprove = async () => {
-    await approveMutation.mutateAsync({ 
-      qualificationId: qualification.id, 
-      comments: comments || undefined 
-    });
-    setApproveDialogOpen(false);
-    onComplete();
+    try {
+      await approveMutation.mutateAsync({ 
+        qualificationId: qualification.id, 
+        comments: comments || undefined 
+      });
+      setApproveDialogOpen(false);
+      onComplete();
+    } catch (error) {
+      console.error("Approve failed:", error);
+    }
   };
 
   const handleReject = async () => {
     if (!comments.trim()) return;
-    await rejectMutation.mutateAsync({ 
-      qualificationId: qualification.id, 
-      comments 
-    });
-    setRejectDialogOpen(false);
-    onComplete();
+    try {
+      await rejectMutation.mutateAsync({ 
+        qualificationId: qualification.id, 
+        comments 
+      });
+      setRejectDialogOpen(false);
+      onComplete();
+    } catch (error) {
+      console.error("Reject failed:", error);
+    }
   };
 
   return (
