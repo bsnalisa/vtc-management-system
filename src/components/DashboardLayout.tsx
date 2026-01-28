@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation, NavLink } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -29,6 +29,7 @@ import { useLogActivity } from "@/hooks/useRoleActivity";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast as showToast } from "sonner";
+import { signOutAndClearCaches } from "@/lib/authUtils";
 
 interface NavItem {
   title: string;
@@ -296,9 +297,10 @@ export const DashboardLayout = ({
   const location = useLocation();
   const { role } = useUserRole();
   const { organizationName, settings } = useOrganizationContext();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutAndClearCaches(queryClient);
     showToast.success("You have been signed out successfully.");
     navigate("/auth");
   };
