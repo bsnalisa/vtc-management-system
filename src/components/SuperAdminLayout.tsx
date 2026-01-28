@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -29,8 +29,8 @@ import {
   BarChart3,
   TrendingUp,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
 import { Breadcrumb } from "@/components/Breadcrumb";
+import { signOutAndClearCaches } from "@/lib/authUtils";
 
 interface SuperAdminLayoutProps {
   children: ReactNode;
@@ -159,9 +159,10 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutAndClearCaches(queryClient);
     toast({
       title: "Signed out",
       description: "You have been signed out successfully.",

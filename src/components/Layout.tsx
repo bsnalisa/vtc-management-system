@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -8,6 +8,7 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { MODULE_CODES } from "@/lib/packageUtils";
 import { GlobalSearch } from "./GlobalSearch";
 import { NotificationBell } from "./NotificationBell";
+import { signOutAndClearCaches } from "@/lib/authUtils";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -37,9 +38,10 @@ const Layout = ({ children }: LayoutProps) => {
   const { role } = useUserRole();
   const { hasModuleAccess } = useOrganizationContext();
   const [searchOpen, setSearchOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutAndClearCaches(queryClient);
     toast({
       title: "Signed out",
       description: "You have been signed out successfully.",
