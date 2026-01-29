@@ -1,18 +1,20 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Pencil, Send, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Pencil, Send, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { 
   Qualification, 
   QualificationStatus,
   useQualificationApprovals,
   useSubmitForApproval
 } from "@/hooks/useQualifications";
+import { useTradesForOrg } from "@/hooks/useTradesManagement";
 import { UnitStandardsTable } from "./UnitStandardsTable";
 import { format } from "date-fns";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface QualificationDetailPanelProps {
   qualification: Qualification;
@@ -35,12 +37,18 @@ export const QualificationDetailPanel = ({
   canManage 
 }: QualificationDetailPanelProps) => {
   const { data: approvals } = useQualificationApprovals(qualification.id);
+  const { data: trades } = useTradesForOrg();
   const submitMutation = useSubmitForApproval();
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
 
-  const isEditable = canManage && (qualification.status === "draft" || qualification.status === "rejected");
-  const canSubmit = canManage && (qualification.status === "draft" || qualification.status === "rejected");
+  // Allow editing for draft, rejected, and approved qualifications (for resubmission)
+  const isEditable = canManage && ["draft", "rejected", "approved"].includes(qualification.status);
+  // Can submit if draft, rejected, or approved (for resubmission after edits)
+  const canSubmit = canManage && ["draft", "rejected", "approved"].includes(qualification.status);
   const statusInfo = statusConfig[qualification.status];
+  
+  // Get trade name
+  const trade = trades?.find(t => t.id === qualification.trade_id);
 
   const confirmSubmit = async () => {
     try {
@@ -82,11 +90,21 @@ export const QualificationDetailPanel = ({
           {canSubmit && (
             <Button onClick={() => setSubmitDialogOpen(true)}>
               <Send className="h-4 w-4 mr-2" />
-              Submit for Approval
+              {qualification.status === "approved" ? "Resubmit for Approval" : "Submit for Approval"}
             </Button>
           )}
         </div>
       </div>
+
+      {/* Info for approved qualifications being edited */}
+      {qualification.status === "approved" && canManage && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            This qualification is currently approved. If you edit it, you'll need to resubmit for approval.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Rejection Comments */}
       {qualification.status === "rejected" && qualification.rejection_comments && (
@@ -123,6 +141,12 @@ export const QualificationDetailPanel = ({
               <div>
                 <p className="text-muted-foreground">Version</p>
                 <p className="font-medium">v{qualification.version_number}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-muted-foreground">Trade</p>
+                <p className="font-medium">
+                  {trade ? `${trade.code} - ${trade.name}` : <span className="text-muted-foreground italic">No trade assigned</span>}
+                </p>
               </div>
             </div>
           </CardContent>

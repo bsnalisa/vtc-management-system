@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { 
   QualificationUnitStandard, 
   useQualificationUnitStandards, 
   useDeleteUnitStandard 
 } from "@/hooks/useQualifications";
 import { UnitStandardDialog } from "./UnitStandardDialog";
+import { BulkUnitStandardImportDialog } from "./BulkUnitStandardImportDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,6 +23,7 @@ export const UnitStandardsTable = ({ qualificationId, isEditable }: UnitStandard
   const deleteMutation = useDeleteUnitStandard();
   
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [selectedUnitStandard, setSelectedUnitStandard] = useState<QualificationUnitStandard | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [unitToDelete, setUnitToDelete] = useState<QualificationUnitStandard | null>(null);
@@ -74,10 +76,16 @@ export const UnitStandardsTable = ({ qualificationId, isEditable }: UnitStandard
           </Badge>
         </div>
         {isEditable && (
-          <Button onClick={handleAddNew} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Unit Standard
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setBulkImportOpen(true)} size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              Bulk Import
+            </Button>
+            <Button onClick={handleAddNew} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Unit Standard
+            </Button>
+          </div>
         )}
       </div>
 
@@ -140,6 +148,12 @@ export const UnitStandardsTable = ({ qualificationId, isEditable }: UnitStandard
         onOpenChange={setDialogOpen}
         qualificationId={qualificationId}
         unitStandard={selectedUnitStandard}
+      />
+
+      <BulkUnitStandardImportDialog
+        open={bulkImportOpen}
+        onOpenChange={setBulkImportOpen}
+        qualificationId={qualificationId}
       />
 
       <ConfirmDialog

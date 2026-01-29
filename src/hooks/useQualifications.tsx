@@ -24,6 +24,7 @@ export interface Qualification {
   version_number: number;
   active: boolean;
   rejection_comments: string | null;
+  trade_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,6 +57,7 @@ export interface CreateQualificationData {
   nqf_level: number;
   duration_value: number;
   duration_unit: DurationUnit;
+  trade_id?: string;
 }
 
 export interface CreateUnitStandardData {
@@ -250,10 +252,18 @@ export const useUpdateQualification = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...data }: Partial<Qualification> & { id: string }) => {
+    mutationFn: async ({ id, currentStatus, ...data }: Partial<Qualification> & { id: string; currentStatus?: string }) => {
+      // If updating an approved qualification, automatically set status to draft for re-approval
+      const updateData = { ...data };
+      if (currentStatus === "approved") {
+        updateData.status = "draft";
+        updateData.approved_by = null;
+        updateData.approval_date = null;
+      }
+      
       const { data: result, error } = await supabase
         .from("qualifications")
-        .update(data)
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();

@@ -61,6 +61,7 @@ export const organizationAdminNavItems: NavItem[] = [
 // Head of Training Navigation (All Academic & Training Operations)
 export const headOfTrainingNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-training-dashboard", icon: LayoutDashboard },
+  { title: "Trade Management", url: "/trade-management", icon: Briefcase },
   { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
   { title: "Course Management", url: "/course-management", icon: BookOpen },
   { title: "Training Modules", url: "/training-modules", icon: BookOpen },

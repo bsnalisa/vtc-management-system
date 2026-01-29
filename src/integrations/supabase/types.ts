@@ -4321,6 +4321,7 @@ export type Database = {
           qualification_type: Database["public"]["Enums"]["qualification_type"]
           rejection_comments: string | null
           status: Database["public"]["Enums"]["qualification_status"]
+          trade_id: string | null
           updated_at: string
           version_number: number
         }
@@ -4340,6 +4341,7 @@ export type Database = {
           qualification_type: Database["public"]["Enums"]["qualification_type"]
           rejection_comments?: string | null
           status?: Database["public"]["Enums"]["qualification_status"]
+          trade_id?: string | null
           updated_at?: string
           version_number?: number
         }
@@ -4359,6 +4361,7 @@ export type Database = {
           qualification_type?: Database["public"]["Enums"]["qualification_type"]
           rejection_comments?: string | null
           status?: Database["public"]["Enums"]["qualification_status"]
+          trade_id?: string | null
           updated_at?: string
           version_number?: number
         }
@@ -4368,6 +4371,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualifications_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
             referencedColumns: ["id"]
           },
         ]
