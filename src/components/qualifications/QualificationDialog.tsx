@@ -12,6 +12,7 @@ import {
   useCreateQualification, 
   useUpdateQualification 
 } from "@/hooks/useQualifications";
+import { useTradesForOrg } from "@/hooks/useTradesManagement";
 
 interface QualificationDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface QualificationDialogProps {
 export const QualificationDialog = ({ open, onOpenChange, qualification }: QualificationDialogProps) => {
   const createMutation = useCreateQualification();
   const updateMutation = useUpdateQualification();
+  const { data: trades } = useTradesForOrg();
   
   const [formData, setFormData] = useState<CreateQualificationData>({
     qualification_title: "",
@@ -30,6 +32,7 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
     nqf_level: 1,
     duration_value: 12,
     duration_unit: "months",
+    trade_id: undefined,
   });
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
         nqf_level: qualification.nqf_level,
         duration_value: qualification.duration_value,
         duration_unit: qualification.duration_unit,
+        trade_id: qualification.trade_id || undefined,
       });
     } else {
       setFormData({
@@ -50,6 +54,7 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
         nqf_level: 1,
         duration_value: 12,
         duration_unit: "months",
+        trade_id: undefined,
       });
     }
   }, [qualification, open]);
@@ -58,7 +63,11 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
     e.preventDefault();
     
     if (qualification) {
-      await updateMutation.mutateAsync({ id: qualification.id, ...formData });
+      await updateMutation.mutateAsync({ 
+        id: qualification.id, 
+        currentStatus: qualification.status,
+        ...formData 
+      });
     } else {
       await createMutation.mutateAsync(formData);
     }
@@ -67,7 +76,8 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
   };
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
-  const isEditable = !qualification || qualification.status === "draft" || qualification.status === "rejected";
+  // Allow editing for approved qualifications too (will resubmit for approval)
+  const isEditable = !qualification || ["draft", "rejected", "approved"].includes(qualification.status);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -118,8 +128,29 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
                   <SelectItem value="nvc">NVC (National Vocational Certificate)</SelectItem>
                   <SelectItem value="diploma">Diploma</SelectItem>
                 </SelectContent>
-              </Select>
+            </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="trade">Trade</Label>
+            <Select
+              value={formData.trade_id || "none"}
+              onValueChange={(value) => setFormData({ ...formData, trade_id: value === "none" ? undefined : value })}
+              disabled={!isEditable}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a trade (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No trade selected</SelectItem>
+                {trades?.map((trade) => (
+                  <SelectItem key={trade.id} value={trade.id}>
+                    {trade.code} - {trade.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

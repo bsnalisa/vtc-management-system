@@ -81,6 +81,7 @@ import EntryRequirementsManagement from "./pages/EntryRequirementsManagement";
 import CourseManagement from "./pages/CourseManagement";
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationApprovals from "./pages/QualificationApprovals";
+import TradeManagement from "./pages/TradeManagement";
 import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
 import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
 import TraineeAdmissionStatusPage from "./pages/trainee/TraineeAdmissionStatusPage";
@@ -360,6 +361,7 @@ const App = () => (
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
           <Route path="/qualification-approvals" element={<ProtectedRoute><QualificationApprovals /></ProtectedRoute>} />
+          <Route path="/trade-management" element={<ProtectedRoute><TradeManagement /></ProtectedRoute>} />
           {/* Trainee Portal Routes */}
           <Route path="/trainee/registration" element={<ProtectedRoute><TraineeRegistrationPage /></ProtectedRoute>} />
           <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
