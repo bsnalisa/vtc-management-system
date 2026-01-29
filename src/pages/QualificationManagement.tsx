@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useQualifications, Qualification } from "@/hooks/useQualifications";
 import { QualificationsTable } from "@/components/qualifications/QualificationsTable";
 import { QualificationDialog } from "@/components/qualifications/QualificationDialog";
 import { QualificationDetailPanel } from "@/components/qualifications/QualificationDetailPanel";
+import { BulkQualificationImportDialog } from "@/components/qualifications/BulkQualificationImportDialog";
 import { organizationAdminNavItems } from "@/lib/navigationConfig";
 import { Skeleton } from "@/components/ui/skeleton";
 import { withRoleAccess } from "@/components/withRoleAccess";
@@ -13,6 +14,7 @@ import { withRoleAccess } from "@/components/withRoleAccess";
 const QualificationManagementPage = () => {
   const { data: qualifications, isLoading } = useQualifications();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [selectedQualification, setSelectedQualification] = useState<Qualification | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "detail">("list");
 
@@ -51,10 +53,16 @@ const QualificationManagementPage = () => {
                 Manage qualifications, add unit standards, and submit for approval.
               </p>
             </div>
-            <Button onClick={handleAddNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Qualification
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setBulkImportOpen(true)}>
+                <Upload className="h-4 w-4 mr-2" />
+                Bulk Import
+              </Button>
+              <Button onClick={handleAddNew}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Qualification
+              </Button>
+            </div>
           </div>
 
           {isLoading ? (
@@ -93,6 +101,11 @@ const QualificationManagementPage = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         qualification={selectedQualification}
+      />
+
+      <BulkQualificationImportDialog
+        open={bulkImportOpen}
+        onOpenChange={setBulkImportOpen}
       />
     </DashboardLayout>
   );
