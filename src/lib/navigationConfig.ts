@@ -128,10 +128,13 @@ export const debtorOfficerNavItems: NavItem[] = [
 // Registration Officer Navigation
 export const registrationOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/registration-officer-dashboard", icon: LayoutDashboard },
-  { title: "Applications", url: "/applications", icon: FileText },
-  { title: "Entry Requirements", url: "/entry-requirements", icon: ClipboardCheck },
+  { title: "Applications Inbox", url: "/applications-inbox", icon: FileText },
+  { title: "Admission Results", url: "/applications", icon: ClipboardCheck },
   { title: "Register Trainee", url: "/trainees/register", icon: Users },
   { title: "Trainee List", url: "/trainees", icon: Users },
+  { title: "Historical Trainees", url: "/historical-trainees", icon: Users },
+  { title: "Entry Requirements", url: "/entry-requirements", icon: ClipboardList },
+  { title: "Grading Scale", url: "/grading-scale", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 

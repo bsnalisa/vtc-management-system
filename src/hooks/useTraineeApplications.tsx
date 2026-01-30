@@ -315,8 +315,14 @@ export const useApplicationStats = () => {
 
       return {
         totalApplications: applications.length,
+        pending: applications.filter(
+          (a) => a.qualification_status === "pending"
+        ).length,
         provisionallyQualified: applications.filter(
           (a) => a.qualification_status === "provisionally_qualified"
+        ).length,
+        doesNotQualify: applications.filter(
+          (a) => a.qualification_status === "does_not_qualify"
         ).length,
         januaryRegistered: applications.filter(
           (a) =>
@@ -342,4 +348,9 @@ export const useApplicationStats = () => {
     },
     enabled: !!organizationId,
   });
+};
+
+// Alias for backwards compatibility and clearer naming
+export const useApplicationsData = () => {
+  return useTraineeApplications();
 };

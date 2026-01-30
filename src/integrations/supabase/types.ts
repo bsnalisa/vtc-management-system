@@ -1525,6 +1525,7 @@ export type Database = {
           science_symbol: string | null
           trade_id: string
           updated_at: string
+          version_number: number | null
         }
         Insert: {
           active?: boolean | null
@@ -1553,6 +1554,7 @@ export type Database = {
           science_symbol?: string | null
           trade_id: string
           updated_at?: string
+          version_number?: number | null
         }
         Update: {
           active?: boolean | null
@@ -1581,6 +1583,7 @@ export type Database = {
           science_symbol?: string | null
           trade_id?: string
           updated_at?: string
+          version_number?: number | null
         }
         Relationships: [
           {
@@ -1588,6 +1591,92 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entry_requirements_history: {
+        Row: {
+          additional_requirements: string | null
+          change_reason: string | null
+          changed_by: string
+          created_at: string
+          english_symbol: string | null
+          entry_requirement_id: string
+          id: string
+          level: number
+          maths_symbol: string | null
+          mature_age_entry: boolean | null
+          mature_min_age: number | null
+          mature_min_experience_years: number | null
+          min_grade: number | null
+          min_points: number | null
+          organization_id: string
+          previous_level_required: number | null
+          prevocational_symbol: string | null
+          required_subjects: Json | null
+          requirement_name: string
+          requires_previous_level: boolean | null
+          science_symbol: string | null
+          trade_id: string
+          version_number: number
+        }
+        Insert: {
+          additional_requirements?: string | null
+          change_reason?: string | null
+          changed_by: string
+          created_at?: string
+          english_symbol?: string | null
+          entry_requirement_id: string
+          id?: string
+          level: number
+          maths_symbol?: string | null
+          mature_age_entry?: boolean | null
+          mature_min_age?: number | null
+          mature_min_experience_years?: number | null
+          min_grade?: number | null
+          min_points?: number | null
+          organization_id: string
+          previous_level_required?: number | null
+          prevocational_symbol?: string | null
+          required_subjects?: Json | null
+          requirement_name: string
+          requires_previous_level?: boolean | null
+          science_symbol?: string | null
+          trade_id: string
+          version_number?: number
+        }
+        Update: {
+          additional_requirements?: string | null
+          change_reason?: string | null
+          changed_by?: string
+          created_at?: string
+          english_symbol?: string | null
+          entry_requirement_id?: string
+          id?: string
+          level?: number
+          maths_symbol?: string | null
+          mature_age_entry?: boolean | null
+          mature_min_age?: number | null
+          mature_min_experience_years?: number | null
+          min_grade?: number | null
+          min_points?: number | null
+          organization_id?: string
+          previous_level_required?: number | null
+          prevocational_symbol?: string | null
+          required_subjects?: Json | null
+          requirement_name?: string
+          requires_previous_level?: boolean | null
+          science_symbol?: string | null
+          trade_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_requirements_history_entry_requirement_id_fkey"
+            columns: ["entry_requirement_id"]
+            isOneToOne: false
+            referencedRelation: "entry_requirements"
             referencedColumns: ["id"]
           },
         ]
@@ -5755,6 +5844,9 @@ export type Database = {
         Row: {
           academic_year: string
           address: string
+          archive_notes: string | null
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           date_of_birth: string
           email: string | null
@@ -5778,6 +5870,9 @@ export type Database = {
         Insert: {
           academic_year: string
           address: string
+          archive_notes?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           date_of_birth: string
           email?: string | null
@@ -5801,6 +5896,9 @@ export type Database = {
         Update: {
           academic_year?: string
           address?: string
+          archive_notes?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           date_of_birth?: string
           email?: string | null
@@ -6479,7 +6577,12 @@ export type Database = {
       qualification_type: "nvc" | "diploma"
       room_status: "available" | "occupied" | "maintenance" | "reserved"
       room_type: "single" | "double" | "dormitory" | "suite"
-      trainee_status: "active" | "completed" | "deferred" | "withdrawn"
+      trainee_status:
+        | "active"
+        | "completed"
+        | "deferred"
+        | "withdrawn"
+        | "archived"
       training_mode: "fulltime" | "bdl" | "shortcourse"
     }
     CompositeTypes: {
@@ -6688,7 +6791,13 @@ export const Constants = {
       qualification_type: ["nvc", "diploma"],
       room_status: ["available", "occupied", "maintenance", "reserved"],
       room_type: ["single", "double", "dormitory", "suite"],
-      trainee_status: ["active", "completed", "deferred", "withdrawn"],
+      trainee_status: [
+        "active",
+        "completed",
+        "deferred",
+        "withdrawn",
+        "archived",
+      ],
       training_mode: ["fulltime", "bdl", "shortcourse"],
     },
   },
