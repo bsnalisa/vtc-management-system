@@ -82,6 +82,9 @@ import CourseManagement from "./pages/CourseManagement";
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationApprovals from "./pages/QualificationApprovals";
 import TradeManagement from "./pages/TradeManagement";
+import HistoricalTrainees from "./pages/HistoricalTrainees";
+import ApplicationsInbox from "./pages/ApplicationsInbox";
+import GradingScale from "./pages/GradingScale";
 import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
 import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
 import TraineeAdmissionStatusPage from "./pages/trainee/TraineeAdmissionStatusPage";
@@ -362,6 +365,9 @@ const App = () => (
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
           <Route path="/qualification-approvals" element={<ProtectedRoute><QualificationApprovals /></ProtectedRoute>} />
           <Route path="/trade-management" element={<ProtectedRoute><TradeManagement /></ProtectedRoute>} />
+          <Route path="/historical-trainees" element={<ProtectedRoute><HistoricalTrainees /></ProtectedRoute>} />
+          <Route path="/applications-inbox" element={<ProtectedRoute><ApplicationsInbox /></ProtectedRoute>} />
+          <Route path="/grading-scale" element={<ProtectedRoute><GradingScale /></ProtectedRoute>} />
           {/* Trainee Portal Routes */}
           <Route path="/trainee/registration" element={<ProtectedRoute><TraineeRegistrationPage /></ProtectedRoute>} />
           <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
