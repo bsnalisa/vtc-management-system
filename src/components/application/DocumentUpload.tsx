@@ -2,10 +2,10 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Upload, X, FileText, Image, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 
 interface DocumentUploadProps {
   label: string;
@@ -35,6 +35,7 @@ export const DocumentUpload = ({
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { organizationId } = useOrganizationContext();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,9 +60,10 @@ export const DocumentUpload = ({
     setUploading(true);
 
     try {
-      // Generate unique file name
+      // Generate unique file name with organization prefix for RLS policy
       const timestamp = Date.now();
-      const uniqueName = `${folder}/${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+      const orgPrefix = organizationId ? `${organizationId}/` : "";
+      const uniqueName = `${orgPrefix}${folder}/${timestamp}_${file.name.replace(/\s+/g, "_")}`;
 
       const { data, error: uploadError } = await supabase.storage
         .from(bucket)
@@ -211,6 +213,7 @@ export const MultipleDocumentUpload = ({
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { organizationId } = useOrganizationContext();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -231,7 +234,8 @@ export const MultipleDocumentUpload = ({
     try {
       for (const file of Array.from(files)) {
         const timestamp = Date.now();
-        const uniqueName = `${folder}/${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+        const orgPrefix = organizationId ? `${organizationId}/` : "";
+        const uniqueName = `${orgPrefix}${folder}/${timestamp}_${file.name.replace(/\s+/g, "_")}`;
 
         const { data, error: uploadError } = await supabase.storage
           .from(bucket)
