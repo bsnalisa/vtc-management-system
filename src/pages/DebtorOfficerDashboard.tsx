@@ -1,6 +1,5 @@
 // DebtorOfficerDashboard.tsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Search,
   Filter,
@@ -22,19 +21,111 @@ import {
   UserCheck,
   Home,
   Calendar,
-  Link as LinkIcon,
+  Menu,
+  ChevronLeft,
+  LogOut,
 } from "lucide-react";
 
-// ---- Layout ----
-import DashboardLayout from "../components/layout/DashboardLayout";
-
-// ---- Navigation / Profile ----
-import { debtorOfficerNavItems } from "../lib/navigationConfig";
+// Import hooks
 import { useProfile } from "../hooks/useProfile";
 
-// ------------------ LOCAL UI FALLBACKS ------------------
-// These replace missing shadcn/ui components to prevent build failure
+// ------------------ SIMPLE DASHBOARD LAYOUT ------------------
+// This replaces the missing DashboardLayout component
 
+const SimpleDashboardLayout = ({
+  children,
+  title,
+  subtitle,
+  navItems = [],
+  groupLabel = "",
+  showBackButton = false,
+}: {
+  children: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  navItems?: any[];
+  groupLabel?: string;
+  showBackButton?: boolean;
+}) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 rounded-lg hover:bg-gray-100">
+              <Menu className="h-5 w-5" />
+            </button>
+            <div>
+              <h1 className="text-xl font-semibold">{title}</h1>
+              {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-full hover:bg-gray-100">
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Sidebar - Desktop */}
+        <aside className="hidden md:block w-64 bg-white border-r min-h-[calc(100vh-73px)]">
+          <div className="p-4 border-b">
+            <h2 className="font-medium text-gray-500">{groupLabel || "Navigation"}</h2>
+          </div>
+          <nav className="p-2">
+            {navItems.map((item: any, index: number) => (
+              <a
+                key={index}
+                href={item.href || "#"}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700"
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Mobile Sidebar */}
+        {sidebarOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+            <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg">
+              <div className="p-4 border-b flex items-center justify-between">
+                <h2 className="font-medium">Menu</h2>
+                <button onClick={() => setSidebarOpen(false)}>
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              </div>
+              <nav className="p-2">
+                {navItems.map((item: any, index: number) => (
+                  <a
+                    key={index}
+                    href={item.href || "#"}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100"
+                  >
+                    {item.icon && <item.icon className="h-4 w-4" />}
+                    <span>{item.label}</span>
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6">{children}</main>
+      </div>
+    </div>
+  );
+};
+
+// ------------------ LOCAL UI COMPONENTS ------------------
 type BaseProps = React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode };
 
 const Card = ({ children, ...props }: BaseProps) => (
@@ -64,7 +155,10 @@ const CardDescription = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Button = ({ children, className = "", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button {...props} className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${className}`}>
+  <button
+    {...props}
+    className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors hover:bg-gray-50 ${className}`}
+  >
     {children}
   </button>
 );
@@ -92,7 +186,7 @@ const TableHead = ({ children }: BaseProps) => (
 );
 const TableCell = ({ children }: BaseProps) => <td className="py-3 px-4 border-b">{children}</td>;
 
-// Tabs components with proper structure
+// Tabs components
 const Tabs = ({
   children,
   value,
@@ -176,6 +270,15 @@ const TabsContent = ({
 };
 
 // ------------------ MOCK DATA ------------------
+const debtorOfficerNavItems = [
+  { label: "Dashboard", icon: BarChart3, href: "/debtor" },
+  { label: "Payment Clearance", icon: Clock, href: "/debtor/clearance" },
+  { label: "Fee Management", icon: DollarSign, href: "/debtor/fees" },
+  { label: "Reports", icon: FileText, href: "/debtor/reports" },
+  { label: "Trainees", icon: Users, href: "/debtor/trainees" },
+  { label: "Connected Systems", icon: Building, href: "/debtor/systems" },
+];
+
 const stats = {
   totalCollected: 12_450_000,
   outstanding: 2_350_000,
@@ -246,8 +349,32 @@ const StatCard = ({ title, value, icon: Icon, trend, description, color = "prima
     <CardContent>
       <div className="flex items-center justify-between mb-2">
         <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
-        <div className={`p-2 rounded-lg bg-${color}-100`}>
-          <Icon className={`h-4 w-4 text-${color}-600`} />
+        <div
+          className={`p-2 rounded-lg ${
+            color === "green"
+              ? "bg-green-100"
+              : color === "amber"
+                ? "bg-yellow-100"
+                : color === "blue"
+                  ? "bg-blue-100"
+                  : color === "red"
+                    ? "bg-red-100"
+                    : "bg-gray-100"
+          }`}
+        >
+          <Icon
+            className={`h-4 w-4 ${
+              color === "green"
+                ? "text-green-600"
+                : color === "amber"
+                  ? "text-yellow-600"
+                  : color === "blue"
+                    ? "text-blue-600"
+                    : color === "red"
+                      ? "text-red-600"
+                      : "text-gray-600"
+            }`}
+          />
         </div>
       </div>
       <div className="text-2xl font-bold">{value}</div>
@@ -257,7 +384,13 @@ const StatCard = ({ title, value, icon: Icon, trend, description, color = "prima
   </Card>
 );
 
-// ------------------ COMPONENT ------------------
+// Mock useProfile hook
+const useProfile = () => ({
+  profile: { firstname: "Admin" },
+  isLoading: false,
+});
+
+// ------------------ MAIN COMPONENT ------------------
 export default function DebtorOfficerDashboard() {
   const { profile } = useProfile();
   const [searchQuery, setSearchQuery] = useState("");
@@ -268,10 +401,12 @@ export default function DebtorOfficerDashboard() {
 
   const handleGenerateInvoice = (traineeId: string) => {
     console.log("Generating invoice for:", traineeId);
+    alert(`Invoice generated for trainee ${traineeId}`);
   };
 
   const handleSendReminder = (traineeId: string) => {
     console.log("Sending reminder for:", traineeId);
+    alert(`Reminder sent to trainee ${traineeId}`);
   };
 
   const handleQuickClear = (trainee: any) => {
@@ -280,7 +415,7 @@ export default function DebtorOfficerDashboard() {
   };
 
   return (
-    <DashboardLayout
+    <SimpleDashboardLayout
       title={`Welcome back, ${profile?.firstname || "User"}`}
       subtitle="Payment Clearance & Fee Management Dashboard"
       navItems={debtorOfficerNavItems}
@@ -341,7 +476,7 @@ export default function DebtorOfficerDashboard() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline">
+                  <Button className="border-gray-300 hover:bg-gray-50">
                     <Filter className="h-4 w-4 mr-2" />
                     Filter
                   </Button>
@@ -351,8 +486,8 @@ export default function DebtorOfficerDashboard() {
                   {quickActions.map((action, index) => (
                     <Button
                       key={index}
-                      variant="outline"
-                      className="h-auto py-3 flex flex-col items-center justify-center gap-2 hover:border-blue-500 transition-colors"
+                      className="h-auto py-3 flex flex-col items-center justify-center gap-2 hover:border-blue-500 hover:bg-gray-50 border-gray-300"
+                      onClick={() => alert(`${action.label} clicked`)}
                     >
                       <action.icon className="h-5 w-5" />
                       <span className="text-xs font-medium">{action.label}</span>
@@ -386,7 +521,10 @@ export default function DebtorOfficerDashboard() {
                     Reports
                   </TabsTrigger>
                 </TabsList>
-                <Button onClick={() => setShowPaymentModal(true)} className="bg-blue-600 text-white hover:bg-blue-700">
+                <Button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
+                >
                   <Zap className="h-4 w-4 mr-2" />
                   Process Payment
                 </Button>
@@ -428,13 +566,15 @@ export default function DebtorOfficerDashboard() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex justify-end gap-2">
-                                  <Button size="sm" variant="ghost">
+                                  <Button
+                                    className="border-gray-300 hover:bg-gray-50"
+                                    onClick={() => handleGenerateInvoice(clearance.id)}
+                                  >
                                     <Eye className="h-4 w-4" />
                                   </Button>
                                   <Button
-                                    size="sm"
+                                    className="bg-green-600 text-white hover:bg-green-700 border-green-600"
                                     onClick={() => handleQuickClear(clearance)}
-                                    className="bg-green-600 text-white hover:bg-green-700"
                                   >
                                     Clear
                                   </Button>
@@ -461,7 +601,7 @@ export default function DebtorOfficerDashboard() {
                         </div>
                         <Button
                           onClick={() => setShowFeeSetupModal(true)}
-                          className="bg-blue-600 text-white hover:bg-blue-700"
+                          className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Fee
@@ -497,13 +637,9 @@ export default function DebtorOfficerDashboard() {
                                   </div>
                                 </div>
                                 <div className="flex gap-2">
-                                  <Button size="sm" variant="outline">
-                                    Edit
-                                  </Button>
+                                  <Button className="border-gray-300 hover:bg-gray-50">Edit</Button>
                                   {fee.type !== "grant" && (
-                                    <Button size="sm" variant="outline">
-                                      Delete
-                                    </Button>
+                                    <Button className="border-gray-300 hover:bg-gray-50">Delete</Button>
                                   )}
                                 </div>
                               </div>
@@ -524,9 +660,7 @@ export default function DebtorOfficerDashboard() {
                       <BarChart3 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                       <h3 className="text-lg font-semibold">Payment History</h3>
                       <p className="text-sm text-gray-500">View all cleared payment transactions</p>
-                      <Button className="mt-4" variant="outline">
-                        Load History
-                      </Button>
+                      <Button className="mt-4 border-gray-300 hover:bg-gray-50">Load History</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -540,7 +674,7 @@ export default function DebtorOfficerDashboard() {
                       <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                       <h3 className="text-lg font-semibold">Financial Reports</h3>
                       <p className="text-sm text-gray-500">Generate and download detailed reports</p>
-                      <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700">
+                      <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700 border-blue-600">
                         <Download className="h-4 w-4 mr-2" />
                         Generate Report
                       </Button>
@@ -557,7 +691,7 @@ export default function DebtorOfficerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <LinkIcon className="h-4 w-4" />
+                  <Building className="h-4 w-4" />
                   Connected Systems
                 </CardTitle>
                 <CardDescription>Integrated dashboard status</CardDescription>
@@ -582,9 +716,7 @@ export default function DebtorOfficerDashboard() {
                   </div>
                 ))}
                 <div className="pt-2">
-                  <Button variant="outline" className="w-full">
-                    Refresh Connections
-                  </Button>
+                  <Button className="w-full border-gray-300 hover:bg-gray-50">Refresh Connections</Button>
                 </div>
               </CardContent>
             </Card>
@@ -607,6 +739,7 @@ export default function DebtorOfficerDashboard() {
                         ? "border-green-500 bg-green-50"
                         : "hover:border-blue-500 hover:bg-gray-50"
                     }`}
+                    onClick={() => method.id === "training_grant" && setShowPaymentModal(true)}
                   >
                     <div className={`text-xl ${method.id === "training_grant" ? "text-green-600" : ""}`}>
                       {method.icon}
@@ -649,7 +782,7 @@ export default function DebtorOfficerDashboard() {
                   <p className="text-2xl font-bold">N${stats.monthlyRecurring.toLocaleString()}</p>
                 </div>
                 <Button
-                  className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                  className="w-full bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                   onClick={() => setShowPaymentModal(true)}
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
@@ -687,13 +820,13 @@ export default function DebtorOfficerDashboard() {
                 <input className="w-full p-2 border rounded" placeholder="0.00" type="number" />
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setShowPaymentModal(false)}>
+                <Button className="border-gray-300 hover:bg-gray-50" onClick={() => setShowPaymentModal(false)}>
                   Cancel
                 </Button>
                 <Button
-                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                   onClick={() => {
-                    console.log("Payment processed");
+                    alert("Payment processed successfully!");
                     setShowPaymentModal(false);
                   }}
                 >
@@ -732,13 +865,13 @@ export default function DebtorOfficerDashboard() {
                 </select>
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setShowFeeSetupModal(false)}>
+                <Button className="border-gray-300 hover:bg-gray-50" onClick={() => setShowFeeSetupModal(false)}>
                   Cancel
                 </Button>
                 <Button
-                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                   onClick={() => {
-                    console.log("Fee created");
+                    alert("Fee structure created successfully!");
                     setShowFeeSetupModal(false);
                   }}
                 >
@@ -749,7 +882,7 @@ export default function DebtorOfficerDashboard() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </SimpleDashboardLayout>
   );
 }
 
