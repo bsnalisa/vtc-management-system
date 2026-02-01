@@ -1,375 +1,183 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import {
-  DollarSign,
-  TrendingUp,
-  AlertCircle,
-  Users,
-  FileText,
-  Plus,
-  Edit,
-  Trash2,
-  Bell,
-  Download,
-  Filter,
-  Search,
-} from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { debtorOfficerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
+import { DebtorStatsCards } from "@/components/debtor/DebtorStatsCards";
+import { PaymentClearanceCenter } from "@/components/debtor/PaymentClearanceCenter";
+import { ConnectedDashboardsView } from "@/components/debtor/ConnectedDashboardsView";
+import { HostelFeeManagement } from "@/components/debtor/HostelFeeManagement";
+import { DollarSign, Building, Link2, FileText } from "lucide-react";
 import { FeeManagementTable } from "@/components/fees/FeeManagementTable";
-import { PaymentModal } from "@/components/fees/PaymentModal";
-import { FeeSetupModal } from "@/components/fees/FeeSetupModal";
-import { TraineeSearch } from "@/components/fees/TraineeSearch";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DebtorOfficerDashboard = () => {
   const { data: profile } = useProfile();
-  const { toast } = useToast();
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showFeeSetupModal, setShowFeeSetupModal] = useState(false);
-  const [selectedTrainee, setSelectedTrainee] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // Sample data - replace with actual API calls
-  const stats = {
-    totalCollected: 2400000,
-    outstanding: 425000,
-    collectionRate: 85,
-    pendingRegistrations: 12,
-    overduePayments: 45,
-  };
-
-  const paymentMethods = [
-    { id: "training_grant", label: "Training Grant", description: "Free education grant" },
-    { id: "cash", label: "Cash", description: "Physical cash payment" },
-    { id: "card", label: "Card", description: "Debit/Credit card" },
-    { id: "bank_transfer", label: "Bank Transfer", description: "Electronic transfer" },
-    { id: "mobile_money", label: "Mobile Money", description: "Mobile payment" },
-  ];
-
-  const feeTypes = [
-    { id: "hostel_registration", name: "Hostel Registration", amount: 5000, type: "one-time" },
-    { id: "hostel_monthly", name: "Hostel Monthly Fee", amount: 1500, type: "recurring" },
-    { id: "tuition", name: "Tuition Fee", amount: 0, type: "grant", description: "Covered by Training Grant" },
-  ];
-
-  const handleRecordPayment = () => {
-    setShowPaymentModal(true);
-  };
-
-  const handleFeeSetup = () => {
-    setShowFeeSetupModal(true);
-  };
-
-  const handleGenerateInvoice = (traineeId) => {
-    // Generate invoice logic
-    toast({
-      title: "Invoice Generated",
-      description: "Invoice has been generated and sent to trainee.",
-    });
-  };
-
-  const handleSendReminder = (traineeId) => {
-    // Send reminder logic
-    toast({
-      title: "Reminder Sent",
-      description: "Payment reminder has been sent to trainee's portal.",
-    });
-  };
-
-  const handleDeleteFee = (feeId) => {
-    // Delete fee logic
-    toast({
-      title: "Fee Deleted",
-      description: "The fee has been successfully removed.",
-    });
-  };
+  const [activeTab, setActiveTab] = useState("clearances");
 
   return (
     <DashboardLayout
       title={`Welcome back, ${profile?.firstname || "User"}`}
-      subtitle="Manage fees, payments, and training grants"
+      subtitle="Payment clearance hub - Manage fees, payments, and training grants"
       navItems={debtorOfficerNavItems}
       groupLabel="Fee Management"
     >
       <div className="space-y-6">
         {/* Stats Overview */}
-        <div className="grid gap-4 md:grid-cols-5">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">N${(stats.totalCollected / 1000000).toFixed(1)}M</div>
-              <p className="text-xs text-muted-foreground">This academic year</p>
-            </CardContent>
-          </Card>
+        <DebtorStatsCards />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">N${(stats.outstanding / 1000).toFixed(0)}K</div>
-              <p className="text-xs text-muted-foreground">
-                {Math.round((stats.outstanding / stats.totalCollected) * 100)}% of total fees
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Collection Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.collectionRate}%</div>
-              <p className="text-xs text-muted-foreground">+3% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Registrations</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingRegistrations}</div>
-              <p className="text-xs text-muted-foreground">Awaiting payment clearance</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue Payments</CardTitle>
-              <Bell className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.overduePayments}</div>
-              <p className="text-xs text-muted-foreground">Require follow-up</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions & Search */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Fee management tasks</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              <Button onClick={handleRecordPayment} className="h-auto py-4 justify-start" variant="outline">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                  <div className="text-left">
-                    <p className="font-medium">Record Payment</p>
-                    <p className="text-xs text-muted-foreground">Process trainee payments</p>
-                  </div>
-                </div>
-              </Button>
-
-              <Button onClick={handleFeeSetup} className="h-auto py-4 justify-start" variant="outline">
-                <div className="flex items-center gap-3">
-                  <Plus className="h-6 w-6 text-primary" />
-                  <div className="text-left">
-                    <p className="font-medium">Setup Course Fees</p>
-                    <p className="text-xs text-muted-foreground">Create/update fee structures</p>
-                  </div>
-                </div>
-              </Button>
-
-              <Button className="h-auto py-4 justify-start" variant="outline">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-6 w-6 text-primary" />
-                  <div className="text-left">
-                    <p className="font-medium">Generate Invoices</p>
-                    <p className="text-xs text-muted-foreground">Create invoices for trainees</p>
-                  </div>
-                </div>
-              </Button>
-
-              <Button className="h-auto py-4 justify-start" variant="outline">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="h-6 w-6 text-primary" />
-                  <div className="text-left">
-                    <p className="font-medium">View Outstanding</p>
-                    <p className="text-xs text-muted-foreground">Check unpaid balances</p>
-                  </div>
-                </div>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Find Trainee</CardTitle>
-              <CardDescription>Search by trainee number or name</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TraineeSearch onSelectTrainee={setSelectedTrainee} placeholder="Enter trainee number..." />
-              {selectedTrainee && (
-                <div className="mt-4 p-3 border rounded-lg">
-                  <p className="font-medium">{selectedTrainee.name}</p>
-                  <p className="text-sm text-muted-foreground">ID: {selectedTrainee.id}</p>
-                  <div className="flex gap-2 mt-2">
-                    <Button size="sm" onClick={() => handleGenerateInvoice(selectedTrainee.id)}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Invoice
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleSendReminder(selectedTrainee.id)}>
-                      <Bell className="h-4 w-4 mr-2" />
-                      Remind
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Connected Dashboards Quick View */}
+        <ConnectedDashboardsView />
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="fees">Fee Management</TabsTrigger>
-            <TabsTrigger value="payments">Recent Payments</TabsTrigger>
-            <TabsTrigger value="pending">Pending Clearance</TabsTrigger>
+            <TabsTrigger value="clearances" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline">Payment Clearance</span>
+              <span className="sm:hidden">Clearance</span>
+            </TabsTrigger>
+            <TabsTrigger value="hostel" className="flex items-center gap-2">
+              <Building className="h-4 w-4" />
+              <span className="hidden sm:inline">Hostel Fees</span>
+              <span className="sm:hidden">Hostel</span>
+            </TabsTrigger>
+            <TabsTrigger value="fees" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Fee Records</span>
+              <span className="sm:hidden">Fees</span>
+            </TabsTrigger>
+            <TabsTrigger value="connections" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Integrations</span>
+              <span className="sm:hidden">Links</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
+          <TabsContent value="clearances">
+            <PaymentClearanceCenter />
+          </TabsContent>
+
+          <TabsContent value="hostel">
+            <HostelFeeManagement />
+          </TabsContent>
+
+          <TabsContent value="fees">
             <Card>
               <CardHeader>
-                <CardTitle>Training Grant Payments</CardTitle>
-                <CardDescription>Recent grant-based payments</CardDescription>
+                <CardTitle>Fee Records</CardTitle>
+                <CardDescription>
+                  View and manage all trainee fee records
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <FeeManagementTable
-                  data={[]} // Pass actual data
-                  onEdit={(fee) => {
-                    /* Edit logic */
-                  }}
-                  onDelete={handleDeleteFee}
+                  data={[]}
+                  onEdit={() => {}}
+                  onDelete={() => {}}
                 />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="fees" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Fee Structures</CardTitle>
-                    <CardDescription>Manage course and hostel fees</CardDescription>
-                  </div>
-                  <Button onClick={handleFeeSetup}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Fee
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {feeTypes.map((fee) => (
-                    <div key={fee.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{fee.name}</p>
-                          {fee.type === "grant" && <Badge variant="secondary">Training Grant</Badge>}
-                          {fee.type === "recurring" && <Badge variant="outline">Monthly</Badge>}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {fee.type === "grant" ? fee.description : `N$${fee.amount}`}
-                        </p>
+          <TabsContent value="connections">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    🔗 Dashboard Integration Status
+                  </CardTitle>
+                  <CardDescription>
+                    Real-time synchronization with connected systems
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+                        <h4 className="font-medium">Registration Dashboard</h4>
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        {fee.type !== "grant" && (
-                          <Button size="sm" variant="outline" onClick={() => handleDeleteFee(fee.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Connected - Syncing pending registrations in real-time
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    <div className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+                        <h4 className="font-medium">Hostel Coordinator</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Connected - Hostel fee updates sync automatically
+                      </p>
+                    </div>
+                    <div className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+                        <h4 className="font-medium">Trainee Portal</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Connected - Trainees receive instant payment notifications
+                      </p>
+                    </div>
+                    <div className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+                        <h4 className="font-medium">Fee Records Database</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Connected - All transactions recorded in real-time
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <TabsContent value="payments">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Payments</CardTitle>
-                <CardDescription>Latest payment transactions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Payment history table component would go here */}
-                <p className="text-muted-foreground">Payment history will be displayed here</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="pending">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pending Registration Clearance</CardTitle>
-                <CardDescription>Trainees awaiting payment confirmation</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Pending registrations table would go here */}
-                <p className="text-muted-foreground">Pending registrations will be displayed here</p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>How It Works</CardTitle>
+                  <CardDescription>The payment clearance flow</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-4">
+                    <div className="flex flex-col items-center text-center p-4">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                        <span className="text-xl">📋</span>
+                      </div>
+                      <p className="font-medium">Registration Flags</p>
+                      <p className="text-xs text-muted-foreground">Pending payment</p>
+                    </div>
+                    <div className="text-2xl">→</div>
+                    <div className="flex flex-col items-center text-center p-4">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                        <span className="text-xl">💰</span>
+                      </div>
+                      <p className="font-medium">Debtor Processes</p>
+                      <p className="text-xs text-muted-foreground">Payment cleared</p>
+                    </div>
+                    <div className="text-2xl">→</div>
+                    <div className="flex flex-col items-center text-center p-4">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                        <span className="text-xl">✅</span>
+                      </div>
+                      <p className="font-medium">Status Updated</p>
+                      <p className="text-xs text-muted-foreground">All dashboards sync</p>
+                    </div>
+                    <div className="text-2xl">→</div>
+                    <div className="flex flex-col items-center text-center p-4">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                        <span className="text-xl">🎉</span>
+                      </div>
+                      <p className="font-medium">Trainee Notified</p>
+                      <p className="text-xs text-muted-foreground">Ready to proceed</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
-
-        {/* Payment Methods Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Available Payment Methods</CardTitle>
-            <CardDescription>Select Training Grant for free education payments</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {paymentMethods.map((method) => (
-                <div
-                  key={method.id}
-                  className={`p-4 border rounded-lg text-center cursor-pointer transition-colors ${
-                    method.id === "training_grant" ? "border-primary bg-primary/5" : "hover:border-primary"
-                  }`}
-                >
-                  <div className="font-medium">{method.label}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{method.description}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Modals */}
-      <PaymentModal
-        open={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        trainee={selectedTrainee}
-        paymentMethods={paymentMethods}
-      />
-
-      <FeeSetupModal
-        open={showFeeSetupModal}
-        onClose={() => setShowFeeSetupModal(false)}
-        feeTypes={feeTypes.filter((f) => f.type !== "grant")}
-      />
     </DashboardLayout>
   );
 };
