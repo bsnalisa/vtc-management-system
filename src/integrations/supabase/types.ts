@@ -3708,6 +3708,94 @@ export type Database = {
           },
         ]
       }
+      payment_clearances: {
+        Row: {
+          amount_paid: number
+          amount_required: number
+          application_id: string | null
+          balance: number | null
+          clearance_type: string
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          fee_type: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          payment_method: string | null
+          requested_at: string | null
+          requested_by: string | null
+          source_dashboard: string | null
+          status: string
+          trainee_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          amount_required?: number
+          application_id?: string | null
+          balance?: number | null
+          clearance_type?: string
+          cleared_at?: string | null
+          cleared_by?: string | null
+          created_at?: string
+          fee_type?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payment_method?: string | null
+          requested_at?: string | null
+          requested_by?: string | null
+          source_dashboard?: string | null
+          status?: string
+          trainee_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          amount_required?: number
+          application_id?: string | null
+          balance?: number | null
+          clearance_type?: string
+          cleared_at?: string | null
+          cleared_by?: string | null
+          created_at?: string
+          fee_type?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payment_method?: string | null
+          requested_at?: string | null
+          requested_by?: string | null
+          source_dashboard?: string | null
+          status?: string
+          trainee_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_clearances_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_clearances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_clearances_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_plan_installments: {
         Row: {
           amount: number
@@ -5512,6 +5600,9 @@ export type Database = {
           needs_hostel_accommodation: boolean | null
           organization_id: string
           overall_size: string | null
+          payment_clearance_status: string | null
+          payment_cleared_at: string | null
+          payment_cleared_by: string | null
           payment_verified_at: string | null
           payment_verified_by: string | null
           phone: string
@@ -5601,6 +5692,9 @@ export type Database = {
           needs_hostel_accommodation?: boolean | null
           organization_id: string
           overall_size?: string | null
+          payment_clearance_status?: string | null
+          payment_cleared_at?: string | null
+          payment_cleared_by?: string | null
           payment_verified_at?: string | null
           payment_verified_by?: string | null
           phone: string
@@ -5690,6 +5784,9 @@ export type Database = {
           needs_hostel_accommodation?: boolean | null
           organization_id?: string
           overall_size?: string | null
+          payment_clearance_status?: string | null
+          payment_cleared_at?: string | null
+          payment_cleared_by?: string | null
           payment_verified_at?: string | null
           payment_verified_by?: string | null
           phone?: string
@@ -6386,6 +6483,15 @@ export type Database = {
           reasons: string[]
         }[]
       }
+      clear_payment: {
+        Args: {
+          _amount: number
+          _clearance_id: string
+          _notes?: string
+          _payment_method: string
+        }
+        Returns: boolean
+      }
       expire_trial_packages: {
         Args: never
         Returns: {
@@ -6419,6 +6525,10 @@ export type Database = {
           package_name: string
           status: string
         }[]
+      }
+      get_pending_clearance_count: {
+        Args: { _org_id: string }
+        Returns: number
       }
       get_system_stats: { Args: never; Returns: Json }
       get_user_organization: { Args: { _user_id: string }; Returns: string }
