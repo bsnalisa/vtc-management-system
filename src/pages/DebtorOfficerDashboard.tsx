@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import {
   DollarSign,
@@ -23,21 +22,16 @@ import {
   Link as LinkIcon,
   AlertCircle,
   Eye,
-  Download,
-  MoreVertical,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { debtorOfficerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const DebtorOfficerDashboard = () => {
   const { data: profile } = useProfile();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showFeeSetupModal, setShowFeeSetupModal] = useState(false);
   const [selectedTrainee, setSelectedTrainee] = useState(null);
@@ -45,7 +39,7 @@ const DebtorOfficerDashboard = () => {
   const [showConnectedSystems, setShowConnectedSystems] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock data - replace with actual API calls
+  // Mock data
   const pendingClearances = [
     { id: "TRA2024001", name: "John Doe", amount: 1500, status: "pending", date: "2024-01-15", type: "Hostel Monthly" },
     {
@@ -120,7 +114,7 @@ const DebtorOfficerDashboard = () => {
     setShowPaymentModal(true);
   };
 
-  // Clearance Stats Cards Component (Inlined)
+  // Clearance Stats Cards Component
   const ClearanceStatsCards = () => (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -171,18 +165,18 @@ const DebtorOfficerDashboard = () => {
     </div>
   );
 
-  // Pending Clearance Table Component (Inlined)
+  // Pending Clearance Table Component
   const PendingClearanceTable = ({ data, onQuickClear }) => (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Trainee ID</TableHead>
+            <TableHead className="w-[120px]">Trainee ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Fee Type</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -214,35 +208,42 @@ const DebtorOfficerDashboard = () => {
     </div>
   );
 
-  // Applications Awaiting Payment Component (Inlined)
+  // Applications Awaiting Payment Component
   const ApplicationsAwaitingPayment = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-medium">Registration Pipeline</CardTitle>
-        <CardDescription>Applications waiting for payment clearance</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Total Applications</div>
-              <div className="text-2xl font-bold">47</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Awaiting Payment</div>
-              <div className="text-2xl font-bold text-yellow-600">12</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Cleared Today</div>
-              <div className="text-2xl font-bold text-green-600">8</div>
-            </div>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Clear payments here to allow registration officers to proceed with these applications.
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">47</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-yellow-600">Awaiting Payment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">12</div>
+            <p className="text-xs text-muted-foreground">Need clearance</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-green-600">Cleared Today</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">8</div>
+            <p className="text-xs text-muted-foreground">Ready for registration</p>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="text-sm text-muted-foreground">
+        Clear payments here to allow registration officers to proceed with these applications.
+      </div>
+    </div>
   );
 
   return (
@@ -308,11 +309,19 @@ const DebtorOfficerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Main Tabs */}
+            {/* Main Tabs Area */}
             <Card>
               <CardHeader className="pb-3">
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Payment Operations</CardTitle>
+                    <CardDescription>Manage payments and fee structures</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-4 mb-6">
                     <TabsTrigger value="clearance" className="relative">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
@@ -346,11 +355,8 @@ const DebtorOfficerDashboard = () => {
                       </div>
                     </TabsTrigger>
                   </TabsList>
-                </Tabs>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <TabsContent value="clearance" className="m-0">
-                  <div className="space-y-4">
+
+                  <TabsContent value="clearance" className="m-0 space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">Pending Payment Clearance</h3>
@@ -368,15 +374,13 @@ const DebtorOfficerDashboard = () => {
                       </div>
                     </div>
                     <PendingClearanceTable data={pendingClearances} onQuickClear={handleQuickClear} />
-                  </div>
-                </TabsContent>
+                  </TabsContent>
 
-                <TabsContent value="pipeline" className="m-0">
-                  <ApplicationsAwaitingPayment />
-                </TabsContent>
+                  <TabsContent value="pipeline" className="m-0 space-y-4">
+                    <ApplicationsAwaitingPayment />
+                  </TabsContent>
 
-                <TabsContent value="fees" className="m-0">
-                  <div className="space-y-4">
+                  <TabsContent value="fees" className="m-0 space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">Fee Structures</h3>
@@ -425,16 +429,14 @@ const DebtorOfficerDashboard = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
-                </TabsContent>
+                  </TabsContent>
 
-                <TabsContent value="history" className="m-0">
-                  <div className="space-y-4">
+                  <TabsContent value="history" className="m-0 space-y-4">
                     <div>
                       <h3 className="font-semibold">Payment History</h3>
                       <p className="text-sm text-muted-foreground">Recent cleared payment transactions</p>
                     </div>
-                    <div className="border rounded-lg">
+                    <div className="border rounded-lg overflow-hidden">
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -467,8 +469,8 @@ const DebtorOfficerDashboard = () => {
                         </TableBody>
                       </Table>
                     </div>
-                  </div>
-                </TabsContent>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
@@ -494,8 +496,8 @@ const DebtorOfficerDashboard = () => {
                     {connectedSystems.map((system) => (
                       <div key={system.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg bg-${system.color}-100 dark:bg-${system.color}-900/30`}>
-                            <system.icon className={`h-4 w-4 text-${system.color}-600 dark:text-${system.color}-400`} />
+                          <div className={`p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30`}>
+                            <system.icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
                             <p className="text-sm font-medium">{system.name}</p>
@@ -516,7 +518,7 @@ const DebtorOfficerDashboard = () => {
               )}
             </Card>
 
-            {/* Quick Process Payment */}
+            {/* Quick Actions */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
@@ -597,15 +599,20 @@ const DebtorOfficerDashboard = () => {
         </div>
       </div>
 
-      {/* Simple Payment Modal (Placeholder) */}
+      {/* Simple Payment Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Process Payment</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Process Payment</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowPaymentModal(false)}>
+                ✕
+              </Button>
+            </div>
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Payment Method</label>
-                <select className="w-full p-2 border rounded">
+                <select className="w-full p-2 border rounded dark:bg-gray-700">
                   {paymentMethods.map((method) => (
                     <option key={method.id} value={method.id}>
                       {method.label}
@@ -615,9 +622,13 @@ const DebtorOfficerDashboard = () => {
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">Amount</label>
-                <input className="w-full p-2 border rounded" placeholder="Enter amount" />
+                <input
+                  className="w-full p-2 border rounded dark:bg-gray-700"
+                  placeholder="Enter amount"
+                  type="number"
+                />
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowPaymentModal(false)}>
                   Cancel
                 </Button>
@@ -638,28 +649,33 @@ const DebtorOfficerDashboard = () => {
         </div>
       )}
 
-      {/* Simple Fee Setup Modal (Placeholder) */}
+      {/* Simple Fee Setup Modal */}
       {showFeeSetupModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Create Fee Structure</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Create Fee Structure</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowFeeSetupModal(false)}>
+                ✕
+              </Button>
+            </div>
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Fee Name</label>
-                <input className="w-full p-2 border rounded" placeholder="e.g., Hostel Registration" />
+                <input className="w-full p-2 border rounded dark:bg-gray-700" placeholder="e.g., Hostel Registration" />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">Amount</label>
-                <input className="w-full p-2 border rounded" placeholder="0.00" type="number" />
+                <input className="w-full p-2 border rounded dark:bg-gray-700" placeholder="0.00" type="number" />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">Fee Type</label>
-                <select className="w-full p-2 border rounded">
+                <select className="w-full p-2 border rounded dark:bg-gray-700">
                   <option value="one-time">One-time</option>
                   <option value="recurring">Recurring (Monthly)</option>
                 </select>
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowFeeSetupModal(false)}>
                   Cancel
                 </Button>
