@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import {
   DollarSign,
   Plus,
@@ -22,6 +23,10 @@ import {
   Link as LinkIcon,
   AlertCircle,
   Eye,
+  Download,
+  UserCheck,
+  Home,
+  Calendar,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { debtorOfficerNavItems } from "@/lib/navigationConfig";
@@ -36,7 +41,6 @@ const DebtorOfficerDashboard = () => {
   const [showFeeSetupModal, setShowFeeSetupModal] = useState(false);
   const [selectedTrainee, setSelectedTrainee] = useState(null);
   const [activeTab, setActiveTab] = useState("clearance");
-  const [showConnectedSystems, setShowConnectedSystems] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Mock data
@@ -66,14 +70,16 @@ const DebtorOfficerDashboard = () => {
     collectionRate: 85,
     pendingRegistrations: 3,
     clearedToday: 12,
+    hostelFees: 12500,
+    monthlyRecurring: 4500,
   };
 
   const paymentMethods = [
-    { id: "training_grant", label: "Training Grant", description: "Free education grant", icon: "🎓" },
-    { id: "cash", label: "Cash", description: "Physical cash payment", icon: "💵" },
-    { id: "card", label: "Card", description: "Debit/Credit card", icon: "💳" },
-    { id: "bank_transfer", label: "Bank Transfer", description: "Electronic transfer", icon: "🏦" },
-    { id: "mobile_money", label: "Mobile Money", description: "Mobile payment", icon: "📱" },
+    { id: "training_grant", label: "Training Grant", description: "Free education grant", icon: "🎓", color: "green" },
+    { id: "cash", label: "Cash", description: "Physical cash payment", icon: "💵", color: "blue" },
+    { id: "card", label: "Card", description: "Debit/Credit card", icon: "💳", color: "purple" },
+    { id: "bank_transfer", label: "Bank Transfer", description: "Electronic transfer", icon: "🏦", color: "orange" },
+    { id: "mobile_money", label: "Mobile Money", description: "Mobile payment", icon: "📱", color: "pink" },
   ];
 
   const feeTypes = [
@@ -90,499 +96,355 @@ const DebtorOfficerDashboard = () => {
   ];
 
   const connectedSystems = [
-    { name: "Registration Dashboard", status: "connected", pending: 3, icon: Users, color: "blue" },
-    { name: "Trainee Portal", status: "connected", icon: Building, color: "green" },
-    { name: "Hostel Coordinator", status: "connected", icon: Building, color: "purple" },
+    { name: "Registration Dashboard", status: "connected", pending: 3, icon: UserCheck, color: "blue" },
+    { name: "Trainee Portal", status: "connected", icon: Users, color: "green" },
+    { name: "Hostel Coordinator", status: "connected", icon: Home, color: "purple" },
   ];
 
-  const handleGenerateInvoice = (traineeId) => {
-    toast({
-      title: "Invoice Generated",
-      description: "Invoice has been generated and sent to trainee.",
-    });
-  };
+  const quickActions = [
+    { icon: FileText, label: "Generate Invoice", description: "Create trainee invoice" },
+    { icon: Bell, label: "Send Reminders", description: "Notify pending payments" },
+    { icon: Download, label: "Export Reports", description: "Download payment data" },
+    { icon: Calendar, label: "Schedule Fees", description: "Set up recurring payments" },
+  ];
 
-  const handleSendReminder = (traineeId) => {
-    toast({
-      title: "Reminder Sent",
-      description: "Payment reminder has been sent to trainee's portal.",
-    });
-  };
-
-  const handleQuickClear = (trainee) => {
-    setSelectedTrainee(trainee);
-    setShowPaymentModal(true);
-  };
-
-  // Clearance Stats Cards Component
-  const ClearanceStatsCards = () => (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">N${(stats.totalCollected / 1000000).toFixed(1)}M</div>
-          <p className="text-xs text-muted-foreground">This academic year</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">N${(stats.outstanding / 1000).toFixed(0)}K</div>
-          <p className="text-xs text-muted-foreground">
-            {Math.round((stats.outstanding / stats.totalCollected) * 100)}% of total
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Collection Rate</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.collectionRate}%</div>
-          <p className="text-xs text-muted-foreground">+3% from last month</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Pending Clearance</CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.pendingRegistrations}</div>
-          <p className="text-xs text-muted-foreground">Awaiting payment</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  // Pending Clearance Table Component
-  const PendingClearanceTable = ({ data, onQuickClear }) => (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[120px]">Trainee ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Fee Type</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="w-[120px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((clearance) => (
-            <TableRow key={clearance.id}>
-              <TableCell className="font-medium">{clearance.id}</TableCell>
-              <TableCell>{clearance.name}</TableCell>
-              <TableCell>{clearance.type}</TableCell>
-              <TableCell>N${clearance.amount.toLocaleString()}</TableCell>
-              <TableCell>
-                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                  Pending
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => onQuickClear?.(clearance)}>
-                    Clear
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-
-  // Applications Awaiting Payment Component
-  const ApplicationsAwaitingPayment = () => (
-    <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">47</div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-600">Awaiting Payment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">12</div>
-            <p className="text-xs text-muted-foreground">Need clearance</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-600">Cleared Today</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">8</div>
-            <p className="text-xs text-muted-foreground">Ready for registration</p>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="text-sm text-muted-foreground">
-        Clear payments here to allow registration officers to proceed with these applications.
-      </div>
-    </div>
+  const StatCard = ({ title, value, icon: Icon, trend, description, color = "primary" }) => (
+    <Card className="relative overflow-hidden">
+      <div
+        className={`absolute top-0 right-0 w-24 h-24 opacity-10 transform translate-x-8 -translate-y-8 bg-${color}`}
+      />
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+          <div className={`p-2 rounded-lg bg-${color}/10`}>
+            <Icon className={`h-4 w-4 text-${color}`} />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {trend && <p className="text-xs text-muted-foreground mt-1">{trend}</p>}
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+      </CardContent>
+    </Card>
   );
 
   return (
     <DashboardLayout
-      title={`Welcome, ${profile?.firstname || "User"}`}
-      subtitle="Payment Clearance Center"
+      title={`Welcome back, ${profile?.firstname || "User"}`}
+      subtitle="Payment Clearance & Fee Management Dashboard"
       navItems={debtorOfficerNavItems}
-      groupLabel="Payment Operations"
+      groupLabel="Financial Operations"
       showBackButton={false}
     >
       <div className="space-y-6">
-        {/* Header Section with Stats */}
-        <ClearanceStatsCards />
+        {/* Top Section: Stats Overview */}
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Total Collected"
+            value={`N$${(stats.totalCollected / 1000000).toFixed(1)}M`}
+            icon={DollarSign}
+            description="This academic year"
+            color="green"
+          />
+          <StatCard
+            title="Outstanding"
+            value={`N$${(stats.outstanding / 1000).toFixed(0)}K`}
+            icon={AlertCircle}
+            description={`${Math.round((stats.outstanding / stats.totalCollected) * 100)}% of total`}
+            color="amber"
+          />
+          <StatCard
+            title="Collection Rate"
+            value={`${stats.collectionRate}%`}
+            icon={TrendingUp}
+            trend="+3% from last month"
+            color="blue"
+          />
+          <StatCard
+            title="Pending Clearance"
+            value={stats.pendingRegistrations}
+            icon={Clock}
+            description="Awaiting payment"
+            color="red"
+          />
+        </div>
 
-        {/* Main Content Area */}
-        <div className="grid gap-4 lg:grid-cols-3">
+        {/* Middle Section: Main Content Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Trainee Search */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Search and Quick Actions Card */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Quick Search</CardTitle>
-                <CardDescription>Find trainee by ID or name</CardDescription>
+              <CardHeader>
+                <CardTitle>Trainee Management</CardTitle>
+                <CardDescription>Search and manage trainee payments</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
+              <CardContent className="space-y-4">
+                <div className="flex gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Enter trainee number or name..."
+                      placeholder="Search by trainee ID, name, or phone..."
                       className="pl-9"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <Button>
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
+                  <Button variant="outline">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter
                   </Button>
                 </div>
-                {selectedTrainee && (
-                  <div className="mt-4 p-4 border rounded-lg bg-accent/50">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{selectedTrainee.name}</p>
-                        <p className="text-sm text-muted-foreground">ID: {selectedTrainee.id}</p>
-                        <Badge variant="outline" className="mt-1">
-                          {selectedTrainee.status}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleGenerateInvoice(selectedTrainee.id)}>
-                          Invoice
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleSendReminder(selectedTrainee.id)}>
-                          <Bell className="h-4 w-4 mr-1" />
-                          Remind
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {quickActions.map((action, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors"
+                    >
+                      <action.icon className="h-5 w-5" />
+                      <span className="text-xs font-medium">{action.label}</span>
+                    </Button>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
-            {/* Main Tabs Area */}
+            {/* Main Tabs Section */}
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Payment Operations</CardTitle>
-                    <CardDescription>Manage payments and fee structures</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 mb-6">
+              <CardHeader className="border-b">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="clearance" className="relative">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
                         Clearance
                         {pendingClearances.length > 0 && (
-                          <Badge
-                            variant="destructive"
-                            className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                          >
+                          <Badge variant="destructive" className="ml-1 h-5 w-5 p-0">
                             {pendingClearances.length}
                           </Badge>
                         )}
                       </div>
                     </TabsTrigger>
-                    <TabsTrigger value="pipeline">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" />
-                        Pipeline
-                      </div>
-                    </TabsTrigger>
                     <TabsTrigger value="fees">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        Fees
-                      </div>
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Fees
                     </TabsTrigger>
                     <TabsTrigger value="history">
-                      <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        History
-                      </div>
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      History
+                    </TabsTrigger>
+                    <TabsTrigger value="reports">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Reports
                     </TabsTrigger>
                   </TabsList>
-
-                  <TabsContent value="clearance" className="m-0 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">Pending Payment Clearance</h3>
-                        <p className="text-sm text-muted-foreground">Clear payments to unlock trainee registrations</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Filter className="h-4 w-4 mr-1" />
-                          Filter
-                        </Button>
-                        <Button size="sm" onClick={() => setShowPaymentModal(true)}>
-                          <Plus className="h-4 w-4 mr-1" />
-                          Process Payment
-                        </Button>
-                      </div>
+                </Tabs>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <TabsContent value="clearance" className="m-0 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">Pending Payment Clearance</h3>
+                      <p className="text-sm text-muted-foreground">Clear payments to unlock registrations</p>
                     </div>
-                    <PendingClearanceTable data={pendingClearances} onQuickClear={handleQuickClear} />
-                  </TabsContent>
+                    <Button onClick={() => setShowPaymentModal(true)}>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Process Payment
+                    </Button>
+                  </div>
 
-                  <TabsContent value="pipeline" className="m-0 space-y-4">
-                    <ApplicationsAwaitingPayment />
-                  </TabsContent>
-
-                  <TabsContent value="fees" className="m-0 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">Fee Structures</h3>
-                        <p className="text-sm text-muted-foreground">Manage course and hostel fees</p>
-                      </div>
-                      <Button size="sm" onClick={() => setShowFeeSetupModal(true)}>
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Fee
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      {feeTypes.map((fee) => (
-                        <div
-                          key={fee.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-lg ${
-                                fee.type === "grant"
-                                  ? "bg-green-100 dark:bg-green-900/30"
-                                  : "bg-blue-100 dark:bg-blue-900/30"
-                              }`}
-                            >
-                              <DollarSign
-                                className={`h-4 w-4 ${
-                                  fee.type === "grant"
-                                    ? "text-green-600 dark:text-green-400"
-                                    : "text-blue-600 dark:text-blue-400"
-                                }`}
-                              />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium">{fee.name}</p>
-                                <Badge variant={fee.type === "grant" ? "secondary" : "outline"}>{fee.frequency}</Badge>
+                  <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Trainee ID</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Fee Type</TableHead>
+                          <TableHead className="text-right">Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pendingClearances.map((clearance) => (
+                          <TableRow key={clearance.id}>
+                            <TableCell className="font-medium">{clearance.id}</TableCell>
+                            <TableCell>{clearance.name}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {clearance.type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              N${clearance.amount.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                Pending
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button size="sm" variant="ghost">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" onClick={() => setShowPaymentModal(true)}>
+                                  Clear
+                                </Button>
                               </div>
-                              <p className="text-sm text-muted-foreground">
-                                {fee.type === "grant" ? fee.description : `N$${fee.amount.toLocaleString()}`}
-                              </p>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="fees" className="m-0 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">Fee Structures</h3>
+                      <p className="text-sm text-muted-foreground">Manage all fee types and amounts</p>
+                    </div>
+                    <Button onClick={() => setShowFeeSetupModal(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Fee
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-4">
+                    {feeTypes.map((fee) => (
+                      <Card key={fee.id} className={fee.type === "grant" ? "border-green-200" : ""}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${fee.type === "grant" ? "bg-green-100" : "bg-blue-100"}`}
+                              >
+                                <DollarSign
+                                  className={`h-4 w-4 ${fee.type === "grant" ? "text-green-600" : "text-blue-600"}`}
+                                />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold">{fee.name}</h4>
+                                  <Badge variant={fee.type === "grant" ? "secondary" : "outline"}>
+                                    {fee.frequency}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  {fee.type === "grant" ? fee.description : `N$${fee.amount.toLocaleString()}`}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                Edit
+                              </Button>
+                              {fee.type !== "grant" && (
+                                <Button size="sm" variant="outline">
+                                  Delete
+                                </Button>
+                              )}
                             </div>
                           </div>
-                          <Button size="sm" variant="ghost">
-                            Edit
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
 
-                  <TabsContent value="history" className="m-0 space-y-4">
-                    <div>
-                      <h3 className="font-semibold">Payment History</h3>
-                      <p className="text-sm text-muted-foreground">Recent cleared payment transactions</p>
-                    </div>
-                    <div className="border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Trainee ID</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Method</TableHead>
-                            <TableHead>Status</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell>2024-01-15</TableCell>
-                            <TableCell className="font-medium">TRA2024004</TableCell>
-                            <TableCell>N$1,500</TableCell>
-                            <TableCell>Training Grant</TableCell>
-                            <TableCell>
-                              <Badge className="bg-green-100 text-green-800">Cleared</Badge>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>2024-01-14</TableCell>
-                            <TableCell className="font-medium">TRA2024005</TableCell>
-                            <TableCell>N$5,000</TableCell>
-                            <TableCell>Bank Transfer</TableCell>
-                            <TableCell>
-                              <Badge className="bg-green-100 text-green-800">Cleared</Badge>
-                            </TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                <TabsContent value="history" className="m-0">
+                  <div className="text-center py-12">
+                    <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">Payment History</h3>
+                    <p className="text-sm text-muted-foreground">View all cleared payment transactions</p>
+                    <Button className="mt-4" variant="outline">
+                      Load History
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="reports" className="m-0">
+                  <div className="text-center py-12">
+                    <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">Financial Reports</h3>
+                    <p className="text-sm text-muted-foreground">Generate and download detailed reports</p>
+                    <Button className="mt-4">
+                      <Download className="h-4 w-4 mr-2" />
+                      Generate Report
+                    </Button>
+                  </div>
+                </TabsContent>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column - Side Panel */}
-          <div className="space-y-4">
-            {/* Connected Systems */}
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Connected Systems Card */}
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <LinkIcon className="h-4 w-4" />
-                    Connected Systems
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setShowConnectedSystems(!showConnectedSystems)}>
-                    {showConnectedSystems ? "Hide" : "Show"}
-                  </Button>
-                </div>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4" />
+                  Connected Systems
+                </CardTitle>
+                <CardDescription>Integrated dashboard status</CardDescription>
               </CardHeader>
-              {showConnectedSystems && (
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    {connectedSystems.map((system) => (
-                      <div key={system.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30`}>
-                            <system.icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">{system.name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{system.status}</p>
-                          </div>
-                        </div>
-                        {system.pending ? (
-                          <Badge variant="destructive" className="h-5 px-1.5">
-                            {system.pending}
-                          </Badge>
-                        ) : (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        )}
+              <CardContent className="space-y-4">
+                {connectedSystems.map((system) => (
+                  <div key={system.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-blue-100">
+                        <system.icon className="h-4 w-4 text-blue-600" />
                       </div>
-                    ))}
+                      <div>
+                        <p className="text-sm font-medium">{system.name}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{system.status}</p>
+                      </div>
+                    </div>
+                    {system.pending ? (
+                      <Badge variant="destructive">{system.pending}</Badge>
+                    ) : (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    )}
                   </div>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  onClick={() => setShowPaymentModal(true)}
-                  className="w-full h-auto py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Zap className="h-4 w-4" />
-                    <span>Process Payment</span>
-                  </div>
+                ))}
+                <Separator />
+                <Button variant="outline" className="w-full">
+                  Refresh Connections
                 </Button>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="w-full justify-start" size="sm">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Invoices
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" size="sm">
-                    <Bell className="h-4 w-4 mr-2" />
-                    Reminders
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Fee
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" size="sm">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Reports
-                  </Button>
-                </div>
               </CardContent>
             </Card>
 
-            {/* Payment Methods */}
+            {/* Payment Methods Card */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
                   Payment Methods
                 </CardTitle>
-                <CardDescription>Training grant is default</CardDescription>
+                <CardDescription>Available payment options</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {paymentMethods.map((method) => (
                   <div
                     key={method.id}
-                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                       method.id === "training_grant"
-                        ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                        ? "border-green-500 bg-green-50"
                         : "hover:border-primary hover:bg-accent"
                     }`}
-                    onClick={() => method.id === "training_grant" && setShowPaymentModal(true)}
                   >
-                    <div className={`text-lg ${method.id === "training_grant" ? "text-green-600" : ""}`}>
+                    <div className={`text-xl ${method.id === "training_grant" ? "text-green-600" : ""}`}>
                       {method.icon}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <p
-                          className={`font-medium ${method.id === "training_grant" ? "text-green-700 dark:text-green-400" : ""}`}
-                        >
+                        <p className={`text-sm font-medium ${method.id === "training_grant" ? "text-green-700" : ""}`}>
                           {method.label}
                         </p>
                         {method.id === "training_grant" && (
@@ -595,15 +457,80 @@ const DebtorOfficerDashboard = () => {
                 ))}
               </CardContent>
             </Card>
+
+            {/* Quick Stats Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Today's Summary</CardTitle>
+                <CardDescription>Daily payment overview</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Cleared Today</p>
+                    <p className="text-2xl font-bold text-green-600">{stats.clearedToday}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Hostel Fees</p>
+                    <p className="text-2xl font-bold">N${stats.hostelFees.toLocaleString()}</p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Monthly Recurring</p>
+                  <p className="text-2xl font-bold">N${stats.monthlyRecurring.toLocaleString()}</p>
+                </div>
+                <Button className="w-full" onClick={() => setShowPaymentModal(true)}>
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Record Payment
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest system updates</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-full bg-green-100">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Payment cleared for TRA2024004</p>
+                    <p className="text-xs text-muted-foreground">2 minutes ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-full bg-blue-100">
+                    <Bell className="h-3 w-3 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Reminder sent to 5 trainees</p>
+                    <p className="text-xs text-muted-foreground">15 minutes ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-full bg-purple-100">
+                    <FileText className="h-3 w-3 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Monthly report generated</p>
+                    <p className="text-xs text-muted-foreground">1 hour ago</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
 
-      {/* Simple Payment Modal */}
+      {/* Modals */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Process Payment</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowPaymentModal(false)}>
                 ✕
@@ -611,8 +538,8 @@ const DebtorOfficerDashboard = () => {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">Payment Method</label>
-                <select className="w-full p-2 border rounded dark:bg-gray-700">
+                <label className="text-sm font-medium mb-2 block">Select Payment Method</label>
+                <select className="w-full p-2 border rounded">
                   {paymentMethods.map((method) => (
                     <option key={method.id} value={method.id}>
                       {method.label}
@@ -621,14 +548,10 @@ const DebtorOfficerDashboard = () => {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">Amount</label>
-                <input
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  placeholder="Enter amount"
-                  type="number"
-                />
+                <label className="text-sm font-medium mb-2 block">Amount (N$)</label>
+                <input className="w-full p-2 border rounded" placeholder="0.00" type="number" />
               </div>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowPaymentModal(false)}>
                   Cancel
                 </Button>
@@ -649,11 +572,10 @@ const DebtorOfficerDashboard = () => {
         </div>
       )}
 
-      {/* Simple Fee Setup Modal */}
       {showFeeSetupModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Create Fee Structure</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowFeeSetupModal(false)}>
                 ✕
@@ -661,21 +583,22 @@ const DebtorOfficerDashboard = () => {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">Fee Name</label>
-                <input className="w-full p-2 border rounded dark:bg-gray-700" placeholder="e.g., Hostel Registration" />
+                <label className="text-sm font-medium mb-2 block">Fee Name</label>
+                <input className="w-full p-2 border rounded" placeholder="e.g., Hostel Registration" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">Amount</label>
-                <input className="w-full p-2 border rounded dark:bg-gray-700" placeholder="0.00" type="number" />
+                <label className="text-sm font-medium mb-2 block">Amount (N$)</label>
+                <input className="w-full p-2 border rounded" placeholder="0.00" type="number" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">Fee Type</label>
-                <select className="w-full p-2 border rounded dark:bg-gray-700">
-                  <option value="one-time">One-time</option>
+                <label className="text-sm font-medium mb-2 block">Fee Type</label>
+                <select className="w-full p-2 border rounded">
+                  <option value="one-time">One-time Payment</option>
                   <option value="recurring">Recurring (Monthly)</option>
+                  <option value="semester">Per Semester</option>
                 </select>
               </div>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowFeeSetupModal(false)}>
                   Cancel
                 </Button>
