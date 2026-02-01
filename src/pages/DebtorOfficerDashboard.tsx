@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   DollarSign,
   Plus,
@@ -20,21 +21,18 @@ import {
   Clock,
   BarChart3,
   Link as LinkIcon,
+  AlertCircle,
+  Eye,
+  Download,
+  MoreVertical,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { debtorOfficerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
-import { usePaymentClearances, usePendingClearanceCount, useClearanceStats } from "@/hooks/usePaymentClearances";
-import { ClearanceStatsCards } from "@/components/fees/ClearanceStatsCards";
-import { PendingClearanceTable } from "@/components/fees/PendingClearanceTable";
-import { ApplicationsAwaitingPayment } from "@/components/fees/ApplicationsAwaitingPayment";
-import { PaymentModal } from "@/components/fees/PaymentModal";
-import { FeeSetupModal } from "@/components/fees/FeeSetupModal";
-import { TraineeSearch } from "@/components/fees/TraineeSearch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const DebtorOfficerDashboard = () => {
   const { data: profile } = useProfile();
@@ -45,31 +43,36 @@ const DebtorOfficerDashboard = () => {
   const [selectedTrainee, setSelectedTrainee] = useState(null);
   const [activeTab, setActiveTab] = useState("clearance");
   const [showConnectedSystems, setShowConnectedSystems] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch clearance data
-  const { data: pendingClearances, isLoading: clearancesLoading } = usePaymentClearances("pending");
-  const { data: allClearances } = usePaymentClearances("all");
-  const { data: pendingCount } = usePendingClearanceCount();
-  const { data: stats } = useClearanceStats();
+  // Mock data - replace with actual API calls
+  const pendingClearances = [
+    { id: "TRA2024001", name: "John Doe", amount: 1500, status: "pending", date: "2024-01-15", type: "Hostel Monthly" },
+    {
+      id: "TRA2024002",
+      name: "Jane Smith",
+      amount: 5000,
+      status: "pending",
+      date: "2024-01-14",
+      type: "Hostel Registration",
+    },
+    {
+      id: "TRA2024003",
+      name: "Bob Johnson",
+      amount: 1500,
+      status: "pending",
+      date: "2024-01-14",
+      type: "Hostel Monthly",
+    },
+  ];
 
-  // Real-time subscription for clearances
-  useEffect(() => {
-    const channel = supabase
-      .channel("debtor-dashboard-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "payment_clearances" }, () => {
-        queryClient.invalidateQueries({ queryKey: ["payment-clearances"] });
-        queryClient.invalidateQueries({ queryKey: ["pending-clearance-count"] });
-        queryClient.invalidateQueries({ queryKey: ["clearance-stats"] });
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "trainee_applications" }, () => {
-        queryClient.invalidateQueries({ queryKey: ["applications-awaiting-payment"] });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  const stats = {
+    totalCollected: 2450000,
+    outstanding: 425000,
+    collectionRate: 85,
+    pendingRegistrations: 3,
+    clearedToday: 12,
+  };
 
   const paymentMethods = [
     { id: "training_grant", label: "Training Grant", description: "Free education grant", icon: "🎓" },
@@ -93,7 +96,7 @@ const DebtorOfficerDashboard = () => {
   ];
 
   const connectedSystems = [
-    { name: "Registration Dashboard", status: "connected", pending: pendingCount, icon: Users, color: "blue" },
+    { name: "Registration Dashboard", status: "connected", pending: 3, icon: Users, color: "blue" },
     { name: "Trainee Portal", status: "connected", icon: Building, color: "green" },
     { name: "Hostel Coordinator", status: "connected", icon: Building, color: "purple" },
   ];
@@ -117,6 +120,131 @@ const DebtorOfficerDashboard = () => {
     setShowPaymentModal(true);
   };
 
+  // Clearance Stats Cards Component (Inlined)
+  const ClearanceStatsCards = () => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">N${(stats.totalCollected / 1000000).toFixed(1)}M</div>
+          <p className="text-xs text-muted-foreground">This academic year</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">N${(stats.outstanding / 1000).toFixed(0)}K</div>
+          <p className="text-xs text-muted-foreground">
+            {Math.round((stats.outstanding / stats.totalCollected) * 100)}% of total
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Collection Rate</CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.collectionRate}%</div>
+          <p className="text-xs text-muted-foreground">+3% from last month</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pending Clearance</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.pendingRegistrations}</div>
+          <p className="text-xs text-muted-foreground">Awaiting payment</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Pending Clearance Table Component (Inlined)
+  const PendingClearanceTable = ({ data, onQuickClear }) => (
+    <div className="border rounded-lg">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Trainee ID</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Fee Type</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((clearance) => (
+            <TableRow key={clearance.id}>
+              <TableCell className="font-medium">{clearance.id}</TableCell>
+              <TableCell>{clearance.name}</TableCell>
+              <TableCell>{clearance.type}</TableCell>
+              <TableCell>N${clearance.amount.toLocaleString()}</TableCell>
+              <TableCell>
+                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                  Pending
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => onQuickClear?.(clearance)}>
+                    Clear
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
+  // Applications Awaiting Payment Component (Inlined)
+  const ApplicationsAwaitingPayment = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm font-medium">Registration Pipeline</CardTitle>
+        <CardDescription>Applications waiting for payment clearance</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Total Applications</div>
+              <div className="text-2xl font-bold">47</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Awaiting Payment</div>
+              <div className="text-2xl font-bold text-yellow-600">12</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Cleared Today</div>
+              <div className="text-2xl font-bold text-green-600">8</div>
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Clear payments here to allow registration officers to proceed with these applications.
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <DashboardLayout
       title={`Welcome, ${profile?.firstname || "User"}`}
@@ -126,80 +254,12 @@ const DebtorOfficerDashboard = () => {
       showBackButton={false}
     >
       <div className="space-y-6">
-        {/* Header Section with Stats and Quick Actions */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Left Column - Stats */}
-          <div className="lg:col-span-2">
-            <ClearanceStatsCards />
-          </div>
-
-          {/* Right Column - Connected Systems & Quick Actions */}
-          <div className="space-y-4">
-            {/* Connected Systems */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <LinkIcon className="h-4 w-4" />
-                    Connected Systems
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setShowConnectedSystems(!showConnectedSystems)}>
-                    {showConnectedSystems ? "Hide" : "Show"}
-                  </Button>
-                </div>
-              </CardHeader>
-              {showConnectedSystems && (
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    {connectedSystems.map((system) => (
-                      <div key={system.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg bg-${system.color}-100 dark:bg-${system.color}-900/30`}>
-                            <system.icon className={`h-4 w-4 text-${system.color}-600 dark:text-${system.color}-400`} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">{system.name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{system.status}</p>
-                          </div>
-                        </div>
-                        {system.pending ? (
-                          <Badge variant="destructive" className="h-5 px-1.5">
-                            {system.pending}
-                          </Badge>
-                        ) : (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Quick Process Payment */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Quick Process</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  onClick={() => setShowPaymentModal(true)}
-                  className="w-full h-auto py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Zap className="h-4 w-4" />
-                    <span>Process Payment</span>
-                  </div>
-                </Button>
-                <p className="text-xs text-muted-foreground text-center mt-2">Clear payments in one click</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        {/* Header Section with Stats */}
+        <ClearanceStatsCards />
 
         {/* Main Content Area */}
         <div className="grid gap-4 lg:grid-cols-3">
-          {/* Left Column - Search and Pending Clearances */}
+          {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-4">
             {/* Trainee Search */}
             <Card>
@@ -208,11 +268,21 @@ const DebtorOfficerDashboard = () => {
                 <CardDescription>Find trainee by ID or name</CardDescription>
               </CardHeader>
               <CardContent>
-                <TraineeSearch
-                  onSelectTrainee={setSelectedTrainee}
-                  placeholder="Enter trainee number or name..."
-                  className="w-full"
-                />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Enter trainee number or name..."
+                      className="pl-9"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <Button>
+                    <Search className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
+                </div>
                 {selectedTrainee && (
                   <div className="mt-4 p-4 border rounded-lg bg-accent/50">
                     <div className="flex items-center justify-between">
@@ -240,19 +310,19 @@ const DebtorOfficerDashboard = () => {
 
             {/* Main Tabs */}
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="clearance" className="relative">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
                         Clearance
-                        {(pendingCount || 0) > 0 && (
+                        {pendingClearances.length > 0 && (
                           <Badge
                             variant="destructive"
                             className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
                           >
-                            {pendingCount}
+                            {pendingClearances.length}
                           </Badge>
                         )}
                       </div>
@@ -291,17 +361,13 @@ const DebtorOfficerDashboard = () => {
                           <Filter className="h-4 w-4 mr-1" />
                           Filter
                         </Button>
-                        <Button size="sm">
+                        <Button size="sm" onClick={() => setShowPaymentModal(true)}>
                           <Plus className="h-4 w-4 mr-1" />
-                          Bulk Clear
+                          Process Payment
                         </Button>
                       </div>
                     </div>
-                    <PendingClearanceTable
-                      data={pendingClearances || []}
-                      isLoading={clearancesLoading}
-                      onQuickClear={handleQuickClear}
-                    />
+                    <PendingClearanceTable data={pendingClearances} onQuickClear={handleQuickClear} />
                   </div>
                 </TabsContent>
 
@@ -366,12 +432,41 @@ const DebtorOfficerDashboard = () => {
                   <div className="space-y-4">
                     <div>
                       <h3 className="font-semibold">Payment History</h3>
-                      <p className="text-sm text-muted-foreground">All cleared payment transactions</p>
+                      <p className="text-sm text-muted-foreground">Recent cleared payment transactions</p>
                     </div>
-                    <PendingClearanceTable
-                      data={(allClearances || []).filter((c) => c.status === "cleared")}
-                      isLoading={clearancesLoading}
-                    />
+                    <div className="border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Trainee ID</TableHead>
+                            <TableHead>Amount</TableHead>
+                            <TableHead>Method</TableHead>
+                            <TableHead>Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>2024-01-15</TableCell>
+                            <TableCell className="font-medium">TRA2024004</TableCell>
+                            <TableCell>N$1,500</TableCell>
+                            <TableCell>Training Grant</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800">Cleared</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>2024-01-14</TableCell>
+                            <TableCell className="font-medium">TRA2024005</TableCell>
+                            <TableCell>N$5,000</TableCell>
+                            <TableCell>Bank Transfer</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800">Cleared</Badge>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 </TabsContent>
               </CardContent>
@@ -380,14 +475,92 @@ const DebtorOfficerDashboard = () => {
 
           {/* Right Column - Side Panel */}
           <div className="space-y-4">
+            {/* Connected Systems */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4" />
+                    Connected Systems
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" onClick={() => setShowConnectedSystems(!showConnectedSystems)}>
+                    {showConnectedSystems ? "Hide" : "Show"}
+                  </Button>
+                </div>
+              </CardHeader>
+              {showConnectedSystems && (
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    {connectedSystems.map((system) => (
+                      <div key={system.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg bg-${system.color}-100 dark:bg-${system.color}-900/30`}>
+                            <system.icon className={`h-4 w-4 text-${system.color}-600 dark:text-${system.color}-400`} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{system.name}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{system.status}</p>
+                          </div>
+                        </div>
+                        {system.pending ? (
+                          <Badge variant="destructive" className="h-5 px-1.5">
+                            {system.pending}
+                          </Badge>
+                        ) : (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Quick Process Payment */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="w-full h-auto py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    <span>Process Payment</span>
+                  </div>
+                </Button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Invoices
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Bell className="h-4 w-4 mr-2" />
+                    Reminders
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Fee
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Reports
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Payment Methods */}
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
                   Payment Methods
                 </CardTitle>
-                <CardDescription>Select training grant for free education</CardDescription>
+                <CardDescription>Training grant is default</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {paymentMethods.map((method) => (
@@ -420,84 +593,92 @@ const DebtorOfficerDashboard = () => {
                 ))}
               </CardContent>
             </Card>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-start gap-3 p-2">
-                  <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Payment Cleared</p>
-                    <p className="text-xs text-muted-foreground">TRA2024001 • Just now</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-2">
-                  <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                    <Bell className="h-3 w-3 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Reminder Sent</p>
-                    <p className="text-xs text-muted-foreground">TRA2024002 • 5 min ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-2">
-                  <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                    <FileText className="h-3 w-3 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Invoice Generated</p>
-                    <p className="text-xs text-muted-foreground">TRA2024003 • 10 min ago</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start" size="sm">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Generate Bulk Invoices
-                </Button>
-                <Button variant="outline" className="w-full justify-start" size="sm">
-                  <Bell className="h-4 w-4 mr-2" />
-                  Send Batch Reminders
-                </Button>
-                <Button variant="outline" className="w-full justify-start" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Fee Template
-                </Button>
-                <Button variant="outline" className="w-full justify-start" size="sm">
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  View Reports
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
 
-      {/* Modals */}
-      <PaymentModal
-        open={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        trainee={selectedTrainee}
-        paymentMethods={paymentMethods}
-      />
+      {/* Simple Payment Modal (Placeholder) */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Process Payment</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Payment Method</label>
+                <select className="w-full p-2 border rounded">
+                  {paymentMethods.map((method) => (
+                    <option key={method.id} value={method.id}>
+                      {method.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Amount</label>
+                <input className="w-full p-2 border rounded" placeholder="Enter amount" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowPaymentModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "Payment Processed",
+                      description: "Payment has been cleared successfully.",
+                    });
+                    setShowPaymentModal(false);
+                  }}
+                >
+                  Process Payment
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <FeeSetupModal
-        open={showFeeSetupModal}
-        onClose={() => setShowFeeSetupModal(false)}
-        feeTypes={feeTypes.filter((f) => f.type !== "grant")}
-      />
+      {/* Simple Fee Setup Modal (Placeholder) */}
+      {showFeeSetupModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Create Fee Structure</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Fee Name</label>
+                <input className="w-full p-2 border rounded" placeholder="e.g., Hostel Registration" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Amount</label>
+                <input className="w-full p-2 border rounded" placeholder="0.00" type="number" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Fee Type</label>
+                <select className="w-full p-2 border rounded">
+                  <option value="one-time">One-time</option>
+                  <option value="recurring">Recurring (Monthly)</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowFeeSetupModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "Fee Created",
+                      description: "New fee structure has been created.",
+                    });
+                    setShowFeeSetupModal(false);
+                  }}
+                >
+                  Create Fee
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
