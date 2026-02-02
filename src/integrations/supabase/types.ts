@@ -1732,6 +1732,144 @@ export type Database = {
           },
         ]
       }
+      fee_types: {
+        Row: {
+          active: boolean
+          applicable_to: string[] | null
+          category: string
+          code: string
+          created_at: string
+          created_by: string | null
+          default_amount: number
+          description: string | null
+          id: string
+          is_mandatory: boolean
+          is_recurring: boolean
+          name: string
+          organization_id: string
+          recurring_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applicable_to?: string[] | null
+          category: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          default_amount?: number
+          description?: string | null
+          id?: string
+          is_mandatory?: boolean
+          is_recurring?: boolean
+          name: string
+          organization_id: string
+          recurring_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applicable_to?: string[] | null
+          category?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          default_amount?: number
+          description?: string | null
+          id?: string
+          is_mandatory?: boolean
+          is_recurring?: boolean
+          name?: string
+          organization_id?: string
+          recurring_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_transactions: {
+        Row: {
+          academic_year: string | null
+          account_id: string
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string | null
+          fee_type_id: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          payment_method: string | null
+          processed_at: string
+          processed_by: string | null
+          reference_number: string | null
+          transaction_type: string
+        }
+        Insert: {
+          academic_year?: string | null
+          account_id: string
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string | null
+          fee_type_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payment_method?: string | null
+          processed_at?: string
+          processed_by?: string | null
+          reference_number?: string | null
+          transaction_type: string
+        }
+        Update: {
+          academic_year?: string | null
+          account_id?: string
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          fee_type_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payment_method?: string | null
+          processed_at?: string
+          processed_by?: string | null
+          reference_number?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_fee_type_id_fkey"
+            columns: ["fee_type_id"]
+            isOneToOne: false
+            referencedRelation: "fee_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_documents: {
         Row: {
           created_at: string
@@ -3583,6 +3721,7 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          email_domain: string | null
           id: string
           name: string
           package: Database["public"]["Enums"]["package_type"]
@@ -3593,6 +3732,7 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          email_domain?: string | null
           id?: string
           name: string
           package?: Database["public"]["Enums"]["package_type"]
@@ -3603,6 +3743,7 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          email_domain?: string | null
           id?: string
           name?: string
           package?: Database["public"]["Enums"]["package_type"]
@@ -5636,6 +5777,7 @@ export type Database = {
           shoe_size: string | null
           skirt_trousers_size: string | null
           special_needs_description: string | null
+          system_email: string | null
           tertiary_address: string | null
           tertiary_exam_year: number | null
           tertiary_fax: string | null
@@ -5648,6 +5790,8 @@ export type Database = {
           trainee_number: string | null
           tshirt_size: string | null
           updated_at: string
+          user_account_created: boolean | null
+          user_id: string | null
         }
         Insert: {
           academic_qualifications_path?: string | null
@@ -5728,6 +5872,7 @@ export type Database = {
           shoe_size?: string | null
           skirt_trousers_size?: string | null
           special_needs_description?: string | null
+          system_email?: string | null
           tertiary_address?: string | null
           tertiary_exam_year?: number | null
           tertiary_fax?: string | null
@@ -5740,6 +5885,8 @@ export type Database = {
           trainee_number?: string | null
           tshirt_size?: string | null
           updated_at?: string
+          user_account_created?: boolean | null
+          user_id?: string | null
         }
         Update: {
           academic_qualifications_path?: string | null
@@ -5820,6 +5967,7 @@ export type Database = {
           shoe_size?: string | null
           skirt_trousers_size?: string | null
           special_needs_description?: string | null
+          system_email?: string | null
           tertiary_address?: string | null
           tertiary_exam_year?: number | null
           tertiary_fax?: string | null
@@ -5832,6 +5980,8 @@ export type Database = {
           trainee_number?: string | null
           tshirt_size?: string | null
           updated_at?: string
+          user_account_created?: boolean | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -5888,6 +6038,70 @@ export type Database = {
           },
           {
             foreignKeyName: "trainee_enrollments_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainee_financial_accounts: {
+        Row: {
+          account_number: string
+          application_id: string | null
+          balance: number | null
+          created_at: string
+          id: string
+          organization_id: string
+          status: string
+          total_fees: number
+          total_paid: number
+          trainee_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_number: string
+          application_id?: string | null
+          balance?: number | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          status?: string
+          total_fees?: number
+          total_paid?: number
+          trainee_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string
+          application_id?: string | null
+          balance?: number | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          status?: string
+          total_fees?: number
+          total_paid?: number
+          trainee_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainee_financial_accounts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_financial_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_financial_accounts_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
             referencedRelation: "trainees"
