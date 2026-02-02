@@ -120,7 +120,9 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
 // Debtor Officer Navigation
 export const debtorOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/debtor-officer-dashboard", icon: LayoutDashboard },
+  { title: "Payment Clearance", url: "/debtor-officer-dashboard", icon: CreditCard },
   { title: "Fee Management", url: "/fees", icon: DollarSign },
+  { title: "Hostel Fees", url: "/hostel", icon: Building },
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
