@@ -30,6 +30,7 @@ export default function OrganizationSettings() {
   const [domain, setDomain] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [traineeIdPrefix, setTraineeIdPrefix] = useState("VTC");
+  const [emailDomain, setEmailDomain] = useState("");
   const [uploading, setUploading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [domainStatus, setDomainStatus] = useState<"pending" | "verified" | "failed">("pending");
@@ -60,6 +61,9 @@ export default function OrganizationSettings() {
       }
       if (settings.trainee_id_prefix) {
         setTraineeIdPrefix(settings.trainee_id_prefix);
+      }
+      if (settings.email_domain) {
+        setEmailDomain(settings.email_domain);
       }
 
       checkDomainVerification(settings.domain);
@@ -264,6 +268,7 @@ export default function OrganizationSettings() {
         domain: enableCustomDomain ? domain : "",
         organization_name: organizationName,
         trainee_id_prefix: traineeIdPrefix.toUpperCase(),
+        email_domain: emailDomain || undefined,
       });
 
       // Apply theme immediately after saving
@@ -307,6 +312,7 @@ export default function OrganizationSettings() {
       setDomain(settings.domain || "");
       setOrganizationName(settings.organization_name || "");
       setTraineeIdPrefix(settings.trainee_id_prefix || "VTC");
+      setEmailDomain(settings.email_domain || "");
       setEnableCustomDomain(!!settings.domain);
     }
     setSelectedFile(null);
@@ -395,6 +401,23 @@ export default function OrganizationSettings() {
                 />
                 <p className="text-xs text-muted-foreground">
                   This prefix will be used for trainee IDs (e.g., {traineeIdPrefix}202500001)
+                </p>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="emailDomain" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Trainee Email Domain
+                </Label>
+                <Input
+                  id="emailDomain"
+                  value={emailDomain}
+                  onChange={(e) => setEmailDomain(e.target.value.toLowerCase())}
+                  placeholder="e.g., nvtc.edu.na"
+                  className="font-mono"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Used for auto-generated trainee emails (e.g., {traineeIdPrefix.toLowerCase()}202500001@{emailDomain || 'yourdomain.na'})
                 </p>
               </div>
             </div>

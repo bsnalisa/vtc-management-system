@@ -16,6 +16,7 @@ export interface OrganizationSettings {
   domain: string | null;
   organization_name: string | null;
   trainee_id_prefix: string | null;
+  email_domain: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -31,6 +32,7 @@ export interface UpdateOrganizationSettingsData {
   domain?: string;
   organization_name?: string;
   trainee_id_prefix?: string;
+  email_domain?: string;
 }
 
 export const useOrganizationSettings = () => {
@@ -50,17 +52,18 @@ export const useOrganizationSettings = () => {
           .maybeSingle(),
         supabase
           .from("organizations")
-          .select("trainee_id_prefix")
+          .select("trainee_id_prefix, email_domain")
           .eq("id", organizationId)
           .single()
       ]);
 
       if (settingsResult.error) throw settingsResult.error;
       
-      // Merge trainee_id_prefix from organizations table
+      // Merge trainee_id_prefix and email_domain from organizations table
       return {
         ...settingsResult.data,
-        trainee_id_prefix: orgResult.data?.trainee_id_prefix || 'VTC'
+        trainee_id_prefix: orgResult.data?.trainee_id_prefix || 'VTC',
+        email_domain: orgResult.data?.email_domain || null
       } as OrganizationSettings | null;
     },
     enabled: !!organizationId,
@@ -78,13 +81,21 @@ export const useUpdateOrganizationSettings = () => {
     mutationFn: async (settingsData: UpdateOrganizationSettingsData) => {
       if (!organizationId) throw new Error("No organization ID");
 
-      const { trainee_id_prefix, ...otherSettings } = settingsData;
+      const { trainee_id_prefix, email_domain, ...otherSettings } = settingsData;
 
-      // Update trainee_id_prefix in organizations table if provided
+      // Update trainee_id_prefix and email_domain in organizations table if provided
+      const orgUpdates: Record<string, any> = {};
       if (trainee_id_prefix !== undefined) {
+        orgUpdates.trainee_id_prefix = trainee_id_prefix;
+      }
+      if (email_domain !== undefined) {
+        orgUpdates.email_domain = email_domain;
+      }
+
+      if (Object.keys(orgUpdates).length > 0) {
         const { error: orgError } = await supabase
           .from("organizations")
-          .update({ trainee_id_prefix })
+          .update(orgUpdates)
           .eq("id", organizationId);
 
         if (orgError) throw orgError;
