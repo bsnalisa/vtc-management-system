@@ -195,6 +195,19 @@ export const useScreenApplication = () => {
         .single();
 
       if (error) throw error;
+      
+      // If application is provisionally qualified, provision auth account
+      if (qualificationStatus === 'provisionally_qualified' && data.trainee_number && data.system_email) {
+        try {
+          await supabase.functions.invoke('provision-trainee-auth', {
+            body: { application_id: applicationId }
+          });
+        } catch (provisionError) {
+          console.error('Failed to provision trainee auth:', provisionError);
+          // Don't throw - screening was successful, provisioning can be done later
+        }
+      }
+      
       return data;
     },
     onSuccess: () => {

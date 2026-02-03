@@ -43,6 +43,24 @@ const fetchUserRole = async (userId: string): Promise<UserRole> => {
   return role;
 };
 
+// Check if trainee needs password reset on first login
+const checkTraineePasswordReset = async (userId: string): Promise<boolean> => {
+  // Check user metadata first
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.user_metadata?.password_reset_required) {
+    return true;
+  }
+
+  // Check trainee record
+  const { data } = await supabase
+    .from("trainees")
+    .select("password_reset_required")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return data?.password_reset_required === true;
+};
+
 // Log login attempt to database
 const logLoginAttempt = async (email: string, success: boolean, failureReason?: string) => {
   try {
@@ -147,6 +165,17 @@ const Auth = () => {
       resetRateLimit(rateLimitKey);
       
       const role = await fetchUserRole(data.user.id);
+      
+      // Check if trainee needs password reset on first login
+      if (role === 'trainee') {
+        const needsPasswordReset = await checkTraineePasswordReset(data.user.id);
+        if (needsPasswordReset) {
+          setLoading(false);
+          navigate("/first-login", { replace: true });
+          return;
+        }
+      }
+      
       const dashboardPath = getRoleDashboardPath(role);
       setLoading(false);
       navigate(dashboardPath || "/dashboard", { replace: true });

@@ -85,11 +85,12 @@ export default function OrganizationSettings() {
         domain !== (settings.domain || "") ||
         organizationName !== (settings.organization_name || "") ||
         traineeIdPrefix !== (settings.trainee_id_prefix || "VTC") ||
+        emailDomain !== (settings.email_domain || "") ||
         selectedFile !== null; // Consider selected file as a change
 
       setIsDirty(hasChanges);
     }
-  }, [primaryColor, secondaryColor, accentColor, logoUrl, domain, organizationName, traineeIdPrefix, selectedFile, settings]);
+  }, [primaryColor, secondaryColor, accentColor, logoUrl, domain, organizationName, traineeIdPrefix, emailDomain, selectedFile, settings]);
 
   const checkDomainVerification = async (domain: string) => {
     if (!domain) {

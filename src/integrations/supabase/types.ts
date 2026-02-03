@@ -406,6 +406,13 @@ export type Database = {
             foreignKeyName: "assessment_results_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -895,6 +902,13 @@ export type Database = {
             foreignKeyName: "attendance_records_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -1114,6 +1128,13 @@ export type Database = {
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_enrollments_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
             referencedColumns: ["id"]
           },
           {
@@ -1390,6 +1411,13 @@ export type Database = {
           trainee_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_trainee_id_fkey"
             columns: ["trainee_id"]
@@ -1721,6 +1749,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_records_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
             referencedColumns: ["id"]
           },
           {
@@ -2367,6 +2402,13 @@ export type Database = {
             foreignKeyName: "hostel_visitors_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_visitors_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -2433,6 +2475,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internship_placements_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
             referencedColumns: ["id"]
           },
           {
@@ -2559,6 +2608,13 @@ export type Database = {
             foreignKeyName: "invoices_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -2610,6 +2666,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
             referencedColumns: ["id"]
           },
           {
@@ -3365,6 +3428,13 @@ export type Database = {
             foreignKeyName: "marks_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marks_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -3943,6 +4013,13 @@ export type Database = {
             foreignKeyName: "payment_clearances_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_clearances_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -4067,6 +4144,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_plans_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
             referencedColumns: ["id"]
           },
           {
@@ -4324,6 +4408,13 @@ export type Database = {
             columns: ["qualification_id"]
             isOneToOne: false
             referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proof_of_registrations_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
             referencedColumns: ["id"]
           },
           {
@@ -6040,6 +6131,13 @@ export type Database = {
             foreignKeyName: "trainee_enrollments_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_enrollments_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -6104,6 +6202,13 @@ export type Database = {
             foreignKeyName: "trainee_financial_accounts_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_financial_accounts_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -6157,6 +6262,13 @@ export type Database = {
             foreignKeyName: "trainee_update_requests_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_update_requests_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -6176,13 +6288,16 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           has_pending_update: boolean | null
           id: string
+          is_email_system_generated: boolean | null
           last_name: string
           level: number
           national_id: string
           organization_id: string | null
+          password_reset_required: boolean | null
           phone: string
           qualification_id: string | null
           status: Database["public"]["Enums"]["trainee_status"]
+          system_email: string | null
           trade_id: string
           trainee_id: string
           training_mode: Database["public"]["Enums"]["training_mode"]
@@ -6202,13 +6317,16 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           has_pending_update?: boolean | null
           id?: string
+          is_email_system_generated?: boolean | null
           last_name: string
           level: number
           national_id: string
           organization_id?: string | null
+          password_reset_required?: boolean | null
           phone: string
           qualification_id?: string | null
           status?: Database["public"]["Enums"]["trainee_status"]
+          system_email?: string | null
           trade_id: string
           trainee_id: string
           training_mode: Database["public"]["Enums"]["training_mode"]
@@ -6228,13 +6346,16 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"]
           has_pending_update?: boolean | null
           id?: string
+          is_email_system_generated?: boolean | null
           last_name?: string
           level?: number
           national_id?: string
           organization_id?: string | null
+          password_reset_required?: boolean | null
           phone?: string
           qualification_id?: string | null
           status?: Database["public"]["Enums"]["trainee_status"]
+          system_email?: string | null
           trade_id?: string
           trainee_id?: string
           training_mode?: Database["public"]["Enums"]["training_mode"]
@@ -6457,6 +6578,13 @@ export type Database = {
             foreignKeyName: "transcripts_trainee_id_fkey"
             columns: ["trainee_id"]
             isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transcripts_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
             referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
@@ -6657,6 +6785,29 @@ export type Database = {
         }
         Relationships: []
       }
+      trainee_login_info: {
+        Row: {
+          email_domain: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          organization_id: string | null
+          organization_name: string | null
+          password_reset_required: boolean | null
+          system_email: string | null
+          trainee_id: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_application_points: {
@@ -6734,6 +6885,10 @@ export type Database = {
       generate_trainee_id:
         | { Args: never; Returns: string }
         | { Args: { org_id: string }; Returns: string }
+      generate_trainee_system_email: {
+        Args: { p_org_id: string; p_trainee_number: string }
+        Returns: string
+      }
       generate_transcript_number: { Args: { _org_id: string }; Returns: string }
       get_asset_categories_count: {
         Args: { _org_id?: string }
