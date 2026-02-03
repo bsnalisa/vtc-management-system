@@ -93,6 +93,7 @@ import TraineeExamTimetablePage from "./pages/trainee/TraineeExamTimetablePage";
 import TraineeResultsPage from "./pages/trainee/TraineeResultsPage";
 import TraineeFinancePage from "./pages/trainee/TraineeFinancePage";
 import TraineePaymentsPage from "./pages/trainee/TraineePaymentsPage";
+import FirstLoginPasswordChange from "./pages/FirstLoginPasswordChange";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -279,6 +280,7 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/first-login" element={<FirstLoginPasswordChange />} />
           <Route path="/admin-dashboard" element={<ProtectedRoute><ProtectedAdminDashboard /></ProtectedRoute>} />
           <Route path="/organization-admin-dashboard" element={<ProtectedRoute><ProtectedOrganizationAdminDashboard /></ProtectedRoute>} />
           <Route path="/head-of-training-dashboard" element={<ProtectedRoute><ProtectedHeadOfTrainingDashboard /></ProtectedRoute>} />
