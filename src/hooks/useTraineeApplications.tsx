@@ -182,7 +182,7 @@ export const useScreenApplication = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("trainee_applications")
         .update({
           qualification_status: qualificationStatus,
@@ -190,25 +190,55 @@ export const useScreenApplication = () => {
           screened_by: user.id,
           screened_at: new Date().toISOString(),
         })
-        .eq("id", applicationId)
-        .select()
-        .single();
+        .eq("id", applicationId);
 
       if (error) throw error;
       
       // If application is provisionally qualified, provision auth account
-      if (qualificationStatus === 'provisionally_qualified' && data.trainee_number && data.system_email) {
-        try {
-          await supabase.functions.invoke('provision-trainee-auth', {
-            body: { application_id: applicationId }
-          });
-        } catch (provisionError) {
-          console.error('Failed to provision trainee auth:', provisionError);
-          // Don't throw - screening was successful, provisioning can be done later
+      // Re-fetch the application to get the trigger-generated trainee_number and system_email
+      if (qualificationStatus === 'provisionally_qualified') {
+        // Wait a moment for the trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Fetch the updated application with trigger-generated fields
+        const { data: updatedApp, error: fetchError } = await supabase
+          .from("trainee_applications")
+          .select("trainee_number, system_email")
+          .eq("id", applicationId)
+          .single();
+        
+        if (!fetchError && updatedApp?.trainee_number && updatedApp?.system_email) {
+          try {
+            const { data: provisionResult, error: provisionError } = await supabase.functions.invoke('provision-trainee-auth', {
+              body: { application_id: applicationId }
+            });
+            
+            if (provisionError) {
+              console.error('Failed to provision trainee auth:', provisionError);
+              toast({
+                title: "Warning",
+                description: "Application screened but trainee account creation failed. Please try again from the applications list.",
+                variant: "destructive",
+              });
+            } else {
+              console.log('Trainee auth provisioned:', provisionResult);
+            }
+          } catch (provisionError) {
+            console.error('Failed to provision trainee auth:', provisionError);
+          }
+        } else {
+          console.warn('Trainee number or system email not generated yet:', updatedApp);
         }
       }
       
-      return data;
+      // Fetch the final updated data
+      const { data: finalData } = await supabase
+        .from("trainee_applications")
+        .select("*")
+        .eq("id", applicationId)
+        .single();
+      
+      return finalData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trainee_applications"] });
