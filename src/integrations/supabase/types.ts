@@ -4426,6 +4426,77 @@ export type Database = {
           },
         ]
       }
+      provisioning_logs: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          email: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string | null
+          result: string
+          trainee_id: string | null
+          trigger_type: string
+          user_id: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          email: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          result: string
+          trainee_id?: string | null
+          trigger_type: string
+          user_id?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          result?: string
+          trainee_id?: string | null
+          trigger_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provisioning_logs_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provisioning_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provisioning_logs_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provisioning_logs_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_order_items: {
         Row: {
           created_at: string
@@ -5792,6 +5863,9 @@ export type Database = {
         Row: {
           academic_qualifications_path: string | null
           academic_year: string
+          account_provisioning_status:
+            | Database["public"]["Enums"]["account_provisioning_status"]
+            | null
           additional_documents_paths: Json | null
           address: string
           admission_letter_path: string | null
@@ -5829,6 +5903,7 @@ export type Database = {
           has_disability: boolean | null
           has_special_needs: boolean | null
           highest_grade_passed: number | null
+          hostel_allocated: boolean | null
           hostel_application_data: Json | null
           ict_access: Json | null
           id: string
@@ -5887,6 +5962,9 @@ export type Database = {
         Insert: {
           academic_qualifications_path?: string | null
           academic_year: string
+          account_provisioning_status?:
+            | Database["public"]["Enums"]["account_provisioning_status"]
+            | null
           additional_documents_paths?: Json | null
           address: string
           admission_letter_path?: string | null
@@ -5924,6 +6002,7 @@ export type Database = {
           has_disability?: boolean | null
           has_special_needs?: boolean | null
           highest_grade_passed?: number | null
+          hostel_allocated?: boolean | null
           hostel_application_data?: Json | null
           ict_access?: Json | null
           id?: string
@@ -5982,6 +6061,9 @@ export type Database = {
         Update: {
           academic_qualifications_path?: string | null
           academic_year?: string
+          account_provisioning_status?:
+            | Database["public"]["Enums"]["account_provisioning_status"]
+            | null
           additional_documents_paths?: Json | null
           address?: string
           admission_letter_path?: string | null
@@ -6019,6 +6101,7 @@ export type Database = {
           has_disability?: boolean | null
           has_special_needs?: boolean | null
           highest_grade_passed?: number | null
+          hostel_allocated?: boolean | null
           hostel_application_data?: Json | null
           ict_access?: Json | null
           id?: string
@@ -6277,6 +6360,9 @@ export type Database = {
       trainees: {
         Row: {
           academic_year: string
+          account_provisioning_status:
+            | Database["public"]["Enums"]["account_provisioning_status"]
+            | null
           address: string
           archive_notes: string | null
           archived_at: string | null
@@ -6306,6 +6392,9 @@ export type Database = {
         }
         Insert: {
           academic_year: string
+          account_provisioning_status?:
+            | Database["public"]["Enums"]["account_provisioning_status"]
+            | null
           address: string
           archive_notes?: string | null
           archived_at?: string | null
@@ -6335,6 +6424,9 @@ export type Database = {
         }
         Update: {
           academic_year?: string
+          account_provisioning_status?:
+            | Database["public"]["Enums"]["account_provisioning_status"]
+            | null
           address?: string
           archive_notes?: string | null
           archived_at?: string | null
@@ -6890,6 +6982,19 @@ export type Database = {
         Returns: string
       }
       generate_transcript_number: { Args: { _org_id: string }; Returns: string }
+      get_applications_needing_provisioning: {
+        Args: { _org_id: string }
+        Returns: {
+          account_provisioning_status: Database["public"]["Enums"]["account_provisioning_status"]
+          application_id: string
+          first_name: string
+          last_name: string
+          qualification_status: string
+          registration_status: string
+          system_email: string
+          trainee_number: string
+        }[]
+      }
       get_asset_categories_count: {
         Args: { _org_id?: string }
         Returns: number
@@ -6968,6 +7073,20 @@ export type Database = {
         }
         Returns: string
       }
+      log_provisioning_attempt: {
+        Args: {
+          _application_id: string
+          _email: string
+          _error_message?: string
+          _metadata?: Json
+          _org_id: string
+          _result: string
+          _trainee_id: string
+          _trigger_type: string
+          _user_id: string
+        }
+        Returns: string
+      }
       log_super_admin_action: {
         Args: {
           _action: string
@@ -6993,6 +7112,11 @@ export type Database = {
       }
     }
     Enums: {
+      account_provisioning_status:
+        | "not_started"
+        | "auto_provisioned"
+        | "manually_provisioned"
+        | "failed"
       allocation_status: "active" | "checked_out" | "pending" | "cancelled"
       app_role:
         | "admin"
@@ -7201,6 +7325,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_provisioning_status: [
+        "not_started",
+        "auto_provisioned",
+        "manually_provisioned",
+        "failed",
+      ],
       allocation_status: ["active", "checked_out", "pending", "cancelled"],
       app_role: [
         "admin",
