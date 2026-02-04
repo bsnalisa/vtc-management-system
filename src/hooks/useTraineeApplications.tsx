@@ -54,6 +54,8 @@ export const useTraineeApplications = (filters?: {
       const { data, error } = await query;
 
       if (error) throw error;
+      
+      // The account_provisioning_status is now included in the * selection
       return data;
     },
     enabled: !!organizationId,
@@ -182,6 +184,7 @@ export const useScreenApplication = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Update the application with screening decision
       const { error } = await supabase
         .from("trainee_applications")
         .update({
@@ -189,49 +192,53 @@ export const useScreenApplication = () => {
           qualification_remarks: remarks,
           screened_by: user.id,
           screened_at: new Date().toISOString(),
+          // Set initial registration status based on qualification
+          registration_status: qualificationStatus === 'provisionally_qualified' 
+            ? 'provisionally_admitted' 
+            : 'applied',
         })
         .eq("id", applicationId);
 
       if (error) throw error;
       
-      // If application is provisionally qualified, provision auth account
-      // Re-fetch the application to get the trigger-generated trainee_number and system_email
+      // If provisionally qualified, trigger auto-provisioning
       if (qualificationStatus === 'provisionally_qualified') {
-        // Wait a moment for the trigger to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Wait for database triggers to generate trainee_number and system_email
+        await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Fetch the updated application with trigger-generated fields
+        // Fetch the updated application to verify trigger-generated fields
         const { data: updatedApp, error: fetchError } = await supabase
           .from("trainee_applications")
-          .select("trainee_number, system_email")
+          .select("trainee_number, system_email, account_provisioning_status")
           .eq("id", applicationId)
           .single();
         
         if (!fetchError && updatedApp?.trainee_number && updatedApp?.system_email) {
+          // Auto-provision the trainee account
           try {
             const { data: provisionResult, error: provisionError } = await supabase.functions.invoke('provision-trainee-auth', {
-              body: { application_id: applicationId }
+              body: { 
+                application_id: applicationId,
+                trigger_type: 'auto'
+              }
             });
             
             if (provisionError) {
-              console.error('Failed to provision trainee auth:', provisionError);
-              toast({
-                title: "Warning",
-                description: "Application screened but trainee account creation failed. Please try again from the applications list.",
-                variant: "destructive",
-              });
+              console.error('Auto-provisioning failed:', provisionError);
+              // Don't fail the screening - just log the error
+              // The manual "Create Account" button will be available
             } else {
-              console.log('Trainee auth provisioned:', provisionResult);
+              console.log('Auto-provisioning succeeded:', provisionResult);
             }
           } catch (provisionError) {
-            console.error('Failed to provision trainee auth:', provisionError);
+            console.error('Auto-provisioning exception:', provisionError);
           }
         } else {
-          console.warn('Trainee number or system email not generated yet:', updatedApp);
+          console.warn('Cannot auto-provision: missing trainee_number or system_email', updatedApp);
         }
       }
       
-      // Fetch the final updated data
+      // Fetch and return the final application data
       const { data: finalData } = await supabase
         .from("trainee_applications")
         .select("*")
@@ -240,11 +247,17 @@ export const useScreenApplication = () => {
       
       return finalData;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["trainee_applications"] });
+      queryClient.invalidateQueries({ queryKey: ["application_stats"] });
+      
+      const message = variables.qualificationStatus === 'provisionally_qualified'
+        ? "Application qualified! Trainee account will be created automatically."
+        : "Application screened successfully!";
+      
       toast({
         title: "Success",
-        description: "Application screened successfully!",
+        description: message,
       });
     },
     onError: (error: Error) => {

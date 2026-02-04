@@ -8,10 +8,53 @@ const corsHeaders = {
 // Default password for all new trainees
 const DEFAULT_TRAINEE_PASSWORD = 'Password1'
 
+// Valid statuses that allow provisioning
+const ALLOWED_QUALIFICATION_STATUSES = ['provisionally_qualified']
+const ALLOWED_REGISTRATION_STATUSES = ['provisionally_admitted', 'pending_payment', 'payment_verified', 'payment_cleared', 'fully_registered', 'registered']
+
 interface ProvisionRequest {
-  trainee_id?: string;
-  application_id?: string;
-  force_provision?: boolean;
+  trainee_id?: string
+  application_id?: string
+  trigger_type?: 'auto' | 'manual' | 'bulk'
+  force_provision?: boolean
+}
+
+interface ProvisionResult {
+  success: boolean
+  user_id?: string
+  email?: string
+  message: string
+  provisioning_status: 'auto_provisioned' | 'manually_provisioned' | 'failed' | 'skipped'
+  error?: string
+}
+
+async function logProvisioningAttempt(
+  supabaseAdmin: any,
+  orgId: string | null,
+  traineeId: string | null,
+  applicationId: string | null,
+  userId: string | null,
+  email: string,
+  triggerType: string,
+  result: string,
+  errorMessage: string | null = null,
+  metadata: Record<string, any> = {}
+) {
+  try {
+    await supabaseAdmin.from('provisioning_logs').insert({
+      organization_id: orgId,
+      trainee_id: traineeId,
+      application_id: applicationId,
+      user_id: userId,
+      email,
+      trigger_type: triggerType,
+      result,
+      error_message: errorMessage,
+      metadata
+    })
+  } catch (e) {
+    console.error('Failed to log provisioning attempt:', e)
+  }
 }
 
 Deno.serve(async (req) => {
@@ -33,7 +76,11 @@ Deno.serve(async (req) => {
     // Verify the requesting user has admin permissions
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'No authorization header',
+        provisioning_status: 'failed'
+      }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -43,7 +90,11 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
     
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Unauthorized',
+        provisioning_status: 'failed'
+      }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -57,7 +108,11 @@ Deno.serve(async (req) => {
       .single()
 
     if (roleError) {
-      return new Response(JSON.stringify({ error: 'Failed to verify permissions' }), {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Failed to verify permissions',
+        provisioning_status: 'failed'
+      }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -66,17 +121,25 @@ Deno.serve(async (req) => {
     // Check if user has permission to provision trainees
     const allowedRoles = ['super_admin', 'organization_admin', 'registration_officer', 'admin']
     if (!allowedRoles.includes(userRole?.role)) {
-      return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Insufficient permissions',
+        provisioning_status: 'failed'
+      }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
     const requestBody: ProvisionRequest = await req.json()
-    const { trainee_id, application_id, force_provision } = requestBody
+    const { trainee_id, application_id, trigger_type = 'manual', force_provision } = requestBody
 
     if (!trainee_id && !application_id) {
-      return new Response(JSON.stringify({ error: 'Either trainee_id or application_id is required' }), {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Either trainee_id or application_id is required',
+        provisioning_status: 'failed'
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -84,10 +147,18 @@ Deno.serve(async (req) => {
 
     let traineeData: any = null
     let systemEmail: string | null = null
+    let traineeNumber: string | null = null
     let organizationId: string | null = null
+    let qualificationStatus: string | null = null
+    let registrationStatus: string | null = null
+    let currentProvisioningStatus: string | null = null
+    let existingUserId: string | null = null
+
+    // ========================================
+    // PRECONDITION CHECKS
+    // ========================================
 
     if (trainee_id) {
-      // Get trainee data
       const { data, error } = await supabaseAdmin
         .from('trainees')
         .select('*, organizations(name, email_domain)')
@@ -95,7 +166,15 @@ Deno.serve(async (req) => {
         .single()
 
       if (error || !data) {
-        return new Response(JSON.stringify({ error: 'Trainee not found' }), {
+        await logProvisioningAttempt(
+          supabaseAdmin, null, trainee_id, null, null,
+          'unknown', trigger_type, 'failed', 'Trainee not found'
+        )
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Trainee not found',
+          provisioning_status: 'failed'
+        }), {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
@@ -103,21 +182,15 @@ Deno.serve(async (req) => {
 
       traineeData = data
       systemEmail = data.system_email
+      traineeNumber = data.trainee_id
       organizationId = data.organization_id
+      currentProvisioningStatus = data.account_provisioning_status
+      existingUserId = data.user_id
+      // For trainees, we use status as 'active' which is always valid
+      qualificationStatus = 'provisionally_qualified' // Trainees are already qualified
+      registrationStatus = data.status || 'registered'
 
-      // Check if trainee already has a user account
-      if (data.user_id && !force_provision) {
-        return new Response(JSON.stringify({ 
-          success: true, 
-          message: 'Trainee already has an account',
-          user_id: data.user_id,
-          email: systemEmail
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
     } else if (application_id) {
-      // Get application data
       const { data, error } = await supabaseAdmin
         .from('trainee_applications')
         .select('*, organizations(name, email_domain)')
@@ -125,7 +198,15 @@ Deno.serve(async (req) => {
         .single()
 
       if (error || !data) {
-        return new Response(JSON.stringify({ error: 'Application not found' }), {
+        await logProvisioningAttempt(
+          supabaseAdmin, null, null, application_id, null,
+          'unknown', trigger_type, 'failed', 'Application not found'
+        )
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: 'Application not found',
+          provisioning_status: 'failed'
+        }), {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
@@ -133,39 +214,138 @@ Deno.serve(async (req) => {
 
       traineeData = data
       systemEmail = data.system_email
+      traineeNumber = data.trainee_number
       organizationId = data.organization_id
-
-      // Check if application already has a user account
-      if (data.user_id && !force_provision) {
-        return new Response(JSON.stringify({ 
-          success: true, 
-          message: 'Application already has an account',
-          user_id: data.user_id,
-          email: systemEmail
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      qualificationStatus = data.qualification_status
+      registrationStatus = data.registration_status
+      currentProvisioningStatus = data.account_provisioning_status
+      existingUserId = data.user_id
     }
 
-    if (!systemEmail) {
+    // ========================================
+    // GUARD: Check trainee_number exists
+    // ========================================
+    if (!traineeNumber) {
+      const errorMsg = 'Trainee number not yet assigned'
+      console.error('Precondition failed:', errorMsg)
+      
+      // Update provisioning status to failed
+      if (application_id) {
+        await supabaseAdmin
+          .from('trainee_applications')
+          .update({ account_provisioning_status: 'failed' })
+          .eq('id', application_id)
+      }
+      
+      await logProvisioningAttempt(
+        supabaseAdmin, organizationId, trainee_id || null, application_id || null, null,
+        systemEmail || 'no_email', trigger_type, 'failed', errorMsg
+      )
+
       return new Response(JSON.stringify({ 
-        error: 'No system email available. Ensure trainee has a trainee number and organization has email domain configured.' 
+        success: false,
+        error: errorMsg,
+        provisioning_status: 'failed'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Check if user with this email already exists
+    // ========================================
+    // GUARD: Check system_email exists
+    // ========================================
+    if (!systemEmail) {
+      const errorMsg = 'System email not generated. Ensure organization has email domain configured.'
+      console.error('Precondition failed:', errorMsg)
+      
+      if (application_id) {
+        await supabaseAdmin
+          .from('trainee_applications')
+          .update({ account_provisioning_status: 'failed' })
+          .eq('id', application_id)
+      }
+      
+      await logProvisioningAttempt(
+        supabaseAdmin, organizationId, trainee_id || null, application_id || null, null,
+        traineeNumber, trigger_type, 'failed', errorMsg
+      )
+
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: errorMsg,
+        provisioning_status: 'failed'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // ========================================
+    // GUARD: Check qualification status is valid
+    // ========================================
+    if (!force_provision && qualificationStatus && !ALLOWED_QUALIFICATION_STATUSES.includes(qualificationStatus)) {
+      const errorMsg = `Invalid qualification status for provisioning: ${qualificationStatus}. Must be one of: ${ALLOWED_QUALIFICATION_STATUSES.join(', ')}`
+      console.error('Precondition failed:', errorMsg)
+      
+      if (application_id) {
+        await supabaseAdmin
+          .from('trainee_applications')
+          .update({ account_provisioning_status: 'failed' })
+          .eq('id', application_id)
+      }
+      
+      await logProvisioningAttempt(
+        supabaseAdmin, organizationId, trainee_id || null, application_id || null, null,
+        systemEmail, trigger_type, 'failed', errorMsg
+      )
+
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: errorMsg,
+        provisioning_status: 'failed'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // ========================================
+    // IDEMPOTENCY: Check if already provisioned
+    // ========================================
+    if (existingUserId && !force_provision) {
+      // Already has an account - return success without creating duplicate
+      console.log('Account already exists for:', systemEmail)
+      
+      await logProvisioningAttempt(
+        supabaseAdmin, organizationId, trainee_id || null, application_id || null, existingUserId,
+        systemEmail, trigger_type, 'skipped', 'Account already exists'
+      )
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'Account already exists',
+        user_id: existingUserId,
+        email: systemEmail,
+        provisioning_status: currentProvisioningStatus || 'auto_provisioned'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // ========================================
+    // IDEMPOTENCY: Check if auth user already exists by email
+    // ========================================
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
     const existingUser = existingUsers?.users?.find(u => u.email === systemEmail)
 
     let userId: string
+    let accountExisted = false
 
     if (existingUser) {
       userId = existingUser.id
-      console.log('User already exists with email:', systemEmail)
+      accountExisted = true
+      console.log('Auth user already exists with email:', systemEmail)
     } else {
       // Create auth user with default password
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -185,17 +365,43 @@ Deno.serve(async (req) => {
 
       if (createError) {
         console.error('Error creating user:', createError)
-        return new Response(JSON.stringify({ error: createError.message }), {
+        
+        // Update provisioning status to failed
+        if (application_id) {
+          await supabaseAdmin
+            .from('trainee_applications')
+            .update({ account_provisioning_status: 'failed' })
+            .eq('id', application_id)
+        }
+        if (trainee_id) {
+          await supabaseAdmin
+            .from('trainees')
+            .update({ account_provisioning_status: 'failed' })
+            .eq('id', trainee_id)
+        }
+        
+        await logProvisioningAttempt(
+          supabaseAdmin, organizationId, trainee_id || null, application_id || null, null,
+          systemEmail, trigger_type, 'failed', createError.message
+        )
+
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: createError.message,
+          provisioning_status: 'failed'
+        }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
 
       userId = newUser.user.id
-      console.log('Created new user:', userId)
+      console.log('Created new auth user:', userId)
     }
 
-    // Assign trainee role
+    // ========================================
+    // ASSIGN TRAINEE ROLE
+    // ========================================
     const { error: roleInsertError } = await supabaseAdmin
       .from('user_roles')
       .upsert({
@@ -208,15 +414,21 @@ Deno.serve(async (req) => {
 
     if (roleInsertError) {
       console.error('Error assigning role:', roleInsertError)
+      // Don't fail the whole operation for role assignment issues
     }
 
-    // Update trainee or application with user_id
+    // ========================================
+    // UPDATE RECORDS WITH USER_ID AND PROVISIONING STATUS
+    // ========================================
+    const provisioningStatus = trigger_type === 'auto' ? 'auto_provisioned' : 'manually_provisioned'
+
     if (trainee_id) {
       await supabaseAdmin
         .from('trainees')
         .update({ 
           user_id: userId,
-          password_reset_required: true 
+          password_reset_required: true,
+          account_provisioning_status: provisioningStatus
         })
         .eq('id', trainee_id)
     }
@@ -224,24 +436,43 @@ Deno.serve(async (req) => {
     if (application_id) {
       await supabaseAdmin
         .from('trainee_applications')
-        .update({ user_id: userId })
+        .update({ 
+          user_id: userId,
+          account_provisioning_status: provisioningStatus
+        })
         .eq('id', application_id)
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
+    // ========================================
+    // LOG SUCCESS
+    // ========================================
+    await logProvisioningAttempt(
+      supabaseAdmin, organizationId, trainee_id || null, application_id || null, userId,
+      systemEmail, trigger_type, 'success', null,
+      { account_existed: accountExisted }
+    )
+
+    const result: ProvisionResult = {
+      success: true,
       user_id: userId,
       email: systemEmail,
-      message: existingUser ? 'Account already existed, linked to trainee' : 'Account created with default password',
-      password_reset_required: true
-    }), {
+      message: accountExisted ? 'Account already existed, linked to trainee' : 'Account created with default password',
+      provisioning_status: provisioningStatus
+    }
+
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
   } catch (error) {
     console.error('Error in provision-trainee-auth:', error)
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: errorMessage,
+      provisioning_status: 'failed'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
