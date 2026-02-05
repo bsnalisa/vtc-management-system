@@ -1829,6 +1829,78 @@ export type Database = {
           },
         ]
       }
+      financial_queue: {
+        Row: {
+          amount: number
+          amount_paid: number
+          balance: number | null
+          cleared_at: string | null
+          cleared_by: string | null
+          created_at: string
+          description: string | null
+          entity_id: string
+          entity_type: string
+          fee_type_id: string | null
+          id: string
+          organization_id: string
+          payment_method: string | null
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          amount_paid?: number
+          balance?: number | null
+          cleared_at?: string | null
+          cleared_by?: string | null
+          created_at?: string
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          fee_type_id?: string | null
+          id?: string
+          organization_id: string
+          payment_method?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          amount_paid?: number
+          balance?: number | null
+          cleared_at?: string | null
+          cleared_by?: string | null
+          created_at?: string
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          fee_type_id?: string | null
+          id?: string
+          organization_id?: string
+          payment_method?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_queue_fee_type_id_fkey"
+            columns: ["fee_type_id"]
+            isOneToOne: false
+            referencedRelation: "fee_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_transactions: {
         Row: {
           academic_year: string | null
@@ -4968,6 +5040,87 @@ export type Database = {
           },
         ]
       }
+      registrations: {
+        Row: {
+          academic_year: string
+          application_id: string | null
+          created_at: string
+          hostel_required: boolean | null
+          id: string
+          organization_id: string
+          qualification_id: string | null
+          registered_at: string | null
+          registered_by: string | null
+          registration_status: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          application_id?: string | null
+          created_at?: string
+          hostel_required?: boolean | null
+          id?: string
+          organization_id: string
+          qualification_id?: string | null
+          registered_at?: string | null
+          registered_by?: string | null
+          registration_status?: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          application_id?: string | null
+          created_at?: string
+          hostel_required?: boolean | null
+          id?: string
+          organization_id?: string
+          qualification_id?: string | null
+          registered_at?: string | null
+          registered_by?: string | null
+          registration_status?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       requirement_change_requests: {
         Row: {
           created_at: string
@@ -5905,6 +6058,7 @@ export type Database = {
           highest_grade_passed: number | null
           hostel_allocated: boolean | null
           hostel_application_data: Json | null
+          hostel_application_status: string | null
           ict_access: Json | null
           id: string
           id_document_path: string | null
@@ -6004,6 +6158,7 @@ export type Database = {
           highest_grade_passed?: number | null
           hostel_allocated?: boolean | null
           hostel_application_data?: Json | null
+          hostel_application_status?: string | null
           ict_access?: Json | null
           id?: string
           id_document_path?: string | null
@@ -6103,6 +6258,7 @@ export type Database = {
           highest_grade_passed?: number | null
           hostel_allocated?: boolean | null
           hostel_application_data?: Json | null
+          hostel_application_status?: string | null
           ict_access?: Json | null
           id?: string
           id_document_path?: string | null

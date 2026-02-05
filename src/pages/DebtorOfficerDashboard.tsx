@@ -5,20 +5,21 @@ import { debtorOfficerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
 import { DebtorStatsCards } from "@/components/debtor/DebtorStatsCards";
 import { PaymentClearanceCenter } from "@/components/debtor/PaymentClearanceCenter";
+import { FinancialQueueCenter } from "@/components/debtor/FinancialQueueCenter";
 import { HostelFeeManagement } from "@/components/debtor/HostelFeeManagement";
 import { FeeRecordsTab } from "@/components/debtor/FeeRecordsTab";
 import { FeeTypesManager } from "@/components/fees/FeeTypesManager";
 import { TraineeFinancialList } from "@/components/fees/TraineeFinancialList";
-import { DollarSign, Building, FileText, Tag, Users } from "lucide-react";
+import { DollarSign, Building, FileText, Tag, Users, Wallet } from "lucide-react";
 
 const DebtorOfficerDashboard = () => {
   const { data: profile } = useProfile();
-  const [activeTab, setActiveTab] = useState("clearances");
+  const [activeTab, setActiveTab] = useState("accounts");
 
   return (
     <DashboardLayout
       title={`Welcome back, ${profile?.firstname || "User"}`}
-      subtitle="Payment clearance hub - Manage fees, payments, and training grants"
+      subtitle="Trainee Accounts - Process fees and unlock registrations"
       navItems={debtorOfficerNavItems}
       groupLabel="Fee Management"
     >
@@ -28,10 +29,14 @@ const DebtorOfficerDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="clearances" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="accounts" className="flex items-center gap-2">
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">Accounts</span>
+            </TabsTrigger>
+            <TabsTrigger value="legacy" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
-              <span className="hidden sm:inline">Clearance</span>
+              <span className="hidden sm:inline">Legacy</span>
             </TabsTrigger>
             <TabsTrigger value="trainees" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -51,7 +56,11 @@ const DebtorOfficerDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="clearances">
+          <TabsContent value="accounts">
+            <FinancialQueueCenter />
+          </TabsContent>
+
+          <TabsContent value="legacy">
             <PaymentClearanceCenter />
           </TabsContent>
 

@@ -1,0 +1,361 @@
+ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0'
+ 
+ const corsHeaders = {
+   'Access-Control-Allow-Origin': '*',
+   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+ }
+ 
+ const DEFAULT_TRAINEE_PASSWORD = 'Password1'
+ 
+ interface ClearFeeRequest {
+   queue_id: string
+   amount: number
+   payment_method: string
+   notes?: string
+ }
+ 
+ Deno.serve(async (req) => {
+   if (req.method === 'OPTIONS') {
+     return new Response(null, { headers: corsHeaders })
+   }
+ 
+   try {
+     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+     
+     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+       auth: { autoRefreshToken: false, persistSession: false }
+     })
+ 
+     // Verify authorization
+     const authHeader = req.headers.get('Authorization')
+     if (!authHeader) {
+       return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+         status: 401,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     const token = authHeader.replace('Bearer ', '')
+     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+     
+     if (authError || !user) {
+       return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+         status: 401,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     // Verify debtor officer or admin role
+     const { data: userRole } = await supabaseAdmin
+       .from('user_roles')
+       .select('organization_id, role')
+       .eq('user_id', user.id)
+       .single()
+ 
+     const allowedRoles = ['super_admin', 'organization_admin', 'debtor_officer', 'admin']
+     if (!userRole || !allowedRoles.includes(userRole.role)) {
+       return new Response(JSON.stringify({ success: false, error: 'Insufficient permissions' }), {
+         status: 403,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     const body: ClearFeeRequest = await req.json()
+     const { queue_id, amount, payment_method, notes } = body
+ 
+     if (!queue_id || amount === undefined || !payment_method) {
+       return new Response(JSON.stringify({ success: false, error: 'Missing required fields' }), {
+         status: 400,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     // Get queue entry
+     const { data: queueEntry, error: queueError } = await supabaseAdmin
+       .from('financial_queue')
+       .select('*')
+       .eq('id', queue_id)
+       .single()
+ 
+     if (queueError || !queueEntry) {
+       return new Response(JSON.stringify({ success: false, error: 'Queue entry not found' }), {
+         status: 404,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     // Verify organization
+     if (queueEntry.organization_id !== userRole.organization_id && userRole.role !== 'super_admin') {
+       return new Response(JSON.stringify({ success: false, error: 'Cannot process payments for other organizations' }), {
+         status: 403,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     // Only process APPLICATION fees in this function
+     if (queueEntry.entity_type !== 'APPLICATION') {
+       return new Response(JSON.stringify({ success: false, error: 'This function only handles application fees' }), {
+         status: 400,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     const newAmountPaid = (queueEntry.amount_paid || 0) + amount
+     const isFullyCleared = newAmountPaid >= queueEntry.amount
+     const newStatus = isFullyCleared ? 'cleared' : (newAmountPaid > 0 ? 'partial' : 'pending')
+ 
+     // Update financial queue
+     const { error: updateQueueError } = await supabaseAdmin
+       .from('financial_queue')
+       .update({
+         amount_paid: newAmountPaid,
+         status: newStatus,
+         payment_method,
+         cleared_by: isFullyCleared ? user.id : null,
+         cleared_at: isFullyCleared ? new Date().toISOString() : null,
+       })
+       .eq('id', queue_id)
+ 
+     if (updateQueueError) {
+       console.error('Queue update error:', updateQueueError)
+       return new Response(JSON.stringify({ success: false, error: updateQueueError.message }), {
+         status: 500,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+       })
+     }
+ 
+     // If fully cleared, this is the TRIGGER POINT for identity creation
+     let provisioningResult = null
+     if (isFullyCleared) {
+       // Get application
+       const { data: application, error: appError } = await supabaseAdmin
+         .from('trainee_applications')
+         .select('*, organizations(name, email_domain)')
+         .eq('id', queueEntry.entity_id)
+         .single()
+ 
+       if (appError || !application) {
+         console.error('Application not found:', appError)
+         return new Response(JSON.stringify({ success: false, error: 'Application not found' }), {
+           status: 404,
+           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+         })
+       }
+ 
+       // Generate trainee number if missing
+       let traineeNumber = application.trainee_number
+       if (!traineeNumber) {
+         const { data: newNumber } = await supabaseAdmin
+           .rpc('generate_continuous_trainee_number', { org_id: application.organization_id })
+         traineeNumber = newNumber
+       }
+ 
+       // Generate system email if missing
+       let systemEmail = application.system_email
+       if (!systemEmail && traineeNumber) {
+         const { data: newEmail } = await supabaseAdmin
+           .rpc('generate_trainee_system_email', { 
+             p_trainee_number: traineeNumber, 
+             p_org_id: application.organization_id 
+           })
+         systemEmail = newEmail
+       }
+ 
+       if (!traineeNumber || !systemEmail) {
+         console.error('Failed to generate trainee credentials')
+         await supabaseAdmin
+           .from('trainee_applications')
+           .update({ 
+             account_provisioning_status: 'failed',
+             registration_status: 'payment_cleared'
+           })
+           .eq('id', application.id)
+ 
+         await supabaseAdmin.from('provisioning_logs').insert({
+           organization_id: application.organization_id,
+           application_id: application.id,
+           trigger_type: 'auto',
+           result: 'failed',
+           email: application.email,
+           error_message: 'Failed to generate trainee number or system email',
+         })
+ 
+         return new Response(JSON.stringify({ 
+           success: true, 
+           message: 'Payment cleared but identity creation failed - requires manual intervention',
+           payment_cleared: true,
+           provisioning_failed: true,
+         }), {
+           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+         })
+       }
+ 
+       // ========================================
+       // ATOMIC IDENTITY CREATION
+       // ========================================
+ 
+       // Check if auth user already exists (idempotency)
+       const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+       const existingUser = existingUsers?.users?.find(u => u.email === systemEmail)
+ 
+       let userId: string
+       let accountExisted = false
+ 
+       if (existingUser) {
+         userId = existingUser.id
+         accountExisted = true
+         console.log('Auth user already exists:', systemEmail)
+       } else {
+         // Create auth user
+         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+           email: systemEmail,
+           password: DEFAULT_TRAINEE_PASSWORD,
+           email_confirm: true,
+           user_metadata: {
+             firstname: application.first_name,
+             surname: application.last_name,
+             full_name: `${application.first_name} ${application.last_name}`,
+             application_id: application.id,
+             is_trainee: true,
+             password_reset_required: true,
+           },
+         })
+ 
+         if (createError) {
+           console.error('Error creating user:', createError)
+           
+           await supabaseAdmin
+             .from('trainee_applications')
+             .update({ 
+               account_provisioning_status: 'failed',
+               registration_status: 'payment_cleared',
+               trainee_number: traineeNumber,
+               system_email: systemEmail,
+             })
+             .eq('id', application.id)
+ 
+           await supabaseAdmin.from('provisioning_logs').insert({
+             organization_id: application.organization_id,
+             application_id: application.id,
+             trigger_type: 'auto',
+             result: 'failed',
+             email: systemEmail,
+             error_message: createError.message,
+           })
+ 
+           return new Response(JSON.stringify({ 
+             success: true, 
+             message: 'Payment cleared but account creation failed',
+             payment_cleared: true,
+             provisioning_failed: true,
+             error: createError.message,
+           }), {
+             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+           })
+         }
+ 
+         userId = newUser.user.id
+         console.log('Created new auth user:', userId)
+       }
+ 
+       // Create trainee record
+       const { data: trainee, error: traineeError } = await supabaseAdmin
+         .from('trainees')
+         .insert({
+           organization_id: application.organization_id,
+           trainee_id: traineeNumber,
+           first_name: application.first_name,
+           last_name: application.last_name,
+           full_name: `${application.first_name} ${application.last_name}`,
+           email: application.email,
+           phone: application.phone,
+           national_id: application.national_id,
+           date_of_birth: application.date_of_birth,
+           gender: application.gender,
+           address: application.residential_address,
+           trade_id: application.trade_id,
+           level: application.level || 1,
+           training_mode: application.training_mode || 'fulltime',
+           status: 'active',
+           system_email: systemEmail,
+           user_id: userId,
+           account_provisioning_status: 'auto_provisioned',
+           password_reset_required: true,
+           is_email_system_generated: true,
+         })
+         .select()
+         .single()
+ 
+       if (traineeError) {
+         console.error('Error creating trainee:', traineeError)
+         // Don't fail the whole operation - account exists
+       }
+ 
+       // Assign trainee role
+       await supabaseAdmin.from('user_roles').upsert({
+         user_id: userId,
+         role: 'trainee',
+         organization_id: application.organization_id,
+       }, { onConflict: 'user_id' })
+ 
+       // Update application
+       await supabaseAdmin
+         .from('trainee_applications')
+         .update({
+           trainee_number: traineeNumber,
+           system_email: systemEmail,
+           user_id: userId,
+           registration_status: 'payment_cleared',
+           account_provisioning_status: 'auto_provisioned',
+           payment_clearance_status: 'cleared',
+           payment_cleared_at: new Date().toISOString(),
+           payment_cleared_by: user.id,
+         })
+         .eq('id', application.id)
+ 
+       // Log success
+       await supabaseAdmin.from('provisioning_logs').insert({
+         organization_id: application.organization_id,
+         application_id: application.id,
+         trainee_id: trainee?.id,
+         user_id: userId,
+         trigger_type: 'auto',
+         result: 'success',
+         email: systemEmail,
+         metadata: { account_existed: accountExisted, payment_cleared_by: user.id },
+       })
+ 
+       provisioningResult = {
+         user_id: userId,
+         trainee_id: trainee?.id,
+         trainee_number: traineeNumber,
+         system_email: systemEmail,
+         account_existed: accountExisted,
+       }
+ 
+       console.log(`Application ${application.id} fee cleared, identity created:`, provisioningResult)
+     }
+ 
+     return new Response(JSON.stringify({ 
+       success: true,
+       message: isFullyCleared ? 'Payment cleared and trainee account created' : 'Partial payment recorded',
+       payment_status: newStatus,
+       amount_paid: newAmountPaid,
+       balance: queueEntry.amount - newAmountPaid,
+       provisioning: provisioningResult,
+     }), {
+       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+     })
+ 
+   } catch (error) {
+     console.error('Error in clear-application-fee:', error)
+     return new Response(JSON.stringify({ 
+       success: false, 
+       error: error instanceof Error ? error.message : 'Unknown error' 
+     }), {
+       status: 500,
+       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+     })
+   }
+ })
