@@ -167,6 +167,7 @@ export const useCreateApplication = () => {
   });
 };
 
+// Legacy screening mutation - now calls the Edge Function
 export const useScreenApplication = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -181,78 +182,27 @@ export const useScreenApplication = () => {
       qualificationStatus: string;
       remarks?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Update the application with screening decision
-      const { error } = await supabase
-        .from("trainee_applications")
-        .update({
+      // Call the new screen-application Edge Function
+      const { data, error } = await supabase.functions.invoke('screen-application', {
+        body: { 
+          application_id: applicationId, 
           qualification_status: qualificationStatus,
-          qualification_remarks: remarks,
-          screened_by: user.id,
-          screened_at: new Date().toISOString(),
-          // Set initial registration status based on qualification
-          registration_status: qualificationStatus === 'provisionally_qualified' 
-            ? 'provisionally_admitted' 
-            : 'applied',
-        })
-        .eq("id", applicationId);
-
-      if (error) throw error;
-      
-      // If provisionally qualified, trigger auto-provisioning
-      if (qualificationStatus === 'provisionally_qualified') {
-        // Wait for database triggers to generate trainee_number and system_email
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Fetch the updated application to verify trigger-generated fields
-        const { data: updatedApp, error: fetchError } = await supabase
-          .from("trainee_applications")
-          .select("trainee_number, system_email, account_provisioning_status")
-          .eq("id", applicationId)
-          .single();
-        
-        if (!fetchError && updatedApp?.trainee_number && updatedApp?.system_email) {
-          // Auto-provision the trainee account
-          try {
-            const { data: provisionResult, error: provisionError } = await supabase.functions.invoke('provision-trainee-auth', {
-              body: { 
-                application_id: applicationId,
-                trigger_type: 'auto'
-              }
-            });
-            
-            if (provisionError) {
-              console.error('Auto-provisioning failed:', provisionError);
-              // Don't fail the screening - just log the error
-              // The manual "Create Account" button will be available
-            } else {
-              console.log('Auto-provisioning succeeded:', provisionResult);
-            }
-          } catch (provisionError) {
-            console.error('Auto-provisioning exception:', provisionError);
-          }
-        } else {
-          console.warn('Cannot auto-provision: missing trainee_number or system_email', updatedApp);
+          screening_remarks: remarks 
         }
-      }
-      
-      // Fetch and return the final application data
-      const { data: finalData } = await supabase
-        .from("trainee_applications")
-        .select("*")
-        .eq("id", applicationId)
-        .single();
-      
-      return finalData;
+      });
+
+      if (error) throw new Error(error.message);
+      if (!data.success) throw new Error(data.error || 'Screening failed');
+
+      return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["trainee_applications"] });
       queryClient.invalidateQueries({ queryKey: ["application_stats"] });
+      queryClient.invalidateQueries({ queryKey: ["financial_queue"] });
       
       const message = variables.qualificationStatus === 'provisionally_qualified'
-        ? "Application qualified! Trainee account will be created automatically."
+        ? "Application qualified! Fee entry added to financial queue."
         : "Application screened successfully!";
       
       toast({

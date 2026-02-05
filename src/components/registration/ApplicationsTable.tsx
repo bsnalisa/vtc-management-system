@@ -2,8 +2,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { FileText, CheckCircle, DollarSign, UserPlus, Loader2, RefreshCw, AlertCircle } from "lucide-react";
-import { useProvisionTraineeAuth, canProvisionAccount, getProvisioningStatusDisplay } from "@/hooks/useProvisionTraineeAuth";
+import { FileText, CheckCircle, Clock, UserCheck, AlertCircle, Banknote } from "lucide-react";
+import { getProvisioningStatusDisplay } from "@/hooks/useProvisionTraineeAuth";
 
 interface Application {
   id: string;
@@ -39,7 +39,6 @@ export const ApplicationsTable = ({
   onRegister,
   onViewDetails,
 }: ApplicationsTableProps) => {
-  const provisionAuth = useProvisionTraineeAuth();
 
   const getQualificationBadge = (status: string) => {
     switch (status) {
@@ -63,7 +62,7 @@ export const ApplicationsTable = ({
       case "pending_payment":
         return <Badge className="bg-yellow-500">Pending Payment</Badge>;
       case "provisionally_admitted":
-        return <Badge className="bg-blue-500">Provisionally Admitted</Badge>;
+        return <Badge className="bg-blue-500">Awaiting Payment</Badge>;
       case "rejected":
         return <Badge variant="destructive">Rejected</Badge>;
       default:
@@ -72,6 +71,11 @@ export const ApplicationsTable = ({
   };
 
   const getAccountStatusBadge = (application: Application) => {
+    // Only show account status for qualified applications
+    if (application.qualification_status !== 'provisionally_qualified') {
+      return <span className="text-muted-foreground text-sm">-</span>;
+    }
+
     const { label, variant, color } = getProvisioningStatusDisplay(
       application.account_provisioning_status,
       !!application.user_id
@@ -92,11 +96,11 @@ export const ApplicationsTable = ({
             {application.user_id ? (
               <p>Account active: {application.system_email}</p>
             ) : application.account_provisioning_status === 'failed' ? (
-              <p>Provisioning failed - click Retry to try again</p>
+              <p>Provisioning failed - clear payment to retry</p>
             ) : application.system_email ? (
-              <p>Pending: {application.system_email}</p>
+              <p>Will be created on payment: {application.system_email}</p>
             ) : (
-              <p>No system email assigned yet</p>
+              <p>Account created after payment clearance</p>
             )}
           </TooltipContent>
         </Tooltip>
@@ -104,26 +108,9 @@ export const ApplicationsTable = ({
     );
   };
 
-  const handleProvision = (application: Application) => {
-    provisionAuth.mutate({ applicationId: application.id, triggerType: 'manual' });
-  };
-
-  const getProvisioningEligibility = (application: Application) => {
-    return canProvisionAccount({
-      qualification_status: application.qualification_status,
-      account_provisioning_status: application.account_provisioning_status,
-      trainee_number: application.trainee_number,
-      system_email: application.system_email,
-      user_id: application.user_id,
-    });
-  };
-
-  // Determine which action button to show based on status
+  // Determine action button based on workflow status
   const getActionButton = (application: Application) => {
-    const { canProvision } = getProvisioningEligibility(application);
-    const isFailed = application.account_provisioning_status === 'failed';
-    
-    // Screen action - only for pending qualification
+    // 1. Screen action - for applications pending screening
     if (application.qualification_status === "pending") {
       return (
         <Button size="sm" variant="outline" onClick={() => onScreen(application)}>
@@ -133,39 +120,47 @@ export const ApplicationsTable = ({
       );
     }
 
-    // Provision/Retry action - for qualified apps needing account
-    if (canProvision) {
-      return (
-        <Button 
-          size="sm" 
-          variant={isFailed ? "destructive" : "outline"}
-          onClick={() => handleProvision(application)}
-          disabled={provisionAuth.isPending}
-        >
-          {provisionAuth.isPending ? (
-            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-          ) : isFailed ? (
-            <RefreshCw className="h-4 w-4 mr-1" />
-          ) : (
-            <UserPlus className="h-4 w-4 mr-1" />
-          )}
-          {isFailed ? 'Retry' : 'Create Account'}
-        </Button>
-      );
-    }
-
-    // Register action - for payment cleared applications
-    if (
-      application.qualification_status === "provisionally_qualified" &&
-      (application.registration_status === "payment_cleared" || 
-       application.registration_status === "payment_verified")
-    ) {
-      return (
-        <Button size="sm" onClick={() => onRegister(application)}>
-          <CheckCircle className="h-4 w-4 mr-1" />
-          Register
-        </Button>
-      );
+    // 2. For qualified applications, show status-based actions
+    if (application.qualification_status === "provisionally_qualified") {
+      switch (application.registration_status) {
+        case "provisionally_admitted":
+          // Awaiting payment - show indicator
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Awaiting Payment
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Payment must be cleared by Debtor Officer</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        
+        case "payment_cleared":
+        case "payment_verified":
+          // Ready for registration
+          return (
+            <Button size="sm" onClick={() => onRegister(application)}>
+              <UserCheck className="h-4 w-4 mr-1" />
+              Register
+            </Button>
+          );
+        
+        case "registered":
+        case "fully_registered":
+          // Completed
+          return (
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Complete
+            </Badge>
+          );
+      }
     }
 
     return null;

@@ -1,5 +1,20 @@
 project_id = "osiokcprjgwypmamvjhm"
 
+[functions.screen-application]
+verify_jwt = false
+
+[functions.clear-application-fee]
+verify_jwt = false
+
+[functions.register-trainee]
+verify_jwt = false
+
+[functions.clear-registration-fee]
+verify_jwt = false
+
+[functions.provision-trainee-auth]
+verify_jwt = false
+
 [functions.ai-chat]
 verify_jwt = true
 
