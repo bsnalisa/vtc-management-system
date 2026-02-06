@@ -71,16 +71,24 @@ Deno.serve(async (req) => {
     // Get application details
     const { data: application, error: appError } = await supabaseAdmin
       .from('trainee_applications')
-      .select('*, organizations(name, email_domain, trainee_id_prefix)')
+      .select('*')
       .eq('id', application_id)
       .single()
 
     if (appError || !application) {
+      console.error('Application lookup error:', appError)
       return new Response(JSON.stringify({ success: false, error: 'Application not found' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    // Get organization details separately (no FK relationship)
+    const { data: organization } = await supabaseAdmin
+      .from('organizations')
+      .select('name, email_domain, trainee_id_prefix')
+      .eq('id', application.organization_id)
+      .single()
 
     // Verify organization matches
     if (application.organization_id !== userRole.organization_id && userRole.role !== 'super_admin') {
@@ -95,7 +103,7 @@ Deno.serve(async (req) => {
       qualification_status,
       screened_by: user.id,
       screened_at: new Date().toISOString(),
-      screening_remarks: screening_remarks || null,
+      qualification_remarks: screening_remarks || null,
     }
 
     // If qualified, set status to APPLICATION_FEE_PENDING and create financial queue entry
