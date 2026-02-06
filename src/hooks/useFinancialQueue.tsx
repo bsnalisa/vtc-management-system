@@ -100,38 +100,59 @@
    });
  };
  
- export const useFinancialQueueStats = () => {
-   const { organizationId } = useOrganizationContext();
- 
-   return useQuery({
-     queryKey: ["financial_queue_stats", organizationId],
-     queryFn: async () => {
-       if (!organizationId) return null;
- 
-       const { data, error } = await supabase
-         .from("financial_queue")
-         .select("status, entity_type, amount, amount_paid, balance")
-         .eq("organization_id", organizationId);
- 
-       if (error) throw error;
- 
-       const stats = {
-         total: data?.length || 0,
-         pending: data?.filter(d => d.status === 'pending').length || 0,
-         partial: data?.filter(d => d.status === 'partial').length || 0,
-         cleared: data?.filter(d => d.status === 'cleared').length || 0,
-         applicationFees: data?.filter(d => d.entity_type === 'APPLICATION').length || 0,
-         registrationFees: data?.filter(d => d.entity_type === 'REGISTRATION').length || 0,
-         hostelFees: data?.filter(d => d.entity_type === 'HOSTEL').length || 0,
-         totalOutstanding: data?.filter(d => d.status !== 'cleared').reduce((sum, d) => sum + (d.balance || 0), 0) || 0,
-         totalCollected: data?.reduce((sum, d) => sum + (d.amount_paid || 0), 0) || 0,
-       };
- 
-       return stats;
-     },
-     enabled: !!organizationId,
-   });
- };
+export const useFinancialQueueStats = () => {
+  const { organizationId } = useOrganizationContext();
+
+  return useQuery({
+    queryKey: ["financial_queue_stats", organizationId],
+    queryFn: async () => {
+      if (!organizationId) return null;
+
+      const { data, error } = await supabase
+        .from("financial_queue")
+        .select("status, entity_type, amount, amount_paid, balance, cleared_at")
+        .eq("organization_id", organizationId);
+
+      if (error) throw error;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const clearedToday = data?.filter(d => {
+        if (d.status !== 'cleared' || !d.cleared_at) return false;
+        const clearedDate = new Date(d.cleared_at);
+        return clearedDate >= today;
+      }) || [];
+
+      const pendingEntries = data?.filter(d => d.status === 'pending' || d.status === 'partial') || [];
+
+      const stats = {
+        total: data?.length || 0,
+        pending: data?.filter(d => d.status === 'pending').length || 0,
+        partial: data?.filter(d => d.status === 'partial').length || 0,
+        cleared: data?.filter(d => d.status === 'cleared').length || 0,
+        // Pending counts by entity type
+        applicationFeesPending: pendingEntries.filter(d => d.entity_type === 'APPLICATION').length,
+        registrationFeesPending: pendingEntries.filter(d => d.entity_type === 'REGISTRATION').length,
+        hostelFeesPending: pendingEntries.filter(d => d.entity_type === 'HOSTEL').length,
+        // Total counts by entity type
+        applicationFees: data?.filter(d => d.entity_type === 'APPLICATION').length || 0,
+        registrationFees: data?.filter(d => d.entity_type === 'REGISTRATION').length || 0,
+        hostelFees: data?.filter(d => d.entity_type === 'HOSTEL').length || 0,
+        // Financial totals
+        totalAmount: data?.reduce((sum, d) => sum + (Number(d.amount) || 0), 0) || 0,
+        totalCollected: data?.reduce((sum, d) => sum + (Number(d.amount_paid) || 0), 0) || 0,
+        totalOutstanding: pendingEntries.reduce((sum, d) => sum + (Number(d.balance) || 0), 0),
+        // Today's stats
+        clearedToday: clearedToday.length,
+        collectedTodayAmount: clearedToday.reduce((sum, d) => sum + (Number(d.amount_paid) || 0), 0),
+      };
+
+      return stats;
+    },
+    enabled: !!organizationId,
+  });
+};
  
  export const useClearApplicationFee = () => {
    const { toast } = useToast();
