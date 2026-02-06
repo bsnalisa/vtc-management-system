@@ -117,13 +117,12 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
 ];
 
-// Debtor Officer Navigation
+// Debtor Officer Navigation (Financial Operations Only)
 export const debtorOfficerNavItems: NavItem[] = [
-  { title: "Dashboard", url: "/debtor-officer-dashboard", icon: LayoutDashboard },
-  { title: "Payment Clearance", url: "/debtor-officer-dashboard", icon: CreditCard },
-  { title: "Fee Management", url: "/fees", icon: DollarSign },
-  { title: "Hostel Fees", url: "/hostel", icon: Building },
-  { title: "Trainee List", url: "/trainees", icon: Users },
+  { title: "Overview", url: "/debtor-officer-dashboard", icon: LayoutDashboard },
+  { title: "Payment Clearance", url: "/debtor-officer-dashboard?tab=clearance", icon: CreditCard },
+  { title: "Trainee Accounts", url: "/debtor-officer-dashboard?tab=accounts", icon: DollarSign },
+  { title: "Fee Configuration", url: "/debtor-officer-dashboard?tab=config", icon: Settings },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 
