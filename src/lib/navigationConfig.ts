@@ -18,8 +18,8 @@ import {
   UserCircle,
   Settings,
   CreditCard,
-  ShieldCheck,
   Home,
+  History,
   LucideIcon,
 } from "lucide-react";
 
@@ -117,13 +117,14 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
 ];
 
-// Debtor Officer Navigation (Financial Operations Only)
+// Debtor Officer Navigation (Financial Operations Only - Separate Routes)
 export const debtorOfficerNavItems: NavItem[] = [
   { title: "Overview", url: "/debtor-officer-dashboard", icon: LayoutDashboard },
-  { title: "Payment Clearance", url: "/debtor-officer-dashboard?tab=clearance", icon: CreditCard },
-  { title: "Trainee Accounts", url: "/debtor-officer-dashboard?tab=accounts", icon: DollarSign },
-  { title: "Fee Configuration", url: "/debtor-officer-dashboard?tab=config", icon: Settings },
-  { title: "Reports", url: "/reports", icon: FileText },
+  { title: "Application Fees", url: "/debtors/application-fees", icon: FileText },
+  { title: "Registration Fees", url: "/debtors/registration-fees", icon: GraduationCap },
+  { title: "Cleared Payments", url: "/debtors/cleared-payments", icon: History },
+  { title: "Trainee Accounts", url: "/debtors/accounts", icon: DollarSign },
+  { title: "Fee Configuration", url: "/debtors/config", icon: Settings },
 ];
 
 // Registration Officer Navigation

@@ -123,9 +123,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // If fully cleared, update registration, trainee, and application status
+    // ========================================
+    // IF FULLY CLEARED: Set status to REGISTERED
+    // ========================================
     if (isFullyCleared) {
-      // entity_id is registration_id for REGISTRATION type
       const registrationId = queueEntry.entity_id
 
       // Get registration to find trainee and application
@@ -192,13 +193,13 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Update trainee status
+      // Update trainee status to active
       await supabaseAdmin
         .from('trainees')
         .update({ status: 'active' })
         .eq('id', registration.trainee_id)
 
-      // Update application status to REGISTERED
+      // Update application status to REGISTERED (final state)
       if (registration.application_id) {
         await supabaseAdmin
           .from('trainee_applications')
@@ -230,20 +231,23 @@ Deno.serve(async (req) => {
           user_id: trainee.user_id,
           organization_id: queueEntry.organization_id,
           title: 'Registration Complete! 🎉',
-          message: 'Your registration fee has been cleared. You are now fully registered.',
+          message: 'Your registration fee has been cleared. You are now fully REGISTERED.',
           type: 'success',
         })
       }
 
-      console.log(`Registration ${registrationId} fee cleared - trainee ${registration.trainee_id} fully registered`)
+      console.log(`Registration ${registrationId} fee cleared - trainee fully REGISTERED`)
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: isFullyCleared ? 'Registration fee cleared - trainee fully registered' : 'Partial payment recorded',
+      message: isFullyCleared 
+        ? 'Registration fee cleared - trainee status set to REGISTERED' 
+        : 'Partial payment recorded',
       payment_status: newStatus,
       amount_paid: newAmountPaid,
       balance: queueEntry.amount - newAmountPaid,
+      final_status: isFullyCleared ? 'REGISTERED' : undefined,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

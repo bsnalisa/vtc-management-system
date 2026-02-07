@@ -90,11 +90,28 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Verify application is in correct status (must be PROVISIONALLY_ADMITTED after app fee cleared)
+    // ========================================
+    // STRICT STATUS CHECK: Must be PROVISIONALLY_ADMITTED
+    // This status is only set AFTER application fee is cleared
+    // ========================================
     if (application.registration_status !== 'provisionally_admitted') {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: `Cannot register: application status is ${application.registration_status}, expected provisionally_admitted` 
+        error: `Cannot register: application status is '${application.registration_status}'. ` +
+               `Expected 'provisionally_admitted'. Application fee must be cleared first.`,
+        current_status: application.registration_status,
+        required_status: 'provisionally_admitted',
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Verify trainee_number exists (created during application fee clearance)
+    if (!application.trainee_number) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Trainee number not found. Application fee must be cleared first to create trainee identity.' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -120,7 +137,7 @@ Deno.serve(async (req) => {
     }
 
     // ========================================
-    // CAPACITY CHECKS WITH LOCKING
+    // CAPACITY CHECKS
     // ========================================
 
     // Check qualification capacity
@@ -153,7 +170,6 @@ Deno.serve(async (req) => {
 
     // Check hostel capacity if required
     if (application.needs_hostel_accommodation) {
-      // Get available hostel capacity
       const { data: hostelCapacity, error: hostelError } = await supabaseAdmin
         .from('hostel_rooms')
         .select('id, capacity, current_occupancy')
@@ -162,7 +178,6 @@ Deno.serve(async (req) => {
 
       if (hostelError) {
         console.error('Hostel capacity check error:', hostelError)
-        // Continue without blocking - hostel can be allocated later
       } else {
         const totalAvailable = (hostelCapacity || []).reduce((sum, room) => {
           return sum + (room.capacity - (room.current_occupancy || 0))
@@ -195,7 +210,7 @@ Deno.serve(async (req) => {
         qualification_id,
         academic_year: academic_year || currentYear,
         hostel_required: application.needs_hostel_accommodation || false,
-        registration_status: 'fee_pending',
+        registration_status: 'fee_pending', // REGISTRATION_FEE_PENDING
         registered_by: user.id,
       })
       .select()
@@ -209,7 +224,9 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Create financial queue entry for registration fee using registration_id
+    // ========================================
+    // CREATE REGISTRATION FEE IN FINANCIAL_QUEUE
+    // ========================================
     const { data: feeType } = await supabaseAdmin
       .from('fee_types')
       .select('id, amount')
@@ -228,18 +245,23 @@ Deno.serve(async (req) => {
         description: `Registration fee for ${application.first_name} ${application.last_name}`,
         requested_by: user.id,
       })
+      console.log(`Created REGISTRATION fee in financial_queue for registration ${registration.id}`)
+    } else {
+      console.warn(`No registration fee type found for organization ${application.organization_id}`)
     }
 
-    // Update application status - do NOT set to registered yet, just pending registration fee
+    // ========================================
+    // UPDATE APPLICATION STATUS
+    // Status remains at provisionally_admitted until registration fee is cleared
+    // ========================================
     await supabaseAdmin
       .from('trainee_applications')
       .update({
-        registration_status: 'payment_cleared', // Keep at payment_cleared until reg fee paid
         hostel_application_status: application.needs_hostel_accommodation ? 'provisionally_allocated' : 'not_applied',
       })
       .eq('id', application_id)
 
-    // Increment qualification enrollment count
+    // Increment qualification enrollment count (reserve slot)
     if (qualification.max_intake !== null) {
       await supabaseAdmin
         .from('qualifications')
@@ -249,14 +271,15 @@ Deno.serve(async (req) => {
         .eq('id', qualification_id)
     }
 
-    console.log(`Trainee ${trainee.id} registered for qualification ${qualification_id}, registration_id: ${registration.id}`)
+    console.log(`Trainee ${trainee.id} registered for qualification ${qualification_id}, registration_id: ${registration.id}, status: REGISTRATION_FEE_PENDING`)
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: 'Trainee registered - awaiting registration fee payment',
+      message: 'Trainee registered - awaiting registration fee payment (REGISTRATION_FEE_PENDING)',
       registration_id: registration.id,
       registration_status: 'fee_pending',
       trainee_number: application.trainee_number,
+      next_step: 'Clear registration fee to complete enrollment',
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
