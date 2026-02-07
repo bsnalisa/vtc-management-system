@@ -83,13 +83,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get organization details separately (no FK relationship)
-    const { data: organization } = await supabaseAdmin
-      .from('organizations')
-      .select('name, email_domain, trainee_id_prefix')
-      .eq('id', application.organization_id)
-      .single()
-
     // Verify organization matches
     if (application.organization_id !== userRole.organization_id && userRole.role !== 'super_admin') {
       return new Response(JSON.stringify({ success: false, error: 'Cannot screen applications from other organizations' }), {
@@ -98,17 +91,23 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Build update data - ONLY set status fields
-    const updateData: Record<string, any> = {
+    // ========================================
+    // SCREENING ONLY - NO IDENTITY CREATION
+    // Identity (trainee_number, system_email, auth) is created ONLY in clear-application-fee
+    // ========================================
+
+    // Build update data - ONLY set screening status fields
+    const updateData: Record<string, unknown> = {
       qualification_status,
       screened_by: user.id,
       screened_at: new Date().toISOString(),
       qualification_remarks: screening_remarks || null,
     }
 
-    // If qualified, set status to APPLICATION_FEE_PENDING and create financial queue entry
+    let resultMessage = ''
+
     if (qualification_status === 'provisionally_qualified') {
-      // Set status to APPLICATION_FEE_PENDING (not provisionally_admitted yet)
+      // Set status to APPLICATION_FEE_PENDING - applicant must pay before identity creation
       updateData.registration_status = 'pending_payment'
       
       // Set hostel status if applied
@@ -125,27 +124,40 @@ Deno.serve(async (req) => {
         .single()
       
       if (feeType) {
-        await supabaseAdmin.from('financial_queue').insert({
-          organization_id: application.organization_id,
-          entity_type: 'APPLICATION',
-          entity_id: application_id, // Use application_id for APPLICATION type
-          fee_type_id: feeType.id,
-          amount: feeType.amount || 0,
-          status: 'pending',
-          description: `Application fee for ${application.first_name} ${application.last_name}`,
-          requested_by: user.id,
-        })
+        // Check if queue entry already exists to prevent duplicates
+        const { data: existingQueue } = await supabaseAdmin
+          .from('financial_queue')
+          .select('id')
+          .eq('entity_type', 'APPLICATION')
+          .eq('entity_id', application_id)
+          .single()
+
+        if (!existingQueue) {
+          await supabaseAdmin.from('financial_queue').insert({
+            organization_id: application.organization_id,
+            entity_type: 'APPLICATION',
+            entity_id: application_id,
+            fee_type_id: feeType.id,
+            amount: feeType.amount || 0,
+            status: 'pending',
+            description: `Application fee for ${application.first_name} ${application.last_name}`,
+            requested_by: user.id,
+          })
+          console.log(`Created financial_queue entry for application ${application_id}`)
+        }
+      } else {
+        console.warn(`No application fee type found for organization ${application.organization_id}`)
       }
       
-      // DO NOT generate trainee_number or system_email here
-      // These are generated in clear-application-fee when payment is cleared
+      resultMessage = 'Application qualified - awaiting application fee payment (APPLICATION_FEE_PENDING)'
       
     } else {
-      // Does not qualify - keep at applied status
-      updateData.registration_status = 'applied'
+      // Does not qualify - set to REJECTED
+      updateData.registration_status = 'rejected'
+      resultMessage = 'Application marked as does not qualify (REJECTED)'
     }
 
-    // Update application
+    // Update application - NO trainee_number, NO system_email, NO account creation
     const { error: updateError } = await supabaseAdmin
       .from('trainee_applications')
       .update(updateData)
@@ -159,30 +171,32 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Log to audit - no identity artifacts created
+    // Log to audit - explicitly note no identity artifacts created
     await supabaseAdmin.from('provisioning_logs').insert({
       organization_id: application.organization_id,
       application_id,
       trigger_type: 'manual',
       result: 'screening_complete',
-      email: application.email, // Personal email, not system email
+      email: application.email,
       metadata: { 
         qualification_status, 
         screened_by: user.id,
-        status_set: qualification_status === 'provisionally_qualified' ? 'pending_payment' : 'applied',
-        note: 'No identity artifacts created - awaiting payment clearance'
+        registration_status: updateData.registration_status,
+        note: 'Screening only - no identity artifacts created. Identity will be created upon application fee clearance.'
       }
     })
 
-    console.log(`Application ${application_id} screened: ${qualification_status}, status set to ${updateData.registration_status}`)
+    console.log(`Application ${application_id} screened: ${qualification_status}, status: ${updateData.registration_status}`)
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: qualification_status === 'provisionally_qualified' 
-        ? 'Application qualified - awaiting application fee payment'
-        : 'Application marked as does not qualify',
+      message: resultMessage,
       registration_status: updateData.registration_status,
-      // No trainee_number or system_email returned - these don't exist yet
+      // Explicitly indicate no identity artifacts exist
+      identity_status: 'not_created',
+      next_step: qualification_status === 'provisionally_qualified' 
+        ? 'Clear application fee to create trainee identity' 
+        : 'Application rejected - no further action',
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

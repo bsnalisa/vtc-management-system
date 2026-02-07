@@ -94,6 +94,11 @@ import TraineeResultsPage from "./pages/trainee/TraineeResultsPage";
 import TraineeFinancePage from "./pages/trainee/TraineeFinancePage";
 import TraineePaymentsPage from "./pages/trainee/TraineePaymentsPage";
 import FirstLoginPasswordChange from "./pages/FirstLoginPasswordChange";
+import ApplicationFees from "./pages/debtors/ApplicationFees";
+import RegistrationFees from "./pages/debtors/RegistrationFees";
+import ClearedPayments from "./pages/debtors/ClearedPayments";
+import TraineeAccountsPage from "./pages/debtors/TraineeAccounts";
+import FeeConfiguration from "./pages/debtors/FeeConfiguration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -379,6 +384,12 @@ const App = () => (
           <Route path="/trainee/exams/results" element={<ProtectedRoute><TraineeResultsPage /></ProtectedRoute>} />
           <Route path="/trainee/finance" element={<ProtectedRoute><TraineeFinancePage /></ProtectedRoute>} />
           <Route path="/trainee/payments" element={<ProtectedRoute><TraineePaymentsPage /></ProtectedRoute>} />
+          {/* Debtor Officer Routes */}
+          <Route path="/debtors/application-fees" element={<ProtectedRoute><ApplicationFees /></ProtectedRoute>} />
+          <Route path="/debtors/registration-fees" element={<ProtectedRoute><RegistrationFees /></ProtectedRoute>} />
+          <Route path="/debtors/cleared-payments" element={<ProtectedRoute><ClearedPayments /></ProtectedRoute>} />
+          <Route path="/debtors/accounts" element={<ProtectedRoute><TraineeAccountsPage /></ProtectedRoute>} />
+          <Route path="/debtors/config" element={<ProtectedRoute><FeeConfiguration /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           </Routes>
