@@ -5,7 +5,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const DEFAULT_TRAINEE_PASSWORD = 'Password1'
+// Generate a cryptographically secure random password
+function generateSecurePassword(): string {
+  const length = 16
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
+  const array = new Uint8Array(length)
+  crypto.getRandomValues(array)
+  return Array.from(array, byte => charset[byte % charset.length]).join('')
+}
 
 interface ClearFeeRequest {
   queue_id: string
@@ -234,10 +241,12 @@ Deno.serve(async (req) => {
         accountExisted = true
         console.log('Auth user already exists:', systemEmail)
       } else {
-        // Step 4: Create auth user
+        // Step 4: Create auth user with secure random password
+        // Password reset is enforced on first login, so the trainee will set their own password
+        const securePassword = generateSecurePassword()
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email: systemEmail,
-          password: DEFAULT_TRAINEE_PASSWORD,
+          password: securePassword,
           email_confirm: true,
           user_metadata: {
             firstname: application.first_name,
