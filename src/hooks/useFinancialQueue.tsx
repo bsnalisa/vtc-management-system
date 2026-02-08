@@ -30,13 +30,18 @@
      phone: string | null;
      trade_id: string | null;
    } | null;
-   trainees?: {
-     id: string;
-     first_name: string;
-     last_name: string;
-     trainee_id: string;
-     phone: string | null;
-   } | null;
+    trainees?: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      trainee_id: string;
+      phone: string | null;
+    } | null;
+    registration?: {
+      id: string;
+      trainee_id: string;
+      application_id: string | null;
+    } | null;
    fee_types?: {
      name: string;
      category: string | null;
@@ -72,27 +77,32 @@
        const { data, error } = await query;
        if (error) throw error;
  
-       // Fetch related application/trainee data for each entry
-       const enrichedData = await Promise.all(
-         (data || []).map(async (entry) => {
-           if (entry.entity_type === 'APPLICATION') {
-             const { data: appData } = await supabase
-               .from("trainee_applications")
-               .select("id, first_name, last_name, trainee_number, system_email, phone, trade_id")
-               .eq("id", entry.entity_id)
-               .single();
-             return { ...entry, trainee_applications: appData };
-           } else if (entry.entity_type === 'REGISTRATION') {
-             const { data: traineeData } = await supabase
-               .from("trainees")
-               .select("id, first_name, last_name, trainee_id, phone")
-               .eq("id", entry.entity_id)
-               .single();
-             return { ...entry, trainees: traineeData };
-           }
-           return entry;
-         })
-       );
+        // Fetch related application/trainee data for each entry
+        const enrichedData = await Promise.all(
+          (data || []).map(async (entry) => {
+            if (entry.entity_type === 'APPLICATION') {
+              const { data: appData } = await supabase
+                .from("trainee_applications")
+                .select("id, first_name, last_name, trainee_number, system_email, phone, trade_id")
+                .eq("id", entry.entity_id)
+                .single();
+              return { ...entry, trainee_applications: appData };
+            } else if (entry.entity_type === 'REGISTRATION') {
+              // entity_id is registration_id, need to join through registrations
+              const { data: regData } = await supabase
+                .from("registrations")
+                .select("id, trainee_id, application_id, trainees(id, first_name, last_name, trainee_id, phone)")
+                .eq("id", entry.entity_id)
+                .single();
+              return { 
+                ...entry, 
+                trainees: regData?.trainees,
+                registration: regData 
+              };
+            }
+            return entry;
+          })
+        );
  
        return enrichedData as FinancialQueueEntry[];
      },

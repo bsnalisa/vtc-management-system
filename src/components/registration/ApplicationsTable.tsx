@@ -1,9 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { FileText, CheckCircle, Clock, UserCheck, AlertCircle, Banknote } from "lucide-react";
-import { getProvisioningStatusDisplay } from "@/hooks/useProvisionTraineeAuth";
+import { FileText, CheckCircle, Clock, UserCheck, AlertCircle } from "lucide-react";
 
 interface Application {
   id: string;
@@ -53,59 +51,51 @@ export const ApplicationsTable = ({
 
   const getRegistrationBadge = (status: string) => {
     switch (status) {
-      case "fully_registered":
       case "registered":
-        return <Badge className="bg-green-500">Registered</Badge>;
-      case "payment_cleared":
-      case "payment_verified":
-        return <Badge className="bg-emerald-500">Payment Cleared</Badge>;
-      case "pending_payment":
-        return <Badge className="bg-yellow-500">Pending Payment</Badge>;
+      case "fully_registered":
+        return <Badge className="bg-green-500">REGISTERED</Badge>;
+      case "registration_fee_pending":
+        return <Badge className="bg-amber-500">REGISTRATION_FEE_PENDING</Badge>;
       case "provisionally_admitted":
-        return <Badge className="bg-blue-500">Awaiting Payment</Badge>;
+        return <Badge className="bg-blue-500">PROVISIONALLY_ADMITTED</Badge>;
+      case "pending_payment":
+        return <Badge className="bg-violet-500">APPLICATION_FEE_PENDING</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive">REJECTED</Badge>;
       default:
-        return <Badge variant="secondary">Applied</Badge>;
+        return <Badge variant="secondary">APPLIED</Badge>;
     }
   };
 
   const getAccountStatusBadge = (application: Application) => {
-    // Only show account status for qualified applications
-    if (application.qualification_status !== 'provisionally_qualified') {
-      return <span className="text-muted-foreground text-sm">-</span>;
+    // Only show account status for applications that should have accounts
+    // Account is created ONLY after application fee clearance
+    if (application.registration_status === 'pending_payment') {
+      return (
+        <Badge variant="outline" className="text-muted-foreground border-muted">
+          Not Created
+        </Badge>
+      );
     }
 
-    const { label, variant, color } = getProvisioningStatusDisplay(
-      application.account_provisioning_status,
-      !!application.user_id
-    );
-    
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant={variant} className={color}>
-              {application.account_provisioning_status === 'failed' && (
-                <AlertCircle className="h-3 w-3 mr-1" />
-              )}
-              {label}
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            {application.user_id ? (
-              <p>Account active: {application.system_email}</p>
-            ) : application.account_provisioning_status === 'failed' ? (
-              <p>Provisioning failed - clear payment to retry</p>
-            ) : application.system_email ? (
-              <p>Will be created on payment: {application.system_email}</p>
-            ) : (
-              <p>Account created after payment clearance</p>
-            )}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
+    if (application.user_id) {
+      return (
+        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+          Active
+        </Badge>
+      );
+    }
+
+    if (application.account_provisioning_status === 'failed') {
+      return (
+        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          Failed
+        </Badge>
+      );
+    }
+
+    return <span className="text-muted-foreground text-sm">-</span>;
   };
 
   // Determine action button based on workflow status
@@ -123,32 +113,31 @@ export const ApplicationsTable = ({
     // 2. For qualified applications, show status-based actions
     if (application.qualification_status === "provisionally_qualified") {
       switch (application.registration_status) {
-        case "provisionally_admitted":
-          // Awaiting payment - show indicator
+        case "pending_payment":
+          // Awaiting application fee - Debtor Officer handles this
           return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Awaiting Payment
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Payment must be cleared by Debtor Officer</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Badge variant="outline" className="bg-violet-50 text-violet-700 border-violet-200">
+              <Clock className="h-3 w-3 mr-1" />
+              Awaiting App Fee
+            </Badge>
           );
         
-        case "payment_cleared":
-        case "payment_verified":
+        case "provisionally_admitted":
           // Ready for registration
           return (
             <Button size="sm" onClick={() => onRegister(application)}>
               <UserCheck className="h-4 w-4 mr-1" />
               Register
             </Button>
+          );
+        
+        case "registration_fee_pending":
+          // Awaiting registration fee - Debtor Officer handles this
+          return (
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+              <Clock className="h-3 w-3 mr-1" />
+              Awaiting Reg Fee
+            </Badge>
           );
         
         case "registered":

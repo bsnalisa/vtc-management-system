@@ -229,9 +229,10 @@ Deno.serve(async (req) => {
     // ========================================
     const { data: feeType } = await supabaseAdmin
       .from('fee_types')
-      .select('id, amount')
+      .select('id, default_amount')
       .eq('organization_id', application.organization_id)
-      .ilike('name', '%registration%')
+      .ilike('code', '%REG%')
+      .eq('active', true)
       .single()
 
     if (feeType) {
@@ -240,7 +241,8 @@ Deno.serve(async (req) => {
         entity_type: 'REGISTRATION',
         entity_id: registration.id, // Use registration_id for REGISTRATION type
         fee_type_id: feeType.id,
-        amount: feeType.amount || 0,
+        amount: feeType.default_amount || 500,
+        amount_paid: 0,
         status: 'pending',
         description: `Registration fee for ${application.first_name} ${application.last_name}`,
         requested_by: user.id,
@@ -251,12 +253,12 @@ Deno.serve(async (req) => {
     }
 
     // ========================================
-    // UPDATE APPLICATION STATUS
-    // Status remains at provisionally_admitted until registration fee is cleared
+    // UPDATE APPLICATION STATUS TO REGISTRATION_FEE_PENDING
     // ========================================
     await supabaseAdmin
       .from('trainee_applications')
       .update({
+        registration_status: 'registration_fee_pending',
         hostel_application_status: application.needs_hostel_accommodation ? 'provisionally_allocated' : 'not_applied',
       })
       .eq('id', application_id)

@@ -118,9 +118,10 @@ Deno.serve(async (req) => {
       // Create financial queue entry for application fee
       const { data: feeType } = await supabaseAdmin
         .from('fee_types')
-        .select('id, amount')
+        .select('id, default_amount')
         .eq('organization_id', application.organization_id)
-        .ilike('name', '%application%')
+        .ilike('code', '%APP%')
+        .eq('active', true)
         .single()
       
       if (feeType) {
@@ -138,7 +139,8 @@ Deno.serve(async (req) => {
             entity_type: 'APPLICATION',
             entity_id: application_id,
             fee_type_id: feeType.id,
-            amount: feeType.amount || 0,
+            amount: feeType.default_amount || 100,
+            amount_paid: 0,
             status: 'pending',
             description: `Application fee for ${application.first_name} ${application.last_name}`,
             requested_by: user.id,
