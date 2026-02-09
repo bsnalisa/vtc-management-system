@@ -109,14 +109,25 @@ Deno.serve(async (req) => {
     }
 
     const newAmountPaid = (queueEntry.amount_paid || 0) + amount
-    const isFullyCleared = newAmountPaid >= queueEntry.amount
+    const newBalance = Math.max(0, queueEntry.amount - newAmountPaid)
+    const isFullyCleared = newBalance <= 0
     const newStatus = isFullyCleared ? 'cleared' : (newAmountPaid > 0 ? 'partial' : 'pending')
 
-    // Update financial queue
+    console.log('Processing payment:', { 
+      queue_id, 
+      amount, 
+      newAmountPaid, 
+      newBalance, 
+      isFullyCleared, 
+      newStatus 
+    })
+
+    // Update financial queue with balance
     const { error: updateQueueError } = await supabaseAdmin
       .from('financial_queue')
       .update({
         amount_paid: newAmountPaid,
+        balance: newBalance,
         status: newStatus,
         payment_method,
         cleared_by: isFullyCleared ? user.id : null,
@@ -135,20 +146,62 @@ Deno.serve(async (req) => {
     // If fully cleared, this is the TRIGGER POINT for ALL identity creation
     let provisioningResult = null
     if (isFullyCleared) {
-      // Get application
+      console.log('Payment fully cleared, starting identity creation for entity_id:', queueEntry.entity_id)
+      
+      // Get application - query separately to avoid join issues
       const { data: application, error: appError } = await supabaseAdmin
         .from('trainee_applications')
-        .select('*, organizations(name, email_domain)')
+        .select('*')
         .eq('id', queueEntry.entity_id)
         .single()
 
-      if (appError || !application) {
-        console.error('Application not found:', appError)
-        return new Response(JSON.stringify({ success: false, error: 'Application not found' }), {
+      if (appError) {
+        console.error('Application query error:', appError)
+      }
+      
+      if (!application) {
+        console.error('Application not found for entity_id:', queueEntry.entity_id)
+        
+        // Don't rollback the payment, but log the error
+        await supabaseAdmin.from('provisioning_logs').insert({
+          organization_id: queueEntry.organization_id,
+          application_id: queueEntry.entity_id,
+          trigger_type: 'auto',
+          result: 'failed',
+          email: 'unknown',
+          error_message: `Application not found for entity_id: ${queueEntry.entity_id}`,
+        })
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          warning: 'Payment cleared but application not found for identity creation',
+          payment_status: newStatus,
+          amount_paid: newAmountPaid,
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      
+      // Get organization separately
+      const { data: organization, error: orgError } = await supabaseAdmin
+        .from('organizations')
+        .select('name, email_domain')
+        .eq('id', application.organization_id)
+        .single()
+      
+      if (orgError || !organization) {
+        console.error('Organization not found:', orgError)
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Organization not found' 
+        }), {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
+      
+      console.log('Found application:', application.id, 'Organization:', organization.name)
 
       // ========================================
       // ATOMIC IDENTITY CREATION - ALL STEPS HERE
