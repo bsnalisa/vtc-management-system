@@ -356,35 +356,38 @@ Deno.serve(async (req) => {
       }
 
       // Step 5: Create trainee record
+      // Note: trainees table requires gender and academic_year (not null)
+      const traineeData: Record<string, unknown> = {
+        organization_id: application.organization_id,
+        trainee_id: traineeNumber,
+        first_name: application.first_name,
+        last_name: application.last_name,
+        email: application.email,
+        phone: application.phone,
+        national_id: application.national_id,
+        date_of_birth: application.date_of_birth,
+        gender: application.gender || 'male', // Default if null
+        address: application.address,
+        trade_id: application.trade_id,
+        level: application.preferred_level || 1,
+        training_mode: application.preferred_training_mode || 'fulltime',
+        academic_year: application.academic_year || new Date().getFullYear().toString(),
+        status: 'active',
+        system_email: systemEmail,
+        user_id: userId,
+        account_provisioning_status: 'auto_provisioned',
+        password_reset_required: true,
+        is_email_system_generated: true,
+      }
+
       const { data: trainee, error: traineeError } = await supabaseAdmin
         .from('trainees')
-        .insert({
-          organization_id: application.organization_id,
-          trainee_id: traineeNumber,
-          first_name: application.first_name,
-          last_name: application.last_name,
-          full_name: `${application.first_name} ${application.last_name}`,
-          email: application.email,
-          phone: application.phone,
-          national_id: application.national_id,
-          date_of_birth: application.date_of_birth,
-          gender: application.gender,
-          address: application.residential_address,
-          trade_id: application.trade_id,
-          level: application.level || 1,
-          training_mode: application.training_mode || 'fulltime',
-          status: 'active',
-          system_email: systemEmail,
-          user_id: userId,
-          account_provisioning_status: 'auto_provisioned',
-          password_reset_required: true,
-          is_email_system_generated: true,
-        })
+        .insert(traineeData)
         .select()
         .single()
 
       if (traineeError) {
-        console.error('Error creating trainee:', traineeError)
+        console.error('Error creating trainee:', traineeError, 'Data:', traineeData)
         // Continue anyway - auth user exists, trainee creation can be retried
       }
 
