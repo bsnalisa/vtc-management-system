@@ -122,12 +122,11 @@ Deno.serve(async (req) => {
       newStatus 
     })
 
-    // Update financial queue with balance
+    // Update financial queue - balance is auto-calculated by trigger
     const { error: updateQueueError } = await supabaseAdmin
       .from('financial_queue')
       .update({
         amount_paid: newAmountPaid,
-        balance: newBalance,
         status: newStatus,
         payment_method,
         cleared_by: isFullyCleared ? user.id : null,
