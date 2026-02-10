@@ -399,7 +399,7 @@ Deno.serve(async (req) => {
       }, { onConflict: 'user_id' })
 
       // Step 7: Update application with ALL identity artifacts and new status
-      await supabaseAdmin
+      const { error: appUpdateError } = await supabaseAdmin
         .from('trainee_applications')
         .update({
           trainee_number: traineeNumber,
@@ -412,6 +412,12 @@ Deno.serve(async (req) => {
           payment_cleared_by: user.id,
         })
         .eq('id', application.id)
+
+      if (appUpdateError) {
+        console.error('CRITICAL: Failed to update application status to provisionally_admitted:', appUpdateError)
+      } else {
+        console.log(`Application ${application.id} status updated to provisionally_admitted`)
+      }
 
       // Step 8: Log success
       await supabaseAdmin.from('provisioning_logs').insert({
