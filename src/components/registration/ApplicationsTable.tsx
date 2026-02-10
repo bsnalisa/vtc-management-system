@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, UserCheck, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, UserCheck, AlertCircle, Eye } from "lucide-react";
 
 interface Application {
   id: string;
@@ -68,16 +68,7 @@ export const ApplicationsTable = ({
   };
 
   const getAccountStatusBadge = (application: Application) => {
-    // Only show account status for applications that should have accounts
-    // Account is created ONLY after application fee clearance
-    if (application.registration_status === 'pending_payment') {
-      return (
-        <Badge variant="outline" className="text-muted-foreground border-muted">
-          Not Created
-        </Badge>
-      );
-    }
-
+    // Account is created ONLY after application fee clearance (provisionally_admitted or later)
     if (application.user_id) {
       return (
         <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -95,12 +86,22 @@ export const ApplicationsTable = ({
       );
     }
 
+    // For all pre-clearance stages, show "Not Created"
+    if (['applied', 'pending_payment', 'pending'].includes(application.registration_status) ||
+        application.qualification_status === 'pending') {
+      return (
+        <Badge variant="outline" className="text-muted-foreground border-muted">
+          Not Created
+        </Badge>
+      );
+    }
+
     return <span className="text-muted-foreground text-sm">-</span>;
   };
 
   // Determine action button based on workflow status
   const getActionButton = (application: Application) => {
-    // 1. Screen action - for applications pending screening
+    // 1. Screen action - ONLY for applications that haven't been screened yet
     if (application.qualification_status === "pending") {
       return (
         <Button size="sm" variant="outline" onClick={() => onScreen(application)}>
@@ -110,7 +111,16 @@ export const ApplicationsTable = ({
       );
     }
 
-    // 2. For qualified applications, show status-based actions
+    // 2. Rejected - no further actions
+    if (application.qualification_status === "does_not_qualify") {
+      return (
+        <Badge variant="outline" className="text-destructive border-destructive/30">
+          Rejected
+        </Badge>
+      );
+    }
+
+    // 3. For qualified applications, show status-based actions
     if (application.qualification_status === "provisionally_qualified") {
       switch (application.registration_status) {
         case "pending_payment":
@@ -193,9 +203,12 @@ export const ApplicationsTable = ({
               <TableCell>
                 <div className="flex gap-2 flex-nowrap">
                   {getActionButton(application)}
-                  <Button size="sm" variant="ghost" onClick={() => onViewDetails(application)}>
-                    <FileText className="h-4 w-4" />
-                  </Button>
+                  {/* Only show view details for screened applications (not the screening icon) */}
+                  {application.qualification_status !== "pending" && (
+                    <Button size="sm" variant="ghost" onClick={() => onViewDetails(application)} title="View Details">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

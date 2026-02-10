@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Lock, CheckCircle } from "lucide-react";
-import { useUpdateRegistrationStatus } from "@/hooks/useTraineeApplications";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useRegisterTrainee } from "@/hooks/useFinancialQueue";
+import { useQualifications } from "@/hooks/useQualifications";
 
 interface RegistrationDialogProps {
   open: boolean;
@@ -14,35 +15,43 @@ interface RegistrationDialogProps {
 }
 
 export const RegistrationDialog = ({ open, onOpenChange, application }: RegistrationDialogProps) => {
-  const updateStatus = useUpdateRegistrationStatus();
-  const { role } = useUserRole();
-  const isFinanceOfficer = role === "debtor_officer" || role === "admin";
+  const registerTrainee = useRegisterTrainee();
+  const { data: qualifications } = useQualifications();
+  const [selectedQualification, setSelectedQualification] = useState<string>("");
 
-  const handleSetPendingPayment = async () => {
-    await updateStatus.mutateAsync({
-      applicationId: application.id,
-      status: "pending_payment",
+  // Filter to only approved qualifications matching the application's trade
+  const availableQualifications = qualifications?.filter(
+    (q) => q.status === "approved" && q.active && (!application?.trade_id || q.trade_id === application?.trade_id)
+  ) || [];
+
+  const handleRegister = async () => {
+    if (!selectedQualification) return;
+    
+    await registerTrainee.mutateAsync({
+      application_id: application.id,
+      qualification_id: selectedQualification,
+      academic_year: application.academic_year,
     });
     onOpenChange(false);
   };
 
   if (!application) return null;
 
-  const isPendingPayment = application.registration_status === "pending_payment";
-  const isFullyRegistered = application.registration_status === "fully_registered";
+  const isRegistrationFeePending = application.registration_status === "registration_fee_pending";
+  const isRegistered = application.registration_status === "registered" || application.registration_status === "fully_registered";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Complete Registration</DialogTitle>
+          <DialogTitle>Register Trainee</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {/* Application Details */}
           <div className="p-4 bg-muted rounded-lg space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Applicant Details</h3>
-              <Badge className="bg-green-500">Provisionally Qualified</Badge>
+              <Badge className="bg-green-500">Provisionally Admitted</Badge>
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
@@ -76,36 +85,58 @@ export const RegistrationDialog = ({ open, onOpenChange, application }: Registra
             </div>
           </div>
 
+          {/* Qualification Selection */}
+          {!isRegistrationFeePending && !isRegistered && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Qualification</label>
+              <Select value={selectedQualification} onValueChange={setSelectedQualification}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a qualification..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableQualifications.map((q) => (
+                    <SelectItem key={q.id} value={q.id}>
+                      {q.qualification_code} - {q.qualification_title} (NQF {q.nqf_level})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {availableQualifications.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No approved qualifications found for this trade. Please ensure qualifications are approved first.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Registration Status */}
-          {!isPendingPayment && !isFullyRegistered && (
+          {!isRegistrationFeePending && !isRegistered && (
             <Alert>
               <AlertDescription>
-                Click "Submit for Payment" to mark this registration as pending payment clearance.
-                The Finance Officer will verify the payment before final registration.
+                Select a qualification and click "Register" to create a registration record.
+                A registration fee will be added to the financial queue for the Debtor Officer to process.
               </AlertDescription>
             </Alert>
           )}
 
-          {isPendingPayment && (
+          {isRegistrationFeePending && (
             <Alert className="border-yellow-500 bg-yellow-50">
               <Lock className="h-4 w-4" />
               <AlertDescription>
-                <strong>Registration locked — awaiting finance clearance.</strong>
+                <strong>Registration fee pending — awaiting finance clearance.</strong>
                 <br />
-                {isFinanceOfficer
-                  ? "As a Finance Officer, you can verify payment and complete registration."
-                  : "Only the Finance Officer or Head of Finance can record payment and approve this registration."}
+                The Debtor Officer will process the registration fee payment.
               </AlertDescription>
             </Alert>
           )}
 
-          {isFullyRegistered && (
+          {isRegistered && (
             <Alert className="border-green-500 bg-green-50">
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
                 <strong>Registration completed!</strong>
                 <br />
-                This trainee is fully registered. You can now generate admission letters and proof of registration.
+                This trainee is fully registered.
               </AlertDescription>
             </Alert>
           )}
@@ -114,9 +145,12 @@ export const RegistrationDialog = ({ open, onOpenChange, application }: Registra
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            {!isPendingPayment && !isFullyRegistered && (
-              <Button onClick={handleSetPendingPayment} disabled={updateStatus.isPending}>
-                {updateStatus.isPending ? "Submitting..." : "Submit for Payment"}
+            {!isRegistrationFeePending && !isRegistered && (
+              <Button 
+                onClick={handleRegister} 
+                disabled={registerTrainee.isPending || !selectedQualification}
+              >
+                {registerTrainee.isPending ? "Registering..." : "Register"}
               </Button>
             )}
           </div>
