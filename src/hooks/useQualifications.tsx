@@ -274,6 +274,8 @@ export const useUpdateQualification = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["qualifications"] });
       queryClient.invalidateQueries({ queryKey: ["qualification", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["qualification-unit-standards"] });
+      queryClient.refetchQueries({ queryKey: ["qualifications"] });
       toast({
         title: "Success",
         description: "Qualification updated successfully",

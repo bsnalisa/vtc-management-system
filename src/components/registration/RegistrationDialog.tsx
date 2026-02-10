@@ -19,9 +19,10 @@ export const RegistrationDialog = ({ open, onOpenChange, application }: Registra
   const { data: qualifications } = useQualifications();
   const [selectedQualification, setSelectedQualification] = useState<string>("");
 
-  // Filter to only approved qualifications matching the application's trade
+  // Filter to approved qualifications: prefer trade-matched, but also show unassigned ones
   const availableQualifications = qualifications?.filter(
-    (q) => q.status === "approved" && q.active && (!application?.trade_id || q.trade_id === application?.trade_id)
+    (q) => q.status === "approved" && q.active && 
+      (!application?.trade_id || !q.trade_id || q.trade_id === application?.trade_id)
   ) || [];
 
   const handleRegister = async () => {
