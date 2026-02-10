@@ -110,17 +110,17 @@ export const QualificationsTable = ({
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
+                      {canManage && ["draft", "rejected", "approved"].includes(qualification.status) && (
+                        <DropdownMenuItem onClick={() => onEdit(qualification)}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
                       {canManage && (qualification.status === "draft" || qualification.status === "rejected") && (
-                        <>
-                          <DropdownMenuItem onClick={() => onEdit(qualification)}>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleSubmitClick(qualification)}>
-                            <Send className="h-4 w-4 mr-2" />
-                            Submit for Approval
-                          </DropdownMenuItem>
-                        </>
+                        <DropdownMenuItem onClick={() => handleSubmitClick(qualification)}>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit for Approval
+                        </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
