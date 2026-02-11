@@ -233,13 +233,17 @@ Deno.serve(async (req) => {
     // ========================================
     // UPDATE APPLICATION STATUS TO REGISTRATION_FEE_PENDING
     // ========================================
-    await supabaseAdmin
+    const { error: statusUpdateError } = await supabaseAdmin
       .from('trainee_applications')
       .update({
         registration_status: 'registration_fee_pending',
         hostel_application_status: application.needs_hostel_accommodation ? 'provisionally_allocated' : 'not_applied',
       })
       .eq('id', application_id)
+
+    if (statusUpdateError) {
+      console.error('Failed to update application status:', statusUpdateError)
+    }
 
     // Enrollment count tracking skipped - qualifications table does not have enrollment columns
 
