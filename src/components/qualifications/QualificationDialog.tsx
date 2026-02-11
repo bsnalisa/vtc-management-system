@@ -62,6 +62,10 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.trade_id) {
+      return; // Trade is required
+    }
+
     if (qualification) {
       await updateMutation.mutateAsync({ 
         id: qualification.id, 
@@ -133,17 +137,17 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="trade">Trade</Label>
+            <Label htmlFor="trade">Trade *</Label>
             <Select
-              value={formData.trade_id || "none"}
-              onValueChange={(value) => setFormData({ ...formData, trade_id: value === "none" ? undefined : value })}
+              value={formData.trade_id || ""}
+              onValueChange={(value) => setFormData({ ...formData, trade_id: value || undefined })}
               disabled={!isEditable}
+              required
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a trade (optional)" />
+                <SelectValue placeholder="Select a trade" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No trade selected</SelectItem>
                 {trades?.map((trade) => (
                   <SelectItem key={trade.id} value={trade.id}>
                     {trade.code} - {trade.name}
@@ -151,6 +155,9 @@ export const QualificationDialog = ({ open, onOpenChange, qualification }: Quali
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground">
+              A trade is required. Trainees can only register for qualifications linked to their applied trade.
+            </p>
           </div>
 
           <div className="space-y-2">
