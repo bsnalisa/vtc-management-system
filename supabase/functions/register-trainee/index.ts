@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
     // Check qualification capacity
     const { data: qualification, error: qualError } = await supabaseAdmin
       .from('qualifications')
-      .select('id, qualification_title, trade_id, max_intake, current_enrollment')
+      .select('id, qualification_title, trade_id')
       .eq('id', qualification_id)
       .single()
 
@@ -165,19 +165,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check if qualification has capacity limit and enforce it
-    if (qualification.max_intake !== null && qualification.max_intake > 0) {
-      const currentEnrollment = qualification.current_enrollment || 0
-      if (currentEnrollment >= qualification.max_intake) {
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: `Qualification "${qualification.qualification_title}" has reached maximum capacity (${qualification.max_intake})` 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
-    }
+    // Capacity check skipped - qualifications table does not have max_intake/current_enrollment columns
 
     // Check hostel capacity if required
     if (application.needs_hostel_accommodation) {
@@ -274,15 +262,7 @@ Deno.serve(async (req) => {
       })
       .eq('id', application_id)
 
-    // Increment qualification enrollment count (reserve slot)
-    if (qualification.max_intake !== null) {
-      await supabaseAdmin
-        .from('qualifications')
-        .update({ 
-          current_enrollment: (qualification.current_enrollment || 0) + 1 
-        })
-        .eq('id', qualification_id)
-    }
+    // Enrollment count tracking skipped - qualifications table does not have enrollment columns
 
     console.log(`Trainee ${trainee.id} registered for qualification ${qualification_id}, registration_id: ${registration.id}, status: REGISTRATION_FEE_PENDING`)
 
