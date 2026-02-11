@@ -19,10 +19,10 @@ export const RegistrationDialog = ({ open, onOpenChange, application }: Registra
   const { data: qualifications } = useQualifications();
   const [selectedQualification, setSelectedQualification] = useState<string>("");
 
-  // Filter to approved qualifications: prefer trade-matched, but also show unassigned ones
+  // STRICT: Only show approved qualifications that match the trainee's applied trade
   const availableQualifications = qualifications?.filter(
     (q) => q.status === "approved" && q.active && 
-      (!application?.trade_id || !q.trade_id || q.trade_id === application?.trade_id)
+      q.trade_id != null && application?.trade_id != null && q.trade_id === application.trade_id
   ) || [];
 
   const handleRegister = async () => {
@@ -103,8 +103,9 @@ export const RegistrationDialog = ({ open, onOpenChange, application }: Registra
                 </SelectContent>
               </Select>
               {availableQualifications.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No approved qualifications found for this trade. Please ensure qualifications are approved first.
+                <p className="text-sm text-destructive">
+                  No approved qualifications found for the trade "{application?.trades?.name || 'Unknown'}". 
+                  Please go to Qualification Management, assign a trade to the relevant qualification, and ensure it is approved.
                 </p>
               )}
             </div>

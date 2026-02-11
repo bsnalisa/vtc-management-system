@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
     // Check qualification capacity
     const { data: qualification, error: qualError } = await supabaseAdmin
       .from('qualifications')
-      .select('id, name, max_intake, current_enrollment')
+      .select('id, qualification_title, trade_id, max_intake, current_enrollment')
       .eq('id', qualification_id)
       .single()
 
@@ -154,13 +154,24 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Verify qualification belongs to the same trade as the application
+    if (qualification.trade_id && application.trade_id && qualification.trade_id !== application.trade_id) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Qualification does not belong to the trade the trainee applied for.' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     // Check if qualification has capacity limit and enforce it
     if (qualification.max_intake !== null && qualification.max_intake > 0) {
       const currentEnrollment = qualification.current_enrollment || 0
       if (currentEnrollment >= qualification.max_intake) {
         return new Response(JSON.stringify({ 
           success: false, 
-          error: `Qualification "${qualification.name}" has reached maximum capacity (${qualification.max_intake})` 
+          error: `Qualification "${qualification.qualification_title}" has reached maximum capacity (${qualification.max_intake})` 
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
