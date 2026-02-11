@@ -167,31 +167,10 @@ Deno.serve(async (req) => {
 
     // Capacity check skipped - qualifications table does not have max_intake/current_enrollment columns
 
-    // Check hostel capacity if required
+    // Hostel capacity check - log warning but do not block registration
+    // Actual room allocation happens later in the Hostel Management module
     if (application.needs_hostel_accommodation) {
-      const { data: hostelCapacity, error: hostelError } = await supabaseAdmin
-        .from('hostel_rooms')
-        .select('id, capacity, current_occupancy')
-        .eq('organization_id', application.organization_id)
-        .eq('status', 'available')
-
-      if (hostelError) {
-        console.error('Hostel capacity check error:', hostelError)
-      } else {
-        const totalAvailable = (hostelCapacity || []).reduce((sum, room) => {
-          return sum + (room.capacity - (room.current_occupancy || 0))
-        }, 0)
-
-        if (totalAvailable <= 0) {
-          return new Response(JSON.stringify({ 
-            success: false, 
-            error: 'No hostel accommodation available. Please process as day scholar or wait for availability.' 
-          }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          })
-        }
-      }
+      console.log(`Trainee requested hostel accommodation. Room allocation will be handled separately.`)
     }
 
     // ========================================
