@@ -87,18 +87,33 @@
                 .eq("id", entry.entity_id)
                 .single();
               return { ...entry, trainee_applications: appData };
-            } else if (entry.entity_type === 'REGISTRATION') {
-              // entity_id is registration_id, need to join through registrations
+            } else if (entry.entity_type === 'REGISTRATION' || entry.entity_type === 'HOSTEL') {
+              // entity_id is registration_id for both REGISTRATION and HOSTEL entries
               const { data: regData } = await supabase
                 .from("registrations")
                 .select("id, trainee_id, application_id, trainees(id, first_name, last_name, trainee_id, phone)")
                 .eq("id", entry.entity_id)
-                .single();
-              return { 
-                ...entry, 
-                trainees: regData?.trainees,
-                registration: regData 
-              };
+                .maybeSingle();
+              
+              if (regData?.trainees) {
+                return { 
+                  ...entry, 
+                  trainees: regData.trainees,
+                  registration: regData 
+                };
+              }
+              
+              // Fallback: try to resolve via application if registration join failed
+              if (regData?.application_id) {
+                const { data: appData } = await supabase
+                  .from("trainee_applications")
+                  .select("id, first_name, last_name, trainee_number, system_email, phone, trade_id")
+                  .eq("id", regData.application_id)
+                  .single();
+                return { ...entry, trainee_applications: appData, registration: regData };
+              }
+              
+              return { ...entry, registration: regData };
             }
             return entry;
           })

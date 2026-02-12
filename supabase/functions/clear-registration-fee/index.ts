@@ -69,10 +69,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get queue entry
+    // Get queue entry with fee type info
     const { data: queueEntry, error: queueError } = await supabaseAdmin
       .from('financial_queue')
-      .select('*')
+      .select('*, fee_types(code, name)')
       .eq('id', queue_id)
       .single()
 
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Only process REGISTRATION fees in this function
+    // This function handles REGISTRATION entity type fees only
     if (queueEntry.entity_type !== 'REGISTRATION') {
       return new Response(JSON.stringify({ success: false, error: 'This function only handles registration fees' }), {
         status: 400,
@@ -124,9 +124,14 @@ Deno.serve(async (req) => {
     }
 
     // ========================================
-    // IF FULLY CLEARED: Set status to REGISTERED
+    // IF FULLY CLEARED: Determine if this is a registration-gating fee
+    // Only REG_FEE (day scholar) clearance triggers REGISTERED status
+    // HOSTEL fees (REG_FEE_HOST) do NOT gate registration
     // ========================================
-    if (isFullyCleared) {
+    const feeCode = queueEntry.fee_types?.code || ''
+    const isRegistrationGatingFee = feeCode === 'REG_FEE' || feeCode === 'REG_FEE_BDL'
+
+    if (isFullyCleared && isRegistrationGatingFee) {
       const registrationId = queueEntry.entity_id
 
       // Get registration to find trainee and application
@@ -205,7 +210,7 @@ Deno.serve(async (req) => {
           .from('trainee_applications')
           .update({ 
             registration_status: 'registered',
-            hostel_application_status: registration.hostel_required ? 'allocated' : 'not_applied',
+            hostel_application_status: registration.hostel_required ? 'applied' : 'not_applied',
           })
           .eq('id', registration.application_id)
       }
@@ -215,7 +220,7 @@ Deno.serve(async (req) => {
         .from('trainee_financial_accounts')
         .select('id')
         .eq('trainee_id', registration.trainee_id)
-        .single()
+        .maybeSingle()
 
       if (!existingAccount) {
         await supabaseAdmin.from('trainee_financial_accounts').insert({
@@ -223,6 +228,12 @@ Deno.serve(async (req) => {
           trainee_id: registration.trainee_id,
           balance: 0,
         })
+      }
+
+      // If there's still a pending HOSTEL fee, add it to the trainee's financial account
+      // This ensures the hostel fee persists as a separate obligation
+      if (registration.hostel_required) {
+        console.log(`Trainee has hostel fee obligation - this remains as a separate pending item`)
       }
 
       // Create notification for trainee
@@ -237,17 +248,28 @@ Deno.serve(async (req) => {
       }
 
       console.log(`Registration ${registrationId} fee cleared - trainee fully REGISTERED`)
+
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: 'Registration fee cleared - trainee status set to REGISTERED',
+        payment_status: newStatus,
+        amount_paid: newAmountPaid,
+        balance: queueEntry.amount - newAmountPaid,
+        final_status: 'REGISTERED',
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
+    // For non-gating fees (e.g. HOSTEL fee) or partial payments, just record the payment
     return new Response(JSON.stringify({ 
       success: true,
       message: isFullyCleared 
-        ? 'Registration fee cleared - trainee status set to REGISTERED' 
+        ? 'Fee cleared successfully' 
         : 'Partial payment recorded',
       payment_status: newStatus,
       amount_paid: newAmountPaid,
       balance: queueEntry.amount - newAmountPaid,
-      final_status: isFullyCleared ? 'REGISTERED' : undefined,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

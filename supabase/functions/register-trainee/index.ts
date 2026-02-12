@@ -92,7 +92,6 @@ Deno.serve(async (req) => {
 
     // ========================================
     // STRICT STATUS CHECK: Must be PROVISIONALLY_ADMITTED
-    // This status is only set AFTER application fee is cleared
     // ========================================
     if (application.registration_status !== 'provisionally_admitted') {
       return new Response(JSON.stringify({ 
@@ -107,7 +106,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Verify trainee_number exists (created during application fee clearance)
+    // Verify trainee_number exists
     if (!application.trainee_number) {
       return new Response(JSON.stringify({ 
         success: false, 
@@ -118,7 +117,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Verify trainee record exists (created during application fee clearance)
+    // Verify trainee record exists
     const { data: trainee, error: traineeError } = await supabaseAdmin
       .from('trainees')
       .select('id')
@@ -139,8 +138,6 @@ Deno.serve(async (req) => {
     // ========================================
     // CAPACITY CHECKS
     // ========================================
-
-    // Check qualification capacity
     const { data: qualification, error: qualError } = await supabaseAdmin
       .from('qualifications')
       .select('id, qualification_title, trade_id')
@@ -154,7 +151,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Verify qualification belongs to the same trade as the application
     if (qualification.trade_id && application.trade_id && qualification.trade_id !== application.trade_id) {
       return new Response(JSON.stringify({ 
         success: false, 
@@ -165,10 +161,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Capacity check skipped - qualifications table does not have max_intake/current_enrollment columns
-
-    // Hostel capacity check - log warning but do not block registration
-    // Actual room allocation happens later in the Hostel Management module
+    // Log hostel request - room allocation is separate
     if (application.needs_hostel_accommodation) {
       console.log(`Trainee requested hostel accommodation. Room allocation will be handled separately.`)
     }
@@ -176,7 +169,6 @@ Deno.serve(async (req) => {
     // ========================================
     // CREATE REGISTRATION RECORD
     // ========================================
-
     const currentYear = new Date().getFullYear().toString()
 
     const { data: registration, error: regError } = await supabaseAdmin
@@ -188,7 +180,7 @@ Deno.serve(async (req) => {
         qualification_id,
         academic_year: academic_year || currentYear,
         hostel_required: application.needs_hostel_accommodation || false,
-        registration_status: 'fee_pending', // REGISTRATION_FEE_PENDING
+        registration_status: 'fee_pending',
         registered_by: user.id,
       })
       .select()
@@ -203,50 +195,71 @@ Deno.serve(async (req) => {
     }
 
     // ========================================
-    // CREATE REGISTRATION FEE IN FINANCIAL_QUEUE
+    // CREATE FINANCIAL QUEUE ENTRIES
+    // ALWAYS create REG_FEE (day scholar - mandatory gate for registration)
+    // If hostel requested, ALSO create separate HOSTEL fee (non-blocking)
     // ========================================
-    // Determine the correct registration fee type based on hostel requirement
-    const regFeeCode = application.needs_hostel_accommodation ? 'REG_FEE_HOST' : 'REG_FEE'
-    
-    let feeType = null
-    const { data: exactFee } = await supabaseAdmin
+
+    // 1. MANDATORY: Day scholar registration fee (REG_FEE) - gates registration
+    const { data: regFee } = await supabaseAdmin
       .from('fee_types')
       .select('id, default_amount')
       .eq('organization_id', application.organization_id)
-      .eq('code', regFeeCode)
+      .eq('code', 'REG_FEE')
       .eq('active', true)
-      .single()
-    
-    feeType = exactFee
+      .maybeSingle()
 
-    // Fallback: try any fee type with REG in the code
-    if (!feeType) {
-      const { data: fallbackFee } = await supabaseAdmin
+    if (regFee) {
+      const { error: regQueueError } = await supabaseAdmin.from('financial_queue').insert({
+        organization_id: application.organization_id,
+        entity_type: 'REGISTRATION',
+        entity_id: registration.id,
+        fee_type_id: regFee.id,
+        amount: regFee.default_amount || 500,
+        amount_paid: 0,
+        status: 'pending',
+        description: `Registration fee (Day Scholar) for ${application.first_name} ${application.last_name}`,
+        requested_by: user.id,
+      })
+      if (regQueueError) {
+        console.error('Failed to create REG_FEE queue entry:', regQueueError)
+      } else {
+        console.log(`Created REG_FEE (Day Scholar) in financial_queue for registration ${registration.id}`)
+      }
+    } else {
+      console.warn(`No REG_FEE fee type found for organization ${application.organization_id}`)
+    }
+
+    // 2. OPTIONAL: Hostel registration fee (REG_FEE_HOST) - non-blocking, added to trainee account
+    if (application.needs_hostel_accommodation) {
+      const { data: hostelFee } = await supabaseAdmin
         .from('fee_types')
         .select('id, default_amount')
         .eq('organization_id', application.organization_id)
-        .ilike('code', '%REG%')
+        .eq('code', 'REG_FEE_HOST')
         .eq('active', true)
-        .limit(1)
         .maybeSingle()
-      feeType = fallbackFee
-    }
 
-    if (feeType) {
-      await supabaseAdmin.from('financial_queue').insert({
-        organization_id: application.organization_id,
-        entity_type: 'REGISTRATION',
-        entity_id: registration.id, // Use registration_id for REGISTRATION type
-        fee_type_id: feeType.id,
-        amount: feeType.default_amount || 500,
-        amount_paid: 0,
-        status: 'pending',
-        description: `Registration fee for ${application.first_name} ${application.last_name}`,
-        requested_by: user.id,
-      })
-      console.log(`Created REGISTRATION fee in financial_queue for registration ${registration.id}`)
-    } else {
-      console.warn(`No registration fee type found for organization ${application.organization_id}`)
+      if (hostelFee) {
+        const { error: hostelQueueError } = await supabaseAdmin.from('financial_queue').insert({
+          organization_id: application.organization_id,
+          entity_type: 'HOSTEL',
+          entity_id: registration.id,
+          fee_type_id: hostelFee.id,
+          amount: hostelFee.default_amount || 1500,
+          amount_paid: 0,
+          status: 'pending',
+          description: `Hostel accommodation fee for ${application.first_name} ${application.last_name}`,
+          requested_by: user.id,
+        })
+        if (hostelQueueError) {
+          console.error('Failed to create HOSTEL fee queue entry:', hostelQueueError)
+        } else {
+          console.log(`Created HOSTEL fee in financial_queue for registration ${registration.id}`)
+        }
+      } else {
+        console.warn(`No REG_FEE_HOST fee type found for organization ${application.organization_id}`)
+      }
     }
 
     // ========================================
@@ -256,15 +269,13 @@ Deno.serve(async (req) => {
       .from('trainee_applications')
       .update({
         registration_status: 'registration_fee_pending',
-        hostel_application_status: application.needs_hostel_accommodation ? 'provisionally_allocated' : 'not_applied',
+        hostel_application_status: application.needs_hostel_accommodation ? 'applied' : 'not_applied',
       })
       .eq('id', application_id)
 
     if (statusUpdateError) {
       console.error('Failed to update application status:', statusUpdateError)
     }
-
-    // Enrollment count tracking skipped - qualifications table does not have enrollment columns
 
     console.log(`Trainee ${trainee.id} registered for qualification ${qualification_id}, registration_id: ${registration.id}, status: REGISTRATION_FEE_PENDING`)
 
@@ -274,7 +285,8 @@ Deno.serve(async (req) => {
       registration_id: registration.id,
       registration_status: 'fee_pending',
       trainee_number: application.trainee_number,
-      next_step: 'Clear registration fee to complete enrollment',
+      hostel_fee_created: application.needs_hostel_accommodation || false,
+      next_step: 'Clear day scholar registration fee to complete enrollment. Hostel fee is a separate obligation.',
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

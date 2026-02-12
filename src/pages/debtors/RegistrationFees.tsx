@@ -48,11 +48,14 @@ const RegistrationFees = () => {
   const [paymentNotes, setPaymentNotes] = useState("");
   const [showClearDialog, setShowClearDialog] = useState(false);
 
-  // Query REGISTRATION fees with pending status only
+  // Query REGISTRATION fees with pending/partial status only (day scholar fees that gate registration)
   const { data: queueEntries, isLoading } = useFinancialQueue("pending", "REGISTRATION");
+  const { data: partialEntries } = useFinancialQueue("partial", "REGISTRATION");
   const clearRegistrationFee = useClearRegistrationFee();
 
-  const filteredEntries = queueEntries?.filter((entry) => {
+  const allEntries = [...(queueEntries || []), ...(partialEntries || [])];
+
+  const filteredEntries = allEntries.filter((entry) => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
     const name = entry.trainees
