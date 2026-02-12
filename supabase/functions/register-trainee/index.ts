@@ -205,13 +205,32 @@ Deno.serve(async (req) => {
     // ========================================
     // CREATE REGISTRATION FEE IN FINANCIAL_QUEUE
     // ========================================
-    const { data: feeType } = await supabaseAdmin
+    // Determine the correct registration fee type based on hostel requirement
+    const regFeeCode = application.needs_hostel_accommodation ? 'REG_FEE_HOST' : 'REG_FEE'
+    
+    let feeType = null
+    const { data: exactFee } = await supabaseAdmin
       .from('fee_types')
       .select('id, default_amount')
       .eq('organization_id', application.organization_id)
-      .ilike('code', '%REG%')
+      .eq('code', regFeeCode)
       .eq('active', true)
       .single()
+    
+    feeType = exactFee
+
+    // Fallback: try any fee type with REG in the code
+    if (!feeType) {
+      const { data: fallbackFee } = await supabaseAdmin
+        .from('fee_types')
+        .select('id, default_amount')
+        .eq('organization_id', application.organization_id)
+        .ilike('code', '%REG%')
+        .eq('active', true)
+        .limit(1)
+        .maybeSingle()
+      feeType = fallbackFee
+    }
 
     if (feeType) {
       await supabaseAdmin.from('financial_queue').insert({
