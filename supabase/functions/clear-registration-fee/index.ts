@@ -215,17 +215,26 @@ Deno.serve(async (req) => {
           .eq('id', registration.application_id)
       }
 
-      // Create trainee financial account if not exists
+      // Create or update trainee financial account
       const { data: existingAccount } = await supabaseAdmin
         .from('trainee_financial_accounts')
-        .select('id')
-        .eq('trainee_id', registration.trainee_id)
+        .select('id, trainee_id')
+        .or(`trainee_id.eq.${registration.trainee_id},application_id.eq.${registration.application_id}`)
         .maybeSingle()
 
-      if (!existingAccount) {
+      if (existingAccount) {
+        // Ensure trainee_id is linked if it was missing
+        if (!existingAccount.trainee_id) {
+          await supabaseAdmin
+            .from('trainee_financial_accounts')
+            .update({ trainee_id: registration.trainee_id })
+            .eq('id', existingAccount.id)
+        }
+      } else {
         await supabaseAdmin.from('trainee_financial_accounts').insert({
           organization_id: queueEntry.organization_id,
           trainee_id: registration.trainee_id,
+          application_id: registration.application_id,
           balance: 0,
         })
       }
