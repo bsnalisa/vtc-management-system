@@ -215,15 +215,19 @@ Deno.serve(async (req) => {
           .eq('id', registration.application_id)
       }
 
-      // Create or update trainee financial account
+      // Create or update trainee financial account and record transactions
+      // The trigger 'update_account_on_transaction' auto-updates total_fees/total_paid
       const { data: existingAccount } = await supabaseAdmin
         .from('trainee_financial_accounts')
         .select('id, trainee_id')
         .or(`trainee_id.eq.${registration.trainee_id},application_id.eq.${registration.application_id}`)
         .maybeSingle()
 
+      let accountId: string | null = null
+
       if (existingAccount) {
-        // Ensure trainee_id is linked if it was missing
+        accountId = existingAccount.id
+        // Ensure trainee_id is linked
         if (!existingAccount.trainee_id) {
           await supabaseAdmin
             .from('trainee_financial_accounts')
@@ -231,16 +235,43 @@ Deno.serve(async (req) => {
             .eq('id', existingAccount.id)
         }
       } else {
-        await supabaseAdmin.from('trainee_financial_accounts').insert({
+        const { data: newAcc } = await supabaseAdmin.from('trainee_financial_accounts').insert({
           organization_id: queueEntry.organization_id,
           trainee_id: registration.trainee_id,
           application_id: registration.application_id,
-          balance: 0,
+        }).select('id').single()
+        accountId = newAcc?.id || null
+      }
+
+      // Record charge and payment transactions - trigger handles totals
+      if (accountId) {
+        // 1. Record the fee charge
+        await supabaseAdmin.from('financial_transactions').insert({
+          organization_id: queueEntry.organization_id,
+          account_id: accountId,
+          fee_type_id: queueEntry.fee_type_id,
+          transaction_type: 'charge',
+          amount: queueEntry.amount,
+          balance_after: queueEntry.amount,
+          description: `Registration fee (${queueEntry.fee_types?.name || 'Day Scholar'})`,
+          processed_by: user.id,
+        })
+        // 2. Record the payment
+        await supabaseAdmin.from('financial_transactions').insert({
+          organization_id: queueEntry.organization_id,
+          account_id: accountId,
+          fee_type_id: queueEntry.fee_type_id,
+          transaction_type: 'payment',
+          amount: amount,
+          balance_after: Math.max(0, queueEntry.amount - amount),
+          payment_method,
+          description: `Registration fee payment (${queueEntry.fee_types?.name || 'Day Scholar'})`,
+          notes,
+          processed_by: user.id,
         })
       }
 
-      // If there's still a pending HOSTEL fee, add it to the trainee's financial account
-      // This ensures the hostel fee persists as a separate obligation
+      // If there's still a pending HOSTEL fee, log it
       if (registration.hostel_required) {
         console.log(`Trainee has hostel fee obligation - this remains as a separate pending item`)
       }
