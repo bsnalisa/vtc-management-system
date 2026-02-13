@@ -391,12 +391,80 @@ Deno.serve(async (req) => {
         // Continue anyway - auth user exists, trainee creation can be retried
       }
 
-      // Step 6: Assign trainee role
-      await supabaseAdmin.from('user_roles').upsert({
-        user_id: userId,
-        role: 'trainee',
-        organization_id: application.organization_id,
-      }, { onConflict: 'user_id' })
+      // Step 6: Assign trainee role (check existence first to avoid conflict)
+      const { data: existingRole } = await supabaseAdmin
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('role', 'trainee')
+        .maybeSingle()
+
+      if (!existingRole) {
+        await supabaseAdmin.from('user_roles').insert({
+          user_id: userId,
+          role: 'trainee',
+          organization_id: application.organization_id,
+        })
+      }
+
+      // Step 6b: Create/update financial account and record transactions
+      // The trigger 'update_account_on_transaction' auto-updates total_fees/total_paid
+      const { data: existingFinAccount } = await supabaseAdmin
+        .from('trainee_financial_accounts')
+        .select('id')
+        .or(`trainee_id.eq.${trainee?.id},application_id.eq.${application.id}`)
+        .maybeSingle()
+
+      let accountId: string
+      if (existingFinAccount) {
+        accountId = existingFinAccount.id
+        // Just ensure trainee_id is linked
+        if (trainee?.id) {
+          await supabaseAdmin
+            .from('trainee_financial_accounts')
+            .update({ trainee_id: trainee.id })
+            .eq('id', accountId)
+        }
+      } else {
+        const { data: newAccount } = await supabaseAdmin
+          .from('trainee_financial_accounts')
+          .insert({
+            organization_id: application.organization_id,
+            trainee_id: trainee?.id || null,
+            application_id: application.id,
+          })
+          .select('id')
+          .single()
+        accountId = newAccount?.id
+      }
+
+      // Record charge (fee) and payment transactions - trigger handles totals
+      if (accountId) {
+        // 1. Record the fee charge
+        await supabaseAdmin.from('financial_transactions').insert({
+          organization_id: application.organization_id,
+          account_id: accountId,
+          fee_type_id: queueEntry.fee_type_id,
+          transaction_type: 'charge',
+          amount: queueEntry.amount,
+          balance_after: queueEntry.amount,
+          description: 'Application fee',
+          processed_by: user.id,
+        })
+        // 2. Record the payment
+        await supabaseAdmin.from('financial_transactions').insert({
+          organization_id: application.organization_id,
+          account_id: accountId,
+          fee_type_id: queueEntry.fee_type_id,
+          transaction_type: 'payment',
+          amount: amount,
+          balance_after: 0,
+          payment_method,
+          description: 'Application fee payment',
+          notes,
+          processed_by: user.id,
+        })
+      }
 
       // Step 7: Update application with ALL identity artifacts and new status
       const { error: appUpdateError } = await supabaseAdmin
