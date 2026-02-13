@@ -41,13 +41,15 @@ const ApplicationsInbox = () => {
         matchesTab = app.qualification_status === "pending";
         break;
       case "qualified":
-        matchesTab = app.qualification_status === "provisionally_qualified";
+        matchesTab = app.qualification_status === "provisionally_qualified" &&
+          app.registration_status !== "registered" &&
+          app.registration_status !== "fully_registered";
         break;
       case "not_qualified":
         matchesTab = app.qualification_status === "does_not_qualify";
         break;
       case "registered":
-        matchesTab = app.registration_status === "fully_registered";
+        matchesTab = app.registration_status === "registered" || app.registration_status === "fully_registered";
         break;
     }
 
