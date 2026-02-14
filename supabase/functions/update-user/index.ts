@@ -73,9 +73,9 @@ Deno.serve(async (req) => {
     }
 
     const requestBody = await req.json()
-    const { userId, firstname, surname, phone, role, active, organization_id } = requestBody
+    const { userId, firstname, surname, phone, role, active, organization_id, resetPassword } = requestBody
 
-    console.log('Update request:', { userId, firstname, surname, phone, role, active, organization_id })
+    console.log('Update request:', { userId, firstname, surname, phone, role, active, organization_id, resetPassword })
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'User ID is required' }), {
@@ -219,6 +219,31 @@ Deno.serve(async (req) => {
       console.log('User reactivated successfully')
     }
 
+    // Handle password reset
+    if (resetPassword === true) {
+      const defaultPassword = 'Password1'
+      const { error: resetError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: defaultPassword,
+        user_metadata: { password_reset_required: true }
+      })
+
+      if (resetError) {
+        console.error('Error resetting password:', resetError)
+        return new Response(JSON.stringify({ error: `Failed to reset password: ${resetError.message}` }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Also update trainee record if applicable
+      await supabaseAdmin
+        .from('trainees')
+        .update({ password_reset_required: true })
+        .eq('user_id', userId)
+
+      console.log('Password reset to default successfully')
+    }
+
     // Log audit event
     try {
       await supabaseAdmin.rpc('log_audit_event', {
@@ -226,13 +251,13 @@ Deno.serve(async (req) => {
         _table_name: 'profiles',
         _record_id: userId,
         _old_data: null,
-        _new_data: { firstname, surname, phone, role, active }
+        _new_data: { firstname, surname, phone, role, active, resetPassword }
       })
     } catch (auditError) {
       console.warn('Failed to log audit event:', auditError)
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, passwordReset: resetPassword === true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
