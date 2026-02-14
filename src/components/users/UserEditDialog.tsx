@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, KeyRound } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserEditDialogProps {
   open: boolean;
@@ -36,6 +37,7 @@ interface UserEditDialogProps {
     surname: string;
     phone: string;
     role: string;
+    resetPassword?: boolean;
   }) => Promise<void>;
   isLoading?: boolean;
 }
@@ -48,11 +50,13 @@ export const UserEditDialog = ({
   onSave,
   isLoading = false
 }: UserEditDialogProps) => {
+  const { toast } = useToast();
   const [firstname, setFirstname] = useState("");
   const [surname, setSurname] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("");
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -87,6 +91,29 @@ export const UserEditDialog = ({
       phone,
       role,
     });
+  };
+
+  const handleResetPassword = async () => {
+    if (!user) return;
+    setResettingPassword(true);
+    try {
+      await onSave({
+        userId: user.user_id,
+        firstname,
+        surname,
+        phone,
+        role,
+        resetPassword: true,
+      });
+      toast({
+        title: "Password Reset",
+        description: `Password has been reset to default. User will be required to change it on next login.`,
+      });
+    } catch (error) {
+      // Error handled by parent
+    } finally {
+      setResettingPassword(false);
+    }
   };
 
   if (!user) return null;
@@ -178,6 +205,31 @@ export const UserEditDialog = ({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="border-t pt-4 mt-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Reset Password</p>
+                <p className="text-xs text-muted-foreground">
+                  Reset to default password (Password1). User must change on next login.
+                </p>
+              </div>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={handleResetPassword}
+                disabled={resettingPassword || isLoading}
+              >
+                {resettingPassword ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <KeyRound className="mr-2 h-4 w-4" />
+                )}
+                Reset
+              </Button>
             </div>
           </div>
 

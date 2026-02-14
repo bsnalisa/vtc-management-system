@@ -243,6 +243,7 @@ export interface UpdateUserData {
   role?: string;
   active?: boolean;
   organization_id?: string;
+  resetPassword?: boolean;
 }
 
 export const useUpdateUser = () => {
