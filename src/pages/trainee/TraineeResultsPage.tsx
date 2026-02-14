@@ -3,181 +3,101 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Award, Download, TrendingUp, TrendingDown, Minus, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Award, Download, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Progress } from "@/components/ui/progress";
-
-interface Result {
-  id: string;
-  unitStandard: string;
-  unitCode: string;
-  credits: number;
-  status: "competent" | "not_yet_competent" | "pending";
-  marks?: number;
-  assessedDate?: string;
-}
+import { useTraineeUserId, useTraineeRecord, useTraineeAssessmentResults } from "@/hooks/useTraineePortalData";
 
 const TraineeResultsPage = () => {
-  // Mock results data - in production, fetch from assessment_results
-  const results: Result[] = [
-    { id: "1", unitStandard: "Apply Safe Work Practices", unitCode: "US-WLD-001", credits: 5, status: "competent", marks: 85, assessedDate: "Oct 15, 2025" },
-    { id: "2", unitStandard: "Prepare Welding Equipment", unitCode: "US-WLD-002", credits: 8, status: "competent", marks: 78, assessedDate: "Oct 20, 2025" },
-    { id: "3", unitStandard: "Perform Basic Arc Welding", unitCode: "US-WLD-003", credits: 12, status: "competent", marks: 92, assessedDate: "Nov 5, 2025" },
-    { id: "4", unitStandard: "Interpret Technical Drawings", unitCode: "US-WLD-004", credits: 6, status: "not_yet_competent", marks: 45, assessedDate: "Nov 10, 2025" },
-    { id: "5", unitStandard: "Apply Quality Control Measures", unitCode: "US-WLD-005", credits: 8, status: "pending" },
-    { id: "6", unitStandard: "Perform MIG Welding", unitCode: "US-WLD-006", credits: 15, status: "pending" },
-  ];
+  const userId = useTraineeUserId();
+  const { data: trainee, isLoading: tLoading } = useTraineeRecord(userId);
+  const { data: results, isLoading: rLoading } = useTraineeAssessmentResults(trainee?.id);
 
-  const totalCredits = results.reduce((sum, r) => sum + r.credits, 0);
-  const earnedCredits = results
-    .filter(r => r.status === "competent")
-    .reduce((sum, r) => sum + r.credits, 0);
-  const progressPercentage = Math.round((earnedCredits / totalCredits) * 100);
+  const isLoading = tLoading || rLoading;
 
-  const competentCount = results.filter(r => r.status === "competent").length;
-  const notCompetentCount = results.filter(r => r.status === "not_yet_competent").length;
-  const pendingCount = results.filter(r => r.status === "pending").length;
+  if (isLoading) {
+    return (
+      <DashboardLayout title="My Results" subtitle="View your assessment results and progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
+        <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+      </DashboardLayout>
+    );
+  }
 
-  const getStatusBadge = (status: string) => {
+  const totalCredits = results?.reduce((s, r) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
+  const earnedCredits = results?.filter(r => r.competency_status === "competent").reduce((s, r) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
+  const progressPercentage = totalCredits > 0 ? Math.round((earnedCredits / totalCredits) * 100) : 0;
+
+  const competentCount = results?.filter(r => r.competency_status === "competent").length || 0;
+  const notCompetentCount = results?.filter(r => r.competency_status === "not_yet_competent").length || 0;
+  const pendingCount = results?.filter(r => !r.competency_status || r.competency_status === "pending").length || 0;
+
+  const getStatusBadge = (status: string | null) => {
     switch (status) {
-      case "competent":
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Competent</Badge>;
-      case "not_yet_competent":
-        return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Not Yet Competent</Badge>;
-      case "pending":
-        return <Badge className="bg-gray-100 text-gray-800"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
-      default:
-        return null;
+      case "competent": return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Competent</Badge>;
+      case "not_yet_competent": return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Not Yet Competent</Badge>;
+      default: return <Badge className="bg-gray-100 text-gray-800"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
     }
   };
 
   return (
-    <DashboardLayout
-      title="My Results"
-      subtitle="View your assessment results and progress"
-      navItems={traineeNavItems}
-      groupLabel="Trainee iEnabler"
-    >
+    <DashboardLayout title="My Results" subtitle="View your assessment results and progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
-        {/* Progress Summary */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-primary/10">
-                  <Award className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Credits Earned</p>
-                  <p className="text-2xl font-bold">{earnedCredits}/{totalCredits}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-green-100">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Competent</p>
-                  <p className="text-2xl font-bold text-green-600">{competentCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-red-100">
-                  <XCircle className="h-5 w-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Not Yet Competent</p>
-                  <p className="text-2xl font-bold text-red-600">{notCompetentCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-gray-100">
-                  <Clock className="h-5 w-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold">{pendingCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-primary/10"><Award className="h-5 w-5 text-primary" /></div><div><p className="text-sm text-muted-foreground">Credits Earned</p><p className="text-2xl font-bold">{earnedCredits}/{totalCredits}</p></div></div></CardContent></Card>
+          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-green-100"><CheckCircle className="h-5 w-5 text-green-600" /></div><div><p className="text-sm text-muted-foreground">Competent</p><p className="text-2xl font-bold text-green-600">{competentCount}</p></div></div></CardContent></Card>
+          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-red-100"><XCircle className="h-5 w-5 text-red-600" /></div><div><p className="text-sm text-muted-foreground">Not Yet Competent</p><p className="text-2xl font-bold text-red-600">{notCompetentCount}</p></div></div></CardContent></Card>
+          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-gray-100"><Clock className="h-5 w-5 text-gray-600" /></div><div><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold">{pendingCount}</p></div></div></CardContent></Card>
         </div>
 
-        {/* Overall Progress */}
         <Card className="border-0 shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Overall Progress</CardTitle>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download Transcript
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Qualification Progress</span>
-                <span className="font-medium">{progressPercentage}%</span>
-              </div>
+              <div className="flex justify-between text-sm"><span>Qualification Progress</span><span className="font-medium">{progressPercentage}%</span></div>
               <Progress value={progressPercentage} className="h-3" />
-              <p className="text-sm text-muted-foreground">
-                You have earned {earnedCredits} out of {totalCredits} credits required for this qualification.
-              </p>
+              <p className="text-sm text-muted-foreground">You have earned {earnedCredits} out of {totalCredits} credits.</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Results List */}
         <Card className="border-0 shadow-md">
           <CardHeader>
             <CardTitle>Unit Standard Results</CardTitle>
             <CardDescription>Detailed results for each unit standard</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {results.map((result) => (
-                <div
-                  key={result.id}
-                  className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border"
-                >
-                  <div className="flex-1 mb-4 md:mb-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium">{result.unitStandard}</h4>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="font-mono">{result.unitCode}</span>
-                      <span>{result.credits} credits</span>
-                      {result.assessedDate && <span>Assessed: {result.assessedDate}</span>}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    {result.marks !== undefined && (
-                      <div className="text-right">
-                        <p className="text-2xl font-bold">{result.marks}%</p>
+            {!results || results.length === 0 ? (
+              <div className="text-center py-12">
+                <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <h3 className="font-semibold">No Results Yet</h3>
+                <p className="text-muted-foreground">Your assessment results will appear here once assessed.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {results.map((result: any) => (
+                  <div key={result.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border">
+                    <div className="flex-1 mb-4 md:mb-0">
+                      <h4 className="font-medium">{result.unit_standards?.title || "Unit Standard"}</h4>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="font-mono">{result.unit_standards?.unit_standard_id || ""}</span>
+                        <span>{result.unit_standards?.credit || 0} credits</span>
+                        {result.assessment_date && <span>Assessed: {new Date(result.assessment_date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}</span>}
                       </div>
-                    )}
-                    {getStatusBadge(result.status)}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {result.marks_obtained !== null && result.marks_obtained !== undefined && (
+                        <div className="text-right"><p className="text-2xl font-bold">{result.marks_obtained}%</p></div>
+                      )}
+                      {getStatusBadge(result.competency_status)}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -185,6 +105,4 @@ const TraineeResultsPage = () => {
   );
 };
 
-export default withRoleAccess(TraineeResultsPage, {
-  requiredRoles: ["trainee"],
-});
+export default withRoleAccess(TraineeResultsPage, { requiredRoles: ["trainee"] });

@@ -3,142 +3,102 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { FileText, Upload, Download, Eye, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { FileText, Upload, Download, Eye, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
-
-interface Document {
-  id: string;
-  name: string;
-  type: string;
-  status: "pending" | "verified" | "rejected";
-  uploadedAt: string;
-  size: string;
-}
+import { useTraineeUserId, useTraineeApplication } from "@/hooks/useTraineePortalData";
 
 const TraineeDocumentsPage = () => {
-  // Mock documents data - in production, fetch from storage
-  const documents: Document[] = [
-    { id: "1", name: "National ID Copy", type: "identity", status: "verified", uploadedAt: "Jan 15, 2025", size: "1.2 MB" },
-    { id: "2", name: "Grade 12 Certificate", type: "academic", status: "verified", uploadedAt: "Jan 15, 2025", size: "2.5 MB" },
-    { id: "3", name: "Passport Photo", type: "photo", status: "verified", uploadedAt: "Jan 15, 2025", size: "500 KB" },
-    { id: "4", name: "Medical Certificate", type: "medical", status: "pending", uploadedAt: "Jan 18, 2025", size: "800 KB" },
+  const userId = useTraineeUserId();
+  const { data: application, isLoading } = useTraineeApplication(userId);
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="My Documents" subtitle="Manage your uploaded documents" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
+        <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+      </DashboardLayout>
+    );
+  }
+
+  // Extract document info from application data
+  const docs: Array<{ name: string; uploaded: boolean; field: string }> = [
+    { name: "National ID / Passport", uploaded: !!(application?.national_id), field: "national_id" },
+    { name: "Grade 12 Certificate or Equivalent", uploaded: !!(application?.school_subjects && (application.school_subjects as any[])?.length > 0), field: "school_subjects" },
+    { name: "Passport Size Photo", uploaded: !!(application?.photo_path), field: "passport_photo" },
   ];
 
-  const statusConfig = {
-    pending: { color: "bg-yellow-100 text-yellow-800", label: "Pending Review", icon: <Clock className="h-3 w-3" /> },
-    verified: { color: "bg-green-100 text-green-800", label: "Verified", icon: <CheckCircle className="h-3 w-3" /> },
-    rejected: { color: "bg-red-100 text-red-800", label: "Rejected", icon: <AlertCircle className="h-3 w-3" /> },
-  };
+  const uploadedCount = docs.filter(d => d.uploaded).length;
 
   return (
-    <DashboardLayout
-      title="My Documents"
-      subtitle="Manage your uploaded documents"
-      navItems={traineeNavItems}
-      groupLabel="Trainee iEnabler"
-    >
+    <DashboardLayout title="My Documents" subtitle="Manage your uploaded documents" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
-        {/* Upload Section */}
-        <Card className="border-0 shadow-md border-dashed">
-          <CardContent className="p-8">
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="p-4 rounded-full bg-primary/10 mb-4">
-                <Upload className="h-8 w-8 text-primary" />
+        {/* Summary */}
+        <Card className="border-0 shadow-md bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-lg">Document Status</h3>
+                <p className="text-muted-foreground">{uploadedCount} of {docs.length} documents on record</p>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Upload New Document</h3>
-              <p className="text-muted-foreground mb-4 max-w-md">
-                Upload additional documents required for your registration. Supported formats: PDF, JPG, PNG (max 10MB)
-              </p>
-              <Button>
-                <Upload className="h-4 w-4 mr-2" />
-                Select Files
-              </Button>
+              <Badge variant={uploadedCount === docs.length ? "default" : "secondary"}>
+                {uploadedCount === docs.length ? <><CheckCircle className="h-3 w-3 mr-1" />Complete</> : <><Clock className="h-3 w-3 mr-1" />Incomplete</>}
+              </Badge>
             </div>
           </CardContent>
         </Card>
 
-        {/* Documents List */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle>Uploaded Documents</CardTitle>
-            <CardDescription>{documents.length} document(s) uploaded</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {documents.map((doc) => {
-                const status = statusConfig[doc.status];
-                return (
-                  <div
-                    key={doc.id}
-                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-lg bg-muted">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{doc.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {doc.size} • Uploaded {doc.uploadedAt}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge className={status.color} variant="outline">
-                        {status.icon}
-                        <span className="ml-1">{status.label}</span>
-                      </Badge>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Required Documents Checklist */}
+        {/* Checklist */}
         <Card className="border-0 shadow-md">
           <CardHeader>
             <CardTitle>Required Documents Checklist</CardTitle>
-            <CardDescription>Ensure all required documents are uploaded and verified</CardDescription>
+            <CardDescription>Status of documents based on your application record</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {[
-                { name: "National ID / Passport", required: true, uploaded: true },
-                { name: "Grade 12 Certificate or Equivalent", required: true, uploaded: true },
-                { name: "Passport Size Photo", required: true, uploaded: true },
-                { name: "Medical Certificate", required: false, uploaded: true },
-                { name: "Proof of Address", required: false, uploaded: false },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                    item.uploaded ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"
-                  }`}>
-                    {item.uploaded ? <CheckCircle className="h-3 w-3" /> : <div className="w-2 h-2 rounded-full bg-current" />}
+              {docs.map((item, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 rounded-lg border">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${item.uploaded ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                    {item.uploaded ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                   </div>
-                  <span className={item.uploaded ? "" : "text-muted-foreground"}>
-                    {item.name}
-                    {item.required && <span className="text-red-500 ml-1">*</span>}
-                  </span>
+                  <span className={item.uploaded ? "font-medium" : "text-muted-foreground"}>{item.name}</span>
+                  {item.uploaded && <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200">On Record</Badge>}
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        {/* Application Details */}
+        {application && (
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Application Details</CardTitle>
+              <CardDescription>Information from your application</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="p-4 rounded-lg bg-muted">
+                  <p className="text-sm text-muted-foreground">Application Number</p>
+                  <p className="font-mono font-medium">{application.application_number || "N/A"}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted">
+                  <p className="text-sm text-muted-foreground">National ID</p>
+                  <p className="font-mono font-medium">{application.national_id || "Not provided"}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted">
+                  <p className="text-sm text-muted-foreground">Date of Birth</p>
+                  <p className="font-medium">{application.date_of_birth ? new Date(application.date_of_birth).toLocaleDateString("en-ZA") : "Not provided"}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted">
+                  <p className="text-sm text-muted-foreground">Gender</p>
+                  <p className="font-medium capitalize">{application.gender || "Not provided"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
 };
 
-export default withRoleAccess(TraineeDocumentsPage, {
-  requiredRoles: ["trainee"],
-});
+export default withRoleAccess(TraineeDocumentsPage, { requiredRoles: ["trainee"] });
