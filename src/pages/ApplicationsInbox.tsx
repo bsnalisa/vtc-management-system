@@ -5,13 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Search, FileText, CheckCircle, XCircle, Clock, UserPlus, Filter } from "lucide-react";
-import { useApplicationsData, useApplicationStats } from "@/hooks/useTraineeApplications";
+import { Search, FileText, Clock, UserPlus, Filter } from "lucide-react";
+import { useTraineeApplications } from "@/hooks/useTraineeApplications";
 import { ApplicationsTable } from "@/components/registration/ApplicationsTable";
 import { ScreeningDialog } from "@/components/registration/ScreeningDialog";
-import { RegistrationDialog } from "@/components/registration/RegistrationDialog";
 import { ApplicationCaptureDialog } from "@/components/registration/ApplicationCaptureDialog";
 import { useTrades } from "@/hooks/useTrades";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,52 +18,28 @@ const ApplicationsInbox = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
   const [selectedIntake, setSelectedIntake] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("all");
-  
+
   const [screeningDialogOpen, setScreeningDialogOpen] = useState(false);
-  const [registrationDialogOpen, setRegistrationDialogOpen] = useState(false);
   const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
 
-  const { data: applications, isLoading } = useApplicationsData();
-  const { data: stats } = useApplicationStats();
+  // Only fetch pending (unscreened) applications
+  const { data: applications, isLoading } = useTraineeApplications({
+    qualification_status: "pending",
+  });
   const { data: trades } = useTrades();
 
-  // Filter applications based on tab and filters
   const filteredApplications = applications?.filter((app) => {
-    // Tab filter
-    let matchesTab = true;
-    switch (activeTab) {
-      case "pending":
-        matchesTab = app.qualification_status === "pending";
-        break;
-      case "qualified":
-        matchesTab = app.qualification_status === "provisionally_qualified" &&
-          app.registration_status !== "registered" &&
-          app.registration_status !== "fully_registered";
-        break;
-      case "not_qualified":
-        matchesTab = app.qualification_status === "does_not_qualify";
-        break;
-      case "registered":
-        matchesTab = app.registration_status === "registered" || app.registration_status === "fully_registered";
-        break;
-    }
-
-    // Search filter
     const matchesSearch =
       app.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.application_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.national_id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Trade filter
     const matchesTrade = selectedTrade === "all" || app.trade_id === selectedTrade;
-
-    // Intake filter
     const matchesIntake = selectedIntake === "all" || app.intake === selectedIntake;
 
-    return matchesTab && matchesSearch && matchesTrade && matchesIntake;
+    return matchesSearch && matchesTrade && matchesIntake;
   });
 
   const handleScreen = (application: any) => {
@@ -74,13 +47,7 @@ const ApplicationsInbox = () => {
     setScreeningDialogOpen(true);
   };
 
-  const handleRegister = (application: any) => {
-    setSelectedApplication(application);
-    setRegistrationDialogOpen(true);
-  };
-
   const handleViewDetails = (application: any) => {
-    // For now, open screening dialog in read-only mode or a details view
     setSelectedApplication(application);
     setScreeningDialogOpen(true);
   };
@@ -88,74 +55,31 @@ const ApplicationsInbox = () => {
   return (
     <DashboardLayout
       title="Applications Inbox"
-      subtitle="Manage trainee applications and admissions"
+      subtitle="New applications awaiting screening"
       navItems={registrationOfficerNavItems}
       groupLabel="Registration"
     >
       <div className="space-y-4">
-        {/* Stats Overview */}
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-5">
-          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("all")}>
-            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium">Total</CardTitle>
-              <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{stats?.totalApplications || 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("pending")}>
-            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium">Pending</CardTitle>
-              <Clock className="h-3.5 w-3.5 text-warning" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold text-warning">{stats?.pending || 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("qualified")}>
-            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium">Qualified</CardTitle>
-              <CheckCircle className="h-3.5 w-3.5 text-primary" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold text-primary">{stats?.provisionallyQualified || 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("not_qualified")}>
-            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium">Not Qualified</CardTitle>
-              <XCircle className="h-3.5 w-3.5 text-destructive" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold text-destructive">{stats?.doesNotQualify || 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("registered")}>
-            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium">Registered</CardTitle>
-              <UserPlus className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">
-                {(stats?.januaryRegistered || 0) + (stats?.julyRegistered || 0)}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Stats */}
+        <Card className="p-0">
+          <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-xs font-medium">Pending Screening</CardTitle>
+            <Clock className="h-3.5 w-3.5 text-warning" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0">
+            <div className="text-xl font-bold text-warning">{filteredApplications?.length || 0}</div>
+            <p className="text-[10px] text-muted-foreground">Applications awaiting review</p>
+          </CardContent>
+        </Card>
 
         {/* Applications Table Card */}
         <Card>
           <CardHeader className="p-4 pb-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="text-base">Applications</CardTitle>
+                <CardTitle className="text-base">Pending Applications</CardTitle>
                 <CardDescription className="text-xs">
-                  Screen applications and manage registration process
+                  Screen new applications to determine qualification status
                 </CardDescription>
               </div>
               <Button onClick={() => setCaptureDialogOpen(true)}>
@@ -165,17 +89,6 @@ const ApplicationsInbox = () => {
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-2">
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="qualified">Qualified</TabsTrigger>
-                <TabsTrigger value="not_qualified">Not Qualified</TabsTrigger>
-                <TabsTrigger value="registered">Registered</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">
@@ -218,16 +131,14 @@ const ApplicationsInbox = () => {
             ) : filteredApplications?.length === 0 ? (
               <EmptyState
                 icon={FileText}
-                title="No applications found"
-                description={searchQuery || selectedTrade !== "all" || selectedIntake !== "all"
-                  ? "No applications match your filters"
-                  : "Start by capturing a new application"}
+                title="No pending applications"
+                description="All applications have been screened, or no new applications have been submitted."
               />
             ) : (
               <ApplicationsTable
                 applications={filteredApplications || []}
                 onScreen={handleScreen}
-                onRegister={handleRegister}
+                onRegister={() => {}}
                 onViewDetails={handleViewDetails}
               />
             )}
@@ -236,18 +147,11 @@ const ApplicationsInbox = () => {
 
         {/* Dialogs */}
         {selectedApplication && (
-          <>
-            <ScreeningDialog
-              open={screeningDialogOpen}
-              onOpenChange={setScreeningDialogOpen}
-              application={selectedApplication}
-            />
-            <RegistrationDialog
-              open={registrationDialogOpen}
-              onOpenChange={setRegistrationDialogOpen}
-              application={selectedApplication}
-            />
-          </>
+          <ScreeningDialog
+            open={screeningDialogOpen}
+            onOpenChange={setScreeningDialogOpen}
+            application={selectedApplication}
+          />
         )}
 
         <ApplicationCaptureDialog
