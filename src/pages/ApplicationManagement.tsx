@@ -3,91 +3,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, AlertCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Filter, CheckCircle, XCircle, UserPlus, ClipboardCheck } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { registrationOfficerNavItems } from "@/lib/navigationConfig";
-import { ApplicationCaptureDialog } from "@/components/registration/ApplicationCaptureDialog";
 import { ApplicationsTable } from "@/components/registration/ApplicationsTable";
 import { ScreeningDialog } from "@/components/registration/ScreeningDialog";
 import { RegistrationDialog } from "@/components/registration/RegistrationDialog";
-import { ResumeDraftBanner } from "@/components/application/ResumeDraftBanner";
-import { useTraineeApplications } from "@/hooks/useTraineeApplications";
+import { useTraineeApplications, useApplicationStats } from "@/hooks/useTraineeApplications";
 import { useTrades } from "@/hooks/useTrades";
-import { useApplicationDraft, useDeleteApplicationDraft } from "@/hooks/useApplicationDraft";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ComprehensiveApplicationData } from "@/types/application";
+import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
 const ApplicationManagement = () => {
-  const currentYear = new Date().getFullYear().toString();
-  const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTrade, setSelectedTrade] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState("qualified");
   const [screeningDialogOpen, setScreeningDialogOpen] = useState(false);
   const [registrationDialogOpen, setRegistrationDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
-  
-  // Draft state
-  const [resumeData, setResumeData] = useState<{
-    data: ComprehensiveApplicationData;
-    tab: string;
-    draftId: string;
-  } | null>(null);
 
-  // Fetch draft
-  const { data: draft, refetch: refetchDraft } = useApplicationDraft();
-  const deleteDraft = useDeleteApplicationDraft();
+  // Fetch only screened applications (exclude pending)
+  const { data: applications, isLoading } = useTraineeApplications();
+  const { data: stats } = useApplicationStats();
+  const { data: trades } = useTrades();
 
-  const handleResumeDraft = () => {
-    if (draft) {
-      setResumeData({
-        data: draft.form_data,
-        tab: draft.current_tab,
-        draftId: draft.id,
-      });
-      setCaptureDialogOpen(true);
+  // Filter to only screened applications (not pending)
+  const screenedApplications = applications?.filter(
+    (app) => app.qualification_status !== "pending"
+  );
+
+  const filteredApplications = screenedApplications?.filter((app) => {
+    let matchesTab = true;
+    switch (activeTab) {
+      case "qualified":
+        matchesTab = app.qualification_status === "provisionally_qualified" &&
+          app.registration_status !== "registered" &&
+          app.registration_status !== "fully_registered";
+        break;
+      case "not_qualified":
+        matchesTab = app.qualification_status === "does_not_qualify";
+        break;
+      case "registered":
+        matchesTab = app.registration_status === "registered" || app.registration_status === "fully_registered";
+        break;
+      case "all":
+        break;
     }
-  };
 
-  const handleDiscardDraft = async () => {
-    if (draft) {
-      await deleteDraft.mutateAsync(draft.id);
-    }
-  };
+    const matchesSearch =
+      app.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.application_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.trainee_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.national_id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const handleDraftDeleted = () => {
-    setResumeData(null);
-    refetchDraft();
-  };
-  const [filters, setFilters] = useState({
-    intake: "all",
-    trade_id: "all",
-    qualification_status: "all",
-    registration_status: "all",
-    academic_year: currentYear,
-  });
+    const matchesTrade = selectedTrade === "all" || app.trade_id === selectedTrade;
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Clean filters before passing to API - convert "all" to undefined
-  const cleanFilters = {
-    academic_year: filters.academic_year,
-    intake: filters.intake !== "all" ? filters.intake : undefined,
-    trade_id: filters.trade_id !== "all" ? filters.trade_id : undefined,
-    qualification_status: filters.qualification_status !== "all" ? filters.qualification_status : undefined,
-    registration_status: filters.registration_status !== "all" ? filters.registration_status : undefined,
-  };
-
-  const { data: applications, isLoading, error } = useTraineeApplications(cleanFilters);
-
-  const { data: trades, isLoading: tradesLoading } = useTrades();
-
-  const filteredApplications = applications?.filter((app) => {
-    if (!searchQuery) return true;
-    const search = searchQuery.toLowerCase();
-    return (
-      app.application_number?.toLowerCase().includes(search) ||
-      app.trainee_number?.toLowerCase().includes(search) ||
-      app.first_name?.toLowerCase().includes(search) ||
-      app.last_name?.toLowerCase().includes(search) ||
-      app.national_id?.toLowerCase().includes(search)
-    );
+    return matchesTab && matchesSearch && matchesTrade;
   });
 
   const handleScreen = (application: any) => {
@@ -102,233 +75,113 @@ const ApplicationManagement = () => {
 
   const handleViewDetails = (application: any) => {
     setSelectedApplication(application);
-    // TODO: Open details dialog
+    setScreeningDialogOpen(true);
   };
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      intake: "all",
-      trade_id: "all",
-      qualification_status: "all",
-      registration_status: "all",
-      academic_year: currentYear,
-    });
-    setSearchQuery("");
-  };
-
-  const hasActiveFilters =
-    filters.intake !== "all" ||
-    filters.trade_id !== "all" ||
-    filters.qualification_status !== "all" ||
-    filters.registration_status !== "all" ||
-    searchQuery !== "";
 
   return (
     <DashboardLayout
-      title="Application Management"
-      subtitle="Manage trainee applications and registrations"
+      title="Admission Results"
+      subtitle="View screening outcomes and manage registration"
       navItems={registrationOfficerNavItems}
       groupLabel="Registration"
     >
-      <div className="space-y-6">
-        {/* Resume Draft Banner */}
-        {draft && !captureDialogOpen && (
-          <ResumeDraftBanner
-            draft={draft}
-            onResume={handleResumeDraft}
-            onDiscard={handleDiscardDraft}
-            isDiscarding={deleteDraft.isPending}
-          />
-        )}
+      <div className="space-y-4">
+        {/* Stats Overview */}
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
+          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("qualified")}>
+            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-xs font-medium">Provisionally Qualified</CardTitle>
+              <CheckCircle className="h-3.5 w-3.5 text-primary" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-primary">{stats?.provisionallyQualified || 0}</div>
+              <p className="text-[10px] text-muted-foreground">Awaiting registration</p>
+            </CardContent>
+          </Card>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>Failed to load applications: {error.message}</AlertDescription>
-          </Alert>
-        )}
+          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("not_qualified")}>
+            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-xs font-medium">Does Not Qualify</CardTitle>
+              <XCircle className="h-3.5 w-3.5 text-destructive" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-destructive">{stats?.doesNotQualify || 0}</div>
+              <p className="text-[10px] text-muted-foreground">Not meeting criteria</p>
+            </CardContent>
+          </Card>
 
-        {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
-          <div className="flex gap-2 flex-1 w-full sm:w-auto">
-            <div className="relative flex-1 sm:max-w-md">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, application number, trainee number, or ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" onClick={clearFilters} disabled={isLoading || !hasActiveFilters} className="flex-1 sm:flex-none">
-              Clear Filters
-            </Button>
-            <Button onClick={() => setCaptureDialogOpen(true)} disabled={isLoading} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4 mr-2" />
-              New Application
-            </Button>
-          </div>
+          <Card className="p-0 cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("registered")}>
+            <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-xs font-medium">Fully Registered</CardTitle>
+              <UserPlus className="h-3.5 w-3.5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold">
+                {(stats?.januaryRegistered || 0) + (stats?.julyRegistered || 0)}
+              </div>
+              <p className="text-[10px] text-muted-foreground">Completed registration</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Filters */}
+        {/* Results Table */}
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader className="p-4 pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Filters
+              <ClipboardCheck className="h-4 w-4" />
+              Admission Results
             </CardTitle>
-            <CardDescription>Filter applications by various criteria</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Academic Year</label>
-                <Select
-                  value={filters.academic_year}
-                  onValueChange={(value) => handleFilterChange("academic_year", value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Academic Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={currentYear}>{currentYear}</SelectItem>
-                    <SelectItem value={(parseInt(currentYear) - 1).toString()}>{parseInt(currentYear) - 1}</SelectItem>
-                    <SelectItem value={(parseInt(currentYear) - 2).toString()}>{parseInt(currentYear) - 2}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Intake</label>
-                <Select
-                  value={filters.intake}
-                  onValueChange={(value) => handleFilterChange("intake", value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Intakes" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Intakes</SelectItem>
-                    <SelectItem value="january">January</SelectItem>
-                    <SelectItem value="july">July</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Trade</label>
-                <Select
-                  value={filters.trade_id}
-                  onValueChange={(value) => handleFilterChange("trade_id", value)}
-                  disabled={isLoading || tradesLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Trades" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Trades</SelectItem>
-                    {trades?.map((trade) => (
-                      <SelectItem key={trade.id} value={trade.id}>
-                        {trade.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Qualification</label>
-                <Select
-                  value={filters.qualification_status}
-                  onValueChange={(value) => handleFilterChange("qualification_status", value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Qualifications" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Qualifications</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="provisionally_qualified">Provisionally Qualified</SelectItem>
-                    <SelectItem value="does_not_qualify">Does Not Qualify</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Registration</label>
-                <Select
-                  value={filters.registration_status}
-                  onValueChange={(value) => handleFilterChange("registration_status", value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="applied">Applied</SelectItem>
-                    <SelectItem value="provisionally_admitted">Provisionally Admitted</SelectItem>
-                    <SelectItem value="pending_payment">Pending Payment</SelectItem>
-                    <SelectItem value="fully_registered">Fully Registered</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Applications Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Applications</CardTitle>
-            <CardDescription>
-              {isLoading ? "Loading..." : `${filteredApplications?.length || 0} application(s) found`}
+            <CardDescription className="text-xs">
+              Screened applications and their qualification outcomes
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="all">All Screened</TabsTrigger>
+                <TabsTrigger value="qualified">Qualified</TabsTrigger>
+                <TabsTrigger value="not_qualified">Not Qualified</TabsTrigger>
+                <TabsTrigger value="registered">Registered</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, application/trainee number, or ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              <Select value={selectedTrade} onValueChange={setSelectedTrade}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Trade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Trades</SelectItem>
+                  {trades?.map((trade) => (
+                    <SelectItem key={trade.id} value={trade.id}>
+                      {trade.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {isLoading ? (
-              <div className="text-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading applications...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-                <p className="text-destructive font-medium">Failed to load applications</p>
-                <p className="text-muted-foreground text-sm mt-2">
-                  Please try refreshing the page or contact support if the problem persists.
-                </p>
-              </div>
-            ) : !filteredApplications || filteredApplications.length === 0 ? (
-              <div className="text-center py-12">
-                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-medium">No applications found</p>
-                <p className="text-muted-foreground text-sm mt-2">
-                  {hasActiveFilters ? "Try adjusting your search or filters" : "Start by creating a new application"}
-                </p>
-                {!hasActiveFilters && (
-                  <Button onClick={() => setCaptureDialogOpen(true)} className="mt-4">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create First Application
-                  </Button>
-                )}
-              </div>
+              <TableSkeleton columns={9} rows={5} />
+            ) : filteredApplications?.length === 0 ? (
+              <EmptyState
+                icon={ClipboardCheck}
+                title="No results found"
+                description="No screened applications match your criteria"
+              />
             ) : (
               <ApplicationsTable
-                applications={filteredApplications}
+                applications={filteredApplications || []}
                 onScreen={handleScreen}
                 onRegister={handleRegister}
                 onViewDetails={handleViewDetails}
@@ -336,31 +189,22 @@ const ApplicationManagement = () => {
             )}
           </CardContent>
         </Card>
+
+        {selectedApplication && (
+          <>
+            <ScreeningDialog
+              open={screeningDialogOpen}
+              onOpenChange={setScreeningDialogOpen}
+              application={selectedApplication}
+            />
+            <RegistrationDialog
+              open={registrationDialogOpen}
+              onOpenChange={setRegistrationDialogOpen}
+              application={selectedApplication}
+            />
+          </>
+        )}
       </div>
-
-      <ApplicationCaptureDialog 
-        open={captureDialogOpen} 
-        onOpenChange={(open) => {
-          setCaptureDialogOpen(open);
-          if (!open) setResumeData(null);
-        }}
-        initialData={resumeData?.data}
-        initialTab={resumeData?.tab}
-        draftId={resumeData?.draftId}
-        onDraftDeleted={handleDraftDeleted}
-      />
-
-      <ScreeningDialog
-        open={screeningDialogOpen}
-        onOpenChange={setScreeningDialogOpen}
-        application={selectedApplication}
-      />
-
-      <RegistrationDialog
-        open={registrationDialogOpen}
-        onOpenChange={setRegistrationDialogOpen}
-        application={selectedApplication}
-      />
     </DashboardLayout>
   );
 };

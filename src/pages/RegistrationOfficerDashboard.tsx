@@ -6,12 +6,17 @@ import { registrationOfficerNavItems } from "@/lib/navigationConfig";
 import { useApplicationStats } from "@/hooks/useTraineeApplications";
 import { useTrades } from "@/hooks/useTrades";
 import { useProfile } from "@/hooks/useProfile";
+import { useTrainees } from "@/hooks/useTrainees";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const RegistrationOfficerDashboard = () => {
   const { data: stats } = useApplicationStats();
   const { data: trades } = useTrades();
   const { data: profile } = useProfile();
+  const { data: trainees } = useTrainees();
+
+  // Count registered trainees from the trainees table (only active)
+  const registeredTraineeCount = trainees?.filter(t => t.status === "active").length || 0;
 
   const tradeChartData =
     trades?.map((trade) => ({
@@ -27,7 +32,7 @@ const RegistrationOfficerDashboard = () => {
       groupLabel="Registration"
     >
       <div className="space-y-4">
-        {/* Stats Cards - Compact */}
+        {/* Stats Cards */}
         <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           <Card className="p-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
@@ -42,34 +47,34 @@ const RegistrationOfficerDashboard = () => {
 
           <Card className="p-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Prov. Qualified</CardTitle>
-              <ClipboardCheck className="h-3.5 w-3.5 text-muted-foreground" />
+              <CardTitle className="text-xs font-medium">Pending Screening</CardTitle>
+              <ClipboardCheck className="h-3.5 w-3.5 text-warning" />
             </CardHeader>
             <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{stats?.provisionallyQualified || 0}</div>
+              <div className="text-xl font-bold text-warning">{stats?.pending || 0}</div>
+              <p className="text-[10px] text-muted-foreground">Awaiting review</p>
+            </CardContent>
+          </Card>
+
+          <Card className="p-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+              <CardTitle className="text-xs font-medium">Prov. Qualified</CardTitle>
+              <ClipboardCheck className="h-3.5 w-3.5 text-primary" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+              <div className="text-xl font-bold text-primary">{stats?.provisionallyQualified || 0}</div>
               <p className="text-[10px] text-muted-foreground">Ready for registration</p>
             </CardContent>
           </Card>
 
           <Card className="p-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Registered (Jan)</CardTitle>
+              <CardTitle className="text-xs font-medium">Registered Trainees</CardTitle>
               <Users className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{stats?.januaryRegistered || 0}</div>
-              <p className="text-[10px] text-muted-foreground">January intake</p>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Registered (Jul)</CardTitle>
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{stats?.julyRegistered || 0}</div>
-              <p className="text-[10px] text-muted-foreground">July intake</p>
+              <div className="text-xl font-bold">{registeredTraineeCount}</div>
+              <p className="text-[10px] text-muted-foreground">Active in system</p>
             </CardContent>
           </Card>
 
@@ -96,7 +101,7 @@ const RegistrationOfficerDashboard = () => {
           </Card>
         </div>
 
-        {/* Chart and Quick Actions Row */}
+        {/* Chart and Quick Actions */}
         <div className="grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader className="p-4 pb-2">
@@ -120,28 +125,36 @@ const RegistrationOfficerDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-base">Quick Actions</CardTitle>
               <CardDescription className="text-xs">Registration tasks</CardDescription>
             </CardHeader>
             <CardContent className="p-4 pt-2 space-y-2">
-              <Link to="/applications">
+              <Link to="/applications-inbox">
                 <div className="flex items-center gap-2 p-2.5 border rounded-lg hover:border-primary transition-colors cursor-pointer">
                   <FileText className="h-5 w-5 text-primary shrink-0" />
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">Manage Applications</p>
-                    <p className="text-[10px] text-muted-foreground truncate">Capture and screen applications</p>
+                    <p className="font-medium text-sm truncate">Applications Inbox</p>
+                    <p className="text-[10px] text-muted-foreground truncate">Screen new applications</p>
                   </div>
                 </div>
               </Link>
-              <Link to="/trainees/register">
+              <Link to="/applications">
                 <div className="flex items-center gap-2 p-2.5 border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                  <UserPlus className="h-5 w-5 text-primary shrink-0" />
+                  <ClipboardCheck className="h-5 w-5 text-primary shrink-0" />
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">Register Trainee</p>
-                    <p className="text-[10px] text-muted-foreground truncate">Complete registration process</p>
+                    <p className="font-medium text-sm truncate">Admission Results</p>
+                    <p className="text-[10px] text-muted-foreground truncate">View screening outcomes</p>
+                  </div>
+                </div>
+              </Link>
+              <Link to="/trainees">
+                <div className="flex items-center gap-2 p-2.5 border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                  <Users className="h-5 w-5 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">Trainee List</p>
+                    <p className="text-[10px] text-muted-foreground truncate">View registered trainees</p>
                   </div>
                 </div>
               </Link>
@@ -149,30 +162,32 @@ const RegistrationOfficerDashboard = () => {
           </Card>
         </div>
 
-        {/* Registration Status and Popular Trades */}
+        {/* Registration Pipeline and Popular Trades */}
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
                 <ClipboardCheck className="h-4 w-4" />
-                Registration Status
+                Registration Pipeline
               </CardTitle>
-              <CardDescription className="text-xs">Pipeline overview</CardDescription>
+              <CardDescription className="text-xs">Current status breakdown</CardDescription>
             </CardHeader>
             <CardContent className="p-4 pt-2 space-y-2">
               <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Pending Screening</span>
+                <span className="font-medium text-warning">{stats?.pending || 0}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Qualified for Registration</span>
-                <span className="font-medium text-green-600">{stats?.provisionallyQualified || 0}</span>
+                <span className="font-medium text-primary">{stats?.provisionallyQualified || 0}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Awaiting Payment</span>
-                <span className="font-medium text-amber-600">{stats?.pendingPayment || 0}</span>
+                <span className="font-medium text-warning">{stats?.pendingPayment || 0}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Fully Registered</span>
-                <span className="font-medium text-blue-600">
-                  {(stats?.januaryRegistered || 0) + (stats?.julyRegistered || 0)}
-                </span>
+                <span className="text-muted-foreground">Registered Trainees</span>
+                <span className="font-medium text-primary">{registeredTraineeCount}</span>
               </div>
             </CardContent>
           </Card>
