@@ -58,27 +58,28 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "System Logs", url: "/system-logs", icon: FileText },
 ];
 
-// Head of Training Navigation (All Academic & Training Operations)
+// Head of Training Navigation (Academic Command Center)
 export const headOfTrainingNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-training-dashboard", icon: LayoutDashboard },
   { title: "Trade Management", url: "/trade-management", icon: Briefcase },
   { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
   { title: "Course Management", url: "/course-management", icon: BookOpen },
   { title: "Training Modules", url: "/training-modules", icon: BookOpen },
-  { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
   { title: "Class Management", url: "/classes", icon: GraduationCap },
   { title: "Timetable", url: "/timetable", icon: Calendar },
+  { title: "Assessment Review", url: "/assessment-results", icon: ClipboardCheck },
+  { title: "Trainee List", url: "/trainees", icon: Users },
+  { title: "Course Enrollment", url: "/enrollments", icon: BookOpen },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Assessment Results", url: "/assessment-results", icon: ClipboardCheck },
-  { title: "Course Enrollment", url: "/enrollments", icon: BookOpen },
 ];
 
 // Trainer Navigation
 export const trainerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainer-dashboard", icon: LayoutDashboard },
   { title: "My Classes", url: "/classes", icon: Users },
+  { title: "Assessments", url: "/assessment-results", icon: ClipboardCheck },
   { title: "Attendance", url: "/attendance", icon: ClipboardCheck },
   { title: "Timetable", url: "/timetable", icon: Calendar },
   { title: "Reports", url: "/reports", icon: FileText },
