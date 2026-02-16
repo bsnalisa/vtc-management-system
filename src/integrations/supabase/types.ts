@@ -356,40 +356,64 @@ export type Database = {
       }
       assessment_results: {
         Row: {
+          ac_finalised_at: string | null
+          ac_finalised_by: string | null
           assessed_by: string | null
           assessment_date: string | null
+          assessment_status: string
           competency_status: string | null
           created_at: string
           enrollment_id: string
+          hot_approved_at: string | null
+          hot_approved_by: string | null
           id: string
           marks_obtained: number | null
           remarks: string | null
+          return_reason: string | null
+          returned_at: string | null
+          submitted_at: string | null
           trainee_id: string
           unit_standard_id: string
           updated_at: string
         }
         Insert: {
+          ac_finalised_at?: string | null
+          ac_finalised_by?: string | null
           assessed_by?: string | null
           assessment_date?: string | null
+          assessment_status?: string
           competency_status?: string | null
           created_at?: string
           enrollment_id: string
+          hot_approved_at?: string | null
+          hot_approved_by?: string | null
           id?: string
           marks_obtained?: number | null
           remarks?: string | null
+          return_reason?: string | null
+          returned_at?: string | null
+          submitted_at?: string | null
           trainee_id: string
           unit_standard_id: string
           updated_at?: string
         }
         Update: {
+          ac_finalised_at?: string | null
+          ac_finalised_by?: string | null
           assessed_by?: string | null
           assessment_date?: string | null
+          assessment_status?: string
           competency_status?: string | null
           created_at?: string
           enrollment_id?: string
+          hot_approved_at?: string | null
+          hot_approved_by?: string | null
           id?: string
           marks_obtained?: number | null
           remarks?: string | null
+          return_reason?: string | null
+          returned_at?: string | null
+          submitted_at?: string | null
           trainee_id?: string
           unit_standard_id?: string
           updated_at?: string

@@ -165,10 +165,11 @@ export const useTraineeAssessmentResults = (traineeId: string | null | undefined
       const { data, error } = await supabase
         .from("assessment_results")
         .select(`
-          id, marks_obtained, competency_status, assessment_date, remarks,
+          id, marks_obtained, competency_status, assessment_date, remarks, assessment_status,
           unit_standards (id, title, unit_standard_id, credit, nqf_level)
         `)
         .eq("trainee_id", traineeId)
+        .eq("assessment_status", "finalised")
         .order("assessment_date", { ascending: false });
       if (error) return [];
       return data || [];
