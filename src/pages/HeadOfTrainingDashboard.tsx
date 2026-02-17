@@ -3,9 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, BarChart3, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
-import { useHODStats } from "@/hooks/useHODStats";
+import { useHODStats, useActiveTrainers } from "@/hooks/useHODStats";
 import { useQualifications } from "@/hooks/useQualifications";
-import { useTrainers } from "@/hooks/useTrainers";
 import { Button } from "@/components/ui/button";
 import { headOfTrainingNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -27,7 +26,7 @@ const HeadOfTrainingDashboard = () => {
   const { data: stats, isLoading } = useHODStats();
   const { data: profile } = useProfile();
   const { data: qualifications } = useQualifications();
-  const { data: trainers } = useTrainers();
+  const { data: activeTrainers } = useActiveTrainers();
   const { organizationId } = useOrganizationContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -43,11 +42,28 @@ const HeadOfTrainingDashboard = () => {
   const { data: trainerQualifications } = useQuery({
     queryKey: ["trainer_qualifications", organizationId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("trainer_qualifications")
-        .select("*, trainers(id, full_name, trainer_id), qualifications(id, qualification_title, qualification_code)")
+        .select("*, qualifications(id, qualification_title, qualification_code)")
         .eq("organization_id", organizationId!);
       if (error) throw error;
+
+      // Enrich with profile data for the trainer user
+      if (data && data.length > 0) {
+        const trainerIds = [...new Set(data.map((tq: any) => tq.trainer_id))];
+        const { data: profiles } = await (supabase as any)
+          .from("profiles")
+          .select("id, firstname, surname")
+          .in("id", trainerIds);
+        const profileMap = (profiles || []).reduce((acc: any, p: any) => {
+          acc[p.id] = p;
+          return acc;
+        }, {});
+        return data.map((tq: any) => ({
+          ...tq,
+          trainer_profile: profileMap[tq.trainer_id] || null,
+        }));
+      }
       return data;
     },
     enabled: !!organizationId,
@@ -62,7 +78,7 @@ const HeadOfTrainingDashboard = () => {
     mutationFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
-      const { error } = await supabase.from("trainer_qualifications").insert({
+      const { error } = await (supabase as any).from("trainer_qualifications").insert({
         trainer_id: selectedTrainer,
         qualification_id: selectedQualification,
         assigned_by: user.user.id,
@@ -87,7 +103,7 @@ const HeadOfTrainingDashboard = () => {
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("trainer_qualifications").delete().eq("id", id);
+      const { error } = await (supabase as any).from("trainer_qualifications").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -145,7 +161,7 @@ const HeadOfTrainingDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalTrainers || 0}</div>
-              <p className="text-xs text-muted-foreground">Teaching staff</p>
+              <p className="text-xs text-muted-foreground">Users with trainer role</p>
             </CardContent>
           </Card>
           <Card>
@@ -183,6 +199,9 @@ const HeadOfTrainingDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="trainers">
+              Active Trainers <Badge variant="secondary" className="ml-2 h-5 px-1.5">{activeTrainers?.length || 0}</Badge>
+            </TabsTrigger>
             <TabsTrigger value="assessments">
               Assessment Review {pendingAssessmentCount > 0 && <Badge variant="destructive" className="ml-2 h-5 px-1.5">{pendingAssessmentCount}</Badge>}
             </TabsTrigger>
@@ -239,6 +258,46 @@ const HeadOfTrainingDashboard = () => {
                   <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/analytics')}><BarChart3 className="h-5 w-5" /><span>Analytics</span></Button>
                   <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/reports')}><FileText className="h-5 w-5" /><span>Reports</span></Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Active Trainers Tab */}
+          <TabsContent value="trainers" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" />Active Trainers</CardTitle>
+                <CardDescription>Users assigned the trainer role in the system</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!activeTrainers || activeTrainers.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <h3 className="text-lg font-medium">No Active Trainers</h3>
+                    <p className="text-muted-foreground">No users have been assigned the trainer role yet.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Phone</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {activeTrainers.map((trainer: any) => (
+                        <TableRow key={trainer.id}>
+                          <TableCell className="font-medium">
+                            {trainer.firstname} {trainer.surname}
+                          </TableCell>
+                          <TableCell>{trainer.email || "-"}</TableCell>
+                          <TableCell>{trainer.phone || "-"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -362,7 +421,9 @@ const HeadOfTrainingDashboard = () => {
                     {trainerQualifications.map((tq: any) => (
                       <div key={tq.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">{tq.trainers?.full_name || "Unknown"}</p>
+                          <p className="text-sm font-medium">
+                            {tq.trainer_profile ? `${tq.trainer_profile.firstname} ${tq.trainer_profile.surname}` : "Unknown Trainer"}
+                          </p>
                           <p className="text-xs text-muted-foreground">{tq.qualifications?.qualification_title} ({tq.qualifications?.qualification_code})</p>
                         </div>
                         <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => removeMutation.mutate(tq.id)}>Remove</Button>
@@ -376,7 +437,7 @@ const HeadOfTrainingDashboard = () => {
         </Tabs>
       </div>
 
-      {/* Assign Trainer Dialog */}
+      {/* Assign Trainer Dialog — uses activeTrainers from user_roles+profiles */}
       <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -389,8 +450,10 @@ const HeadOfTrainingDashboard = () => {
               <Select value={selectedTrainer} onValueChange={setSelectedTrainer}>
                 <SelectTrigger><SelectValue placeholder="Select trainer" /></SelectTrigger>
                 <SelectContent>
-                  {trainers?.filter(t => t.active).map((trainer) => (
-                    <SelectItem key={trainer.id} value={trainer.id}>{trainer.full_name} ({trainer.trainer_id})</SelectItem>
+                  {activeTrainers?.map((trainer: any) => (
+                    <SelectItem key={trainer.id} value={trainer.id}>
+                      {trainer.firstname} {trainer.surname}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

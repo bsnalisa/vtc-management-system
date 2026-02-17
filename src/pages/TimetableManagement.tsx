@@ -1,5 +1,6 @@
 import { useState } from "react";
-import Layout from "@/components/Layout";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { headOfTrainingNavItems } from "@/lib/navigationConfig";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -66,13 +67,15 @@ const TimetableManagement = () => {
   }, {} as Record<number, typeof timetable>);
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <DashboardLayout
+      title="Timetable Management"
+      subtitle="Manage class schedules and timetables"
+      navItems={headOfTrainingNavItems}
+      groupLabel="Training Management"
+    >
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Timetable Management</h1>
-            <p className="text-muted-foreground">Manage class schedules and timetables</p>
-          </div>
+          <div />
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -89,9 +92,7 @@ const TimetableManagement = () => {
                 <div className="space-y-2">
                   <Label>Class</Label>
                   <Select value={formData.class_id} onValueChange={(value) => setFormData({ ...formData, class_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select class" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
                     <SelectContent>
                       {classes?.map((cls) => (
                         <SelectItem key={cls.id} value={cls.id}>{cls.class_name}</SelectItem>
@@ -102,9 +103,7 @@ const TimetableManagement = () => {
                 <div className="space-y-2">
                   <Label>Course</Label>
                   <Select value={formData.course_id} onValueChange={(value) => setFormData({ ...formData, course_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select course" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
                     <SelectContent>
                       {courses?.map((course) => (
                         <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
@@ -115,9 +114,7 @@ const TimetableManagement = () => {
                 <div className="space-y-2">
                   <Label>Day</Label>
                   <Select value={formData.day_of_week.toString()} onValueChange={(value) => setFormData({ ...formData, day_of_week: parseInt(value) })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {DAYS.map((day, idx) => (
                         <SelectItem key={idx} value={idx.toString()}>{day}</SelectItem>
@@ -204,7 +201,7 @@ const TimetableManagement = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 
