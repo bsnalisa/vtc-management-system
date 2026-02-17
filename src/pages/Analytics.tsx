@@ -2,7 +2,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { 
   adminNavItems, 
   organizationAdminNavItems,
-  hodNavItems
+  hodNavItems,
+  headOfTrainingNavItems
 } from "@/lib/navigationConfig";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSuperAdminAnalytics } from "@/hooks/useAnalytics";
@@ -21,6 +22,8 @@ export default function Analytics() {
     switch (role) {
       case "organization_admin":
         return organizationAdminNavItems;
+      case "head_of_training":
+        return headOfTrainingNavItems;
       case "hod":
         return hodNavItems;
       default:
