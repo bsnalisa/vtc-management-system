@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { adminNavItems, organizationAdminNavItems } from "@/lib/navigationConfig";
+import { adminNavItems, organizationAdminNavItems, headOfTrainingNavItems } from "@/lib/navigationConfig";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,7 @@ const TrainingModules = () => {
   const updateModule = useUpdateTrainingModule();
   const deleteModule = useDeleteTrainingModule();
   
-  const navItems = role === "organization_admin" ? organizationAdminNavItems : adminNavItems;
+  const navItems = role === "head_of_training" ? headOfTrainingNavItems : role === "organization_admin" ? organizationAdminNavItems : adminNavItems;
 
   const [formData, setFormData] = useState({
     title: "",

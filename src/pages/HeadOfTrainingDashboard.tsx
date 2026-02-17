@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, BarChart3, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw } from "lucide-react";
+import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, BarChart3, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw, Briefcase, Award } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { useHODStats, useActiveTrainers } from "@/hooks/useHODStats";
@@ -143,7 +143,7 @@ const HeadOfTrainingDashboard = () => {
     >
       <div className="space-y-6">
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Trainees</CardTitle>
@@ -162,6 +162,26 @@ const HeadOfTrainingDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalTrainers || 0}</div>
               <p className="text-xs text-muted-foreground">Users with trainer role</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Trades</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalTrades || 0}</div>
+              <p className="text-xs text-muted-foreground">Registered trades</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Qualifications</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalQualifications || 0}</div>
+              <p className="text-xs text-muted-foreground">Approved qualifications</p>
             </CardContent>
           </Card>
           <Card>

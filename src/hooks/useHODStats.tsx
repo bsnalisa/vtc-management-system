@@ -38,6 +38,13 @@ export const useHODStats = () => {
         .eq("organization_id", organizationId)
         .eq("active", true);
 
+      // Fetch approved qualifications count
+      const { count: qualificationCount } = await db
+        .from("qualifications")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", organizationId)
+        .eq("status", "approved");
+
       // Fetch assessment results for competency rate
       const { data: assessmentResults } = await db
         .from("assessment_results")
@@ -57,6 +64,7 @@ export const useHODStats = () => {
         totalTrainers: trainerCount,
         totalClasses: classCount || 0,
         totalTrades: tradeCount || 0,
+        totalQualifications: qualificationCount || 0,
         competencyRate,
       };
     },
