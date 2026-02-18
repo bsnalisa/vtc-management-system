@@ -64,7 +64,6 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Trade Management", url: "/trade-management", icon: Briefcase },
   { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
   { title: "Course Management", url: "/course-management", icon: BookOpen },
-  { title: "Training Modules", url: "/training-modules", icon: BookOpen },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
   { title: "Class Management", url: "/classes", icon: GraduationCap },
   { title: "Timetable", url: "/timetable", icon: Calendar },
@@ -72,7 +71,6 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Course Enrollment", url: "/enrollments", icon: BookOpen },
   { title: "Reports", url: "/reports", icon: FileText },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ];
 
 // Trainer Navigation
