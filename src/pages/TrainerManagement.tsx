@@ -38,15 +38,15 @@ const useTrainersFromRoles = () => {
 
       const trainerUserIds = trainerRoles.map((r: any) => r.user_id);
 
-      // 2. Fetch matching profiles
+      // 2. Fetch matching profiles — profiles are keyed by user_id, not id
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, firstname, surname, email, phone")
-        .in("id", trainerUserIds);
+        .select("id, user_id, firstname, surname, email, phone, full_name")
+        .in("user_id", trainerUserIds);
 
       if (profilesError) throw profilesError;
 
-      // 3. Also pull extra trainer-specific info from trainers table (if record exists) — optional join
+      // 3. Also pull extra trainer-specific info from trainers table (optional join)
       const { data: trainerRecords } = await (supabase as any)
         .from("trainers")
         .select("user_id, trainer_id, designation, employment_type, trainer_trades(trade_id, trades(id, name))")
@@ -57,19 +57,25 @@ const useTrainersFromRoles = () => {
         trainerMap[t.user_id] = t;
       });
 
-      return (profiles || []).map((p: any) => ({
-        ...p,
-        full_name: `${p.firstname || ""} ${p.surname || ""}`.trim(),
-        trainer_record: trainerMap[p.id] || null,
-        trainer_id: trainerMap[p.id]?.trainer_id || "—",
-        designation: trainerMap[p.id]?.designation || "—",
-        employment_type: trainerMap[p.id]?.employment_type || "—",
-        trades:
-          trainerMap[p.id]?.trainer_trades
-            ?.map((tt: any) => tt.trades?.name)
-            .filter(Boolean)
-            .join(", ") || "—",
-      }));
+      // Build final list — use user_id as the lookup key for the trainer record
+      return (profiles || []).map((p: any) => {
+        const rec = trainerMap[p.user_id] || null;
+        const resolvedName =
+          `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || "—";
+        return {
+          ...p,
+          full_name: resolvedName,
+          trainer_record: rec,
+          trainer_id: rec?.trainer_id || "—",
+          designation: rec?.designation || "—",
+          employment_type: rec?.employment_type || "—",
+          trades:
+            rec?.trainer_trades
+              ?.map((tt: any) => tt.trades?.name)
+              .filter(Boolean)
+              .join(", ") || "—",
+        };
+      });
     },
     enabled: !!organizationId,
   });
