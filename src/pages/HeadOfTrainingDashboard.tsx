@@ -204,10 +204,10 @@ const HeadOfTrainingDashboard = () => {
               <p className="text-xs text-muted-foreground">Assessment pass rate</p>
             </CardContent>
           </Card>
-          <Card className={pendingAssessmentCount > 0 ? "border-amber-300 bg-amber-50/50 dark:bg-amber-950/20" : ""}>
+          <Card className={pendingAssessmentCount > 0 ? "border-warning/40 bg-warning/5" : ""}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{pendingAssessmentCount}</div>
@@ -237,7 +237,7 @@ const HeadOfTrainingDashboard = () => {
                   <CardDescription>Manage curriculum and training modules</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" onClick={() => navigate('/training-modules')}>Training Modules</Button>
+                  <Button className="w-full" onClick={() => navigate('/course-management')}>Course Management</Button>
                   <Button variant="outline" className="w-full" onClick={() => navigate('/classes')}>Class Management</Button>
                   <Button variant="outline" className="w-full" onClick={() => navigate('/trade-management')}>Trade Management</Button>
                 </CardContent>
@@ -272,10 +272,9 @@ const HeadOfTrainingDashboard = () => {
             <Card>
               <CardHeader><CardTitle>Quick Actions</CardTitle><CardDescription>Academic and training operations</CardDescription></CardHeader>
               <CardContent>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/timetable')}><Calendar className="h-5 w-5" /><span>Timetable</span></Button>
                   <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/assessment-results')}><ClipboardCheck className="h-5 w-5" /><span>Assessments</span></Button>
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/analytics')}><BarChart3 className="h-5 w-5" /><span>Analytics</span></Button>
                   <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/reports')}><FileText className="h-5 w-5" /><span>Reports</span></Button>
                 </div>
               </CardContent>
