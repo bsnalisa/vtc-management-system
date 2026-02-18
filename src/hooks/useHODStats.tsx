@@ -17,11 +17,12 @@ export const useHODStats = () => {
         .eq("organization_id", organizationId)
         .eq("active", true);
 
-      // Fetch active trainers from user_roles (the real source of truth)
+      // Fetch active trainers from user_roles scoped to this org
       const { data: trainerRoles } = await db
         .from("user_roles")
         .select("user_id")
-        .eq("role", "trainer");
+        .eq("role", "trainer")
+        .eq("organization_id", organizationId);
       const trainerCount = trainerRoles?.length || 0;
 
       // Fetch classes count
@@ -74,28 +75,34 @@ export const useHODStats = () => {
 };
 
 // Hook to fetch active trainers with their profile info (from user_roles + profiles)
-export const useActiveTrainers = () => {
+export const useActiveTrainers = (organizationId?: string) => {
   return useQuery({
-    queryKey: ["active_trainers_from_roles"],
+    queryKey: ["active_trainers_from_roles", organizationId],
     queryFn: async () => {
       const db: any = supabase;
-      // Get all user_ids with trainer role
-      const { data: trainerRoles, error: rolesError } = await db
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "trainer");
+      // Get all user_ids with trainer role, scoped to org if provided
+      let rolesQuery = db.from("user_roles").select("user_id").eq("role", "trainer");
+      if (organizationId) rolesQuery = rolesQuery.eq("organization_id", organizationId);
+
+      const { data: trainerRoles, error: rolesError } = await rolesQuery;
       if (rolesError) throw rolesError;
       if (!trainerRoles || trainerRoles.length === 0) return [];
 
       const trainerUserIds = trainerRoles.map((r: any) => r.user_id);
 
-      // Get profile info for these users
+      // Profiles are keyed by user_id, not id
       const { data: profiles, error: profilesError } = await db
         .from("profiles")
-        .select("id, firstname, surname, email, phone")
-        .in("id", trainerUserIds);
+        .select("id, user_id, firstname, surname, full_name, email, phone")
+        .in("user_id", trainerUserIds);
       if (profilesError) throw profilesError;
-      return profiles || [];
+
+      return (profiles || []).map((p: any) => ({
+        ...p,
+        display_name:
+          `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || p.email || "Unknown",
+      }));
     },
+    enabled: true,
   });
 };
