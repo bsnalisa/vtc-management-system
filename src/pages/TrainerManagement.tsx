@@ -16,37 +16,52 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { exportToCSV } from "@/lib/exportUtils";
-import { useOrganizationContext } from "@/hooks/useOrganizationContext";
+
 
 // ─── Data hook ───────────────────────────────────────────────────────────────
-// Single source of truth: user_roles (role = 'trainer') + profiles
+// Fetches org from the current user's own role row, then pulls trainers.
+// Does NOT depend on useOrganizationContext so it never gets stuck waiting.
 const useTrainersFromRoles = () => {
-  const { organizationId } = useOrganizationContext();
-
   return useQuery({
-    queryKey: ["trainers_from_user_roles", organizationId],
+    queryKey: ["trainers_from_user_roles"],
     queryFn: async () => {
-      // 1. Get all user_ids with trainer role in this org
-      const { data: trainerRoles, error: rolesError } = await (supabase as any)
+      // 0. Resolve the current user's organization_id directly
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: myRole, error: myRoleError } = await supabase
         .from("user_roles")
-        .select("user_id, organization_id")
-        .eq("role", "trainer")
-        .eq("organization_id", organizationId!);
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (myRoleError) throw myRoleError;
+      const orgId = myRole?.organization_id;
+      if (!orgId) throw new Error("No organization found for current user");
+
+      // 1. Get all user_ids with trainer role in this org
+      const { data: trainerRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "trainer" as any)
+        .eq("organization_id", orgId);
 
       if (rolesError) throw rolesError;
       if (!trainerRoles || trainerRoles.length === 0) return [];
 
       const trainerUserIds = trainerRoles.map((r: any) => r.user_id);
 
-      // 2. Fetch matching profiles — profiles are keyed by user_id, not id
+      // 2. Fetch matching profiles (keyed by user_id)
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, user_id, firstname, surname, email, phone, full_name")
         .in("user_id", trainerUserIds);
 
       if (profilesError) throw profilesError;
+      if (!profiles || profiles.length === 0) return [];
 
-      // 3. Also pull extra trainer-specific info from trainers table (optional join)
+      // 3. Optionally pull extra info from trainers table
       const { data: trainerRecords } = await (supabase as any)
         .from("trainers")
         .select("user_id, trainer_id, designation, employment_type, trainer_trades(trade_id, trades(id, name))")
@@ -57,7 +72,7 @@ const useTrainersFromRoles = () => {
         trainerMap[t.user_id] = t;
       });
 
-      // Build final list — use user_id as the lookup key for the trainer record
+      // Build final list
       return (profiles || []).map((p: any) => {
         const rec = trainerMap[p.user_id] || null;
         const resolvedName =
@@ -77,7 +92,9 @@ const useTrainersFromRoles = () => {
         };
       });
     },
-    enabled: !!organizationId,
+    // Always enabled — resolves org internally
+    enabled: true,
+    retry: 2,
   });
 };
 
