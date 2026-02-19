@@ -19,43 +19,42 @@ import { exportToCSV } from "@/lib/exportUtils";
 
 
 // ─── Data hook ───────────────────────────────────────────────────────────────
-// Same pattern as useTrainees: direct query, no context dependency.
+// Two-step query (no FK join): user_roles → get user_ids, then profiles by user_id.
 const useTrainersFromRoles = () => {
   return useQuery({
     queryKey: ["trainers_from_user_roles"],
     queryFn: async () => {
-      // Pull all user_roles rows where role = trainer, joining profiles directly
-      const { data, error } = await (supabase as any)
+      // Step 1: get all user_ids with role = trainer
+      const { data: roleRows, error: rolesError } = await supabase
         .from("user_roles")
-        .select(`
-          user_id,
-          organization_id,
-          profiles!inner(
-            id,
-            user_id,
-            firstname,
-            surname,
-            full_name,
-            email,
-            phone
-          )
-        `)
-        .eq("role", "trainer")
-        .order("created_at", { ascending: false });
+        .select("user_id, organization_id")
+        .eq("role", "trainer" as any);
 
-      if (error) throw error;
-      if (!data || data.length === 0) return [];
+      if (rolesError) throw rolesError;
+      if (!roleRows || roleRows.length === 0) return [];
 
-      return data.map((row: any) => {
-        const p = row.profiles;
-        const resolvedName =
-          `${p?.firstname || ""} ${p?.surname || ""}`.trim() || p?.full_name || "—";
+      const userIds = roleRows.map((r: any) => r.user_id as string);
+
+      // Step 2: fetch profiles for those user_ids
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("user_id, firstname, surname, full_name, email, phone")
+        .in("user_id", userIds);
+
+      if (profilesError) throw profilesError;
+
+      const profileMap: Record<string, any> = {};
+      (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+
+      return roleRows.map((r: any) => {
+        const p = profileMap[r.user_id] || {};
+        const name = `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || p.email || "—";
         return {
-          user_id: row.user_id,
-          organization_id: row.organization_id,
-          full_name: resolvedName,
-          email: p?.email || "—",
-          phone: p?.phone || "—",
+          user_id: r.user_id,
+          organization_id: r.organization_id,
+          full_name: name,
+          email: p.email || "—",
+          phone: p.phone || "—",
           trainer_id: "—",
           designation: "—",
           employment_type: "—",
@@ -202,7 +201,7 @@ const TrainerManagement = () => {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((trainer) => (
-                    <TableRow key={trainer.id}>
+                    <TableRow key={trainer.user_id}>
                       <TableCell className="font-medium">{trainer.full_name || "—"}</TableCell>
                       <TableCell>{trainer.email || "—"}</TableCell>
                       <TableCell>{trainer.phone || "—"}</TableCell>
