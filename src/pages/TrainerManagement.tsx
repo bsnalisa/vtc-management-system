@@ -19,82 +19,51 @@ import { exportToCSV } from "@/lib/exportUtils";
 
 
 // ─── Data hook ───────────────────────────────────────────────────────────────
-// Fetches org from the current user's own role row, then pulls trainers.
-// Does NOT depend on useOrganizationContext so it never gets stuck waiting.
+// Same pattern as useTrainees: direct query, no context dependency.
 const useTrainersFromRoles = () => {
   return useQuery({
     queryKey: ["trainers_from_user_roles"],
     queryFn: async () => {
-      // 0. Resolve the current user's organization_id directly
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data: myRole, error: myRoleError } = await supabase
+      // Pull all user_roles rows where role = trainer, joining profiles directly
+      const { data, error } = await (supabase as any)
         .from("user_roles")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .limit(1)
-        .maybeSingle();
+        .select(`
+          user_id,
+          organization_id,
+          profiles!inner(
+            id,
+            user_id,
+            firstname,
+            surname,
+            full_name,
+            email,
+            phone
+          )
+        `)
+        .eq("role", "trainer")
+        .order("created_at", { ascending: false });
 
-      if (myRoleError) throw myRoleError;
-      const orgId = myRole?.organization_id;
-      if (!orgId) throw new Error("No organization found for current user");
+      if (error) throw error;
+      if (!data || data.length === 0) return [];
 
-      // 1. Get all user_ids with trainer role in this org
-      const { data: trainerRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "trainer" as any)
-        .eq("organization_id", orgId);
-
-      if (rolesError) throw rolesError;
-      if (!trainerRoles || trainerRoles.length === 0) return [];
-
-      const trainerUserIds = trainerRoles.map((r: any) => r.user_id);
-
-      // 2. Fetch matching profiles (keyed by user_id)
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, user_id, firstname, surname, email, phone, full_name")
-        .in("user_id", trainerUserIds);
-
-      if (profilesError) throw profilesError;
-      if (!profiles || profiles.length === 0) return [];
-
-      // 3. Optionally pull extra info from trainers table
-      const { data: trainerRecords } = await (supabase as any)
-        .from("trainers")
-        .select("user_id, trainer_id, designation, employment_type, trainer_trades(trade_id, trades(id, name))")
-        .in("user_id", trainerUserIds);
-
-      const trainerMap: Record<string, any> = {};
-      (trainerRecords || []).forEach((t: any) => {
-        trainerMap[t.user_id] = t;
-      });
-
-      // Build final list
-      return (profiles || []).map((p: any) => {
-        const rec = trainerMap[p.user_id] || null;
+      return data.map((row: any) => {
+        const p = row.profiles;
         const resolvedName =
-          `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || "—";
+          `${p?.firstname || ""} ${p?.surname || ""}`.trim() || p?.full_name || "—";
         return {
-          ...p,
+          user_id: row.user_id,
+          organization_id: row.organization_id,
           full_name: resolvedName,
-          trainer_record: rec,
-          trainer_id: rec?.trainer_id || "—",
-          designation: rec?.designation || "—",
-          employment_type: rec?.employment_type || "—",
-          trades:
-            rec?.trainer_trades
-              ?.map((tt: any) => tt.trades?.name)
-              .filter(Boolean)
-              .join(", ") || "—",
+          email: p?.email || "—",
+          phone: p?.phone || "—",
+          trainer_id: "—",
+          designation: "—",
+          employment_type: "—",
+          trades: "—",
         };
       });
     },
-    // Always enabled — resolves org internally
     enabled: true,
-    retry: 2,
   });
 };
 
