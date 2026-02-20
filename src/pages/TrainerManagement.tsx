@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Users, Loader2, Download, GraduationCap } from "lucide-react";
+import { Search, Users, Loader2, Download, GraduationCap, Pencil, UserX, MoreHorizontal } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import {
   adminNavItems,
@@ -16,10 +16,16 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { exportToCSV } from "@/lib/exportUtils";
-
+import { TrainerEditDialog } from "@/components/trainers/TrainerEditDialog";
+import { TrainerDeactivateDialog } from "@/components/trainers/TrainerDeactivateDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // ─── Data hook ───────────────────────────────────────────────────────────────
-// Two-step query (no FK join): user_roles → get user_ids, then profiles by user_id.
 const useTrainersFromRoles = () => {
   return useQuery({
     queryKey: ["trainers_from_user_roles"],
@@ -35,30 +41,70 @@ const useTrainersFromRoles = () => {
 
       const userIds = roleRows.map((r: any) => r.user_id as string);
 
-      // Step 2: fetch profiles for those user_ids
+      // Step 2: fetch profiles
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, firstname, surname, full_name, email, phone")
         .in("user_id", userIds);
-
       if (profilesError) throw profilesError;
 
       const profileMap: Record<string, any> = {};
       (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
 
+      // Step 3: fetch trainers table for metadata (designation, employment_type, trainer_id)
+      const { data: trainerRows } = await (supabase as any)
+        .from("trainers")
+        .select("id, trainer_id, full_name, designation, employment_type, active, email, organization_id");
+
+      const trainerByEmail: Record<string, any> = {};
+      const trainerByName: Record<string, any> = {};
+      (trainerRows || []).forEach((t: any) => {
+        if (t.email) trainerByEmail[t.email.toLowerCase()] = t;
+        if (t.full_name) trainerByName[t.full_name.toLowerCase()] = t;
+      });
+
+      // Step 4: fetch trainer_trades for all trainers
+      const trainerTableIds = (trainerRows || []).map((t: any) => t.id);
+      let tradeMap: Record<string, string[]> = {};
+      let tradeNameMap: Record<string, string[]> = {};
+      if (trainerTableIds.length > 0) {
+        const { data: ttRows } = await (supabase as any)
+          .from("trainer_trades")
+          .select("trainer_id, trade_id, trades(name)")
+          .in("trainer_id", trainerTableIds);
+        (ttRows || []).forEach((tt: any) => {
+          if (!tradeMap[tt.trainer_id]) {
+            tradeMap[tt.trainer_id] = [];
+            tradeNameMap[tt.trainer_id] = [];
+          }
+          tradeMap[tt.trainer_id].push(tt.trade_id);
+          tradeNameMap[tt.trainer_id].push(tt.trades?.name || tt.trade_id);
+        });
+      }
+
       return roleRows.map((r: any) => {
         const p = profileMap[r.user_id] || {};
-        const name = `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || p.email || "—";
+        const email = p.email || "";
+        const fullName = `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || email || "—";
+
+        // Match to trainers table by email or name
+        const trainerRecord = trainerByEmail[email.toLowerCase()] || trainerByName[fullName.toLowerCase()] || null;
+
         return {
           user_id: r.user_id,
           organization_id: r.organization_id,
-          full_name: name,
-          email: p.email || "—",
+          firstname: p.firstname || "",
+          surname: p.surname || "",
+          full_name: fullName,
+          email: email || "—",
           phone: p.phone || "—",
-          trainer_id: "—",
-          designation: "—",
-          employment_type: "—",
-          trades: "—",
+          trainer_table_id: trainerRecord?.id || undefined,
+          trainer_id: trainerRecord?.trainer_id || "—",
+          designation: trainerRecord?.designation || "—",
+          employment_type: trainerRecord?.employment_type || "—",
+          active: trainerRecord?.active ?? true,
+          assigned_trade_ids: trainerRecord ? (tradeMap[trainerRecord.id] || []) : [],
+          trades: trainerRecord ? (tradeNameMap[trainerRecord.id] || []).join(", ") || "—" : "—",
         };
       });
     },
@@ -70,23 +116,21 @@ const useTrainersFromRoles = () => {
 const TrainerManagement = () => {
   const { role } = useUserRole();
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingTrainer, setEditingTrainer] = useState<any>(null);
+  const [deactivatingTrainer, setDeactivatingTrainer] = useState<any>(null);
 
   const { data: trainers, isLoading, error } = useTrainersFromRoles();
 
+  const canManage = role === "head_of_training" || role === "admin" || role === "organization_admin" || role === "super_admin";
+
   const getNavItems = () => {
     switch (role) {
-      case "head_of_training":
-        return headOfTrainingNavItems;
-      case "hod":
-        return hodNavItems;
-      case "registration_officer":
-        return registrationOfficerNavItems;
-      default:
-        return adminNavItems;
+      case "head_of_training": return headOfTrainingNavItems;
+      case "hod": return hodNavItems;
+      case "registration_officer": return registrationOfficerNavItems;
+      default: return adminNavItems;
     }
   };
-
-  const navItems = getNavItems();
 
   const filtered = useMemo(() => {
     if (!trainers) return [];
@@ -119,7 +163,7 @@ const TrainerManagement = () => {
     <DashboardLayout
       title="Trainer Management"
       subtitle="All users assigned the trainer role"
-      navItems={navItems}
+      navItems={getNavItems()}
       groupLabel="Training Management"
     >
       <div className="space-y-6">
@@ -144,9 +188,9 @@ const TrainerManagement = () => {
         <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
           <GraduationCap className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <p className="text-sm text-foreground/80">
-            Trainers are pulled directly from the system's user roles. Only users assigned the{" "}
-            <strong>Trainer</strong> role appear here. To add or remove a trainer, update their
-            role in <strong>User Management</strong>.
+            Trainers are pulled from system user roles. Use the <strong>Actions</strong> menu to
+            edit details, assign trades, or deactivate trainers. To add a new trainer, assign the
+            Trainer role in <strong>User Management</strong>.
           </p>
         </div>
 
@@ -197,6 +241,7 @@ const TrainerManagement = () => {
                     <TableHead>Employment Type</TableHead>
                     <TableHead>Assigned Trades</TableHead>
                     <TableHead>Status</TableHead>
+                    {canManage && <TableHead className="w-12">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -210,10 +255,36 @@ const TrainerManagement = () => {
                       <TableCell className="capitalize">
                         {trainer.employment_type.replace(/_/g, " ")}
                       </TableCell>
-                      <TableCell>{trainer.trades}</TableCell>
+                      <TableCell className="max-w-[200px] truncate" title={trainer.trades}>
+                        {trainer.trades}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="default">Active</Badge>
                       </TableCell>
+                      {canManage && (
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setEditingTrainer(trainer)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => setDeactivatingTrainer(trainer)}
+                              >
+                                <UserX className="h-4 w-4 mr-2" />
+                                Deactivate
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -222,6 +293,17 @@ const TrainerManagement = () => {
           </CardContent>
         </Card>
       </div>
+
+      <TrainerEditDialog
+        open={!!editingTrainer}
+        onOpenChange={(open) => { if (!open) setEditingTrainer(null); }}
+        trainer={editingTrainer}
+      />
+      <TrainerDeactivateDialog
+        open={!!deactivatingTrainer}
+        onOpenChange={(open) => { if (!open) setDeactivatingTrainer(null); }}
+        trainer={deactivatingTrainer}
+      />
     </DashboardLayout>
   );
 };
