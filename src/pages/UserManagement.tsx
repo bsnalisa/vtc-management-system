@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { adminNavItems, organizationAdminNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,7 @@ type UserWithRoles = {
 const UserManagement = () => {
   const [open, setOpen] = useState(false);
   const { organizationId } = useOrganizationContext();
-  const { role: userRole } = useUserRole();
+  const { role: userRole, navItems, groupLabel } = useRoleNavigation();
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -67,8 +67,6 @@ const UserManagement = () => {
   const deleteUser = useDeleteUser();
   const updateUser = useUpdateUser();
   const deactivateUser = useDeactivateUser();
-  
-  const navItems = userRole === "organization_admin" ? organizationAdminNavItems : adminNavItems;
 
   // Get organization name for display
   const userOrganizationName = organizations?.find(org => org.id === organizationId)?.name;

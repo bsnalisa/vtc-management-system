@@ -3,12 +3,13 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { procurementNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import SuppliersTable from "@/components/procurement/SuppliersTable";
 import SupplierDialog from "@/components/procurement/SupplierDialog";
 import { useSuppliers, Supplier } from "@/hooks/useProcurement";
 
 const SupplierManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const { data: suppliers, isLoading } = useSuppliers();
@@ -27,8 +28,8 @@ const SupplierManagement = () => {
     <DashboardLayout
       title="Supplier Management"
       subtitle="Manage suppliers and their contact information"
-      navItems={procurementNavItems}
-      groupLabel="Procurement"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex justify-end">

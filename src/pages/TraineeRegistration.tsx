@@ -9,7 +9,7 @@ import { useRegisterTrainee } from "@/hooks/useTrainees";
 import { useApprovedQualifications } from "@/hooks/useQualifications";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { FormFieldError } from "@/components/ui/form-field-error";
 import { validateTraineeRegistration } from "@/lib/validationUtils";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, GraduationCap } from "lucide-react";
 
 const TraineeRegistration = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: qualifications, isLoading: qualificationsLoading } = useApprovedQualifications();
@@ -105,8 +106,8 @@ const TraineeRegistration = () => {
     <DashboardLayout
       title="Trainee Registration"
       subtitle="Register a new trainee in the system"
-      navItems={registrationOfficerNavItems}
-      groupLabel="Registration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="max-w-4xl mx-auto space-y-6">

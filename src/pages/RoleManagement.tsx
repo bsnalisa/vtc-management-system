@@ -27,15 +27,12 @@ import { RoleDialog } from "@/components/roles/RoleDialog";
 import { PermissionsEditor } from "@/components/roles/PermissionsEditor";
 import { BulkRoleAssignmentDialog } from "@/components/roles/BulkRoleAssignmentDialog";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { adminNavItems, organizationAdminNavItems } from "@/lib/navigationConfig";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 
 export default function RoleManagement() {
-  const { role } = useUserRole();
+  const { role, navItems, groupLabel } = useRoleNavigation();
   const { data: roles = [], isLoading } = useCustomRoles();
   const deleteRole = useDeleteCustomRole();
-  
-  const navItems = role === "organization_admin" ? organizationAdminNavItems : adminNavItems;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<CustomRole | null>(null);

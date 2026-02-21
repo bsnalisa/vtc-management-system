@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, Search, Download, Filter, Calendar, FileText } from "lucide-react";
 import { useFeeRecords, useRecordPayment } from "@/hooks/useFeeRecords";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { debtorOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { usePagination } from "@/hooks/usePagination";
@@ -22,6 +22,7 @@ import { PaymentPlansTable } from "@/components/finance/PaymentPlansTable";
 import { InvoicesTable } from "@/components/finance/InvoicesTable";
 
 const FeeManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -145,8 +146,8 @@ const FeeManagement = () => {
     <DashboardLayout
       title="Fee Management"
       subtitle="Manage trainee fees and payments"
-      navItems={debtorOfficerNavItems}
-      groupLabel="Fee Management"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">

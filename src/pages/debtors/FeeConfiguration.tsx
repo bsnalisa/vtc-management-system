@@ -1,14 +1,15 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { debtorOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { FeeTypesManager } from "@/components/fees/FeeTypesManager";
 
 const FeeConfiguration = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   return (
     <DashboardLayout
       title="Fee Configuration"
       subtitle="Manage fee types and amounts"
-      navItems={debtorOfficerNavItems}
-      groupLabel="Financial Operations"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <FeeTypesManager />
     </DashboardLayout>

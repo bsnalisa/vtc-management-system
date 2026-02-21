@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, BookOpen, GraduationCap, Settings, Layers } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { headOfTrainingNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useTrades } from "@/hooks/useTrades";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
@@ -29,6 +29,7 @@ interface TradeFormData {
 }
 
 const CourseManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [activeTab, setActiveTab] = useState("trades");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<any>(null);
@@ -192,8 +193,8 @@ const CourseManagement = () => {
     <DashboardLayout
       title="Course & Trade Management"
       subtitle="Manage trades, levels, and course configurations"
-      navItems={headOfTrainingNavItems}
-      groupLabel="Training Management"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>

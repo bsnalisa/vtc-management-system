@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { procurementNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import PurchaseOrdersTable from "@/components/procurement/PurchaseOrdersTable";
 import PurchaseOrderDialog from "@/components/procurement/PurchaseOrderDialog";
 import { usePurchaseOrders, PurchaseOrder } from "@/hooks/useProcurement";
 
 const PurchaseOrders = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
   const { data: orders, isLoading } = usePurchaseOrders();
@@ -33,8 +34,8 @@ const PurchaseOrders = () => {
     <DashboardLayout
       title="Purchase Orders"
       subtitle="Create and manage purchase orders"
-      navItems={procurementNavItems}
-      groupLabel="Procurement"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex justify-end">

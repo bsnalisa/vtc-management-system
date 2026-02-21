@@ -6,13 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, Loader2, Download, GraduationCap, Pencil, UserX, MoreHorizontal } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import {
-  adminNavItems,
-  headOfTrainingNavItems,
-  hodNavItems,
-  registrationOfficerNavItems,
-} from "@/lib/navigationConfig";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { exportToCSV } from "@/lib/exportUtils";
@@ -114,7 +108,7 @@ const useTrainersFromRoles = () => {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const TrainerManagement = () => {
-  const { role } = useUserRole();
+  const { role, navItems, groupLabel } = useRoleNavigation();
   const [searchTerm, setSearchTerm] = useState("");
   const [editingTrainer, setEditingTrainer] = useState<any>(null);
   const [deactivatingTrainer, setDeactivatingTrainer] = useState<any>(null);
@@ -122,15 +116,6 @@ const TrainerManagement = () => {
   const { data: trainers, isLoading, error } = useTrainersFromRoles();
 
   const canManage = role === "head_of_training" || role === "admin" || role === "organization_admin" || role === "super_admin";
-
-  const getNavItems = () => {
-    switch (role) {
-      case "head_of_training": return headOfTrainingNavItems;
-      case "hod": return hodNavItems;
-      case "registration_officer": return registrationOfficerNavItems;
-      default: return adminNavItems;
-    }
-  };
 
   const filtered = useMemo(() => {
     if (!trainers) return [];
@@ -163,8 +148,8 @@ const TrainerManagement = () => {
     <DashboardLayout
       title="Trainer Management"
       subtitle="All users assigned the trainer role"
-      navItems={getNavItems()}
-      groupLabel="Training Management"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         {/* Toolbar */}

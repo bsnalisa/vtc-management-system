@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 
 const HistoricalTrainees = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
@@ -126,8 +127,8 @@ const HistoricalTrainees = () => {
     <DashboardLayout
       title="Historical Trainees"
       subtitle="Manage archived trainee records from previous years"
-      navItems={registrationOfficerNavItems}
-      groupLabel="Registration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-4">
         {/* Stats Overview */}

@@ -6,12 +6,13 @@ import { Clock, Eye } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { usePendingQualifications, Qualification } from "@/hooks/useQualifications";
 import { ApprovalPanel } from "@/components/qualifications/ApprovalPanel";
-import { headOfTrainingNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { format } from "date-fns";
 
 const QualificationApprovalsPage = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { data: pendingQualifications, isLoading, refetch } = usePendingQualifications();
   const [selectedQualification, setSelectedQualification] = useState<Qualification | null>(null);
 
@@ -25,8 +26,8 @@ const QualificationApprovalsPage = () => {
       <DashboardLayout
         title="Review Qualification"
         subtitle="Approve or reject qualification submission"
-        navItems={headOfTrainingNavItems}
-        groupLabel="Training Management"
+        navItems={navItems}
+        groupLabel={groupLabel}
       >
         <ApprovalPanel
           qualification={selectedQualification}
@@ -41,8 +42,8 @@ const QualificationApprovalsPage = () => {
     <DashboardLayout
       title="Qualification Approvals"
       subtitle="Review and approve pending qualifications"
-      navItems={headOfTrainingNavItems}
-      groupLabel="Training Management"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex items-center gap-2">

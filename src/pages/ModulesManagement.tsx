@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { organizationAdminNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useOrganizationModules } from "@/hooks/useModules";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const ModulesManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { organizationId } = useOrganizationContext();
   const { data: organizationModules, isLoading } = useOrganizationModules(organizationId);
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ const ModulesManagement = () => {
     <DashboardLayout
       title="Modules Management"
       subtitle="View and manage your organization's active modules"
-      navItems={organizationAdminNavItems}
-      groupLabel="Navigation"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         {isLoading ? (

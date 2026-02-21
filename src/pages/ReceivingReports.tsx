@@ -3,12 +3,13 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { procurementNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import ReceivingReportsTable from "@/components/procurement/ReceivingReportsTable";
 import ReceivingReportDialog from "@/components/procurement/ReceivingReportDialog";
 import { useReceivingReports } from "@/hooks/useProcurement";
 
 const ReceivingReports = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const { data: reports, isLoading } = useReceivingReports();
@@ -27,8 +28,8 @@ const ReceivingReports = () => {
     <DashboardLayout
       title="Receiving Reports"
       subtitle="Track and verify received goods"
-      navItems={procurementNavItems}
-      groupLabel="Procurement"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex justify-end">

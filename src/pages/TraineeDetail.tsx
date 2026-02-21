@@ -10,12 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useTraineeDetail, useUpdateTraineePersonalDetails } from "@/hooks/useTraineeDetail";
 import { useCreateUpdateRequest } from "@/hooks/useTraineeUpdateRequests";
 import { useTrades } from "@/hooks/useTrades";
 
 const TraineeDetail = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: trainee, isLoading } = useTraineeDetail(id);
@@ -85,7 +86,7 @@ const TraineeDetail = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Loading..." subtitle="Please wait..." navItems={registrationOfficerNavItems}>
+      <DashboardLayout title="Loading..." subtitle="Please wait..." navItems={navItems} groupLabel={groupLabel}>
         <div className="flex justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
         </div>
@@ -95,7 +96,7 @@ const TraineeDetail = () => {
 
   if (!trainee) {
     return (
-      <DashboardLayout title="Trainee Not Found" subtitle="Unable to load trainee details" navItems={registrationOfficerNavItems}>
+      <DashboardLayout title="Trainee Not Found" subtitle="Unable to load trainee details" navItems={navItems} groupLabel={groupLabel}>
         <Card>
           <CardContent className="pt-6">
             <p>Trainee not found.</p>
@@ -112,7 +113,8 @@ const TraineeDetail = () => {
     <DashboardLayout
       title={`${trainee.first_name} ${trainee.last_name}`}
       subtitle={`Trainee ID: ${trainee.trainee_id}`}
-      navItems={registrationOfficerNavItems}
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <Button variant="outline" onClick={() => navigate("/trainees")}>

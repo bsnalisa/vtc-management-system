@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { 
-  adminNavItems, 
-  organizationAdminNavItems,
-  trainerNavItems,
-  hodNavItems,
-  headOfTrainingNavItems
-} from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +13,9 @@ import { Users, Plus, Pencil, Trash2 } from "lucide-react";
 import { useClasses, useCreateClass, useUpdateClass, useDeleteClass, ClassData } from "@/hooks/useClasses";
 import { useTrades } from "@/hooks/useTrades";
 import { useTrainers } from "@/hooks/useTrainers";
-import { useUserRole } from "@/hooks/useUserRole";
 
 const ClassManagement = () => {
-  const { role } = useUserRole();
+  const { role, navItems, groupLabel } = useRoleNavigation();
   const [open, setOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<any>(null);
   const [formData, setFormData] = useState<ClassData>({
@@ -42,23 +35,6 @@ const ClassManagement = () => {
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
-  
-  const getNavItems = () => {
-    switch (role) {
-      case "organization_admin":
-        return organizationAdminNavItems;
-      case "trainer":
-        return trainerNavItems;
-      case "hod":
-        return hodNavItems;
-      case "head_of_training":
-        return headOfTrainingNavItems;
-      default:
-        return adminNavItems;
-    }
-  };
-  
-  const navItems = getNavItems();
 
   const handleOpenDialog = (classToEdit?: any) => {
     if (classToEdit) {

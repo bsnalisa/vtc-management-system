@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRoleActivity, useRoleActivitySummary } from "@/hooks/useRoleActivity";
-import { adminNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { getRoleDisplayName } from "@/lib/roleUtils";
 import { useProfile } from "@/hooks/useProfile";
 
 export default function RoleActivityDashboard() {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { data: activitySummary, isLoading: summaryLoading } = useRoleActivitySummary();
   const { data: recentActivity, isLoading: activityLoading } = useRoleActivity();
   const { data: profile } = useProfile();
@@ -46,8 +47,8 @@ export default function RoleActivityDashboard() {
     <DashboardLayout
       title={`Welcome back, ${profile?.firstname || 'User'}`}
       subtitle="Monitor role-based activity and usage patterns"
-      navItems={adminNavItems}
-      groupLabel="Navigation"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         {/* Stats Cards */}

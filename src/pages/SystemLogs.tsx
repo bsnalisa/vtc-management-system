@@ -22,11 +22,11 @@ import {
 } from "@/components/ui/table";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
-import { organizationAdminNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { format } from "date-fns";
 
 const SystemLogs = () => {
-  const { role } = useUserRole();
+  const { role, navItems, groupLabel } = useRoleNavigation();
   const { organizationId } = useOrganizationContext();
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -231,8 +231,8 @@ const SystemLogs = () => {
     <DashboardLayout
       title="System Activity Logs"
       subtitle="Organization activity monitoring"
-      navItems={organizationAdminNavItems}
-      groupLabel="Navigation"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       {mainContent}
     </DashboardLayout>
