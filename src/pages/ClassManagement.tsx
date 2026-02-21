@@ -7,8 +7,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Users, Plus, Pencil, Trash2 } from "lucide-react";
 import { useClasses, useCreateClass, useUpdateClass, useDeleteClass, ClassData } from "@/hooks/useClasses";
 import { useTrades } from "@/hooks/useTrades";
@@ -67,13 +84,13 @@ const ClassManagement = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingClass) {
       await updateClass.mutateAsync({ id: editingClass.id, ...formData });
     } else {
       await createClass.mutateAsync(formData);
     }
-    
+
     setOpen(false);
     setEditingClass(null);
     setFormData({
@@ -97,7 +114,7 @@ const ClassManagement = () => {
       title="Class Management"
       subtitle="Manage trades, classes, and training programs"
       navItems={navItems}
-      groupLabel="Navigation"
+      groupLabel="Training Management"
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -139,33 +156,46 @@ const ClassManagement = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="trade">Trade</Label>
-                    <Select value={formData.trade_id} onValueChange={(value) => setFormData({ ...formData, trade_id: value })}>
+                    <Select
+                      value={formData.trade_id}
+                      onValueChange={(value) => setFormData({ ...formData, trade_id: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select trade" />
                       </SelectTrigger>
                       <SelectContent>
                         {trades?.map((trade) => (
-                          <SelectItem key={trade.id} value={trade.id}>{trade.name}</SelectItem>
+                          <SelectItem key={trade.id} value={trade.id}>
+                            {trade.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="level">Level</Label>
-                    <Select value={formData.level.toString()} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })}>
+                    <Select
+                      value={formData.level.toString()}
+                      onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {[1, 2, 3, 4].map((level) => (
-                          <SelectItem key={level} value={level.toString()}>Level {level}</SelectItem>
+                          <SelectItem key={level} value={level.toString()}>
+                            Level {level}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="training_mode">Training Mode</Label>
-                    <Select value={formData.training_mode} onValueChange={(value) => setFormData({ ...formData, training_mode: value })}>
+                    <Select
+                      value={formData.training_mode}
+                      onValueChange={(value) => setFormData({ ...formData, training_mode: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -178,13 +208,18 @@ const ClassManagement = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="trainer">Class Trainer</Label>
-                    <Select value={formData.trainer_id} onValueChange={(value) => setFormData({ ...formData, trainer_id: value })}>
+                    <Select
+                      value={formData.trainer_id}
+                      onValueChange={(value) => setFormData({ ...formData, trainer_id: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select trainer" />
                       </SelectTrigger>
                       <SelectContent>
                         {trainers?.map((trainer) => (
-                          <SelectItem key={trainer.id} value={trainer.id}>{trainer.full_name}</SelectItem>
+                          <SelectItem key={trainer.id} value={trainer.id}>
+                            {trainer.full_name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -210,7 +245,9 @@ const ClassManagement = () => {
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
                   <Button type="submit">{editingClass ? "Update Class" : "Create Class"}</Button>
                 </div>
               </form>
@@ -257,11 +294,7 @@ const ClassManagement = () => {
                       <TableCell>{cls.academic_year}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleOpenDialog(cls)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(cls)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
@@ -279,9 +312,7 @@ const ClassManagement = () => {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(cls.id)}>
-                                  Delete
-                                </AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDelete(cls.id)}>Delete</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
