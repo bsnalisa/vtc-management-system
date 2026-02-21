@@ -11,13 +11,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, AlertCircle, CheckCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useEntryRequirements, useCreateEntryRequirement, useUpdateEntryRequirement, EntryRequirementData } from "@/hooks/useEntryRequirements";
 import { useTrades } from "@/hooks/useTrades";
 import { useToast } from "@/hooks/use-toast";
 import { SYMBOLS } from "@/types/application";
 
 const EntryRequirementsManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRequirement, setEditingRequirement] = useState<any>(null);
   const [formData, setFormData] = useState<EntryRequirementData>({
@@ -118,8 +119,8 @@ const EntryRequirementsManagement = () => {
     <DashboardLayout
       title="Entry Requirements Management"
       subtitle="Manage entry requirements for all trades and levels"
-      navItems={registrationOfficerNavItems}
-      groupLabel="Registration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex justify-between items-center">

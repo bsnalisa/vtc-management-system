@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { headOfTrainingNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { TradesTable } from "@/components/trades/TradesTable";
 import { TradeDialog } from "@/components/trades/TradeDialog";
@@ -21,6 +21,7 @@ export interface Trade {
 }
 
 const TradeManagementPage = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { data: trades, isLoading } = useTrades();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
@@ -39,8 +40,8 @@ const TradeManagementPage = () => {
     <DashboardLayout
       title="Trade Management"
       subtitle="Create and manage trades for qualifications"
-      navItems={headOfTrainingNavItems}
-      groupLabel="Academic"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex justify-between items-center">

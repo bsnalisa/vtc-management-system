@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Filter, CheckCircle, XCircle, UserPlus, ClipboardCheck } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { ApplicationsTable } from "@/components/registration/ApplicationsTable";
 import { ScreeningDialog } from "@/components/registration/ScreeningDialog";
 import { RegistrationDialog } from "@/components/registration/RegistrationDialog";
@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const ApplicationManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("qualified");
@@ -82,8 +83,8 @@ const ApplicationManagement = () => {
     <DashboardLayout
       title="Admission Results"
       subtitle="View screening outcomes and manage registration"
-      navItems={registrationOfficerNavItems}
-      groupLabel="Registration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-4">
         {/* Stats Overview */}

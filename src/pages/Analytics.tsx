@@ -1,37 +1,16 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { 
-  adminNavItems, 
-  organizationAdminNavItems,
-  hodNavItems,
-  headOfTrainingNavItems
-} from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSuperAdminAnalytics } from "@/hooks/useAnalytics";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { Building2, Users, Package, Activity } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Analytics() {
-  const { role } = useUserRole();
+  const { navItems, groupLabel } = useRoleNavigation();
   const { data: analytics, isLoading } = useSuperAdminAnalytics();
   const { data: auditLogs } = useAuditLogs();
-  
-  const getNavItems = () => {
-    switch (role) {
-      case "organization_admin":
-        return organizationAdminNavItems;
-      case "head_of_training":
-        return headOfTrainingNavItems;
-      case "hod":
-        return hodNavItems;
-      default:
-        return adminNavItems;
-    }
-  };
-  
-  const navItems = getNavItems();
 
   if (isLoading) {
     return (
@@ -39,7 +18,7 @@ export default function Analytics() {
         title="Analytics"
         subtitle="Monitor system-wide metrics and activity"
         navItems={navItems}
-        groupLabel="Navigation"
+        groupLabel={groupLabel}
       >
         <div className="flex items-center justify-center h-64">
           <p>Loading analytics...</p>
@@ -80,7 +59,7 @@ export default function Analytics() {
       title="Analytics"
       subtitle="Monitor system-wide metrics and activity"
       navItems={navItems}
-      groupLabel="Navigation"
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
 

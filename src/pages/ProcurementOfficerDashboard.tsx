@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { procurementNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
 
 export default function ProcurementOfficerDashboard() {
+  const { navItems, groupLabel } = useRoleNavigation();
   const navigate = useNavigate();
   const { data: requisitions = [], isLoading: loadingRequisitions } = usePurchaseRequisitions();
   const { data: orders = [], isLoading: loadingOrders } = usePurchaseOrders();
@@ -54,8 +55,8 @@ export default function ProcurementOfficerDashboard() {
     <DashboardLayout
       title={`Welcome back, ${profile?.firstname || 'User'}`}
       subtitle="Manage suppliers, requisitions, and purchase orders"
-      navItems={procurementNavItems}
-      groupLabel="Procurement"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { placementOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -65,12 +65,14 @@ const AlumniManagement = () => {
     ).length || 0,
   };
 
+  const { navItems, groupLabel } = useRoleNavigation();
+
   return (
     <DashboardLayout
       title="Alumni Management"
       subtitle="Manage graduate profiles, events, and communications"
-      navItems={placementOfficerNavItems}
-      groupLabel="Placement"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex justify-end">

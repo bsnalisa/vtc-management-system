@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const ApplicationsInbox = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
   const [selectedIntake, setSelectedIntake] = useState<string>("all");
@@ -56,8 +57,8 @@ const ApplicationsInbox = () => {
     <DashboardLayout
       title="Applications Inbox"
       subtitle="New applications awaiting screening"
-      navItems={registrationOfficerNavItems}
-      groupLabel="Registration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-4">
         {/* Stats */}

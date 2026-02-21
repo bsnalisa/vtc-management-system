@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { headOfTrainingNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const TimetableManagement = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [open, setOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [formData, setFormData] = useState<TimetableSlotData>({
@@ -70,8 +71,8 @@ const TimetableManagement = () => {
     <DashboardLayout
       title="Timetable Management"
       subtitle="Manage class schedules and timetables"
-      navItems={headOfTrainingNavItems}
-      groupLabel="Training Management"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">

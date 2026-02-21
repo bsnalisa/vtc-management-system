@@ -1,14 +1,15 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { debtorOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { TraineeAccountsView } from "@/components/debtor/TraineeAccountsView";
 
 const TraineeAccountsPage = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   return (
     <DashboardLayout
       title="Trainee Accounts"
       subtitle="Read-only view of trainee financial profiles"
-      navItems={debtorOfficerNavItems}
-      groupLabel="Financial Operations"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <TraineeAccountsView />
     </DashboardLayout>

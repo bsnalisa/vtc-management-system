@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { registrationOfficerNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,7 @@ const EXAM_LEVELS = [
 
 const GradingScale = () => {
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const { navItems, groupLabel } = useRoleNavigation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -119,8 +120,8 @@ const GradingScale = () => {
     <DashboardLayout
       title="Grading Scale"
       subtitle="Configure symbol points for admission calculations"
-      navItems={registrationOfficerNavItems}
-      groupLabel="Registration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-4">
         {/* Overview */}

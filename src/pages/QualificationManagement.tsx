@@ -7,11 +7,12 @@ import { QualificationsTable } from "@/components/qualifications/QualificationsT
 import { QualificationDialog } from "@/components/qualifications/QualificationDialog";
 import { QualificationDetailPanel } from "@/components/qualifications/QualificationDetailPanel";
 import { BulkQualificationImportDialog } from "@/components/qualifications/BulkQualificationImportDialog";
-import { organizationAdminNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { withRoleAccess } from "@/components/withRoleAccess";
 
 const QualificationManagementPage = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
   const { data: qualifications, isLoading } = useQualifications();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
@@ -42,8 +43,8 @@ const QualificationManagementPage = () => {
     <DashboardLayout
       title="Qualification Management"
       subtitle="Create and manage qualifications with unit standards"
-      navItems={organizationAdminNavItems}
-      groupLabel="Administration"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       {viewMode === "list" ? (
         <div className="space-y-6">

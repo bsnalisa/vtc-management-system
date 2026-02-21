@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { hostelCoordinatorNavItems } from "@/lib/navigationConfig";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Bed, Users, DollarSign, Wrench, UserCheck, ClipboardCheck } from "lucide-react";
@@ -15,6 +15,7 @@ import { useHostelBuildings, useHostelRooms, useHostelAllocations } from "@/hook
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 export default function HostelManagement() {
+  const { navItems, groupLabel } = useRoleNavigation();
   const [activeTab, setActiveTab] = useState("overview");
   const { data: buildings = [] } = useHostelBuildings();
   const { data: rooms = [] } = useHostelRooms();
@@ -29,8 +30,8 @@ export default function HostelManagement() {
     <DashboardLayout
       title="Hostel Management"
       subtitle="Manage accommodation, room allocations, and hostel fees"
-      navItems={hostelCoordinatorNavItems}
-      groupLabel="Hostel"
+      navItems={navItems}
+      groupLabel={groupLabel}
     >
       <div className="space-y-6">
 
