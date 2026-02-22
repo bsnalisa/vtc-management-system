@@ -30,21 +30,24 @@ import { Users, Plus, Pencil, Trash2 } from "lucide-react";
 import { useClasses, useCreateClass, useUpdateClass, useDeleteClass, ClassData } from "@/hooks/useClasses";
 import { useTrades } from "@/hooks/useTrades";
 import { useTrainers } from "@/hooks/useTrainers";
+import { Badge } from "@/components/ui/badge";
+
+const EMPTY_FORM: ClassData = {
+  trade_id: "",
+  level: 1,
+  training_mode: "fulltime",
+  class_code: "",
+  class_name: "",
+  academic_year: new Date().getFullYear().toString(),
+  capacity: 30,
+  trainer_id: "",
+};
 
 const ClassManagement = () => {
-  const { role, navItems, groupLabel } = useRoleNavigation();
+  const { navItems } = useRoleNavigation();
   const [open, setOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<any>(null);
-  const [formData, setFormData] = useState<ClassData>({
-    trade_id: "",
-    level: 1,
-    training_mode: "fulltime",
-    class_code: "",
-    class_name: "",
-    academic_year: new Date().getFullYear().toString(),
-    capacity: 30,
-    trainer_id: "",
-  });
+  const [formData, setFormData] = useState<ClassData>({ ...EMPTY_FORM });
 
   const { data: classes, isLoading } = useClasses();
   const { data: trades } = useTrades();
@@ -68,45 +71,40 @@ const ClassManagement = () => {
       });
     } else {
       setEditingClass(null);
-      setFormData({
-        trade_id: "",
-        level: 1,
-        training_mode: "fulltime",
-        class_code: "",
-        class_name: "",
-        academic_year: new Date().getFullYear().toString(),
-        capacity: 30,
-        trainer_id: "",
-      });
+      setFormData({ ...EMPTY_FORM });
     }
     setOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...formData,
+      trainer_id: formData.trainer_id || null,
+    };
 
     if (editingClass) {
-      await updateClass.mutateAsync({ id: editingClass.id, ...formData });
+      await updateClass.mutateAsync({ id: editingClass.id, ...payload });
     } else {
-      await createClass.mutateAsync(formData);
+      await createClass.mutateAsync(payload);
     }
 
     setOpen(false);
     setEditingClass(null);
-    setFormData({
-      trade_id: "",
-      level: 1,
-      training_mode: "fulltime",
-      class_code: "",
-      class_name: "",
-      academic_year: new Date().getFullYear().toString(),
-      capacity: 30,
-      trainer_id: "",
-    });
+    setFormData({ ...EMPTY_FORM });
   };
 
   const handleDelete = async (id: string) => {
     await deleteClass.mutateAsync(id);
+  };
+
+  const trainingModeLabel = (mode: string) => {
+    switch (mode) {
+      case "fulltime": return "Full Time";
+      case "bdl": return "Block/Day Release";
+      case "shortcourse": return "Short Course";
+      default: return mode;
+    }
   };
 
   return (
@@ -209,14 +207,15 @@ const ClassManagement = () => {
                   <div className="space-y-2">
                     <Label htmlFor="trainer">Class Trainer</Label>
                     <Select
-                      value={formData.trainer_id}
-                      onValueChange={(value) => setFormData({ ...formData, trainer_id: value })}
+                      value={formData.trainer_id || "none"}
+                      onValueChange={(value) => setFormData({ ...formData, trainer_id: value === "none" ? "" : value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select trainer" />
                       </SelectTrigger>
                       <SelectContent>
-                        {trainers?.map((trainer) => (
+                        <SelectItem value="none">No trainer assigned</SelectItem>
+                        {trainers?.filter(t => t.active).map((trainer) => (
                           <SelectItem key={trainer.id} value={trainer.id}>
                             {trainer.full_name}
                           </SelectItem>
@@ -248,7 +247,9 @@ const ClassManagement = () => {
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">{editingClass ? "Update Class" : "Create Class"}</Button>
+                  <Button type="submit" disabled={createClass.isPending || updateClass.isPending}>
+                    {editingClass ? "Update Class" : "Create Class"}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -266,6 +267,8 @@ const ClassManagement = () => {
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">Loading classes...</div>
+            ) : !classes?.length ? (
+              <div className="text-center py-8 text-muted-foreground">No classes found. Create one to get started.</div>
             ) : (
               <Table>
                 <TableHeader>
@@ -282,14 +285,14 @@ const ClassManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classes?.map((cls) => (
+                  {classes?.map((cls: any) => (
                     <TableRow key={cls.id}>
                       <TableCell className="font-medium">{cls.class_code}</TableCell>
                       <TableCell>{cls.class_name}</TableCell>
-                      <TableCell>{cls.trades?.name}</TableCell>
-                      <TableCell>Level {cls.level}</TableCell>
-                      <TableCell className="capitalize">{cls.training_mode}</TableCell>
-                      <TableCell>{cls.trainers?.full_name || "Unassigned"}</TableCell>
+                      <TableCell>{cls.trades?.name || "—"}</TableCell>
+                      <TableCell><Badge variant="outline">Level {cls.level}</Badge></TableCell>
+                      <TableCell>{trainingModeLabel(cls.training_mode)}</TableCell>
+                      <TableCell>{cls.trainers?.full_name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                       <TableCell>{cls.capacity}</TableCell>
                       <TableCell>{cls.academic_year}</TableCell>
                       <TableCell className="text-right">
