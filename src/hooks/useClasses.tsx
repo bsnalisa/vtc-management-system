@@ -10,7 +10,7 @@ export interface ClassData {
   class_name: string;
   academic_year: string;
   capacity?: number;
-  trainer_id?: string;
+  trainer_id?: string | null;
 }
 
 export const useClasses = () => {
@@ -46,12 +46,23 @@ export const useCreateClass = () => {
 
   return useMutation({
     mutationFn: async (classData: ClassData) => {
+      const payload: any = {
+        trade_id: classData.trade_id,
+        level: classData.level,
+        training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
+        class_code: classData.class_code,
+        class_name: classData.class_name,
+        academic_year: classData.academic_year,
+        capacity: classData.capacity,
+      };
+      // Only include trainer_id if it has a value
+      if (classData.trainer_id) {
+        payload.trainer_id = classData.trainer_id;
+      }
+
       const { data, error } = await supabase
         .from("classes")
-        .insert([{
-          ...classData,
-          training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
-        }])
+        .insert([payload])
         .select()
         .single();
 
@@ -60,17 +71,10 @@ export const useCreateClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
-      toast({
-        title: "Success",
-        description: "Class created successfully!",
-      });
+      toast({ title: "Success", description: "Class created successfully!" });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 };
@@ -81,12 +85,20 @@ export const useUpdateClass = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...classData }: ClassData & { id: string }) => {
+      const payload: any = {
+        trade_id: classData.trade_id,
+        level: classData.level,
+        training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
+        class_code: classData.class_code,
+        class_name: classData.class_name,
+        academic_year: classData.academic_year,
+        capacity: classData.capacity,
+        trainer_id: classData.trainer_id || null,
+      };
+
       const { data, error } = await supabase
         .from("classes")
-        .update({
-          ...classData,
-          training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
-        })
+        .update(payload)
         .eq("id", id)
         .select()
         .single();
@@ -96,17 +108,10 @@ export const useUpdateClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
-      toast({
-        title: "Success",
-        description: "Class updated successfully!",
-      });
+      toast({ title: "Success", description: "Class updated successfully!" });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 };
@@ -117,6 +122,12 @@ export const useDeleteClass = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // First remove any enrollments for this class
+      await supabase
+        .from("class_enrollments")
+        .delete()
+        .eq("class_id", id);
+
       const { error } = await supabase
         .from("classes")
         .delete()
@@ -126,17 +137,10 @@ export const useDeleteClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
-      toast({
-        title: "Success",
-        description: "Class deleted successfully!",
-      });
+      toast({ title: "Success", description: "Class deleted successfully!" });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 };
@@ -158,17 +162,10 @@ export const useEnrollInClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class_enrollments"] });
-      toast({
-        title: "Success",
-        description: "Trainee enrolled in class!",
-      });
+      toast({ title: "Success", description: "Trainee enrolled in class!" });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 };

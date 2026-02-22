@@ -6749,42 +6749,49 @@ export type Database = {
           created_at: string
           designation: string | null
           email: string | null
-          employment_type: Database["public"]["Enums"]["employment_type"]
-          full_name: string
-          gender: Database["public"]["Enums"]["gender"]
+          employment_type: Database["public"]["Enums"]["employment_type"] | null
+          full_name: string | null
+          gender: Database["public"]["Enums"]["gender"] | null
           id: string
           organization_id: string | null
           phone: string | null
-          trainer_id: string
+          trainer_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           active?: boolean
           created_at?: string
           designation?: string | null
           email?: string | null
-          employment_type: Database["public"]["Enums"]["employment_type"]
-          full_name: string
-          gender: Database["public"]["Enums"]["gender"]
+          employment_type?:
+            | Database["public"]["Enums"]["employment_type"]
+            | null
+          full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
           organization_id?: string | null
           phone?: string | null
-          trainer_id: string
+          trainer_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           active?: boolean
           created_at?: string
           designation?: string | null
           email?: string | null
-          employment_type?: Database["public"]["Enums"]["employment_type"]
-          full_name?: string
-          gender?: Database["public"]["Enums"]["gender"]
+          employment_type?:
+            | Database["public"]["Enums"]["employment_type"]
+            | null
+          full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
           organization_id?: string | null
           phone?: string | null
-          trainer_id?: string
+          trainer_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
