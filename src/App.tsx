@@ -78,7 +78,7 @@ import BDLCoordinatorDashboard from "./pages/BDLCoordinatorDashboard";
 import RPLCoordinatorDashboard from "./pages/RPLCoordinatorDashboard";
 import PendingApprovals from "./pages/PendingApprovals";
 import EntryRequirementsManagement from "./pages/EntryRequirementsManagement";
-import CourseManagement from "./pages/CourseManagement";
+
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationApprovals from "./pages/QualificationApprovals";
 import TradeManagement from "./pages/TradeManagement";
@@ -269,9 +269,6 @@ const ProtectedPendingApprovals = withRoleAccess(PendingApprovals, {
 const ProtectedEntryRequirements = withRoleAccess(EntryRequirementsManagement, {
   requiredRoles: ["registration_officer", "admin", "head_of_trainee_support"],
 });
-const ProtectedCourseManagement = withRoleAccess(CourseManagement, {
-  requiredRoles: ["head_of_training", "admin"],
-});
 
 const App = () => (
   <ErrorBoundary>
@@ -362,7 +359,7 @@ const App = () => (
           <Route path="/onboarding" element={<ProtectedRoute><StaffOnboarding /></ProtectedRoute>} />
           <Route path="/training-modules" element={<ProtectedRoute><ProtectedTrainingModules /></ProtectedRoute>} />
           <Route path="/entry-requirements" element={<ProtectedRoute><ProtectedEntryRequirements /></ProtectedRoute>} />
-          <Route path="/course-management" element={<ProtectedRoute><ProtectedCourseManagement /></ProtectedRoute>} />
+          
           <Route path="/roles" element={<ProtectedRoute><RoleManagement /></ProtectedRoute>} />
           <Route path="/role-activity" element={<ProtectedRoute><ProtectedRoleActivityDashboard /></ProtectedRoute>} />
           <Route path="/organization-settings" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
