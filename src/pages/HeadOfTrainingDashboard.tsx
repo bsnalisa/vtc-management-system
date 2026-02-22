@@ -237,9 +237,8 @@ const HeadOfTrainingDashboard = () => {
                   <CardDescription>Manage curriculum and training modules</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" onClick={() => navigate('/course-management')}>Course Management</Button>
+                  <Button className="w-full" onClick={() => navigate('/trade-management')}>Trade Management</Button>
                   <Button variant="outline" className="w-full" onClick={() => navigate('/classes')}>Class Management</Button>
-                  <Button variant="outline" className="w-full" onClick={() => navigate('/trade-management')}>Trade Management</Button>
                 </CardContent>
               </Card>
 
