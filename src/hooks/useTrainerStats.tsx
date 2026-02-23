@@ -18,6 +18,11 @@ interface TrainerStats {
     capacity: number | null;
     student_count: number;
   }>;
+  qualifications: Array<{
+    id: string;
+    qualification_code: string;
+    qualification_title: string;
+  }>;
 }
 
 async function fetchTrainerStats(): Promise<TrainerStats | null> {
@@ -39,6 +44,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
       presentToday: 0,
       attendanceRate: "0",
       classes: [],
+      qualifications: [],
     };
   }
 
@@ -84,6 +90,18 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
     }
   }
 
+  // Fetch assigned qualifications
+  const { data: trainerQuals } = await db
+    .from("trainer_qualifications")
+    .select("qualification_id, qualifications:qualification_id (id, qualification_code, qualification_title)")
+    .eq("trainer_id", trainer.id);
+
+  const qualifications = (trainerQuals || []).map((tq: any) => ({
+    id: tq.qualifications?.id || tq.qualification_id,
+    qualification_code: tq.qualifications?.qualification_code || "",
+    qualification_title: tq.qualifications?.qualification_title || "",
+  }));
+
   return {
     myClasses: classCount,
     totalStudents,
@@ -91,6 +109,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
     presentToday: 0,
     attendanceRate: "0",
     classes: classDetails,
+    qualifications,
   };
 }
 

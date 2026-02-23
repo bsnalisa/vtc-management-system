@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList, MessageSquare, FileText, Clock } from "lucide-react";
+import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList, MessageSquare, FileText, Clock, Award } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { trainerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -207,6 +207,57 @@ const TrainerDashboard = () => {
                 <h3 className="text-lg font-medium mb-1">No Classes Assigned</h3>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                   You haven't been assigned to any classes yet. Contact your Head of Training for assignment.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Assigned Qualifications */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Award className="h-5 w-5 text-primary" /> Assigned Qualifications
+                </CardTitle>
+                <CardDescription>Qualifications you are allocated to teach</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-4">
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
+              </div>
+            ) : stats?.qualifications && stats.qualifications.length > 0 ? (
+              <div className="space-y-2">
+                {stats.qualifications.map((q) => (
+                  <div
+                    key={q.id}
+                    className="flex items-center gap-3 rounded-lg border p-4"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs font-mono">{q.qualification_code}</Badge>
+                        <span className="font-medium text-sm">{q.qualification_title}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-10 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <Award className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">No Qualifications Assigned</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  You haven't been assigned to any qualifications yet. Contact your Head of Training for assignment.
                 </p>
               </div>
             )}
