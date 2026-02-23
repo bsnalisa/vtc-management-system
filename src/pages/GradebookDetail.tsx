@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -182,6 +182,22 @@ const GradebookDetail = () => {
 
   const enrolledIds = new Set(gbTrainees?.map((gt: any) => gt.trainee_id) || []);
   const unenrolledTrainees = availableTrainees?.filter((t: any) => !enrolledIds.has(t.id)) || [];
+
+  // Auto-enroll all matching trainees when gradebook has none enrolled yet
+  useEffect(() => {
+    if (
+      id &&
+      gbTrainees &&
+      gbTrainees.length === 0 &&
+      availableTrainees &&
+      availableTrainees.length > 0 &&
+      !addTrainees.isPending
+    ) {
+      const allIds = availableTrainees.map((t: any) => t.id);
+      addTrainees.mutate({ gradebook_id: id, trainee_ids: allIds });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, gbTrainees, availableTrainees]);
 
   if (gbLoading) {
     return (
