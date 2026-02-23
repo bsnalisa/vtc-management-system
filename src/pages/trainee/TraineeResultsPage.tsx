@@ -1,19 +1,150 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Award, Download, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
+import { Award, CheckCircle, XCircle, Clock, Loader2, BookOpen, MessageSquare, ChevronDown, ChevronRight } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Progress } from "@/components/ui/progress";
-import { useTraineeUserId, useTraineeRecord, useTraineeAssessmentResults } from "@/hooks/useTraineePortalData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  useTraineeUserId,
+  useTraineeRecord,
+  useTraineeAssessmentResults,
+  useTraineeGradebookEntries,
+  useTraineeGradebookMarks,
+} from "@/hooks/useTraineePortalData";
 
+const competencyBadge = (status: string | null) => {
+  switch (status) {
+    case "competent": return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Competent</Badge>;
+    case "not_yet_competent": return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Not Yet Competent</Badge>;
+    default: return <Badge className="bg-gray-100 text-gray-800"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+  }
+};
+
+const statusLabel = (status: string) => {
+  if (status === "finalised") return { text: "Final", variant: "default" as const };
+  return { text: "Provisional", variant: "secondary" as const };
+};
+
+// ─── Gradebook detail card for a single gradebook ───
+const GradebookCard = ({ gradebook, traineeId }: { gradebook: any; traineeId: string }) => {
+  const [open, setOpen] = useState(false);
+  const { data, isLoading } = useTraineeGradebookMarks(open ? gradebook.id : null, traineeId);
+
+  const isFinal = gradebook.status === "finalised";
+  const sl = statusLabel(gradebook.status);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <Card className="border-0 shadow-sm">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                <div>
+                  <CardTitle className="text-base">{gradebook.title}</CardTitle>
+                  <CardDescription>
+                    {gradebook.qualifications?.qualification_code} • Level {gradebook.level} • {gradebook.academic_year}
+                  </CardDescription>
+                </div>
+              </div>
+              <Badge variant={sl.variant}>{sl.text}</Badge>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            {isLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+            ) : data ? (
+              <div className="space-y-4">
+                {/* CA Summary */}
+                {data.caScore && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-lg bg-muted/50">
+                    {data.caScore.test_average != null && (
+                      <div><p className="text-xs text-muted-foreground">Test Average</p><p className="text-lg font-semibold">{Number(data.caScore.test_average).toFixed(1)}%</p></div>
+                    )}
+                    {data.caScore.mock_average != null && (
+                      <div><p className="text-xs text-muted-foreground">Mock Average</p><p className="text-lg font-semibold">{Number(data.caScore.mock_average).toFixed(1)}%</p></div>
+                    )}
+                    {data.caScore.ca_score != null && (
+                      <div><p className="text-xs text-muted-foreground">CA Score</p><p className="text-lg font-bold text-primary">{Number(data.caScore.ca_score).toFixed(1)}%</p></div>
+                    )}
+                    <div><p className="text-xs text-muted-foreground">Overall</p>{competencyBadge(data.caScore.overall_competency)}</div>
+                  </div>
+                )}
+
+                {/* Component-level marks */}
+                <div className="space-y-3">
+                  {data.components.map((comp: any) => {
+                    const mark = data.marks.find((m: any) => m.component_id === comp.id);
+                    const fb = data.feedback.find((f: any) => f.component_id === comp.id);
+                    return (
+                      <div key={comp.id} className="p-3 rounded-lg border">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{comp.name}</span>
+                              <Badge variant="outline" className="capitalize text-xs">{comp.component_type}</Badge>
+                              {(comp.group as any)?.name && (
+                                <Badge variant="secondary" className="text-xs">{(comp.group as any).name}</Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {mark ? (
+                              <>
+                                {mark.marks_obtained != null && (
+                                  <span className="text-lg font-bold">{mark.marks_obtained}<span className="text-sm text-muted-foreground font-normal">/{comp.max_marks}</span></span>
+                                )}
+                                {competencyBadge(mark.competency_status)}
+                                <Badge variant={isFinal ? "default" : "secondary"} className="text-xs">
+                                  {isFinal ? "Final" : "Provisional"}
+                                </Badge>
+                              </>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Not assessed</span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Feedback */}
+                        {fb && fb.feedback_text && (
+                          <div className="mt-2 p-2 rounded bg-muted/50 text-sm flex items-start gap-2">
+                            <MessageSquare className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+                            <div>
+                              <span className="text-muted-foreground text-xs font-medium">
+                                {fb.is_final ? "Final Feedback" : "Provisional Feedback"}:
+                              </span>
+                              <p className="mt-0.5">{fb.feedback_text}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+};
+
+// ─── Main Page ───
 const TraineeResultsPage = () => {
   const userId = useTraineeUserId();
   const { data: trainee, isLoading: tLoading } = useTraineeRecord(userId);
   const { data: results, isLoading: rLoading } = useTraineeAssessmentResults(trainee?.id);
+  const { data: gradebooks, isLoading: gLoading } = useTraineeGradebookEntries(trainee?.id);
 
-  const isLoading = tLoading || rLoading;
+  const isLoading = tLoading || rLoading || gLoading;
 
   if (isLoading) {
     return (
@@ -23,25 +154,20 @@ const TraineeResultsPage = () => {
     );
   }
 
-  const totalCredits = results?.reduce((s, r) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
-  const earnedCredits = results?.filter(r => r.competency_status === "competent").reduce((s, r) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
+  const totalCredits = results?.reduce((s: number, r: any) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
+  const earnedCredits = results?.filter((r: any) => r.competency_status === "competent").reduce((s: number, r: any) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
   const progressPercentage = totalCredits > 0 ? Math.round((earnedCredits / totalCredits) * 100) : 0;
 
-  const competentCount = results?.filter(r => r.competency_status === "competent").length || 0;
-  const notCompetentCount = results?.filter(r => r.competency_status === "not_yet_competent").length || 0;
-  const pendingCount = results?.filter(r => !r.competency_status || r.competency_status === "pending").length || 0;
+  const competentCount = results?.filter((r: any) => r.competency_status === "competent").length || 0;
+  const notCompetentCount = results?.filter((r: any) => r.competency_status === "not_yet_competent").length || 0;
+  const pendingCount = results?.filter((r: any) => !r.competency_status || r.competency_status === "pending").length || 0;
 
-  const getStatusBadge = (status: string | null) => {
-    switch (status) {
-      case "competent": return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Competent</Badge>;
-      case "not_yet_competent": return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Not Yet Competent</Badge>;
-      default: return <Badge className="bg-gray-100 text-gray-800"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
-    }
-  };
+  const hasGradebooks = gradebooks && gradebooks.length > 0;
 
   return (
     <DashboardLayout title="My Results" subtitle="View your assessment results and progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
+        {/* Summary stats */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-primary/10"><Award className="h-5 w-5 text-primary" /></div><div><p className="text-sm text-muted-foreground">Credits Earned</p><p className="text-2xl font-bold">{earnedCredits}/{totalCredits}</p></div></div></CardContent></Card>
           <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-green-100"><CheckCircle className="h-5 w-5 text-green-600" /></div><div><p className="text-sm text-muted-foreground">Competent</p><p className="text-2xl font-bold text-green-600">{competentCount}</p></div></div></CardContent></Card>
@@ -49,57 +175,89 @@ const TraineeResultsPage = () => {
           <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-gray-100"><Clock className="h-5 w-5 text-gray-600" /></div><div><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold">{pendingCount}</p></div></div></CardContent></Card>
         </div>
 
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Overall Progress</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm"><span>Qualification Progress</span><span className="font-medium">{progressPercentage}%</span></div>
-              <Progress value={progressPercentage} className="h-3" />
-              <p className="text-sm text-muted-foreground">You have earned {earnedCredits} out of {totalCredits} credits.</p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Progress bar */}
+        {totalCredits > 0 && (
+          <Card className="border-0 shadow-md">
+            <CardHeader><CardTitle>Overall Progress</CardTitle></CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm"><span>Qualification Progress</span><span className="font-medium">{progressPercentage}%</span></div>
+                <Progress value={progressPercentage} className="h-3" />
+                <p className="text-sm text-muted-foreground">You have earned {earnedCredits} out of {totalCredits} credits.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle>Unit Standard Results</CardTitle>
-            <CardDescription>Detailed results for each unit standard</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!results || results.length === 0 ? (
-              <div className="text-center py-12">
-                <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                <h3 className="font-semibold">No Results Yet</h3>
-                <p className="text-muted-foreground">Your assessment results will appear here once assessed.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {results.map((result: any) => (
-                  <div key={result.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border">
-                    <div className="flex-1 mb-4 md:mb-0">
-                      <h4 className="font-medium">{result.unit_standards?.title || "Unit Standard"}</h4>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="font-mono">{result.unit_standards?.unit_standard_id || ""}</span>
-                        <span>{result.unit_standards?.credit || 0} credits</span>
-                        {result.assessment_date && <span>Assessed: {new Date(result.assessment_date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}</span>}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {result.marks_obtained !== null && result.marks_obtained !== undefined && (
-                        <div className="text-right"><p className="text-2xl font-bold">{result.marks_obtained}%</p></div>
-                      )}
-                      {getStatusBadge(result.competency_status)}
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Tabbed content: Gradebook Marks + Unit Standard Results */}
+        <Tabs defaultValue={hasGradebooks ? "gradebooks" : "unit-standards"} className="space-y-4">
+          <TabsList>
+            {hasGradebooks && (
+              <TabsTrigger value="gradebooks">
+                <BookOpen className="h-4 w-4 mr-1" />Gradebook Marks
+                {gradebooks.some((g: any) => g.status !== "finalised") && (
+                  <Badge variant="secondary" className="ml-2 text-xs">Live</Badge>
+                )}
+              </TabsTrigger>
             )}
-          </CardContent>
-        </Card>
+            <TabsTrigger value="unit-standards">
+              <Award className="h-4 w-4 mr-1" />Unit Standard Results
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Gradebook marks */}
+          {hasGradebooks && (
+            <TabsContent value="gradebooks" className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Marks labeled <Badge variant="secondary" className="text-xs mx-1">Provisional</Badge> may change before finalisation.
+                Marks labeled <Badge variant="default" className="text-xs mx-1">Final</Badge> are the official record.
+              </p>
+              {gradebooks.map((gb: any) => (
+                <GradebookCard key={gb.id} gradebook={gb} traineeId={trainee!.id} />
+              ))}
+            </TabsContent>
+          )}
+
+          {/* Legacy unit standard results */}
+          <TabsContent value="unit-standards">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle>Unit Standard Results</CardTitle>
+                <CardDescription>Finalised results for each unit standard</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!results || results.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                    <h3 className="font-semibold">No Results Yet</h3>
+                    <p className="text-muted-foreground">Your assessment results will appear here once finalised.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {results.map((result: any) => (
+                      <div key={result.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border">
+                        <div className="flex-1 mb-4 md:mb-0">
+                          <h4 className="font-medium">{result.unit_standards?.title || "Unit Standard"}</h4>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="font-mono">{result.unit_standards?.unit_standard_id || ""}</span>
+                            <span>{result.unit_standards?.credit || 0} credits</span>
+                            {result.assessment_date && <span>Assessed: {new Date(result.assessment_date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {result.marks_obtained !== null && result.marks_obtained !== undefined && (
+                            <div className="text-right"><p className="text-2xl font-bold">{result.marks_obtained}%</p></div>
+                          )}
+                          {competencyBadge(result.competency_status)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

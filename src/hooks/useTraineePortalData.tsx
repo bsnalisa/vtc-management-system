@@ -178,6 +178,60 @@ export const useTraineeAssessmentResults = (traineeId: string | null | undefined
   });
 };
 
+// ─── Gradebook-based marks for trainee portal ───
+
+export const useTraineeGradebookEntries = (traineeId: string | null | undefined) => {
+  return useQuery({
+    queryKey: ["my-gradebook-entries", traineeId],
+    queryFn: async () => {
+      if (!traineeId) return [];
+      const { data, error } = await supabase
+        .from("gradebook_trainees")
+        .select("gradebook_id")
+        .eq("trainee_id", traineeId);
+      if (error || !data || data.length === 0) return [];
+      const gbIds = data.map(d => d.gradebook_id);
+      
+      const { data: gradebooks, error: gbErr } = await supabase
+        .from("gradebooks")
+        .select(`
+          id, title, academic_year, level, status, test_weight, mock_weight,
+          qualifications:qualification_id (qualification_title, qualification_code)
+        `)
+        .in("id", gbIds)
+        .in("status", ["submitted", "hot_approved", "ac_approved", "finalised"])
+        .order("updated_at", { ascending: false });
+      if (gbErr) return [];
+      return gradebooks || [];
+    },
+    enabled: !!traineeId,
+  });
+};
+
+export const useTraineeGradebookMarks = (gradebookId: string | null | undefined, traineeId: string | null | undefined) => {
+  return useQuery({
+    queryKey: ["my-gb-marks", gradebookId, traineeId],
+    queryFn: async () => {
+      if (!gradebookId || !traineeId) return { marks: [], components: [], feedback: [], caScore: null };
+      
+      const [marksRes, compsRes, fbRes, caRes] = await Promise.all([
+        supabase.from("gradebook_marks").select("*").eq("gradebook_id", gradebookId).eq("trainee_id", traineeId),
+        supabase.from("gradebook_components").select(`*, group:group_id (id, name, group_type)`).eq("gradebook_id", gradebookId).order("sort_order"),
+        supabase.from("gradebook_feedback").select("*").eq("gradebook_id", gradebookId).eq("trainee_id", traineeId),
+        supabase.from("gradebook_ca_scores").select("*").eq("gradebook_id", gradebookId).eq("trainee_id", traineeId).maybeSingle(),
+      ]);
+      
+      return {
+        marks: marksRes.data || [],
+        components: compsRes.data || [],
+        feedback: fbRes.data || [],
+        caScore: caRes.data || null,
+      };
+    },
+    enabled: !!(gradebookId && traineeId),
+  });
+};
+
 export const useTraineeEnrollments = (traineeId: string | null | undefined) => {
   return useQuery({
     queryKey: ["my-enrollments", traineeId],
