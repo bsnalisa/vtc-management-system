@@ -75,6 +75,7 @@ export const headOfTrainingNavItems: NavItem[] = [
 export const trainerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainer-dashboard", icon: LayoutDashboard },
   { title: "My Classes", url: "/classes", icon: Users },
+  { title: "Gradebooks", url: "/gradebooks", icon: BookOpen },
   { title: "Assessments", url: "/assessment-results", icon: ClipboardCheck },
   { title: "Attendance", url: "/attendance", icon: ClipboardCheck },
   { title: "Timetable", url: "/timetable", icon: Calendar },
