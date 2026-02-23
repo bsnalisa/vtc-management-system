@@ -1,181 +1,268 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardCheck, Users, FileText, BookOpen, Calendar, AlertTriangle, RotateCcw } from "lucide-react";
+import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList, MessageSquare, FileText, Clock, Award } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { trainerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerStats } from "@/hooks/useTrainerStats";
-import { useAssessmentResultsByStatus } from "@/hooks/useAssessmentResults";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 
 const TrainerDashboard = () => {
   const navigate = useNavigate();
   const { data: profile } = useProfile();
   const { data: stats, isLoading } = useTrainerStats();
 
-  // Fetch trainer's draft & returned assessments for awareness
-  const { data: draftResults } = useAssessmentResultsByStatus(["draft", "returned_to_trainer"]);
-  const { data: submittedResults } = useAssessmentResultsByStatus(["submitted_by_trainer"]);
+  const trainingModeLabel = (mode: string) => {
+    switch (mode) {
+      case "fulltime": return "Full-time";
+      case "bdl": return "BDL";
+      case "shortcourse": return "Short Course";
+      default: return mode;
+    }
+  };
 
-  const draftCount = draftResults?.length || 0;
-  const returnedCount = draftResults?.filter((r: any) => r.assessment_status === "returned_to_trainer").length || 0;
-  const submittedCount = submittedResults?.length || 0;
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
 
   return (
     <DashboardLayout
-      title={`Welcome back, ${profile?.firstname || "User"}`}
-      subtitle="Manage your classes and assessments"
+      title=""
+      subtitle=""
       navItems={trainerNavItems}
       groupLabel="Trainer Tools"
     >
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+      <div className="space-y-8">
+        {/* Hero greeting */}
+        <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <GraduationCap className="h-7 w-7" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {greeting()}, {profile?.firstname || "Trainer"}
+              </h1>
+              <p className="text-muted-foreground mt-0.5">
+                Here's an overview of your classes and assessments
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-primary/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">My Classes</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">My Classes</CardTitle>
+              <BookOpen className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                <>
-                  <div className="text-2xl font-bold">{stats?.myClasses || 0}</div>
-                  <p className="text-xs text-muted-foreground">Active classes assigned</p>
-                </>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.myClasses || 0}</div>
               )}
+              <p className="text-xs text-muted-foreground mt-1">Active this term</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-secondary/20" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Trainess</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                <>
-                  <div className="text-2xl font-bold">{stats?.totalStudents || 0}</div>
-                  <p className="text-xs text-muted-foreground">Across all classes</p>
-                </>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.totalStudents || 0}</div>
               )}
+              <p className="text-xs text-muted-foreground mt-1">Across all classes</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-accent/30" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Draft Assessments</CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Gradebooks</CardTitle>
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{draftCount}</div>
-              <p className="text-xs text-muted-foreground">Ready to submit for review</p>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.myClasses || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Active gradebooks</p>
             </CardContent>
           </Card>
 
-          <Card className={returnedCount > 0 ? "border-amber-300 bg-amber-50/50 dark:bg-amber-950/20" : ""}>
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-destructive/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Returned</CardTitle>
-              <RotateCcw className="h-4 w-4 text-amber-500" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Attendance</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-600">{returnedCount}</div>
-              <p className="text-xs text-muted-foreground">Need revision</p>
+              <div className="text-3xl font-bold">—</div>
+              <p className="text-xs text-muted-foreground mt-1">Today's registers</p>
             </CardContent>
           </Card>
         </div>
 
-        {returnedCount > 0 && (
-          <Card className="border-amber-300 bg-amber-50/30 dark:bg-amber-950/10">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
-                <div className="flex-1">
-                  <p className="font-medium">You have {returnedCount} returned assessment(s)</p>
-                  <p className="text-sm text-muted-foreground">
-                    The Head of Training returned these for revision. Please review and resubmit.
-                  </p>
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { icon: BookOpen, label: "Gradebooks", desc: "Manage marks", url: "/gradebooks", color: "text-primary" },
+              { icon: ClipboardList, label: "Attendance", desc: "Mark register", url: "/attendance", color: "text-primary" },
+              { icon: Users, label: "My Classes", desc: "View students", url: "/classes", color: "text-primary" },
+              { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable", color: "text-primary" },
+              { icon: MessageSquare, label: "Messages", desc: "Inbox", url: "/messages", color: "text-primary" },
+            ].map(({ icon: Icon, label, desc, url, color }) => (
+              <button
+                key={url}
+                onClick={() => navigate(url)}
+                className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+              >
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 ${color}`}>
+                  <Icon className="h-5 w-5" />
                 </div>
-                <Button variant="outline" onClick={() => navigate("/assessment-results")}>
-                  Review Now
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {submittedCount > 0 && (
-          <Card className="border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <ClipboardCheck className="h-5 w-5 text-blue-500 shrink-0" />
-                <div>
-                  <p className="font-medium">{submittedCount} assessment(s) pending HoT review</p>
-                  <p className="text-sm text-muted-foreground">
-                    These have been submitted and are awaiting Head of Training approval.
-                  </p>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </button>
+            ))}
+          </div>
+        </div>
 
+        {/* My Classes Detail */}
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common trainer tasks</CardDescription>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-primary" /> My Classes
+                </CardTitle>
+                <CardDescription>Classes assigned to you with enrolled students</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate("/classes")}>
+                View All <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button
-              variant="outline"
-              className="h-auto py-4 flex-col gap-2"
-              onClick={() => navigate("/assessment-results")}
-            >
-              <ClipboardCheck className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Capture Marks</p>
-                <p className="text-xs text-muted-foreground">Record & submit assessments</p>
+          <Separator />
+          <CardContent className="pt-4">
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
               </div>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate("/attendance")}>
-              <ClipboardCheck className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Mark Attendance</p>
-                <p className="text-xs text-muted-foreground">Record student attendance</p>
+            ) : stats?.classes && stats.classes.length > 0 ? (
+              <div className="space-y-3">
+                {stats.classes.map((cls) => (
+                  <div
+                    key={cls.id}
+                    className="group flex items-center justify-between rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50 cursor-pointer"
+                    onClick={() => navigate('/classes')}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="font-semibold">{cls.class_name}</span>
+                        <Badge variant="outline" className="text-xs font-mono">{cls.class_code}</Badge>
+                        <Badge variant="secondary" className="text-xs">{trainingModeLabel(cls.training_mode)}</Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{cls.trade_name}</span>
+                        <span>Level {cls.level}</span>
+                        <span>{cls.academic_year}</span>
+                      </div>
+                      {cls.capacity && (
+                        <div className="mt-2.5 flex items-center gap-2">
+                          <Progress value={(cls.student_count / cls.capacity) * 100} className="h-1.5 flex-1 max-w-[200px]" />
+                          <span className="text-xs text-muted-foreground font-medium">{cls.student_count}/{cls.capacity}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 ml-4">
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">{cls.student_count}</div>
+                        <div className="text-xs text-muted-foreground">students</div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate("/classes")}>
-              <BookOpen className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">My Classes</p>
-                <p className="text-xs text-muted-foreground">View assigned classes</p>
+            ) : (
+              <div className="py-10 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <BookOpen className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">No Classes Assigned</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  You haven't been assigned to any classes yet. Contact your Head of Training for assignment.
+                </p>
               </div>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate("/timetable")}>
-              <Calendar className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Timetable</p>
-                <p className="text-xs text-muted-foreground">View schedule</p>
-              </div>
-            </Button>
+            )}
           </CardContent>
         </Card>
 
-        {stats?.myClasses === 0 && !isLoading && (
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-medium mb-2">No Classes Assigned</h3>
-              <p className="text-muted-foreground mb-4">
-                You haven't been assigned to any classes yet. Contact your Head of Training.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {/* Assigned Qualifications */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Award className="h-5 w-5 text-primary" /> Assigned Qualifications
+                </CardTitle>
+                <CardDescription>Qualifications you are allocated to teach</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-4">
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
+              </div>
+            ) : stats?.qualifications && stats.qualifications.length > 0 ? (
+              <div className="space-y-2">
+                {stats.qualifications.map((q) => (
+                  <div
+                    key={q.id}
+                    className="flex items-center gap-3 rounded-lg border p-4"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs font-mono">{q.qualification_code}</Badge>
+                        <span className="font-medium text-sm">{q.qualification_title}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-10 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <Award className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">No Qualifications Assigned</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  You haven't been assigned to any qualifications yet. Contact your Head of Training for assignment.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
