@@ -64,6 +64,7 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Trade Management", url: "/trade-management", icon: Briefcase },
   { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
   { title: "Gradebook Review", url: "/gradebook-review", icon: BookOpen },
+  { title: "Gradebook Audit", url: "/gradebook-reconciliation", icon: ClipboardCheck },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
   { title: "Class Management", url: "/classes", icon: GraduationCap },
   { title: "Timetable", url: "/timetable", icon: Calendar },
@@ -111,6 +112,7 @@ export const hodNavItems: NavItem[] = [
 export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Dashboard", url: "/assessment-coordinator-dashboard", icon: LayoutDashboard },
   { title: "Gradebook Approval", url: "/gradebook-approval", icon: BookOpen },
+  { title: "Gradebook Audit", url: "/gradebook-reconciliation", icon: ClipboardCheck },
   { title: "Assessment Results", url: "/assessment-results", icon: FileText },
   { title: "Mark Management", url: "/assessment-results", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
