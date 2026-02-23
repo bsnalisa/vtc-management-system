@@ -100,8 +100,11 @@ const GradebookDetail = () => {
   // Mark editing state: { `${componentId}_${traineeId}`: { marks, competency, feedback } }
   const [editingMarks, setEditingMarks] = useState<Record<string, { marks: string; competency: string; feedback: string }>>({});
 
+  const { role } = useRoleNavigation();
+  const isTrainer = role === "trainer";
   const isDraft = gradebook?.status === "draft";
   const isLocked = gradebook?.is_locked;
+  const canEdit = isTrainer && isDraft;
 
   const getMark = (componentId: string, traineeId: string) => {
     return marks?.find((m: any) => m.component_id === componentId && m.trainee_id === traineeId);
@@ -254,7 +257,7 @@ const GradebookDetail = () => {
           <TabsContent value="components" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Assessment Components</h3>
-              {isDraft && !isLocked && (
+              {canEdit && !isLocked && (
                 <Dialog open={compDialog} onOpenChange={setCompDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Component</Button>
@@ -327,7 +330,7 @@ const GradebookDetail = () => {
                         <TableHead>Type</TableHead>
                         <TableHead>Group</TableHead>
                         <TableHead>Max Marks</TableHead>
-                        {isDraft && !isLocked && <TableHead className="w-16"></TableHead>}
+                        {canEdit && !isLocked && <TableHead className="w-16"></TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -337,7 +340,7 @@ const GradebookDetail = () => {
                           <TableCell><Badge variant="outline" className="capitalize">{c.component_type}</Badge></TableCell>
                           <TableCell>{(c.group as any)?.name || "—"}</TableCell>
                           <TableCell>{c.max_marks}</TableCell>
-                          {isDraft && !isLocked && (
+                          {canEdit && !isLocked && (
                             <TableCell>
                               <Button size="icon" variant="ghost" onClick={() => deleteComponent.mutate({ id: c.id, gradebook_id: id! })}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -359,7 +362,7 @@ const GradebookDetail = () => {
             )}
 
             {/* Quick group creation */}
-            {isDraft && !isLocked && (
+            {canEdit && !isLocked && (
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => createGroup.mutate({ gradebook_id: id!, name: "Theory", group_type: "theory", sort_order: 1 })}>
                   + Theory Group
@@ -375,7 +378,7 @@ const GradebookDetail = () => {
           <TabsContent value="marks" className="space-y-4">
             {components && components.length > 0 && gbTrainees && gbTrainees.length > 0 ? (
               <>
-                {isDraft && (
+                {canEdit && (
                   <div className="flex justify-end">
                     <Button onClick={handleSubmit} disabled={submitGradebook.isPending}>
                       <Send className="h-4 w-4 mr-2" />{submitGradebook.isPending ? "Submitting..." : "Submit for Review"}
@@ -417,7 +420,7 @@ const GradebookDetail = () => {
 
                                 return (
                                   <TableCell key={c.id} className="text-center p-2">
-                                    {isDraft ? (
+                                    {canEdit ? (
                                       <div className="space-y-1">
                                         <Input
                                           type="number"
@@ -495,7 +498,7 @@ const GradebookDetail = () => {
           <TabsContent value="trainees" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Enrolled Trainees ({gbTrainees?.length || 0})</h3>
-              {isDraft && (
+              {canEdit && (
                 <Dialog open={traineeDialog} onOpenChange={setTraineeDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Trainees</Button>
