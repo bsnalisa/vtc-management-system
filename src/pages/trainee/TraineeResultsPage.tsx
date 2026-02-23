@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Award, CheckCircle, XCircle, Clock, Loader2, BookOpen, MessageSquare, ChevronDown, ChevronRight } from "lucide-react";
+import { Award, CheckCircle, XCircle, Clock, Loader2, BookOpen, MessageSquare, ChevronDown, ChevronRight, HelpCircle, Send } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   useTraineeUserId,
   useTraineeRecord,
@@ -15,6 +21,7 @@ import {
   useTraineeGradebookEntries,
   useTraineeGradebookMarks,
 } from "@/hooks/useTraineePortalData";
+import { useMyMarkQueries, useSubmitMarkQuery } from "@/hooks/useMarkQueries";
 
 const competencyBadge = (status: string | null) => {
   switch (status) {
@@ -30,7 +37,7 @@ const statusLabel = (status: string) => {
 };
 
 // ─── Gradebook detail card for a single gradebook ───
-const GradebookCard = ({ gradebook, traineeId }: { gradebook: any; traineeId: string }) => {
+const GradebookCard = ({ gradebook, traineeId, onRaiseQuery }: { gradebook: any; traineeId: string; onRaiseQuery: (gradebookId: string, componentId: string, componentName: string) => void }) => {
   const [open, setOpen] = useState(false);
   const { data, isLoading } = useTraineeGradebookMarks(open ? gradebook.id : null, traineeId);
 
@@ -124,6 +131,14 @@ const GradebookCard = ({ gradebook, traineeId }: { gradebook: any; traineeId: st
                             </div>
                           </div>
                         )}
+                        {/* Query button */}
+                        {mark && (
+                          <div className="mt-2 flex justify-end">
+                            <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => onRaiseQuery(gradebook.id, comp.id, comp.name)}>
+                              <HelpCircle className="h-3 w-3 mr-1" />Query this mark
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -143,8 +158,32 @@ const TraineeResultsPage = () => {
   const { data: trainee, isLoading: tLoading } = useTraineeRecord(userId);
   const { data: results, isLoading: rLoading } = useTraineeAssessmentResults(trainee?.id);
   const { data: gradebooks, isLoading: gLoading } = useTraineeGradebookEntries(trainee?.id);
+  const { data: myQueries } = useMyMarkQueries(trainee?.id);
+  const submitQuery = useSubmitMarkQuery();
+
+  const [queryDialog, setQueryDialog] = useState<{ gradebookId: string; componentId: string; componentName: string } | null>(null);
+  const [queryForm, setQueryForm] = useState({ query_type: "marks_query", subject: "", description: "" });
 
   const isLoading = tLoading || rLoading || gLoading;
+
+  const handleSubmitQuery = async () => {
+    if (!queryDialog || !trainee?.id || !queryForm.subject || !queryForm.description) return;
+    await submitQuery.mutateAsync({
+      gradebook_id: queryDialog.gradebookId,
+      component_id: queryDialog.componentId,
+      trainee_id: trainee.id,
+      query_type: queryForm.query_type,
+      subject: queryForm.subject,
+      description: queryForm.description,
+    });
+    setQueryDialog(null);
+    setQueryForm({ query_type: "marks_query", subject: "", description: "" });
+  };
+
+  const openQueryDialog = (gradebookId: string, componentId: string, componentName: string) => {
+    setQueryForm({ query_type: "marks_query", subject: `Query about ${componentName}`, description: "" });
+    setQueryDialog({ gradebookId, componentId, componentName });
+  };
 
   if (isLoading) {
     return (
@@ -213,7 +252,7 @@ const TraineeResultsPage = () => {
                 Marks labeled <Badge variant="default" className="text-xs mx-1">Final</Badge> are the official record.
               </p>
               {gradebooks.map((gb: any) => (
-                <GradebookCard key={gb.id} gradebook={gb} traineeId={trainee!.id} />
+                <GradebookCard key={gb.id} gradebook={gb} traineeId={trainee!.id} onRaiseQuery={openQueryDialog} />
               ))}
             </TabsContent>
           )}
@@ -258,6 +297,75 @@ const TraineeResultsPage = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        {/* My Queries Section */}
+        {myQueries && myQueries.length > 0 && (
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><HelpCircle className="h-5 w-5" />My Mark Queries</CardTitle>
+              <CardDescription>Track the status of your submitted queries</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {myQueries.map((q: any) => (
+                <div key={q.id} className="p-3 rounded-lg border space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">{q.subject}</span>
+                    <Badge variant={q.status === "open" ? "secondary" : q.status === "resolved" ? "default" : "outline"} className="capitalize text-xs">
+                      {q.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{q.gradebooks?.title} • {q.gradebook_components?.name}</p>
+                  <p className="text-sm">{q.description}</p>
+                  {q.resolution_notes && (
+                    <div className="mt-1 p-2 bg-muted rounded text-sm">
+                      <span className="text-xs font-medium text-muted-foreground">Response: </span>
+                      {q.resolution_notes}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Query Dialog */}
+        <Dialog open={!!queryDialog} onOpenChange={(open) => { if (!open) setQueryDialog(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Raise a Mark Query</DialogTitle>
+              <DialogDescription>
+                Submit a query about your mark for <strong>{queryDialog?.componentName}</strong>. Your trainer will be notified.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Query Type</Label>
+                <Select value={queryForm.query_type} onValueChange={v => setQueryForm(p => ({ ...p, query_type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="marks_query">Marks Query</SelectItem>
+                    <SelectItem value="competency_query">Competency Status Query</SelectItem>
+                    <SelectItem value="feedback_query">Feedback Query</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Subject</Label>
+                <Input value={queryForm.subject} onChange={e => setQueryForm(p => ({ ...p, subject: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea placeholder="Describe your query in detail..." value={queryForm.description} onChange={e => setQueryForm(p => ({ ...p, description: e.target.value }))} rows={4} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setQueryDialog(null)}>Cancel</Button>
+              <Button onClick={handleSubmitQuery} disabled={submitQuery.isPending || !queryForm.subject.trim() || !queryForm.description.trim()}>
+                <Send className="h-4 w-4 mr-2" />{submitQuery.isPending ? "Submitting..." : "Submit Query"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

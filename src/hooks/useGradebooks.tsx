@@ -2,6 +2,38 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+// ─── Notification helper (fire-and-forget) ───
+const sendGradebookNotification = async (gradebookId: string, type: string, title: string, message: string, targetRole?: string) => {
+  try {
+    const { data: gb } = await supabase
+      .from("gradebooks")
+      .select("organization_id, title, trainer_id, trainers:trainer_id (user_id)")
+      .eq("id", gradebookId)
+      .single();
+    if (!gb) return;
+
+    const payload: Record<string, any> = {
+      organization_id: gb.organization_id,
+      type,
+      title,
+      message,
+      priority: "medium",
+      action_url: `/gradebooks/${gradebookId}`,
+      metadata: { gradebook_id: gradebookId, gradebook_title: gb.title },
+    };
+
+    if (targetRole) {
+      payload.role = targetRole;
+    } else if ((gb as any).trainers?.user_id) {
+      payload.user_id = (gb as any).trainers.user_id;
+    }
+
+    await supabase.functions.invoke("create-notification", { body: payload });
+  } catch (e) {
+    console.warn("Failed to send gradebook notification:", e);
+  }
+};
+
 // ─── Types ───
 export interface Gradebook {
   id: string;
@@ -364,10 +396,12 @@ export const useSubmitGradebook = () => {
         .eq("id", gradebookId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, gradebookId) => {
       qc.invalidateQueries({ queryKey: ["my-gradebooks"] });
       qc.invalidateQueries({ queryKey: ["gradebook"] });
       toast({ title: "Submitted", description: "Gradebook submitted for HoT review." });
+      // Notify HoT
+      sendGradebookNotification(gradebookId, "gradebook_submitted", "Gradebook Submitted for Review", "A trainer has submitted a gradebook for your review.", "head_of_training");
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -408,10 +442,12 @@ export const useHoTApproveGradebook = () => {
         .eq("id", gradebookId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, gradebookId) => {
       qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
       qc.invalidateQueries({ queryKey: ["gradebook"] });
       toast({ title: "Approved", description: "Gradebook approved. Forwarded to Assessment Coordinator." });
+      // Notify AC
+      sendGradebookNotification(gradebookId, "gradebook_hot_approved", "Gradebook Approved by HoT", "A gradebook has been approved by Head of Training and awaits your review.", "assessment_coordinator");
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -435,10 +471,12 @@ export const useReturnGradebook = () => {
         .eq("id", gradebookId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, { gradebookId }) => {
       qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
       qc.invalidateQueries({ queryKey: ["gradebook"] });
       toast({ title: "Returned", description: "Gradebook returned for revision." });
+      // Notify trainer
+      sendGradebookNotification(gradebookId, "gradebook_returned", "Gradebook Returned", "Your gradebook has been returned for revision. Please review the feedback.");
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -458,10 +496,12 @@ export const useACApproveGradebook = () => {
         .eq("id", gradebookId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, gradebookId) => {
       qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
       qc.invalidateQueries({ queryKey: ["gradebook"] });
       toast({ title: "Approved", description: "Gradebook approved by Assessment Coordinator." });
+      // Notify trainer
+      sendGradebookNotification(gradebookId, "gradebook_ac_approved", "Gradebook Approved by AC", "Your gradebook has been approved by the Assessment Coordinator.");
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -480,10 +520,14 @@ export const useFinaliseGradebook = () => {
         .eq("id", gradebookId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, gradebookId) => {
       qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
       qc.invalidateQueries({ queryKey: ["gradebook"] });
       toast({ title: "Finalised", description: "Gradebook finalised. Marks are now official." });
+      // Notify trainer
+      sendGradebookNotification(gradebookId, "gradebook_finalised", "Gradebook Finalised", "Your gradebook has been finalised. Marks are now the official record.");
+      // Notify trainees via role-based notification
+      sendGradebookNotification(gradebookId, "marks_available", "Your Marks Are Available", "Final marks have been published. Check your Results page.", "trainee");
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
