@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 
 export interface ClassData {
   trade_id: string;
@@ -43,6 +44,7 @@ export const useClasses = () => {
 export const useCreateClass = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { organizationId } = useOrganizationContext();
 
   return useMutation({
     mutationFn: async (classData: ClassData) => {
@@ -54,6 +56,7 @@ export const useCreateClass = () => {
         class_name: classData.class_name,
         academic_year: classData.academic_year,
         capacity: classData.capacity,
+        organization_id: organizationId,
       };
       // Only include trainer_id if it has a value
       if (classData.trainer_id) {
@@ -71,6 +74,8 @@ export const useCreateClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["class_enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["trainer-stats"] });
       toast({ title: "Success", description: "Class created successfully!" });
     },
     onError: (error: Error) => {
@@ -108,6 +113,8 @@ export const useUpdateClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["class_enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["trainer-stats"] });
       toast({ title: "Success", description: "Class updated successfully!" });
     },
     onError: (error: Error) => {

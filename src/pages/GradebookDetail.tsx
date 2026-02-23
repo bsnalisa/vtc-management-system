@@ -26,11 +26,32 @@ import { useToast } from "@/hooks/use-toast";
 import { useGradebookQueries, useResolveMarkQuery } from "@/hooks/useMarkQueries";
 
 // Fetch available trainees for the gradebook's qualification
-const useAvailableTrainees = (qualificationId?: string) => {
+// First try class_enrollments matching the qualification's trade, then fall back to direct qualification match
+const useAvailableTrainees = (qualificationId?: string, level?: number) => {
   return useQuery({
-    queryKey: ["available-trainees-for-gb", qualificationId],
+    queryKey: ["available-trainees-for-gb", qualificationId, level],
     queryFn: async () => {
       if (!qualificationId) return [];
+      
+      // Get qualification's trade_id
+      const { data: qual } = await supabase
+        .from("qualifications")
+        .select("trade_id")
+        .eq("id", qualificationId)
+        .single();
+      
+      // Find trainees via class_enrollments matching the trade and level
+      if (qual?.trade_id) {
+        const { data: trainees, error } = await supabase
+          .from("trainees")
+          .select("id, trainee_id, first_name, last_name, level")
+          .eq("trade_id", qual.trade_id)
+          .eq("status", "active")
+          .order("last_name");
+        if (!error && trainees && trainees.length > 0) return trainees;
+      }
+      
+      // Fallback: match by qualification_id
       const { data, error } = await supabase
         .from("trainees")
         .select("id, trainee_id, first_name, last_name, level")
@@ -57,7 +78,7 @@ const GradebookDetail = () => {
   const { data: marks } = useGradebookMarks(id);
   const { data: feedbackList } = useGradebookFeedbackList(id);
   const { data: caScores } = useGradebookCAScores(id);
-  const { data: availableTrainees } = useAvailableTrainees(gradebook?.qualification_id);
+  const { data: availableTrainees } = useAvailableTrainees(gradebook?.qualification_id, gradebook?.level);
   const { data: markQueries } = useGradebookQueries(id);
   const resolveQuery = useResolveMarkQuery();
 
