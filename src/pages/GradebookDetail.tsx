@@ -466,7 +466,7 @@ const GradebookDetail = () => {
           <TabsContent value="components" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Assessment Components</h3>
-              {canEdit && !isLocked && (
+              {canEdit && (
                 <Dialog open={compDialog} onOpenChange={setCompDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Component</Button>
@@ -525,7 +525,7 @@ const GradebookDetail = () => {
             {isLocked && (
               <div className="flex items-center gap-2 p-3 bg-muted rounded-lg text-sm text-muted-foreground">
                 <Lock className="h-4 w-4" />
-                Structure is locked. Components cannot be added or removed after the first mark is entered.
+                Structure is locked. Components cannot be deleted after the first mark is entered, but new ones can still be added.
               </div>
             )}
 
@@ -539,7 +539,7 @@ const GradebookDetail = () => {
                         <TableHead>Type</TableHead>
                         <TableHead>Group</TableHead>
                         <TableHead>Max Marks</TableHead>
-                        {canEdit && !isLocked && <TableHead className="w-16"></TableHead>}
+                        {canEdit && !isLocked && <TableHead className="w-16">Delete</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
