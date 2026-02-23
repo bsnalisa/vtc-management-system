@@ -62,7 +62,10 @@ const routeLabels: Record<string, string> = {
   "register": "Register",
   "documents": "Documents",
   "applications": "Applications",
+  "gradebooks": "Gradebooks",
   "training-modules": "Training Modules",
+  "qualifications": "Qualifications",
+  "trades": "Trades",
 };
 
 export const Breadcrumb = () => {
@@ -70,11 +73,16 @@ export const Breadcrumb = () => {
   const { role } = useUserRole();
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
-  const breadcrumbRoutes: BreadcrumbRoute[] = pathSegments.map((segment, index) => {
-    const path = "/" + pathSegments.slice(0, index + 1).join("/");
-    const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
-    return { path, label };
-  });
+  const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
+  const breadcrumbRoutes: BreadcrumbRoute[] = pathSegments
+    .filter(segment => !isUUID(segment))
+    .map((segment, index, filtered) => {
+      const pathIndex = pathSegments.indexOf(segment);
+      const path = "/" + pathSegments.slice(0, pathIndex + 1).join("/");
+      const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+      return { path, label };
+    });
 
   // Include role context as home if user has a role
   const roleDisplayName = getRoleDisplayName(role);
