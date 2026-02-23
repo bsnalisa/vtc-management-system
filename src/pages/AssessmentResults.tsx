@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -14,7 +13,7 @@ import {
   useHoTApproveGradebook,
   useReturnGradebook,
 } from "@/hooks/useGradebooks";
-import { CheckCircle, RotateCcw, Eye, BookOpen, GraduationCap } from "lucide-react";
+import { CheckCircle, RotateCcw, Eye, ArrowLeft, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 
 const statusColor = (s: string) => {
@@ -31,18 +30,49 @@ const AssessmentResults = () => {
   const navigate = useNavigate();
   const { role, navItems, groupLabel } = useRoleNavigation();
 
-  const { data: submitted } = useOrgGradebooks("submitted");
-  const { data: approved } = useOrgGradebooks("hot_approved");
   const { data: allGradebooks } = useOrgGradebooks();
 
   const approve = useHoTApproveGradebook();
   const returnGb = useReturnGradebook();
 
+  const [selectedQualification, setSelectedQualification] = useState<string | null>(null);
   const [returnDialog, setReturnDialog] = useState<string | null>(null);
   const [returnReason, setReturnReason] = useState("");
 
   const isHoT = role === "head_of_training";
-  const canApprove = isHoT;
+
+  // Group gradebooks by qualification
+  const qualifications = useMemo(() => {
+    if (!allGradebooks) return [];
+    const map = new Map<string, { id: string; code: string; title: string; submitted: number; approved: number; total: number }>();
+    for (const gb of allGradebooks) {
+      const qId = gb.qualification_id;
+      if (!qId) continue;
+      if (!map.has(qId)) {
+        map.set(qId, {
+          id: qId,
+          code: gb.qualifications?.qualification_code || "—",
+          title: gb.qualifications?.qualification_title || "Unknown",
+          submitted: 0,
+          approved: 0,
+          total: 0,
+        });
+      }
+      const entry = map.get(qId)!;
+      entry.total++;
+      if (gb.status === "submitted") entry.submitted++;
+      if (gb.status === "hot_approved" || gb.status === "ac_approved" || gb.status === "finalised") entry.approved++;
+    }
+    return Array.from(map.values()).sort((a, b) => b.submitted - a.submitted);
+  }, [allGradebooks]);
+
+  // Gradebooks for the selected qualification
+  const qualificationGradebooks = useMemo(() => {
+    if (!selectedQualification || !allGradebooks) return [];
+    return allGradebooks.filter((gb: any) => gb.qualification_id === selectedQualification);
+  }, [selectedQualification, allGradebooks]);
+
+  const selectedQualInfo = qualifications.find(q => q.id === selectedQualification);
 
   const handleApprove = async (id: string) => {
     await approve.mutateAsync(id);
@@ -55,133 +85,178 @@ const AssessmentResults = () => {
     setReturnReason("");
   };
 
-  const pendingCount = submitted?.length || 0;
-  const approvedCount = approved?.length || 0;
-
-  const GradebookTable = ({ gradebooks, showActions }: { gradebooks: any[]; showActions: boolean }) => (
-    <Card>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Gradebook</TableHead>
-              <TableHead>Qualification</TableHead>
-              <TableHead>Trainer</TableHead>
-              <TableHead>Level</TableHead>
-              <TableHead>Year</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {gradebooks.map((gb: any) => (
-              <TableRow key={gb.id}>
-                <TableCell className="font-medium">{gb.title}</TableCell>
-                <TableCell>
-                  <div className="text-sm">{gb.qualifications?.qualification_code}</div>
-                  <div className="text-xs text-muted-foreground">{gb.qualifications?.qualification_title}</div>
-                </TableCell>
-                <TableCell>{gb.trainers?.full_name || "—"}</TableCell>
-                <TableCell>{gb.level}</TableCell>
-                <TableCell>{gb.academic_year}</TableCell>
-                <TableCell>
-                  <Badge variant={statusColor(gb.status) as any} className="capitalize">
-                    {gb.status?.replace(/_/g, " ")}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {gb.submitted_at ? format(new Date(gb.submitted_at), "dd MMM yyyy") : "—"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={() => navigate(`/gradebooks/${gb.id}`)}>
-                      <Eye className="h-3.5 w-3.5 mr-1" />View
-                    </Button>
-                    {showActions && canApprove && gb.status === "submitted" && (
-                      <>
-                        <Button size="sm" onClick={() => handleApprove(gb.id)} disabled={approve.isPending}>
-                          <CheckCircle className="h-3.5 w-3.5 mr-1" />Approve
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => setReturnDialog(gb.id)}>
-                          <RotateCcw className="h-3.5 w-3.5 mr-1" />Return
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-            {gradebooks.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  No gradebooks in this category.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
+  const totalPending = qualifications.reduce((sum, q) => sum + q.submitted, 0);
 
   return (
     <DashboardLayout
       title="Assessment Review"
-      subtitle="Review gradebook marks submitted by trainers"
+      subtitle="Review submitted gradebook assessments by qualification"
       navItems={navItems}
       groupLabel={groupLabel}
     >
       <div className="space-y-6 max-w-7xl mx-auto">
-        {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pendingCount}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Approved</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{approvedCount}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Gradebooks</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{allGradebooks?.length || 0}</div>
-            </CardContent>
-          </Card>
-        </div>
+        {!selectedQualification ? (
+          <>
+            {/* Summary */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Qualifications</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{qualifications.length}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-destructive">{totalPending}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Gradebooks</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{allGradebooks?.length || 0}</div>
+                </CardContent>
+              </Card>
+            </div>
 
-        <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="pending">
-              Pending Review {pendingCount > 0 && <Badge variant="destructive" className="ml-2 h-5 px-1.5">{pendingCount}</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="approved">Approved</TabsTrigger>
-            <TabsTrigger value="all">All Gradebooks</TabsTrigger>
-          </TabsList>
+            {/* Qualifications list */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Qualifications</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Qualification</TableHead>
+                      <TableHead className="text-center">Pending Review</TableHead>
+                      <TableHead className="text-center">Approved</TableHead>
+                      <TableHead className="text-center">Total</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {qualifications.map((q) => (
+                      <TableRow
+                        key={q.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => setSelectedQualification(q.id)}
+                      >
+                        <TableCell className="font-mono text-sm">{q.code}</TableCell>
+                        <TableCell className="font-medium">{q.title}</TableCell>
+                        <TableCell className="text-center">
+                          {q.submitted > 0 ? (
+                            <Badge variant="destructive">{q.submitted}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">{q.approved}</TableCell>
+                        <TableCell className="text-center">{q.total}</TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedQualification(q.id); }}>
+                            <BookOpen className="h-3.5 w-3.5 mr-1" /> View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {qualifications.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No qualifications with gradebooks found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <>
+            {/* Back button + qualification header */}
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => setSelectedQualification(null)}>
+                <ArrowLeft className="h-4 w-4 mr-1" /> Back
+              </Button>
+              <div>
+                <h2 className="text-lg font-semibold">{selectedQualInfo?.title}</h2>
+                <p className="text-sm text-muted-foreground">{selectedQualInfo?.code}</p>
+              </div>
+            </div>
 
-          <TabsContent value="pending">
-            <GradebookTable gradebooks={submitted || []} showActions={true} />
-          </TabsContent>
-
-          <TabsContent value="approved">
-            <GradebookTable gradebooks={approved || []} showActions={false} />
-          </TabsContent>
-
-          <TabsContent value="all">
-            <GradebookTable gradebooks={allGradebooks || []} showActions={false} />
-          </TabsContent>
-        </Tabs>
+            {/* Gradebooks for this qualification */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Submitted Assessments</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Gradebook</TableHead>
+                      <TableHead>Trainer</TableHead>
+                      <TableHead>Level</TableHead>
+                      <TableHead>Year</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {qualificationGradebooks.map((gb: any) => (
+                      <TableRow key={gb.id}>
+                        <TableCell className="font-medium">{gb.title}</TableCell>
+                        <TableCell>{gb.trainers?.full_name || "—"}</TableCell>
+                        <TableCell>{gb.level}</TableCell>
+                        <TableCell>{gb.academic_year}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusColor(gb.status) as any} className="capitalize">
+                            {gb.status?.replace(/_/g, " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {gb.submitted_at ? format(new Date(gb.submitted_at), "dd MMM yyyy") : "—"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="outline" onClick={() => navigate(`/gradebooks/${gb.id}`)}>
+                              <Eye className="h-3.5 w-3.5 mr-1" /> View
+                            </Button>
+                            {isHoT && gb.status === "submitted" && (
+                              <>
+                                <Button size="sm" onClick={() => handleApprove(gb.id)} disabled={approve.isPending}>
+                                  <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => setReturnDialog(gb.id)}>
+                                  <RotateCcw className="h-3.5 w-3.5 mr-1" /> Return
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {qualificationGradebooks.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          No gradebooks for this qualification.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </>
+        )}
 
         {/* Return dialog */}
         <Dialog open={!!returnDialog} onOpenChange={(open) => { if (!open) setReturnDialog(null); }}>
