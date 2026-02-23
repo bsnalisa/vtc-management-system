@@ -257,62 +257,193 @@ const GradebookDetail = () => {
         </Card>
 
         {isHoT ? (
-          /* ─── HoT: Read-only CA Scores Summary ─── */
-          <div className="space-y-4">
-            <h3 className="font-semibold">Trainee Assessment Summary</h3>
-            <p className="text-sm text-muted-foreground">
-              CA = Test Avg × {gradebook.test_weight}% + Mock Avg × {gradebook.mock_weight}%
-            </p>
-            {caScores && caScores.length > 0 ? (
-              <Card>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Trainee</TableHead>
-                        <TableHead className="text-center">Test Avg (%)</TableHead>
-                        <TableHead className="text-center">Mock Avg (%)</TableHead>
-                        <TableHead className="text-center">Theory (%)</TableHead>
-                        <TableHead className="text-center">Practical (%)</TableHead>
-                        <TableHead className="text-center">CA Score</TableHead>
-                        <TableHead className="text-center">Competency</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {gbTrainees?.map((gt: any) => {
-                        const trainee = gt.trainees;
-                        const ca = getCA(gt.trainee_id);
-                        return (
-                          <TableRow key={gt.id}>
-                            <TableCell>
-                              <div className="font-medium">{trainee?.first_name} {trainee?.last_name}</div>
-                              <div className="text-xs text-muted-foreground font-mono">{trainee?.trainee_id}</div>
-                            </TableCell>
-                            <TableCell className="text-center">{ca?.test_average != null ? ca.test_average.toFixed(1) : "—"}</TableCell>
-                            <TableCell className="text-center">{ca?.mock_average != null ? ca.mock_average.toFixed(1) : "—"}</TableCell>
-                            <TableCell className="text-center">{ca?.theory_score != null ? ca.theory_score.toFixed(1) : "—"}</TableCell>
-                            <TableCell className="text-center">{ca?.practical_score != null ? ca.practical_score.toFixed(1) : "—"}</TableCell>
-                            <TableCell className="text-center font-bold">{ca?.ca_score != null ? ca.ca_score.toFixed(1) : "—"}</TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant={ca?.overall_competency === "competent" ? "default" : ca?.overall_competency === "not_yet_competent" ? "destructive" : "secondary"}>
-                                {ca?.overall_competency === "competent" ? "Competent" : ca?.overall_competency === "not_yet_competent" ? "NYC" : "Pending"}
-                              </Badge>
-                            </TableCell>
+          /* ─── HoT: Detailed Component-by-Component Assessment View ─── */
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-lg">Trainee Assessment Summary</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Theory CA = Test Avg × {gradebook.test_weight}% + Mock × {gradebook.mock_weight}% (pass: ≥50%) · Practical tasks pass individually (≥60% each)
+              </p>
+            </div>
+
+            {(() => {
+              const testComps = components?.filter((c: any) => c.component_type === "test") || [];
+              const mockComps = components?.filter((c: any) => c.component_type === "mock") || [];
+              const practicalComps = components?.filter((c: any) => c.component_type === "practical") || [];
+              const otherComps = components?.filter((c: any) => !["test", "mock", "practical"].includes(c.component_type)) || [];
+              const allComps = [...testComps, ...mockComps, ...practicalComps, ...otherComps];
+
+              if (allComps.length === 0 && (!gbTrainees || gbTrainees.length === 0)) {
+                return (
+                  <Card className="border-dashed">
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      <Calculator className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>No assessment data available yet.</p>
+                    </CardContent>
+                  </Card>
+                );
+              }
+
+              return (
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="sticky left-0 bg-background z-10 min-w-[180px]">Trainee</TableHead>
+                            {testComps.map((c: any) => (
+                              <TableHead key={c.id} className="text-center min-w-[80px]">
+                                <div className="text-xs font-semibold">{c.name}</div>
+                                <div className="text-[10px] text-muted-foreground">/{c.max_marks}</div>
+                              </TableHead>
+                            ))}
+                            {testComps.length > 0 && (
+                              <TableHead className="text-center min-w-[80px] bg-muted/30">
+                                <div className="text-xs font-semibold">Test Avg</div>
+                                <div className="text-[10px] text-muted-foreground">%</div>
+                              </TableHead>
+                            )}
+                            {mockComps.map((c: any) => (
+                              <TableHead key={c.id} className="text-center min-w-[80px]">
+                                <div className="text-xs font-semibold">{c.name}</div>
+                                <div className="text-[10px] text-muted-foreground">/{c.max_marks}</div>
+                              </TableHead>
+                            ))}
+                            {(testComps.length > 0 || mockComps.length > 0) && (
+                              <TableHead className="text-center min-w-[90px] bg-muted/50">
+                                <div className="text-xs font-bold">Theory CA</div>
+                                <div className="text-[10px] text-muted-foreground">pass ≥50%</div>
+                              </TableHead>
+                            )}
+                            {practicalComps.map((c: any) => (
+                              <TableHead key={c.id} className="text-center min-w-[90px]">
+                                <div className="text-xs font-semibold">{c.name}</div>
+                                <div className="text-[10px] text-muted-foreground">/{c.max_marks} (≥60%)</div>
+                              </TableHead>
+                            ))}
+                            {otherComps.map((c: any) => (
+                              <TableHead key={c.id} className="text-center min-w-[80px]">
+                                <div className="text-xs font-semibold">{c.name}</div>
+                                <div className="text-[10px] text-muted-foreground">/{c.max_marks}</div>
+                              </TableHead>
+                            ))}
+                            <TableHead className="text-center min-w-[100px] bg-muted/50">
+                              <div className="text-xs font-bold">Overall</div>
+                            </TableHead>
                           </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-dashed">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  <Calculator className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No assessment scores available yet.</p>
-                </CardContent>
-              </Card>
-            )}
+                        </TableHeader>
+                        <TableBody>
+                          {gbTrainees?.map((gt: any) => {
+                            const trainee = gt.trainees;
+                            const ca = getCA(gt.trainee_id);
+
+                            // Compute test average %
+                            const testMarks = testComps.map((c: any) => {
+                              const m = getMark(c.id, gt.trainee_id);
+                              return m?.marks_obtained != null ? { pct: (m.marks_obtained / c.max_marks) * 100, raw: m.marks_obtained } : null;
+                            });
+                            const validTests = testMarks.filter(Boolean) as { pct: number; raw: number }[];
+                            const testAvg = validTests.length > 0 ? validTests.reduce((s, t) => s + t.pct, 0) / validTests.length : null;
+
+                            // Mock average %
+                            const mockMarks = mockComps.map((c: any) => {
+                              const m = getMark(c.id, gt.trainee_id);
+                              return m?.marks_obtained != null ? (m.marks_obtained / c.max_marks) * 100 : null;
+                            });
+                            const validMocks = mockMarks.filter((v): v is number => v !== null);
+                            const mockAvg = validMocks.length > 0 ? validMocks.reduce((s, v) => s + v, 0) / validMocks.length : null;
+
+                            // Theory CA
+                            const theoryCA = (testAvg !== null || mockAvg !== null)
+                              ? (testAvg ?? 0) * (gradebook.test_weight / 100) + (mockAvg ?? 0) * (gradebook.mock_weight / 100)
+                              : null;
+                            const theoryPass = theoryCA !== null && theoryCA >= 50;
+
+                            // Practical marks
+                            const practicalResults = practicalComps.map((c: any) => {
+                              const m = getMark(c.id, gt.trainee_id);
+                              if (m?.marks_obtained == null) return { pct: null, pass: false };
+                              const pct = (m.marks_obtained / c.max_marks) * 100;
+                              return { pct, pass: pct >= 60 };
+                            });
+                            const allPracticalsPass = practicalComps.length === 0 || practicalResults.every(p => p.pct !== null && p.pass);
+
+                            return (
+                              <TableRow key={gt.id}>
+                                <TableCell className="sticky left-0 bg-background z-10">
+                                  <div className="font-medium text-sm">{trainee?.first_name} {trainee?.last_name}</div>
+                                  <div className="text-xs text-muted-foreground font-mono">{trainee?.trainee_id}</div>
+                                </TableCell>
+                                {testComps.map((c: any, i: number) => {
+                                  const m = getMark(c.id, gt.trainee_id);
+                                  return (
+                                    <TableCell key={c.id} className="text-center text-sm">
+                                      {m?.marks_obtained != null ? m.marks_obtained : "—"}
+                                    </TableCell>
+                                  );
+                                })}
+                                {testComps.length > 0 && (
+                                  <TableCell className="text-center text-sm font-semibold bg-muted/30">
+                                    {testAvg !== null ? testAvg.toFixed(1) : "—"}
+                                  </TableCell>
+                                )}
+                                {mockComps.map((c: any, i: number) => {
+                                  const m = getMark(c.id, gt.trainee_id);
+                                  return (
+                                    <TableCell key={c.id} className="text-center text-sm">
+                                      {m?.marks_obtained != null ? m.marks_obtained : "—"}
+                                    </TableCell>
+                                  );
+                                })}
+                                {(testComps.length > 0 || mockComps.length > 0) && (
+                                  <TableCell className={`text-center text-sm font-bold bg-muted/50 ${theoryCA !== null ? (theoryPass ? "text-green-600" : "text-destructive") : ""}`}>
+                                    {theoryCA !== null ? theoryCA.toFixed(1) : "—"}
+                                    {theoryCA !== null && (
+                                      <div className="text-[10px]">{theoryPass ? "✓ Pass" : "✗ Fail"}</div>
+                                    )}
+                                  </TableCell>
+                                )}
+                                {practicalComps.map((c: any, i: number) => {
+                                  const p = practicalResults[i];
+                                  return (
+                                    <TableCell key={c.id} className={`text-center text-sm ${p.pct !== null ? (p.pass ? "text-green-600" : "text-destructive") : ""}`}>
+                                      {p.pct !== null ? p.pct.toFixed(1) : "—"}
+                                      {p.pct !== null && (
+                                        <div className="text-[10px]">{p.pass ? "✓ Pass" : "✗ Fail"}</div>
+                                      )}
+                                    </TableCell>
+                                  );
+                                })}
+                                {otherComps.map((c: any) => {
+                                  const m = getMark(c.id, gt.trainee_id);
+                                  return (
+                                    <TableCell key={c.id} className="text-center text-sm">
+                                      {m?.marks_obtained != null ? m.marks_obtained : "—"}
+                                    </TableCell>
+                                  );
+                                })}
+                                <TableCell className="text-center bg-muted/50">
+                                  <Badge variant={
+                                    (theoryPass && allPracticalsPass) ? "default" :
+                                    theoryCA === null && practicalResults.every(p => p.pct === null) ? "secondary" :
+                                    "destructive"
+                                  }>
+                                    {(theoryPass && allPracticalsPass) ? "Competent" :
+                                     theoryCA === null && practicalResults.every(p => p.pct === null) ? "Pending" :
+                                     "NYC"}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </div>
         ) : (
         <Tabs defaultValue="components" className="space-y-4">
