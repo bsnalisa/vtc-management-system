@@ -128,7 +128,7 @@ const GradebookDetail = () => {
       name: compForm.name,
       component_type: compForm.component_type,
       max_marks: parseFloat(compForm.max_marks) || 100,
-      group_id: compForm.group_id || undefined,
+      group_id: compForm.group_id && compForm.group_id !== "none" ? compForm.group_id : undefined,
       sort_order: (components?.length || 0) + 1,
     });
     setCompDialog(false);
@@ -504,7 +504,7 @@ const GradebookDetail = () => {
                           <Select value={compForm.group_id} onValueChange={v => setCompForm(p => ({ ...p, group_id: v }))}>
                             <SelectTrigger><SelectValue placeholder="No group" /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">No group</SelectItem>
+                              <SelectItem value="none">No group</SelectItem>
                               {groups.map((g: any) => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
                             </SelectContent>
                           </Select>
