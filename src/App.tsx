@@ -187,10 +187,10 @@ const ProtectedFeeManagement = withRoleAccess(FeeManagement, {
   requiredRoles: ["debtor_officer", "admin"],
 });
 const ProtectedClassManagement = withRoleAccess(ClassManagement, {
-  requiredRoles: ["admin", "head_of_training", "hod"],
+  requiredRoles: ["admin", "head_of_training", "hod", "trainer"],
 });
 const ProtectedTimetableManagement = withRoleAccess(TimetableManagement, {
-  requiredRoles: ["admin", "head_of_training", "hod"],
+  requiredRoles: ["admin", "head_of_training", "hod", "trainer"],
 });
 const ProtectedAnnouncements = withRoleAccess(Announcements, {
   requiredRoles: ["admin", "organization_admin"],

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList } from "lucide-react";
+import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList, MessageSquare, FileText, Clock } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { trainerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 
 const TrainerDashboard = () => {
   const navigate = useNavigate();
@@ -24,137 +25,191 @@ const TrainerDashboard = () => {
     }
   };
 
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <DashboardLayout
-      title={`Welcome back, ${profile?.firstname || 'Trainer'}`}
-      subtitle="Your classes and gradebook overview"
+      title=""
+      subtitle=""
       navItems={trainerNavItems}
       groupLabel="Trainer Tools"
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
+        {/* Hero greeting */}
+        <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <GraduationCap className="h-7 w-7" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {greeting()}, {profile?.firstname || "Trainer"}
+              </h1>
+              <p className="text-muted-foreground mt-0.5">
+                Here's an overview of your classes and assessments
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card className="border-l-4 border-l-primary">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-primary/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">My Classes</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">My Classes</CardTitle>
               <BookOpen className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               {isLoading ? <Skeleton className="h-8 w-16" /> : (
-                <>
-                  <div className="text-2xl font-bold">{stats?.myClasses || 0}</div>
-                  <p className="text-xs text-muted-foreground">Active classes assigned</p>
-                </>
+                <div className="text-3xl font-bold">{stats?.myClasses || 0}</div>
               )}
+              <p className="text-xs text-muted-foreground mt-1">Active this term</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-secondary">
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-secondary/20" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               {isLoading ? <Skeleton className="h-8 w-16" /> : (
-                <>
-                  <div className="text-2xl font-bold">{stats?.totalStudents || 0}</div>
-                  <p className="text-xs text-muted-foreground">Across all classes</p>
-                </>
+                <div className="text-3xl font-bold">{stats?.totalStudents || 0}</div>
               )}
+              <p className="text-xs text-muted-foreground mt-1">Across all classes</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-accent/30" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Gradebooks</CardTitle>
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.myClasses || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Active gradebooks</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-destructive/10" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Attendance</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">—</div>
+              <p className="text-xs text-muted-foreground mt-1">Today's registers</p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { icon: BookOpen, label: "Gradebooks", desc: "Manage marks", url: "/gradebooks", color: "text-primary" },
+              { icon: ClipboardList, label: "Attendance", desc: "Mark register", url: "/attendance", color: "text-primary" },
+              { icon: Users, label: "My Classes", desc: "View students", url: "/classes", color: "text-primary" },
+              { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable", color: "text-primary" },
+              { icon: MessageSquare, label: "Messages", desc: "Inbox", url: "/messages", color: "text-primary" },
+            ].map(({ icon: Icon, label, desc, url, color }) => (
+              <button
+                key={url}
+                onClick={() => navigate(url)}
+                className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+              >
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 ${color}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* My Classes Detail */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" /> My Classes
-            </CardTitle>
-            <CardDescription>Classes assigned to you with enrolled students</CardDescription>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-primary" /> My Classes
+                </CardTitle>
+                <CardDescription>Classes assigned to you with enrolled students</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate("/classes")}>
+                View All <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent>
+          <Separator />
+          <CardContent className="pt-4">
             {isLoading ? (
               <div className="space-y-3">
-                {[1, 2].map(i => <Skeleton key={i} className="h-20 w-full" />)}
+                {[1, 2].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
               </div>
             ) : stats?.classes && stats.classes.length > 0 ? (
               <div className="space-y-3">
                 {stats.classes.map((cls) => (
                   <div
                     key={cls.id}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                    className="group flex items-center justify-between rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50 cursor-pointer"
                     onClick={() => navigate('/classes')}
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <span className="font-semibold">{cls.class_name}</span>
-                        <Badge variant="outline" className="text-xs">{cls.class_code}</Badge>
+                        <Badge variant="outline" className="text-xs font-mono">{cls.class_code}</Badge>
+                        <Badge variant="secondary" className="text-xs">{trainingModeLabel(cls.training_mode)}</Badge>
                       </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                        <span>{cls.trade_name}</span>
-                        <span>•</span>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{cls.trade_name}</span>
                         <span>Level {cls.level}</span>
-                        <span>•</span>
-                        <span>{trainingModeLabel(cls.training_mode)}</span>
-                        <span>•</span>
                         <span>{cls.academic_year}</span>
                       </div>
                       {cls.capacity && (
-                        <div className="mt-2 flex items-center gap-2">
+                        <div className="mt-2.5 flex items-center gap-2">
                           <Progress value={(cls.student_count / cls.capacity) * 100} className="h-1.5 flex-1 max-w-[200px]" />
-                          <span className="text-xs text-muted-foreground">{cls.student_count}/{cls.capacity} students</span>
+                          <span className="text-xs text-muted-foreground font-medium">{cls.student_count}/{cls.capacity}</span>
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 ml-4">
+                    <div className="flex items-center gap-4 ml-4">
                       <div className="text-right">
                         <div className="text-2xl font-bold">{cls.student_count}</div>
-                        <div className="text-xs text-muted-foreground">enrolled</div>
+                        <div className="text-xs text-muted-foreground">students</div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-lg font-medium mb-2">No Classes Assigned</h3>
-                <p className="text-muted-foreground">You haven't been assigned to any classes yet. Contact your Head of Training.</p>
+              <div className="py-10 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <BookOpen className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">No Classes Assigned</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  You haven't been assigned to any classes yet. Contact your Head of Training for assignment.
+                </p>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common trainer tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/gradebooks')}>
-              <BookOpen className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Gradebooks</p>
-                <p className="text-xs text-muted-foreground">Manage marks & assessments</p>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/attendance')}>
-              <ClipboardList className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Mark Attendance</p>
-                <p className="text-xs text-muted-foreground">Record student attendance</p>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/timetable')}>
-              <Calendar className="h-6 w-6 text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Timetable</p>
-                <p className="text-xs text-muted-foreground">View schedule</p>
-              </div>
-            </Button>
           </CardContent>
         </Card>
       </div>
