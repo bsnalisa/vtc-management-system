@@ -26,8 +26,8 @@ const HeadOfTrainingDashboard = () => {
   const { data: stats, isLoading } = useHODStats();
   const { data: profile } = useProfile();
   const { data: qualifications } = useQualifications();
-  const { data: activeTrainers } = useActiveTrainers();
   const { organizationId } = useOrganizationContext();
+  const { data: activeTrainers } = useActiveTrainers(organizationId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
