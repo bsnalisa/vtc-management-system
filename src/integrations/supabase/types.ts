@@ -1068,6 +1068,42 @@ export type Database = {
           },
         ]
       }
+      building_trades: {
+        Row: {
+          building_id: string
+          created_at: string
+          id: string
+          trade_id: string
+        }
+        Insert: {
+          building_id: string
+          created_at?: string
+          id?: string
+          trade_id: string
+        }
+        Update: {
+          building_id?: string
+          created_at?: string
+          id?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_trades_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "training_buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_trades_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bulk_operations: {
         Row: {
           completed_at: string | null
@@ -6803,6 +6839,50 @@ export type Database = {
           },
         ]
       }
+      training_buildings: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_buildings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_modules: {
         Row: {
           content: string | null
@@ -6841,6 +6921,63 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      training_rooms: {
+        Row: {
+          active: boolean | null
+          building_id: string
+          capacity: number | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          room_type: Database["public"]["Enums"]["training_room_type"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          building_id: string
+          capacity?: number | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          room_type?: Database["public"]["Enums"]["training_room_type"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          building_id?: string
+          capacity?: number | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          room_type?: Database["public"]["Enums"]["training_room_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_rooms_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "training_buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_rooms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transcripts: {
         Row: {
@@ -7434,6 +7571,7 @@ export type Database = {
         | "withdrawn"
         | "archived"
       training_mode: "fulltime" | "bdl" | "shortcourse"
+      training_room_type: "classroom" | "lab" | "workshop"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7655,6 +7793,7 @@ export const Constants = {
         "archived",
       ],
       training_mode: ["fulltime", "bdl", "shortcourse"],
+      training_room_type: ["classroom", "lab", "workshop"],
     },
   },
 } as const
