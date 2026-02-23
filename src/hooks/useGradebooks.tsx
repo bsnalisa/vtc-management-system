@@ -374,3 +374,119 @@ export const useSubmitGradebook = () => {
     },
   });
 };
+
+// ─── Org-wide gradebook queries for HoT / AC ───
+export const useOrgGradebooks = (status?: string) => {
+  return useQuery({
+    queryKey: ["org-gradebooks", status],
+    queryFn: async () => {
+      let query = supabase
+        .from("gradebooks")
+        .select(`
+          *,
+          qualifications:qualification_id (id, qualification_title, qualification_code, nqf_level),
+          trainers:trainer_id (id, full_name, trainer_id)
+        `)
+        .order("updated_at", { ascending: false });
+      if (status) query = query.eq("status", status);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+};
+
+// ─── HoT approve / return ───
+export const useHoTApproveGradebook = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (gradebookId: string) => {
+      const { error } = await supabase
+        .from("gradebooks")
+        .update({ status: "hot_approved", hot_approved_at: new Date().toISOString() })
+        .eq("id", gradebookId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
+      qc.invalidateQueries({ queryKey: ["gradebook"] });
+      toast({ title: "Approved", description: "Gradebook approved. Forwarded to Assessment Coordinator." });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+};
+
+export const useReturnGradebook = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ gradebookId, returnTo }: { gradebookId: string; returnTo: "draft" | "submitted" }) => {
+      const updateData: Record<string, any> = { status: returnTo };
+      if (returnTo === "draft") {
+        updateData.submitted_at = null;
+        updateData.submitted_by = null;
+      }
+      const { error } = await supabase
+        .from("gradebooks")
+        .update(updateData)
+        .eq("id", gradebookId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
+      qc.invalidateQueries({ queryKey: ["gradebook"] });
+      toast({ title: "Returned", description: "Gradebook returned for revision." });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+};
+
+// ─── AC approve / finalise ───
+export const useACApproveGradebook = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (gradebookId: string) => {
+      const { error } = await supabase
+        .from("gradebooks")
+        .update({ status: "ac_approved", ac_approved_at: new Date().toISOString() })
+        .eq("id", gradebookId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
+      qc.invalidateQueries({ queryKey: ["gradebook"] });
+      toast({ title: "Approved", description: "Gradebook approved by Assessment Coordinator." });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+};
+
+export const useFinaliseGradebook = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (gradebookId: string) => {
+      const { error } = await supabase
+        .from("gradebooks")
+        .update({ status: "finalised", finalised_at: new Date().toISOString() })
+        .eq("id", gradebookId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["org-gradebooks"] });
+      qc.invalidateQueries({ queryKey: ["gradebook"] });
+      toast({ title: "Finalised", description: "Gradebook finalised. Marks are now official." });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+};
