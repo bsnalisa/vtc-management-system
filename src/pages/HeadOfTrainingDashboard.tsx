@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, BarChart3, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw, Briefcase, Award } from "lucide-react";
+import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw, Briefcase, Award, ChevronRight, Shield, BarChart3 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { useHODStats, useActiveTrainers } from "@/hooks/useHODStats";
@@ -20,6 +20,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 
 const HeadOfTrainingDashboard = () => {
   const navigate = useNavigate();
@@ -48,7 +51,6 @@ const HeadOfTrainingDashboard = () => {
         .eq("organization_id", organizationId!);
       if (error) throw error;
 
-      // Enrich with trainer name from trainers table
       if (data && data.length > 0) {
         const trainerIds = [...new Set(data.map((tq: any) => tq.trainer_id))];
         const { data: trainers } = await (supabase as any)
@@ -71,7 +73,6 @@ const HeadOfTrainingDashboard = () => {
     enabled: !!organizationId,
   });
 
-  // Submitted assessments awaiting HoT review
   const { data: submittedResults } = useAssessmentResultsByStatus(["submitted_by_trainer"], organizationId);
   const approveAssessments = useApproveAssessments();
   const returnAssessments = useReturnAssessments();
@@ -136,91 +137,170 @@ const HeadOfTrainingDashboard = () => {
     setReturnDialogOpen(false);
   };
 
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <DashboardLayout
-      title={`Welcome back, ${profile?.firstname || 'User'}`}
-      subtitle="Academic Command Center"
+      title=""
+      subtitle=""
       navItems={headOfTrainingNavItems}
       groupLabel="Training Management"
     >
-      <div className="space-y-6">
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-          <Card>
+      <div className="space-y-8">
+        {/* Hero Greeting */}
+        <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <Shield className="h-7 w-7" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {greeting()}, {profile?.firstname || "User"}
+              </h1>
+              <p className="text-muted-foreground mt-0.5">
+                Academic Command Center — oversee training, assessments & qualifications
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-primary/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Trainees</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Trainees</CardTitle>
+              <Users className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalTrainees || 0}</div>
-              <p className="text-xs text-muted-foreground">Active trainees</p>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.totalTrainees || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Active trainees</p>
             </CardContent>
           </Card>
-          <Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-secondary/20" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Trainers</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Trainers</CardTitle>
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalTrainers || 0}</div>
-              <p className="text-xs text-muted-foreground">Users with trainer role</p>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.totalTrainers || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Assigned trainers</p>
             </CardContent>
           </Card>
-          <Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-accent/30" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Trades</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalTrades || 0}</div>
-              <p className="text-xs text-muted-foreground">Registered trades</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Qualifications</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Qualifications</CardTitle>
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalQualifications || 0}</div>
-              <p className="text-xs text-muted-foreground">Approved qualifications</p>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.totalQualifications || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Approved qualifications</p>
             </CardContent>
           </Card>
-          <Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-destructive/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Classes</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.totalClasses || 0}</div>
-              <p className="text-xs text-muted-foreground">Current classes</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Competency Rate</CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "..." : `${stats?.competencyRate || 0}%`}</div>
-              <p className="text-xs text-muted-foreground">Assessment pass rate</p>
-            </CardContent>
-          </Card>
-          <Card className={pendingAssessmentCount > 0 ? "border-warning/40 bg-warning/5" : ""}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Reviews</CardTitle>
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{pendingAssessmentCount}</div>
-              <p className="text-xs text-muted-foreground">Assessments awaiting approval</p>
+              <div className="text-3xl font-bold">{pendingAssessmentCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">Assessments awaiting approval</p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
+        {/* Secondary Stats Row */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Trades</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-6 w-12" /> : (
+                <div className="text-2xl font-bold">{stats?.totalTrades || 0}</div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Classes</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-6 w-12" /> : (
+                <div className="text-2xl font-bold">{stats?.totalClasses || 0}</div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Competency Rate</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-6 w-12" /> : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.competencyRate || 0}%</div>
+                  <Progress value={stats?.competencyRate || 0} className="h-1.5 mt-2" />
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { icon: Briefcase, label: "Trades", desc: "Manage trades", url: "/trade-management" },
+              { icon: BookOpen, label: "Classes", desc: "Class management", url: "/classes" },
+              { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable" },
+              { icon: ClipboardCheck, label: "Assessments", desc: "Review results", url: "/assessment-results" },
+              { icon: FileText, label: "Reports", desc: "Generate reports", url: "/reports" },
+            ].map(({ icon: Icon, label, desc, url }) => (
+              <button
+                key={url}
+                onClick={() => navigate(url)}
+                className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tabbed Content */}
+        <Tabs defaultValue="approvals" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="approvals">
+              Pending Approvals
+              {pendingApprovals.length > 0 && <Badge variant="secondary" className="ml-2 h-5 px-1.5">{pendingApprovals.length}</Badge>}
+            </TabsTrigger>
             <TabsTrigger value="trainers">
               Active Trainers <Badge variant="secondary" className="ml-2 h-5 px-1.5">{activeTrainers?.length || 0}</Badge>
             </TabsTrigger>
@@ -230,54 +310,60 @@ const HeadOfTrainingDashboard = () => {
             <TabsTrigger value="assignments">Trainer Assignments</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5" />Training Management</CardTitle>
-                  <CardDescription>Manage curriculum and training modules</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button className="w-full" onClick={() => navigate('/trade-management')}>Trade Management</Button>
-                  <Button variant="outline" className="w-full" onClick={() => navigate('/classes')}>Class Management</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" />Pending Approvals</CardTitle>
-                  <CardDescription>{pendingApprovals.length} qualification(s) awaiting approval</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {pendingApprovals.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No pending approvals</p>
-                  ) : (
-                    pendingApprovals.slice(0, 3).map((q) => (
-                      <div key={q.id} className="flex items-center justify-between p-2 border rounded-lg">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{q.qualification_title}</p>
-                          <p className="text-xs text-muted-foreground">{q.qualification_code} · NQF {q.nqf_level}</p>
-                        </div>
-                        <Badge variant="secondary">Pending</Badge>
-                      </div>
-                    ))
-                  )}
-                  {pendingApprovals.length > 0 && (
-                    <Button variant="outline" className="w-full" onClick={() => navigate('/qualification-approvals')}>View All Approvals</Button>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
+          {/* Pending Approvals Tab */}
+          <TabsContent value="approvals" className="space-y-4">
             <Card>
-              <CardHeader><CardTitle>Quick Actions</CardTitle><CardDescription>Academic and training operations</CardDescription></CardHeader>
-              <CardContent>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/timetable')}><Calendar className="h-5 w-5" /><span>Timetable</span></Button>
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/assessment-results')}><ClipboardCheck className="h-5 w-5" /><span>Assessments</span></Button>
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/reports')}><FileText className="h-5 w-5" /><span>Reports</span></Button>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <ClipboardCheck className="h-5 w-5 text-primary" /> Qualification Approvals
+                    </CardTitle>
+                    <CardDescription>{pendingApprovals.length} qualification(s) awaiting your approval</CardDescription>
+                  </div>
+                  {pendingApprovals.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={() => navigate('/qualification-approvals')}>
+                      View All <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                    </Button>
+                  )}
                 </div>
+              </CardHeader>
+              <Separator />
+              <CardContent className="pt-4">
+                {pendingApprovals.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                      <CheckCircle className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-1">All Clear</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      No qualifications pending approval. All submissions have been reviewed.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingApprovals.slice(0, 5).map((q) => (
+                      <div key={q.id} className="group flex items-center justify-between rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50 cursor-pointer" onClick={() => navigate('/qualification-approvals')}>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <Award className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{q.qualification_title}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <Badge variant="outline" className="text-xs font-mono">{q.qualification_code}</Badge>
+                              <span className="text-xs text-muted-foreground">NQF {q.nqf_level}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400">Pending</Badge>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -285,38 +371,53 @@ const HeadOfTrainingDashboard = () => {
           {/* Active Trainers Tab */}
           <TabsContent value="trainers" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" />Active Trainers</CardTitle>
-                <CardDescription>Users assigned the trainer role in the system</CardDescription>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Users className="h-5 w-5 text-primary" /> Active Trainers
+                    </CardTitle>
+                    <CardDescription>Trainers currently active in the system</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => navigate("/trainers")}>
+                    Manage <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
+              <Separator />
+              <CardContent className="pt-4">
                 {!activeTrainers || activeTrainers.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium">No Active Trainers</h3>
-                    <p className="text-muted-foreground">No users have been assigned the trainer role yet.</p>
+                  <div className="py-10 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                      <Users className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-1">No Active Trainers</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      No users have been assigned the trainer role yet.
+                    </p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {activeTrainers.map((trainer: any) => (
-                        <TableRow key={trainer.id}>
-                          <TableCell className="font-medium">
-                            {trainer.firstname} {trainer.surname}
-                          </TableCell>
-                          <TableCell>{trainer.email || "-"}</TableCell>
-                          <TableCell>{trainer.phone || "-"}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <div className="space-y-3">
+                    {activeTrainers.map((trainer: any) => (
+                      <div
+                        key={trainer.id}
+                        className="flex items-center justify-between rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                            {(trainer.display_name || "?").charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm">{trainer.display_name}</p>
+                            <p className="text-xs text-muted-foreground">{trainer.email || "No email"}</p>
+                          </div>
+                        </div>
+                        <div className="text-right text-xs text-muted-foreground">
+                          {trainer.phone || "—"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -325,15 +426,18 @@ const HeadOfTrainingDashboard = () => {
           {/* Assessment Review Tab */}
           <TabsContent value="assessments" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Assessments Submitted by Trainers</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <ClipboardCheck className="h-5 w-5 text-primary" /> Assessments Submitted by Trainers
+                    </CardTitle>
                     <CardDescription>Review marks and approve or return for revision</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => {
                         if (selectedAssessmentIds.length === 0) {
                           toast({ title: "Select assessments", description: "Please select at least one assessment to return.", variant: "destructive" });
@@ -345,77 +449,84 @@ const HeadOfTrainingDashboard = () => {
                     >
                       <RotateCcw className="h-4 w-4 mr-2" />Return ({selectedAssessmentIds.length})
                     </Button>
-                    <Button onClick={handleApprove} disabled={selectedAssessmentIds.length === 0 || approveAssessments.isPending}>
+                    <Button size="sm" onClick={handleApprove} disabled={selectedAssessmentIds.length === 0 || approveAssessments.isPending}>
                       <CheckCircle className="h-4 w-4 mr-2" />
                       {approveAssessments.isPending ? "Approving..." : `Approve (${selectedAssessmentIds.length})`}
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <Separator />
+              <CardContent className="pt-4">
                 {!submittedResults || submittedResults.length === 0 ? (
-                  <div className="text-center py-12">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium">No Pending Reviews</h3>
-                    <p className="text-muted-foreground">All submitted assessments have been reviewed.</p>
+                  <div className="py-10 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                      <CheckCircle className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-1">No Pending Reviews</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      All submitted assessments have been reviewed.
+                    </p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-10">
-                          <Checkbox
-                            checked={selectedAssessmentIds.length === submittedResults.length}
-                            onCheckedChange={() => {
-                              if (selectedAssessmentIds.length === submittedResults.length) {
-                                setSelectedAssessmentIds([]);
-                              } else {
-                                setSelectedAssessmentIds(submittedResults.map((r: any) => r.id));
-                              }
-                            }}
-                          />
-                        </TableHead>
-                        <TableHead>Trainee</TableHead>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Unit Standard</TableHead>
-                        <TableHead>Marks</TableHead>
-                        <TableHead>Competency</TableHead>
-                        <TableHead>Submitted</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {submittedResults.map((result: any) => (
-                        <TableRow key={result.id}>
-                          <TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-10">
                             <Checkbox
-                              checked={selectedAssessmentIds.includes(result.id)}
-                              onCheckedChange={() => toggleAssessmentSelect(result.id)}
+                              checked={selectedAssessmentIds.length === submittedResults.length}
+                              onCheckedChange={() => {
+                                if (selectedAssessmentIds.length === submittedResults.length) {
+                                  setSelectedAssessmentIds([]);
+                                } else {
+                                  setSelectedAssessmentIds(submittedResults.map((r: any) => r.id));
+                                }
+                              }}
                             />
-                          </TableCell>
-                          <TableCell>
-                            <p className="font-medium">{result.trainees?.first_name} {result.trainees?.last_name}</p>
-                            <p className="text-xs text-muted-foreground font-mono">{result.trainees?.trainee_id}</p>
-                          </TableCell>
-                          <TableCell>
-                            <p className="text-sm">{result.trainee_enrollments?.courses?.name}</p>
-                          </TableCell>
-                          <TableCell>
-                            <p className="text-sm">{result.unit_standards?.module_title}</p>
-                            <p className="text-xs text-muted-foreground">{result.unit_standards?.unit_no}</p>
-                          </TableCell>
-                          <TableCell className="font-medium">{result.marks_obtained ?? "-"}</TableCell>
-                          <TableCell>
-                            <Badge variant={result.competency_status === "competent" ? "default" : result.competency_status === "not_yet_competent" ? "destructive" : "secondary"}>
-                              {result.competency_status?.replace(/_/g, " ") || "Pending"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {result.submitted_at ? new Date(result.submitted_at).toLocaleDateString("en-ZA") : "-"}
-                          </TableCell>
+                          </TableHead>
+                          <TableHead>Trainee</TableHead>
+                          <TableHead>Course</TableHead>
+                          <TableHead>Unit Standard</TableHead>
+                          <TableHead>Marks</TableHead>
+                          <TableHead>Competency</TableHead>
+                          <TableHead>Submitted</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {submittedResults.map((result: any) => (
+                          <TableRow key={result.id}>
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedAssessmentIds.includes(result.id)}
+                                onCheckedChange={() => toggleAssessmentSelect(result.id)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <p className="font-medium">{result.trainees?.first_name} {result.trainees?.last_name}</p>
+                              <p className="text-xs text-muted-foreground font-mono">{result.trainees?.trainee_id}</p>
+                            </TableCell>
+                            <TableCell>
+                              <p className="text-sm">{result.trainee_enrollments?.courses?.name}</p>
+                            </TableCell>
+                            <TableCell>
+                              <p className="text-sm">{result.unit_standards?.module_title}</p>
+                              <p className="text-xs text-muted-foreground">{result.unit_standards?.unit_no}</p>
+                            </TableCell>
+                            <TableCell className="font-medium">{result.marks_obtained ?? "-"}</TableCell>
+                            <TableCell>
+                              <Badge variant={result.competency_status === "competent" ? "default" : result.competency_status === "not_yet_competent" ? "destructive" : "secondary"}>
+                                {result.competency_status?.replace(/_/g, " ") || "Pending"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {result.submitted_at ? new Date(result.submitted_at).toLocaleDateString("en-ZA") : "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -424,29 +535,50 @@ const HeadOfTrainingDashboard = () => {
           {/* Trainer Assignments Tab */}
           <TabsContent value="assignments" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2"><Link2 className="h-5 w-5" />Trainer-Qualification Assignments</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Link2 className="h-5 w-5 text-primary" /> Trainer-Qualification Assignments
+                    </CardTitle>
                     <CardDescription>Assign trainers to qualifications they deliver</CardDescription>
                   </div>
-                  <Button onClick={() => setAssignDialogOpen(true)}>Assign Trainer</Button>
+                  <Button size="sm" onClick={() => setAssignDialogOpen(true)}>
+                    <Link2 className="h-4 w-4 mr-2" /> Assign Trainer
+                  </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <Separator />
+              <CardContent className="pt-4">
                 {!trainerQualifications || trainerQualifications.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">No trainer-qualification assignments yet.</p>
+                  <div className="py-10 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                      <Link2 className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-1">No Assignments Yet</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      Assign trainers to qualifications so they can create gradebooks and manage assessments.
+                    </p>
+                  </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {trainerQualifications.map((tq: any) => (
-                      <div key={tq.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">
-                            {tq.trainer_profile ? `${tq.trainer_profile.firstname} ${tq.trainer_profile.surname}` : "Unknown Trainer"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{tq.qualifications?.qualification_title} ({tq.qualifications?.qualification_code})</p>
+                      <div key={tq.id} className="flex items-center justify-between rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                            {(tq.trainer_profile?.firstname || "?").charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm">
+                              {tq.trainer_profile ? `${tq.trainer_profile.firstname} ${tq.trainer_profile.surname}`.trim() : "Unknown Trainer"}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <Badge variant="outline" className="text-xs font-mono">{tq.qualifications?.qualification_code}</Badge>
+                              <span className="text-xs text-muted-foreground truncate">{tq.qualifications?.qualification_title}</span>
+                            </div>
+                          </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => removeMutation.mutate(tq.id)}>Remove</Button>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeMutation.mutate(tq.id)}>Remove</Button>
                       </div>
                     ))}
                   </div>
@@ -457,7 +589,7 @@ const HeadOfTrainingDashboard = () => {
         </Tabs>
       </div>
 
-      {/* Assign Trainer Dialog — uses activeTrainers from user_roles+profiles */}
+      {/* Assign Trainer Dialog */}
       <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -472,7 +604,7 @@ const HeadOfTrainingDashboard = () => {
                 <SelectContent>
                   {activeTrainers?.map((trainer: any) => (
                     <SelectItem key={trainer.id} value={trainer.id}>
-                      {trainer.firstname} {trainer.surname}
+                      {trainer.display_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
