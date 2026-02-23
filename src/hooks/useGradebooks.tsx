@@ -534,3 +534,76 @@ export const useFinaliseGradebook = () => {
     },
   });
 };
+
+// ─── Delete gradebook (only if no marks recorded) ───
+export const useDeleteGradebook = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (gradebookId: string) => {
+      // Check if marks exist
+      const { count } = await supabase
+        .from("gradebook_marks")
+        .select("id", { count: "exact", head: true })
+        .eq("gradebook_id", gradebookId);
+      if (count && count > 0) throw new Error("Cannot delete a gradebook with recorded marks.");
+
+      // Delete related data first
+      await supabase.from("gradebook_trainees").delete().eq("gradebook_id", gradebookId);
+      await supabase.from("gradebook_components").delete().eq("gradebook_id", gradebookId);
+      await supabase.from("gradebook_component_groups").delete().eq("gradebook_id", gradebookId);
+      const { error } = await supabase.from("gradebooks").delete().eq("id", gradebookId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-gradebooks"] });
+      toast({ title: "Deleted", description: "Gradebook deleted successfully." });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+};
+
+// ─── Update gradebook info (only if no marks recorded) ───
+export const useUpdateGradebook = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; title?: string; academic_year?: string; intake_label?: string; level?: number; test_weight?: number; mock_weight?: number }) => {
+      const { data, error } = await supabase
+        .from("gradebooks")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-gradebooks"] });
+      qc.invalidateQueries({ queryKey: ["gradebook"] });
+      toast({ title: "Updated", description: "Gradebook updated successfully." });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+};
+
+// ─── Trainer's assigned qualifications ───
+export const useTrainerQualifications = (trainerId?: string) => {
+  return useQuery({
+    queryKey: ["trainer-qualifications", trainerId],
+    queryFn: async () => {
+      if (!trainerId) return [];
+      const { data, error } = await supabase
+        .from("trainer_qualifications")
+        .select("qualification_id, qualifications:qualification_id (id, qualification_title, qualification_code, nqf_level)")
+        .eq("trainer_id", trainerId);
+      if (error) throw error;
+      return data?.map((tq: any) => tq.qualifications).filter(Boolean) || [];
+    },
+    enabled: !!trainerId,
+  });
+};
