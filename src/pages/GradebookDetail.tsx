@@ -104,6 +104,7 @@ const GradebookDetail = () => {
 
   const { role } = useRoleNavigation();
   const isTrainer = role === "trainer";
+  const isHoT = role === "head_of_training";
   const isDraft = gradebook?.status === "draft";
   const isLocked = gradebook?.is_locked;
   const canEdit = isTrainer && isDraft;
@@ -255,6 +256,65 @@ const GradebookDetail = () => {
           </CardContent>
         </Card>
 
+        {isHoT ? (
+          /* ─── HoT: Read-only CA Scores Summary ─── */
+          <div className="space-y-4">
+            <h3 className="font-semibold">Trainee Assessment Summary</h3>
+            <p className="text-sm text-muted-foreground">
+              CA = Test Avg × {gradebook.test_weight}% + Mock Avg × {gradebook.mock_weight}%
+            </p>
+            {caScores && caScores.length > 0 ? (
+              <Card>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Trainee</TableHead>
+                        <TableHead className="text-center">Test Avg (%)</TableHead>
+                        <TableHead className="text-center">Mock Avg (%)</TableHead>
+                        <TableHead className="text-center">Theory (%)</TableHead>
+                        <TableHead className="text-center">Practical (%)</TableHead>
+                        <TableHead className="text-center">CA Score</TableHead>
+                        <TableHead className="text-center">Competency</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {gbTrainees?.map((gt: any) => {
+                        const trainee = gt.trainees;
+                        const ca = getCA(gt.trainee_id);
+                        return (
+                          <TableRow key={gt.id}>
+                            <TableCell>
+                              <div className="font-medium">{trainee?.first_name} {trainee?.last_name}</div>
+                              <div className="text-xs text-muted-foreground font-mono">{trainee?.trainee_id}</div>
+                            </TableCell>
+                            <TableCell className="text-center">{ca?.test_average != null ? ca.test_average.toFixed(1) : "—"}</TableCell>
+                            <TableCell className="text-center">{ca?.mock_average != null ? ca.mock_average.toFixed(1) : "—"}</TableCell>
+                            <TableCell className="text-center">{ca?.theory_score != null ? ca.theory_score.toFixed(1) : "—"}</TableCell>
+                            <TableCell className="text-center">{ca?.practical_score != null ? ca.practical_score.toFixed(1) : "—"}</TableCell>
+                            <TableCell className="text-center font-bold">{ca?.ca_score != null ? ca.ca_score.toFixed(1) : "—"}</TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant={ca?.overall_competency === "competent" ? "default" : ca?.overall_competency === "not_yet_competent" ? "destructive" : "secondary"}>
+                                {ca?.overall_competency === "competent" ? "Competent" : ca?.overall_competency === "not_yet_competent" ? "NYC" : "Pending"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  <Calculator className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No assessment scores available yet.</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        ) : (
         <Tabs defaultValue="components" className="space-y-4">
           <TabsList>
             <TabsTrigger value="components"><BookOpen className="h-4 w-4 mr-1" />Components</TabsTrigger>
@@ -702,6 +762,7 @@ const GradebookDetail = () => {
             )}
           </TabsContent>
         </Tabs>
+        )}
 
         {/* Resolve/Reject query dialog */}
         <Dialog open={!!resolveDialog} onOpenChange={(open) => { if (!open) setResolveDialog(null); }}>
