@@ -24,7 +24,7 @@ const EMPTY_FORM: ClassData = {
   trainer_id: "",
 };
 
-const ClassesTab = () => {
+const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
   const [open, setOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<any>(null);
   const [formData, setFormData] = useState<ClassData>({ ...EMPTY_FORM });
@@ -80,6 +80,7 @@ const ClassesTab = () => {
 
   return (
     <div className="space-y-4">
+      {!readOnly && (
       <div className="flex items-center justify-between">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -160,6 +161,7 @@ const ClassesTab = () => {
           </DialogContent>
         </Dialog>
       </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -183,7 +185,7 @@ const ClassesTab = () => {
                   <TableHead>Trainer</TableHead>
                   <TableHead>Capacity</TableHead>
                   <TableHead>Year</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  {!readOnly && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -197,6 +199,7 @@ const ClassesTab = () => {
                     <TableCell>{cls.trainers?.full_name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                     <TableCell>{cls.capacity}</TableCell>
                     <TableCell>{cls.academic_year}</TableCell>
+                    {!readOnly && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(cls)}>
@@ -219,6 +222,7 @@ const ClassesTab = () => {
                         </AlertDialog>
                       </div>
                     </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
