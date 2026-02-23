@@ -4440,6 +4440,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          action_url: string | null
           created_at: string
           id: string
           message: string
@@ -4450,6 +4451,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          action_url?: string | null
           created_at?: string
           id?: string
           message: string
@@ -4460,6 +4462,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          action_url?: string | null
           created_at?: string
           id?: string
           message?: string
