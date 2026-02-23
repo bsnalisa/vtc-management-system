@@ -96,9 +96,7 @@ import TraineePaymentsPage from "./pages/trainee/TraineePaymentsPage";
 import FirstLoginPasswordChange from "./pages/FirstLoginPasswordChange";
 import GradebookManagement from "./pages/GradebookManagement";
 import GradebookDetail from "./pages/GradebookDetail";
-import GradebookReview from "./pages/GradebookReview";
 import GradebookApproval from "./pages/GradebookApproval";
-import GradebookReconciliation from "./pages/GradebookReconciliation";
 import ApplicationFees from "./pages/debtors/ApplicationFees";
 import RegistrationFees from "./pages/debtors/RegistrationFees";
 import ClearedPayments from "./pages/debtors/ClearedPayments";
@@ -333,9 +331,7 @@ const App = () => (
           <Route path="/assessment-results" element={<ProtectedRoute><AssessmentResults /></ProtectedRoute>} />
           <Route path="/gradebooks" element={<ProtectedRoute><GradebookManagement /></ProtectedRoute>} />
           <Route path="/gradebooks/:id" element={<ProtectedRoute><GradebookDetail /></ProtectedRoute>} />
-          <Route path="/gradebook-review" element={<ProtectedRoute><GradebookReview /></ProtectedRoute>} />
           <Route path="/gradebook-approval" element={<ProtectedRoute><GradebookApproval /></ProtectedRoute>} />
-          <Route path="/gradebook-reconciliation" element={<ProtectedRoute><GradebookReconciliation /></ProtectedRoute>} />
           <Route path="/classes" element={<ProtectedRoute><ProtectedClassManagement /></ProtectedRoute>} />
           <Route path="/timetable" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/announcements" element={<ProtectedRoute><ProtectedAnnouncements /></ProtectedRoute>} />
