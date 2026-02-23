@@ -199,9 +199,9 @@ const DocumentGeneration = () => {
   "invoiceNumber": "INV-2025-001",
   "date": "2025-11-03",
   "billTo": {
-    "name": "Student Name",
+    "name": "Trainee Name",
     "address": "123 Main St",
-    "email": "student@example.com"
+    "email": "trainee@example.com"
   },
   "items": [
     {

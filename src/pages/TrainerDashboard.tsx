@@ -76,12 +76,12 @@ const TrainerDashboard = () => {
           <Card className="relative overflow-hidden">
             <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-secondary/20" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Trainees</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               {isLoading ? <Skeleton className="h-8 w-16" /> : (
-                <div className="text-3xl font-bold">{stats?.totalStudents || 0}</div>
+                <div className="text-3xl font-bold">{stats?.totalTrainees || 0}</div>
               )}
               <p className="text-xs text-muted-foreground mt-1">Across all classes</p>
             </CardContent>
@@ -121,7 +121,7 @@ const TrainerDashboard = () => {
             {[
               { icon: BookOpen, label: "Gradebooks", desc: "Manage marks", url: "/gradebooks", color: "text-primary" },
               { icon: ClipboardList, label: "Attendance", desc: "Mark register", url: "/attendance", color: "text-primary" },
-              { icon: Users, label: "My Classes", desc: "View students", url: "/classes", color: "text-primary" },
+              { icon: Users, label: "My Classes", desc: "View trainees", url: "/classes", color: "text-primary" },
               { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable", color: "text-primary" },
               { icon: MessageSquare, label: "Messages", desc: "Inbox", url: "/messages", color: "text-primary" },
             ].map(({ icon: Icon, label, desc, url, color }) => (
@@ -150,7 +150,7 @@ const TrainerDashboard = () => {
                 <CardTitle className="text-lg flex items-center gap-2">
                   <GraduationCap className="h-5 w-5 text-primary" /> My Classes
                 </CardTitle>
-                <CardDescription>Classes assigned to you with enrolled students</CardDescription>
+                <CardDescription>Classes assigned to you with enrolled trainees</CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={() => navigate("/classes")}>
                 View All <ChevronRight className="h-3.5 w-3.5 ml-1" />
@@ -184,15 +184,15 @@ const TrainerDashboard = () => {
                       </div>
                       {cls.capacity && (
                         <div className="mt-2.5 flex items-center gap-2">
-                          <Progress value={(cls.student_count / cls.capacity) * 100} className="h-1.5 flex-1 max-w-[200px]" />
-                          <span className="text-xs text-muted-foreground font-medium">{cls.student_count}/{cls.capacity}</span>
+                          <Progress value={(cls.trainee_count / cls.capacity) * 100} className="h-1.5 flex-1 max-w-[200px]" />
+                          <span className="text-xs text-muted-foreground font-medium">{cls.trainee_count}/{cls.capacity}</span>
                         </div>
                       )}
                     </div>
                     <div className="flex items-center gap-4 ml-4">
                       <div className="text-right">
-                        <div className="text-2xl font-bold">{cls.student_count}</div>
-                        <div className="text-xs text-muted-foreground">students</div>
+                        <div className="text-2xl font-bold">{cls.trainee_count}</div>
+                        <div className="text-xs text-muted-foreground">trainees</div>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
