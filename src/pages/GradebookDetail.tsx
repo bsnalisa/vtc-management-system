@@ -40,24 +40,26 @@ const useAvailableTrainees = (qualificationId?: string, level?: number) => {
         .eq("id", qualificationId)
         .single();
       
-      // Find trainees via class_enrollments matching the trade and level
+      // Find trainees matching the trade (and optionally level)
       if (qual?.trade_id) {
-        const { data: trainees, error } = await supabase
+        let query = supabase
           .from("trainees")
           .select("id, trainee_id, first_name, last_name, level")
           .eq("trade_id", qual.trade_id)
-          .eq("status", "active")
-          .order("last_name");
+          .eq("status", "active");
+        if (level) query = query.eq("level", level);
+        const { data: trainees, error } = await query.order("last_name");
         if (!error && trainees && trainees.length > 0) return trainees;
       }
       
-      // Fallback: match by qualification_id
-      const { data, error } = await supabase
+      // Fallback: match by qualification_id on trainees table
+      let fallbackQuery = supabase
         .from("trainees")
         .select("id, trainee_id, first_name, last_name, level")
         .eq("qualification_id", qualificationId)
-        .eq("status", "active")
-        .order("last_name");
+        .eq("status", "active");
+      if (level) fallbackQuery = fallbackQuery.eq("level", level);
+      const { data, error } = await fallbackQuery.order("last_name");
       if (error) throw error;
       return data || [];
     },
