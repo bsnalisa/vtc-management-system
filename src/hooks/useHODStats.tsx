@@ -15,7 +15,7 @@ export const useHODStats = () => {
         .from("trainees")
         .select("*", { count: "exact", head: true })
         .eq("organization_id", organizationId)
-        .eq("active", true);
+        .eq("status", "active");
 
       // Fetch active trainers from user_roles scoped to this org
       const { data: trainerRoles } = await db
