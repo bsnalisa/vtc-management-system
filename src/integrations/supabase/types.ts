@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_time_structure: {
+        Row: {
+          created_at: string
+          day: string
+          end_time: string
+          id: string
+          is_break: boolean
+          label: string | null
+          organization_id: string | null
+          period_number: number
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          end_time: string
+          id?: string
+          is_break?: boolean
+          label?: string | null
+          organization_id?: string | null
+          period_number: number
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          end_time?: string
+          id?: string
+          is_break?: boolean
+          label?: string | null
+          organization_id?: string | null
+          period_number?: number
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_time_structure_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alumni: {
         Row: {
           active: boolean
@@ -1320,8 +1364,11 @@ export type Database = {
           credits: number | null
           description: string | null
           id: string
+          is_double_period: boolean
           level: number
           name: string
+          periods_per_week: number
+          required_room_type: string | null
           trade_id: string
           updated_at: string
         }
@@ -1332,8 +1379,11 @@ export type Database = {
           credits?: number | null
           description?: string | null
           id?: string
+          is_double_period?: boolean
           level: number
           name: string
+          periods_per_week?: number
+          required_room_type?: string | null
           trade_id: string
           updated_at?: string
         }
@@ -1344,8 +1394,11 @@ export type Database = {
           credits?: number | null
           description?: string | null
           id?: string
+          is_double_period?: boolean
           level?: number
           name?: string
+          periods_per_week?: number
+          required_room_type?: string | null
           trade_id?: string
           updated_at?: string
         }
@@ -5933,6 +5986,161 @@ export type Database = {
           },
         ]
       }
+      timetable_entries: {
+        Row: {
+          academic_year: string
+          class_id: string
+          course_id: string
+          created_at: string
+          day: string
+          generation_run_id: string | null
+          id: string
+          is_locked: boolean
+          lock_type: string | null
+          organization_id: string | null
+          period_number: number
+          room_id: string | null
+          soft_penalty_score: number | null
+          term: number
+          trainer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          class_id: string
+          course_id: string
+          created_at?: string
+          day: string
+          generation_run_id?: string | null
+          id?: string
+          is_locked?: boolean
+          lock_type?: string | null
+          organization_id?: string | null
+          period_number: number
+          room_id?: string | null
+          soft_penalty_score?: number | null
+          term?: number
+          trainer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          class_id?: string
+          course_id?: string
+          created_at?: string
+          day?: string
+          generation_run_id?: string | null
+          id?: string
+          is_locked?: boolean
+          lock_type?: string | null
+          organization_id?: string | null
+          period_number?: number
+          room_id?: string | null
+          soft_penalty_score?: number | null
+          term?: number
+          trainer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "training_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_entries_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_generation_runs: {
+        Row: {
+          academic_year: string
+          completed_at: string | null
+          config: Json | null
+          conflict_report: Json | null
+          created_at: string
+          created_by: string | null
+          failed_lessons: number | null
+          global_penalty_score: number | null
+          id: string
+          organization_id: string | null
+          placed_lessons: number | null
+          started_at: string | null
+          status: string
+          term: number
+          total_lessons: number | null
+        }
+        Insert: {
+          academic_year: string
+          completed_at?: string | null
+          config?: Json | null
+          conflict_report?: Json | null
+          created_at?: string
+          created_by?: string | null
+          failed_lessons?: number | null
+          global_penalty_score?: number | null
+          id?: string
+          organization_id?: string | null
+          placed_lessons?: number | null
+          started_at?: string | null
+          status?: string
+          term?: number
+          total_lessons?: number | null
+        }
+        Update: {
+          academic_year?: string
+          completed_at?: string | null
+          config?: Json | null
+          conflict_report?: Json | null
+          created_at?: string
+          created_by?: string | null
+          failed_lessons?: number | null
+          global_penalty_score?: number | null
+          id?: string
+          organization_id?: string | null
+          placed_lessons?: number | null
+          started_at?: string | null
+          status?: string
+          term?: number
+          total_lessons?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_generation_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timetable_slots: {
         Row: {
           academic_year: string
@@ -6789,8 +6997,10 @@ export type Database = {
           full_name: string | null
           gender: Database["public"]["Enums"]["gender"] | null
           id: string
+          max_weekly_periods: number
           organization_id: string | null
           phone: string | null
+          preferred_daily_periods: number
           trainer_id: string | null
           updated_at: string
           user_id: string | null
@@ -6806,8 +7016,10 @@ export type Database = {
           full_name?: string | null
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          max_weekly_periods?: number
           organization_id?: string | null
           phone?: string | null
+          preferred_daily_periods?: number
           trainer_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -6823,8 +7035,10 @@ export type Database = {
           full_name?: string | null
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          max_weekly_periods?: number
           organization_id?: string | null
           phone?: string | null
+          preferred_daily_periods?: number
           trainer_id?: string | null
           updated_at?: string
           user_id?: string | null
