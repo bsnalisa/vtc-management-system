@@ -230,7 +230,7 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                   <TableRow key={cls.id}>
                     <TableCell className="font-medium">{cls.class_code}</TableCell>
                     <TableCell>{cls.class_name}</TableCell>
-                    <TableCell>{cls.trades?.name || "—"}</TableCell>
+                    <TableCell>{cls.trades?.code || "—"}</TableCell>
                     <TableCell>
                       {cls.qualifications ? (
                         <span className="text-xs">{cls.qualifications.qualification_code}</span>
