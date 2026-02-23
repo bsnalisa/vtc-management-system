@@ -1,41 +1,56 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Plus, Trash2 } from "lucide-react";
-import { useTimetable, useCreateTimetableSlot, useDeleteTimetableSlot, TimetableSlotData } from "@/hooks/useTimetable";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Zap, AlertTriangle, Lock, RefreshCw, Settings2 } from "lucide-react";
 import { useClasses } from "@/hooks/useClasses";
-import { useQuery } from "@tanstack/react-query";
+import { useTrainers } from "@/hooks/useTrainers";
+import { useTrainingRooms } from "@/hooks/useTrainingBuildings";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
+import {
+  useTimeStructure,
+  useSeedDefaultPeriods,
+  useTimetableEntries,
+  useSaveTimetable,
+  useToggleLock,
+} from "@/hooks/useScheduler";
+import { runScheduler, SchedulerInput, formatConflicts, DAYS, Day, SlotAssignment } from "@/services/scheduler";
 import { supabase } from "@/integrations/supabase/client";
-
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import TimetableGrid from "@/components/timetable/TimetableGrid";
+import ConflictPanel from "@/components/timetable/ConflictPanel";
 
 const TimetableManagement = () => {
   const { navItems, groupLabel } = useRoleNavigation();
-  const [open, setOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<string>("");
-  const [formData, setFormData] = useState<TimetableSlotData>({
-    class_id: "",
-    course_id: "",
-    day_of_week: 1,
-    start_time: "08:00",
-    end_time: "10:00",
-    room_number: "",
-    academic_year: new Date().getFullYear().toString(),
-  });
+  const { organizationId } = useOrganizationContext();
+  const { toast } = useToast();
+
+  const [academicYear, setAcademicYear] = useState(new Date().getFullYear().toString());
+  const [term, setTerm] = useState(1);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [lastResult, setLastResult] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("grid");
 
   const { data: classes } = useClasses();
-  const { data: timetable, isLoading } = useTimetable(selectedClass || undefined);
-  const createSlot = useCreateTimetableSlot();
-  const deleteSlot = useDeleteTimetableSlot();
+  const { data: trainers } = useTrainers();
+  const { data: rooms } = useTrainingRooms();
+  const { data: timeStructure } = useTimeStructure(organizationId);
+  const { data: entries, isLoading: entriesLoading } = useTimetableEntries(academicYear, term);
+  const seedPeriods = useSeedDefaultPeriods();
+  const saveTimetable = useSaveTimetable();
+  const toggleLock = useToggleLock();
 
+  // Fetch courses
   const { data: courses } = useQuery({
-    queryKey: ["courses"],
+    queryKey: ["courses_for_scheduler"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courses")
@@ -46,161 +61,292 @@ const TimetableManagement = () => {
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await createSlot.mutateAsync(formData);
-    setOpen(false);
-    setFormData({
-      class_id: "",
-      course_id: "",
-      day_of_week: 1,
-      start_time: "08:00",
-      end_time: "10:00",
-      room_number: "",
-      academic_year: new Date().getFullYear().toString(),
-    });
+  // Fetch trainer_trades for trade assignments
+  const { data: trainerTrades } = useQuery({
+    queryKey: ["trainer_trades_scheduler"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trainer_trades")
+        .select("trainer_id, trade_id");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const maxPeriods = timeStructure
+    ? Math.max(...timeStructure.filter(t => !t.is_break).map(t => t.period_number), 0)
+    : 8;
+
+  const handleSeedPeriods = () => {
+    if (organizationId) seedPeriods.mutate(organizationId);
   };
 
-  const groupedByDay = timetable?.reduce((acc, slot) => {
-    if (!acc[slot.day_of_week]) acc[slot.day_of_week] = [];
-    acc[slot.day_of_week].push(slot);
-    return acc;
-  }, {} as Record<number, typeof timetable>);
+  const handleGenerate = useCallback(async () => {
+    if (!classes?.length || !courses?.length || !rooms?.length || !trainers?.length) {
+      toast({ title: "Missing Data", description: "Ensure classes, courses, rooms, and trainers exist.", variant: "destructive" });
+      return;
+    }
+
+    setIsGenerating(true);
+    setProgress(10);
+
+    try {
+      // Build trainer trade map
+      const trainerTradeMap = new Map<string, string[]>();
+      trainerTrades?.forEach(tt => {
+        const existing = trainerTradeMap.get(tt.trainer_id) || [];
+        existing.push(tt.trade_id);
+        trainerTradeMap.set(tt.trainer_id, existing);
+      });
+
+      setProgress(20);
+
+      // Get locked entries
+      const lockedEntries: SlotAssignment[] = (entries || [])
+        .filter((e: any) => e.is_locked)
+        .map((e: any) => ({
+          lessonInstanceId: `locked-${e.id}`,
+          classId: e.class_id,
+          courseId: e.course_id,
+          trainerId: e.trainer_id,
+          roomId: e.room_id,
+          day: e.day as Day,
+          periodNumber: e.period_number,
+          softPenaltyScore: 0,
+          isLocked: true,
+          lockType: e.lock_type,
+        }));
+
+      const input: SchedulerInput = {
+        classes: classes.map(c => ({
+          id: c.id,
+          className: c.class_name,
+          classCode: c.class_code,
+          tradeId: c.trade_id,
+          capacity: c.capacity || 30,
+          level: c.level,
+          trainerId: c.trainer_id,
+        })),
+        courses: courses.map(c => ({
+          id: c.id,
+          name: c.name,
+          code: c.code,
+          tradeId: c.trade_id,
+          level: c.level,
+          periodsPerWeek: (c as any).periods_per_week || 2,
+          requiredRoomType: ((c as any).required_room_type || 'classroom') as 'classroom' | 'lab' | 'workshop',
+          isDoublePeriod: (c as any).is_double_period || false,
+        })),
+        trainers: trainers.map(t => ({
+          id: t.id,
+          fullName: t.full_name || 'Unknown',
+          maxWeeklyPeriods: (t as any).max_weekly_periods || 25,
+          preferredDailyPeriods: (t as any).preferred_daily_periods || 6,
+          tradeIds: trainerTradeMap.get(t.id) || [],
+        })),
+        rooms: rooms.map(r => ({
+          id: r.id,
+          name: r.name,
+          code: r.code,
+          buildingId: r.building_id,
+          roomType: r.room_type as 'classroom' | 'lab' | 'workshop',
+          capacity: r.capacity || 30,
+        })),
+        maxPeriods,
+        lockedAssignments: lockedEntries,
+        config: { optimizationPasses: 100, maxBacktrackDepth: 50 },
+      };
+
+      setProgress(40);
+
+      // Run the scheduler (in-memory, synchronous)
+      const result = runScheduler(input);
+
+      setProgress(80);
+      setLastResult(result);
+
+      // Save to database
+      const runId = crypto.randomUUID();
+      const userId = (await supabase.auth.getUser()).data.user?.id || '';
+      const now = new Date().toISOString();
+
+      const dbEntries = result.assignments
+        .filter(a => !a.isLocked)
+        .map(a => ({
+          organization_id: organizationId!,
+          academic_year: academicYear,
+          term,
+          class_id: a.classId,
+          course_id: a.courseId,
+          trainer_id: a.trainerId,
+          room_id: a.roomId,
+          day: a.day,
+          period_number: a.periodNumber,
+          is_locked: false,
+          generation_run_id: runId,
+          soft_penalty_score: a.softPenaltyScore,
+        }));
+
+      await saveTimetable.mutateAsync({
+        entries: dbEntries,
+        runMeta: {
+          id: runId,
+          organization_id: organizationId!,
+          academic_year: academicYear,
+          term,
+          status: result.conflicts.length > 0 ? 'completed' : 'completed',
+          total_lessons: result.totalLessons,
+          placed_lessons: result.placedLessons,
+          failed_lessons: result.failedLessons,
+          global_penalty_score: result.globalPenaltyScore,
+          conflict_report: result.conflicts,
+          created_by: userId,
+          started_at: now,
+          completed_at: new Date().toISOString(),
+        },
+      });
+
+      setProgress(100);
+      toast({
+        title: "Timetable Generated!",
+        description: `${result.placedLessons} lessons placed, ${result.failedLessons} conflicts.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Generation Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+      setTimeout(() => setProgress(0), 2000);
+    }
+  }, [classes, courses, rooms, trainers, trainerTrades, entries, maxPeriods, organizationId, academicYear, term]);
+
+  const handleToggleLock = (id: string, currentlyLocked: boolean) => {
+    toggleLock.mutate({ id, isLocked: !currentlyLocked, lockType: 'full' });
+  };
+
+  // Build name maps for conflict reporting
+  const courseNames = new Map(courses?.map(c => [c.id, c.name]) || []);
+  const classNames = new Map(classes?.map(c => [c.id, c.class_name]) || []);
+  const trainerNames = new Map(trainers?.map(t => [t.id, t.full_name || 'Unknown']) || []);
+
+  const formattedConflicts = lastResult
+    ? formatConflicts(lastResult.conflicts, courseNames, classNames, trainerNames)
+    : [];
+
+  const hasTimePeriods = timeStructure && timeStructure.length > 0;
 
   return (
     <DashboardLayout
-      title="Timetable Management"
-      subtitle="Manage class schedules and timetables"
+      title="Timetable Generator"
+      subtitle="Constraint-based heuristic scheduling engine"
       navItems={navItems}
       groupLabel={groupLabel}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div />
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Slot
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Timetable Slot</DialogTitle>
-                <DialogDescription>Schedule a new class session</DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Class</Label>
-                  <Select value={formData.class_id} onValueChange={(value) => setFormData({ ...formData, class_id: value })}>
-                    <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
-                    <SelectContent>
-                      {classes?.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id}>{cls.class_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Course</Label>
-                  <Select value={formData.course_id} onValueChange={(value) => setFormData({ ...formData, course_id: value })}>
-                    <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                    <SelectContent>
-                      {courses?.map((course) => (
-                        <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Day</Label>
-                  <Select value={formData.day_of_week.toString()} onValueChange={(value) => setFormData({ ...formData, day_of_week: parseInt(value) })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {DAYS.map((day, idx) => (
-                        <SelectItem key={idx} value={idx.toString()}>{day}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Start Time</Label>
-                    <Input type="time" value={formData.start_time} onChange={(e) => setFormData({ ...formData, start_time: e.target.value })} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>End Time</Label>
-                    <Input type="time" value={formData.end_time} onChange={(e) => setFormData({ ...formData, end_time: e.target.value })} required />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Room Number</Label>
-                  <Input value={formData.room_number} onChange={(e) => setFormData({ ...formData, room_number: e.target.value })} placeholder="e.g., Room 101" />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit">Add Slot</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-
+        {/* Controls */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Class Timetable
+              <Settings2 className="h-5 w-5" />
+              Generation Controls
             </CardTitle>
-            <CardDescription>
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select a class to view timetable" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes?.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id}>{cls.class_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">Loading timetable...</div>
-            ) : !selectedClass ? (
-              <div className="text-center py-8 text-muted-foreground">Select a class to view its timetable</div>
-            ) : (
-              <div className="space-y-6">
-                {DAYS.map((day, idx) => (
-                  <div key={idx}>
-                    <h3 className="font-semibold text-lg mb-3">{day}</h3>
-                    {groupedByDay?.[idx]?.length ? (
-                      <div className="space-y-2">
-                        {groupedByDay[idx].map((slot) => (
-                          <div key={slot.id} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
-                              <p className="font-medium">{slot.courses?.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {slot.start_time} - {slot.end_time}
-                                {slot.room_number && ` • ${slot.room_number}`}
-                              </p>
-                            </div>
-                            <Button size="icon" variant="ghost" onClick={() => deleteSlot.mutate(slot.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground pl-4">No classes scheduled</p>
-                    )}
-                  </div>
-                ))}
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="space-y-1">
+                <Label>Academic Year</Label>
+                <Select value={academicYear} onValueChange={setAcademicYear}>
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[2024, 2025, 2026, 2027].map(y => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="space-y-1">
+                <Label>Term</Label>
+                <Select value={term.toString()} onValueChange={v => setTerm(parseInt(v))}>
+                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3].map(t => (
+                      <SelectItem key={t} value={t.toString()}>Term {t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {!hasTimePeriods && (
+                <Button variant="outline" onClick={handleSeedPeriods} disabled={seedPeriods.isPending}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Setup Period Structure
+                </Button>
+              )}
+
+              <Button
+                onClick={handleGenerate}
+                disabled={isGenerating || !hasTimePeriods}
+                className="gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                {isGenerating ? "Generating..." : "Generate Timetable"}
+              </Button>
+
+              {lastResult && (
+                <div className="flex items-center gap-3 ml-auto">
+                  <Badge variant="secondary">
+                    {lastResult.placedLessons}/{lastResult.totalLessons} placed
+                  </Badge>
+                  {lastResult.failedLessons > 0 && (
+                    <Badge variant="destructive">
+                      {lastResult.failedLessons} conflicts
+                    </Badge>
+                  )}
+                  <Badge variant="outline">
+                    Penalty: {lastResult.globalPenaltyScore}
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            {isGenerating && (
+              <Progress value={progress} className="mt-4 h-2" />
             )}
           </CardContent>
         </Card>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="grid" className="gap-2">
+              <Calendar className="h-4 w-4" /> Timetable Grid
+            </TabsTrigger>
+            <TabsTrigger value="conflicts" className="gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Conflicts
+              {formattedConflicts.length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 px-1.5">
+                  {formattedConflicts.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="grid" className="mt-4">
+            <TimetableGrid
+              entries={entries || []}
+              timeStructure={timeStructure || []}
+              isLoading={entriesLoading}
+              onToggleLock={handleToggleLock}
+              courseNames={courseNames}
+              classNames={classNames}
+              trainerNames={trainerNames}
+            />
+          </TabsContent>
+
+          <TabsContent value="conflicts" className="mt-4">
+            <ConflictPanel conflicts={formattedConflicts} />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
