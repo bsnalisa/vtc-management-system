@@ -11,10 +11,12 @@ import { Users, Plus, Pencil, Trash2 } from "lucide-react";
 import { useClasses, useCreateClass, useUpdateClass, useDeleteClass, ClassData } from "@/hooks/useClasses";
 import { useTrades } from "@/hooks/useTrades";
 import { useTrainers } from "@/hooks/useTrainers";
+import { useQualifications } from "@/hooks/useQualifications";
 import { Badge } from "@/components/ui/badge";
 
 const EMPTY_FORM: ClassData = {
   trade_id: "",
+  qualification_id: "",
   level: 1,
   training_mode: "fulltime",
   class_code: "",
@@ -32,15 +34,22 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
   const { data: classes, isLoading } = useClasses();
   const { data: trades } = useTrades();
   const { data: trainers } = useTrainers();
+  const { data: qualifications } = useQualifications();
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
+
+  // Filter qualifications by selected trade
+  const filteredQualifications = qualifications?.filter(
+    (q: any) => q.trade_id === formData.trade_id
+  ) || [];
 
   const handleOpenDialog = (classToEdit?: any) => {
     if (classToEdit) {
       setEditingClass(classToEdit);
       setFormData({
         trade_id: classToEdit.trade_id,
+        qualification_id: classToEdit.qualification_id || "",
         level: classToEdit.level,
         training_mode: classToEdit.training_mode,
         class_code: classToEdit.class_code,
@@ -56,9 +65,18 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
     setOpen(true);
   };
 
+  const handleTradeChange = (tradeId: string) => {
+    // Reset qualification when trade changes
+    setFormData({ ...formData, trade_id: tradeId, qualification_id: "" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...formData, trainer_id: formData.trainer_id || null };
+    const payload = {
+      ...formData,
+      trainer_id: formData.trainer_id || null,
+      qualification_id: formData.qualification_id || null,
+    };
     if (editingClass) {
       await updateClass.mutateAsync({ id: editingClass.id, ...payload });
     } else {
@@ -105,10 +123,28 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                 </div>
                 <div className="space-y-2">
                   <Label>Trade</Label>
-                  <Select value={formData.trade_id} onValueChange={(v) => setFormData({ ...formData, trade_id: v })}>
+                  <Select value={formData.trade_id} onValueChange={handleTradeChange}>
                     <SelectTrigger><SelectValue placeholder="Select trade" /></SelectTrigger>
                     <SelectContent>
                       {trades?.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Qualification</Label>
+                  <Select
+                    value={formData.qualification_id || "none"}
+                    onValueChange={(v) => setFormData({ ...formData, qualification_id: v === "none" ? "" : v })}
+                    disabled={!formData.trade_id}
+                  >
+                    <SelectTrigger><SelectValue placeholder={formData.trade_id ? "Select qualification" : "Select a trade first"} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No qualification assigned</SelectItem>
+                      {filteredQualifications.map((q: any) => (
+                        <SelectItem key={q.id} value={q.id}>
+                          {q.qualification_code} – {q.qualification_title}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -180,6 +216,7 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                   <TableHead>Class Code</TableHead>
                   <TableHead>Class Name</TableHead>
                   <TableHead>Trade</TableHead>
+                  <TableHead>Qualification</TableHead>
                   <TableHead>Level</TableHead>
                   <TableHead>Mode</TableHead>
                   <TableHead>Trainer</TableHead>
@@ -194,6 +231,13 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                     <TableCell className="font-medium">{cls.class_code}</TableCell>
                     <TableCell>{cls.class_name}</TableCell>
                     <TableCell>{cls.trades?.name || "—"}</TableCell>
+                    <TableCell>
+                      {cls.qualifications ? (
+                        <span className="text-xs">{cls.qualifications.qualification_code}</span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
                     <TableCell><Badge variant="outline">Level {cls.level}</Badge></TableCell>
                     <TableCell>{trainingModeLabel(cls.training_mode)}</TableCell>
                     <TableCell>{cls.trainers?.full_name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>

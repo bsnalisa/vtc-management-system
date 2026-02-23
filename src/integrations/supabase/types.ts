@@ -1261,6 +1261,7 @@ export type Database = {
           id: string
           level: number
           organization_id: string | null
+          qualification_id: string | null
           trade_id: string
           trainer_id: string | null
           training_mode: Database["public"]["Enums"]["training_mode"]
@@ -1276,6 +1277,7 @@ export type Database = {
           id?: string
           level: number
           organization_id?: string | null
+          qualification_id?: string | null
           trade_id: string
           trainer_id?: string | null
           training_mode: Database["public"]["Enums"]["training_mode"]
@@ -1291,6 +1293,7 @@ export type Database = {
           id?: string
           level?: number
           organization_id?: string | null
+          qualification_id?: string | null
           trade_id?: string
           trainer_id?: string | null
           training_mode?: Database["public"]["Enums"]["training_mode"]
@@ -1302,6 +1305,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
             referencedColumns: ["id"]
           },
           {

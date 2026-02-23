@@ -5,6 +5,7 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 
 export interface ClassData {
   trade_id: string;
+  qualification_id?: string | null;
   level: number;
   training_mode: string;
   class_code: string;
@@ -31,6 +32,12 @@ export const useClasses = () => {
             id,
             trainer_id,
             full_name
+          ),
+          qualifications:qualification_id (
+            id,
+            qualification_title,
+            qualification_code,
+            nqf_level
           )
         `)
         .order("created_at", { ascending: false });
@@ -50,6 +57,7 @@ export const useCreateClass = () => {
     mutationFn: async (classData: ClassData) => {
       const payload: any = {
         trade_id: classData.trade_id,
+        qualification_id: classData.qualification_id || null,
         level: classData.level,
         training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
         class_code: classData.class_code,
@@ -92,6 +100,7 @@ export const useUpdateClass = () => {
     mutationFn: async ({ id, ...classData }: ClassData & { id: string }) => {
       const payload: any = {
         trade_id: classData.trade_id,
+        qualification_id: classData.qualification_id || null,
         level: classData.level,
         training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
         class_code: classData.class_code,
