@@ -48,20 +48,22 @@ const HeadOfTrainingDashboard = () => {
         .eq("organization_id", organizationId!);
       if (error) throw error;
 
-      // Enrich with profile data for the trainer user
+      // Enrich with trainer name from trainers table
       if (data && data.length > 0) {
         const trainerIds = [...new Set(data.map((tq: any) => tq.trainer_id))];
-        const { data: profiles } = await (supabase as any)
-          .from("profiles")
-          .select("id, firstname, surname")
+        const { data: trainers } = await (supabase as any)
+          .from("trainers")
+          .select("id, full_name, email")
           .in("id", trainerIds);
-        const profileMap = (profiles || []).reduce((acc: any, p: any) => {
-          acc[p.id] = p;
+        const trainerMap = (trainers || []).reduce((acc: any, t: any) => {
+          acc[t.id] = t;
           return acc;
         }, {});
         return data.map((tq: any) => ({
           ...tq,
-          trainer_profile: profileMap[tq.trainer_id] || null,
+          trainer_profile: trainerMap[tq.trainer_id]
+            ? { firstname: trainerMap[tq.trainer_id].full_name, surname: "" }
+            : null,
         }));
       }
       return data;
