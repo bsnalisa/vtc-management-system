@@ -2134,6 +2134,531 @@ export type Database = {
           },
         ]
       }
+      gradebook_audit_logs: {
+        Row: {
+          action: string
+          entity_id: string | null
+          entity_type: string | null
+          gradebook_id: string
+          id: string
+          new_value: Json | null
+          notes: string | null
+          old_value: Json | null
+          performed_at: string
+          performed_by: string
+        }
+        Insert: {
+          action: string
+          entity_id?: string | null
+          entity_type?: string | null
+          gradebook_id: string
+          id?: string
+          new_value?: Json | null
+          notes?: string | null
+          old_value?: Json | null
+          performed_at?: string
+          performed_by: string
+        }
+        Update: {
+          action?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          gradebook_id?: string
+          id?: string
+          new_value?: Json | null
+          notes?: string | null
+          old_value?: Json | null
+          performed_at?: string
+          performed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_audit_logs_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_ca_scores: {
+        Row: {
+          ca_score: number | null
+          calculated_at: string
+          gradebook_id: string
+          id: string
+          mock_average: number | null
+          overall_competency: string | null
+          practical_score: number | null
+          test_average: number | null
+          theory_score: number | null
+          trainee_id: string
+        }
+        Insert: {
+          ca_score?: number | null
+          calculated_at?: string
+          gradebook_id: string
+          id?: string
+          mock_average?: number | null
+          overall_competency?: string | null
+          practical_score?: number | null
+          test_average?: number | null
+          theory_score?: number | null
+          trainee_id: string
+        }
+        Update: {
+          ca_score?: number | null
+          calculated_at?: string
+          gradebook_id?: string
+          id?: string
+          mock_average?: number | null
+          overall_competency?: string | null
+          practical_score?: number | null
+          test_average?: number | null
+          theory_score?: number | null
+          trainee_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_ca_scores_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_ca_scores_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_ca_scores_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_component_groups: {
+        Row: {
+          created_at: string
+          gradebook_id: string
+          group_type: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          gradebook_id: string
+          group_type: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          gradebook_id?: string
+          group_type?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_component_groups_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_component_units: {
+        Row: {
+          component_id: string
+          created_at: string
+          id: string
+          unit_standard_id: string
+        }
+        Insert: {
+          component_id: string
+          created_at?: string
+          id?: string
+          unit_standard_id: string
+        }
+        Update: {
+          component_id?: string
+          created_at?: string
+          id?: string
+          unit_standard_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_component_units_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "gradebook_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_component_units_unit_standard_id_fkey"
+            columns: ["unit_standard_id"]
+            isOneToOne: false
+            referencedRelation: "unit_standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_components: {
+        Row: {
+          component_type: string
+          created_at: string
+          gradebook_id: string
+          group_id: string | null
+          id: string
+          max_marks: number
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          component_type: string
+          created_at?: string
+          gradebook_id: string
+          group_id?: string | null
+          id?: string
+          max_marks?: number
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          component_type?: string
+          created_at?: string
+          gradebook_id?: string
+          group_id?: string | null
+          id?: string
+          max_marks?: number
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_components_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_components_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "gradebook_component_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_feedback: {
+        Row: {
+          component_id: string
+          feedback_text: string
+          gradebook_id: string
+          id: string
+          is_final: boolean
+          trainee_id: string
+          updated_at: string
+          written_at: string
+          written_by: string
+        }
+        Insert: {
+          component_id: string
+          feedback_text: string
+          gradebook_id: string
+          id?: string
+          is_final?: boolean
+          trainee_id: string
+          updated_at?: string
+          written_at?: string
+          written_by: string
+        }
+        Update: {
+          component_id?: string
+          feedback_text?: string
+          gradebook_id?: string
+          id?: string
+          is_final?: boolean
+          trainee_id?: string
+          updated_at?: string
+          written_at?: string
+          written_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_feedback_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "gradebook_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_feedback_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_feedback_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_feedback_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_marks: {
+        Row: {
+          competency_status: string
+          component_id: string
+          entered_at: string
+          entered_by: string
+          gradebook_id: string
+          id: string
+          marks_obtained: number | null
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          competency_status?: string
+          component_id: string
+          entered_at?: string
+          entered_by: string
+          gradebook_id: string
+          id?: string
+          marks_obtained?: number | null
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          competency_status?: string
+          component_id?: string
+          entered_at?: string
+          entered_by?: string
+          gradebook_id?: string
+          id?: string
+          marks_obtained?: number | null
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_marks_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "gradebook_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_marks_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_marks_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_marks_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebook_trainees: {
+        Row: {
+          created_at: string
+          enrollment_id: string | null
+          gradebook_id: string
+          id: string
+          trainee_id: string
+        }
+        Insert: {
+          created_at?: string
+          enrollment_id?: string | null
+          gradebook_id: string
+          id?: string
+          trainee_id: string
+        }
+        Update: {
+          created_at?: string
+          enrollment_id?: string | null
+          gradebook_id?: string
+          id?: string
+          trainee_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_trainees_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_trainees_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_trainees_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_trainees_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gradebooks: {
+        Row: {
+          ac_approved_at: string | null
+          ac_approved_by: string | null
+          ac_return_reason: string | null
+          academic_year: string
+          created_at: string
+          finalised_at: string | null
+          finalised_by: string | null
+          hot_approved_at: string | null
+          hot_approved_by: string | null
+          hot_return_reason: string | null
+          id: string
+          intake_label: string | null
+          is_locked: boolean
+          level: number
+          locked_at: string | null
+          mock_weight: number
+          organization_id: string
+          qualification_id: string
+          status: string
+          submission_closes_at: string | null
+          submission_opens_at: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          test_weight: number
+          title: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          ac_approved_at?: string | null
+          ac_approved_by?: string | null
+          ac_return_reason?: string | null
+          academic_year: string
+          created_at?: string
+          finalised_at?: string | null
+          finalised_by?: string | null
+          hot_approved_at?: string | null
+          hot_approved_by?: string | null
+          hot_return_reason?: string | null
+          id?: string
+          intake_label?: string | null
+          is_locked?: boolean
+          level?: number
+          locked_at?: string | null
+          mock_weight?: number
+          organization_id: string
+          qualification_id: string
+          status?: string
+          submission_closes_at?: string | null
+          submission_opens_at?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          test_weight?: number
+          title: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          ac_approved_at?: string | null
+          ac_approved_by?: string | null
+          ac_return_reason?: string | null
+          academic_year?: string
+          created_at?: string
+          finalised_at?: string | null
+          finalised_by?: string | null
+          hot_approved_at?: string | null
+          hot_approved_by?: string | null
+          hot_return_reason?: string | null
+          id?: string
+          intake_label?: string | null
+          is_locked?: boolean
+          level?: number
+          locked_at?: string | null
+          mock_weight?: number
+          organization_id?: string
+          qualification_id?: string
+          status?: string
+          submission_closes_at?: string | null
+          submission_opens_at?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          test_weight?: number
+          title?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebooks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebooks_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebooks_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hostel_allocations: {
         Row: {
           actual_check_out_date: string | null
@@ -3545,6 +4070,80 @@ export type Database = {
             columns: ["schedule_id"]
             isOneToOne: false
             referencedRelation: "maintenance_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mark_queries: {
+        Row: {
+          component_id: string
+          created_at: string
+          gradebook_id: string
+          id: string
+          marks_locked: boolean
+          query_text: string
+          resolution_text: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          component_id: string
+          created_at?: string
+          gradebook_id: string
+          id?: string
+          marks_locked?: boolean
+          query_text: string
+          resolution_text?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          component_id?: string
+          created_at?: string
+          gradebook_id?: string
+          id?: string
+          marks_locked?: boolean
+          query_text?: string
+          resolution_text?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_queries_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "gradebook_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_queries_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_queries_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_queries_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
         ]
