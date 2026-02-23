@@ -250,7 +250,7 @@ Training Mode:   ${trainee.training_mode || "N/A"}
 Enrollment Date: ${trainee.created_at ? format(new Date(trainee.created_at), "MMMM d, yyyy") : "N/A"}
 Status:          ${trainee.status?.toUpperCase() || "ACTIVE"}
 
-is a bona fide student of ${organizationName || "this institution"} and is currently 
+is a bona fide trainee of ${organizationName || "this institution"} and is currently 
 enrolled in the above-mentioned programme.
 
 This certificate is issued upon request for official purposes.

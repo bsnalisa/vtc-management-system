@@ -173,13 +173,13 @@ const SuperAdminModulesManagement = () => {
   const handleInitializeModules = async () => {
     const standardModules = [
       // Academic - All training and education operations
-      { name: "Trainee Management", code: "trainee_management", category: "Academic", description: "Student registration, profiles, and records management" },
+      { name: "Trainee Management", code: "trainee_management", category: "Academic", description: "Trainee registration, profiles, and records management" },
       { name: "Trainer Management", code: "trainer_management", category: "Academic", description: "Staff profiles, qualifications, and assignments" },
       { name: "Class Management", code: "class_management", category: "Academic", description: "Class creation, scheduling, and enrollment" },
       { name: "Attendance Management", code: "attendance_management", category: "Academic", description: "Daily attendance tracking and reporting" },
       { name: "Timetable Management", code: "timetable_management", category: "Academic", description: "Schedule management and planning" },
       { name: "Assessment & Results", code: "assessment_results", category: "Academic", description: "Exam management, marking, and results" },
-      { name: "Course Enrollment", code: "course_enrollment", category: "Academic", description: "Student course registration and tracking" },
+      { name: "Course Enrollment", code: "course_enrollment", category: "Academic", description: "Trainee course registration and tracking" },
       { name: "Training Modules", code: "training_modules", category: "Academic", description: "Course content and curriculum management" },
       { name: "Alumni Management", code: "alumni_management", category: "Academic", description: "Graduate tracking and employment records" },
       { name: "Placement & Internships", code: "placement_management", category: "Academic", description: "Job placements and internship coordination" },

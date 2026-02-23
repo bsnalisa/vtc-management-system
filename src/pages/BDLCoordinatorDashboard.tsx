@@ -50,7 +50,7 @@ const virtualSessions = [
   { id: "3", title: "Carpentry Tools Demo", course: "BDL-003", date: "2024-01-14", time: "11:00 AM", trainer: "Peter Brown", registered: 25, status: "completed" },
 ];
 
-const studentProgress = [
+const traineeProgress = [
   { id: "1", name: "Alice Moyo", course: "BDL-001", progress: 78, lastActive: "2024-01-14", assignments: 8, completed: 6, status: "on-track" },
   { id: "2", name: "Brian Ncube", course: "BDL-002", progress: 45, lastActive: "2024-01-10", assignments: 10, completed: 4, status: "at-risk" },
   { id: "3", name: "Chipo Dube", course: "BDL-003", progress: 92, lastActive: "2024-01-15", assignments: 12, completed: 11, status: "on-track" },
@@ -107,7 +107,7 @@ export default function BDLCoordinatorDashboard() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Enrolled Students</CardTitle>
+              <CardTitle className="text-sm font-medium">Enrolled Trainees</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -143,7 +143,7 @@ export default function BDLCoordinatorDashboard() {
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="materials">Learning Materials</TabsTrigger>
             <TabsTrigger value="sessions">Virtual Sessions</TabsTrigger>
-            <TabsTrigger value="progress">Student Progress</TabsTrigger>
+            <TabsTrigger value="progress">Trainee Progress</TabsTrigger>
           </TabsList>
 
           {/* Courses Tab */}
@@ -336,7 +336,7 @@ export default function BDLCoordinatorDashboard() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Schedule Virtual Session</DialogTitle>
-                    <DialogDescription>Plan a live online session for students.</DialogDescription>
+                    <DialogDescription>Plan a live online session for trainees.</DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
@@ -416,14 +416,14 @@ export default function BDLCoordinatorDashboard() {
             <div className="flex items-center justify-between">
               <div className="relative w-64">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search students..." className="pl-8" />
+                <Input placeholder="Search trainees..." className="pl-8" />
               </div>
               <Select defaultValue="all">
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Students</SelectItem>
+                  <SelectItem value="all">All Trainees</SelectItem>
                   <SelectItem value="on-track">On Track</SelectItem>
                   <SelectItem value="at-risk">At Risk</SelectItem>
                 </SelectContent>
@@ -434,7 +434,7 @@ export default function BDLCoordinatorDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student Name</TableHead>
+                    <TableHead>Trainee Name</TableHead>
                     <TableHead>Course</TableHead>
                     <TableHead>Progress</TableHead>
                     <TableHead>Last Active</TableHead>
@@ -444,24 +444,24 @@ export default function BDLCoordinatorDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {studentProgress.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell>{student.course}</TableCell>
+                  {traineeProgress.map((trainee) => (
+                    <TableRow key={trainee.id}>
+                      <TableCell className="font-medium">{trainee.name}</TableCell>
+                      <TableCell>{trainee.course}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-24 bg-muted rounded-full h-2">
                             <div 
-                              className={`h-2 rounded-full ${student.progress >= 70 ? 'bg-green-500' : student.progress >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${student.progress}%` }}
+                              className={`h-2 rounded-full ${trainee.progress >= 70 ? 'bg-green-500' : trainee.progress >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                              style={{ width: `${trainee.progress}%` }}
                             />
                           </div>
-                          <span className="text-sm">{student.progress}%</span>
+                          <span className="text-sm">{trainee.progress}%</span>
                         </div>
                       </TableCell>
-                      <TableCell>{student.lastActive}</TableCell>
-                      <TableCell>{student.completed}/{student.assignments}</TableCell>
-                      <TableCell>{getStatusBadge(student.status)}</TableCell>
+                      <TableCell>{trainee.lastActive}</TableCell>
+                      <TableCell>{trainee.completed}/{trainee.assignments}</TableCell>
+                      <TableCell>{getStatusBadge(trainee.status)}</TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">View Details</Button>
                       </TableCell>

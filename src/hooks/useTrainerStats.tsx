@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TrainerStats {
   myClasses: number;
-  totalStudents: number;
+  totalTrainees: number;
   attendanceToday: number;
   presentToday: number;
   attendanceRate: string;
@@ -16,7 +16,7 @@ interface TrainerStats {
     training_mode: string;
     academic_year: string;
     capacity: number | null;
-    student_count: number;
+    trainee_count: number;
   }>;
   qualifications: Array<{
     id: string;
@@ -39,7 +39,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
   if (!trainer) {
     return {
       myClasses: 0,
-      totalStudents: 0,
+      totalTrainees: 0,
       attendanceToday: 0,
       presentToday: 0,
       attendanceRate: "0",
@@ -62,7 +62,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
   const classIds = classes?.map((c: any) => c.id) || [];
 
   // Get enrollments per class
-  let totalStudents = 0;
+  let totalTrainees = 0;
   const classDetails: TrainerStats["classes"] = [];
 
   if (classIds.length > 0) {
@@ -72,7 +72,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
       .in("class_id", classIds)
       .eq("status", "active");
 
-    totalStudents = enrollments?.length || 0;
+    totalTrainees = enrollments?.length || 0;
 
     for (const cls of classes || []) {
       const count = enrollments?.filter((e: any) => e.class_id === cls.id).length || 0;
@@ -85,7 +85,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
         training_mode: cls.training_mode,
         academic_year: cls.academic_year,
         capacity: cls.capacity,
-        student_count: count,
+        trainee_count: count,
       });
     }
   }
@@ -104,7 +104,7 @@ async function fetchTrainerStats(): Promise<TrainerStats | null> {
 
   return {
     myClasses: classCount,
-    totalStudents,
+    totalTrainees,
     attendanceToday: 0,
     presentToday: 0,
     attendanceRate: "0",
