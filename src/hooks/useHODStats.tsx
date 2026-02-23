@@ -74,33 +74,29 @@ export const useHODStats = () => {
   });
 };
 
-// Hook to fetch active trainers with their profile info (from user_roles + profiles)
+// Hook to fetch active trainers with their profile info (from trainers table)
 export const useActiveTrainers = (organizationId?: string) => {
   return useQuery({
     queryKey: ["active_trainers_from_roles", organizationId],
     queryFn: async () => {
       const db: any = supabase;
-      // Get all user_ids with trainer role, scoped to org if provided
-      let rolesQuery = db.from("user_roles").select("user_id").eq("role", "trainer");
-      if (organizationId) rolesQuery = rolesQuery.eq("organization_id", organizationId);
+      // Get trainers directly from the trainers table
+      let query = db.from("trainers").select("id, user_id, full_name, email, phone, designation").eq("active", true);
+      if (organizationId) query = query.eq("organization_id", organizationId);
 
-      const { data: trainerRoles, error: rolesError } = await rolesQuery;
-      if (rolesError) throw rolesError;
-      if (!trainerRoles || trainerRoles.length === 0) return [];
+      const { data: trainers, error } = await query;
+      if (error) throw error;
+      if (!trainers || trainers.length === 0) return [];
 
-      const trainerUserIds = trainerRoles.map((r: any) => r.user_id);
-
-      // Profiles are keyed by user_id, not id
-      const { data: profiles, error: profilesError } = await db
-        .from("profiles")
-        .select("id, user_id, firstname, surname, full_name, email, phone")
-        .in("user_id", trainerUserIds);
-      if (profilesError) throw profilesError;
-
-      return (profiles || []).map((p: any) => ({
-        ...p,
-        display_name:
-          `${p.firstname || ""} ${p.surname || ""}`.trim() || p.full_name || p.email || "Unknown",
+      return trainers.map((t: any) => ({
+        id: t.id, // This is the trainers table id, which trainer_qualifications references
+        user_id: t.user_id,
+        full_name: t.full_name,
+        email: t.email,
+        phone: t.phone,
+        firstname: t.full_name?.split(" ")[0] || "",
+        surname: t.full_name?.split(" ").slice(1).join(" ") || "",
+        display_name: t.full_name || t.email || "Unknown",
       }));
     },
     enabled: true,
