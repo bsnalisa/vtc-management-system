@@ -68,7 +68,6 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Timetable", url: "/timetable", icon: Calendar },
   { title: "Assessment Review", url: "/assessment-results", icon: ClipboardCheck },
   { title: "Trainee List", url: "/trainees", icon: Users },
-  { title: "Course Enrollment", url: "/enrollments", icon: BookOpen },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 
