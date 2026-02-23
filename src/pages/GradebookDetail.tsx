@@ -21,8 +21,9 @@ import {
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2, Send, Lock, Users, BookOpen, Calculator, MessageSquare } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Send, Lock, Users, BookOpen, Calculator, MessageSquare, HelpCircle, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGradebookQueries, useResolveMarkQuery } from "@/hooks/useMarkQueries";
 
 // Fetch available trainees for the gradebook's qualification
 const useAvailableTrainees = (qualificationId?: string) => {
@@ -57,6 +58,8 @@ const GradebookDetail = () => {
   const { data: feedbackList } = useGradebookFeedbackList(id);
   const { data: caScores } = useGradebookCAScores(id);
   const { data: availableTrainees } = useAvailableTrainees(gradebook?.qualification_id);
+  const { data: markQueries } = useGradebookQueries(id);
+  const resolveQuery = useResolveMarkQuery();
 
   const createComponent = useCreateComponent();
   const createGroup = useCreateComponentGroup();
@@ -70,6 +73,8 @@ const GradebookDetail = () => {
   const [compForm, setCompForm] = useState({ name: "", component_type: "test", max_marks: "100", group_id: "" });
   const [traineeDialog, setTraineeDialog] = useState(false);
   const [selectedTraineeIds, setSelectedTraineeIds] = useState<string[]>([]);
+  const [resolveDialog, setResolveDialog] = useState<{ queryId: string; action: "resolved" | "rejected" } | null>(null);
+  const [resolveNotes, setResolveNotes] = useState("");
 
   // Mark editing state: { `${componentId}_${traineeId}`: { marks, competency, feedback } }
   const [editingMarks, setEditingMarks] = useState<Record<string, { marks: string; competency: string; feedback: string }>>({});
@@ -214,6 +219,14 @@ const GradebookDetail = () => {
             <TabsTrigger value="marks"><Calculator className="h-4 w-4 mr-1" />Marks Entry</TabsTrigger>
             <TabsTrigger value="trainees"><Users className="h-4 w-4 mr-1" />Trainees</TabsTrigger>
             <TabsTrigger value="ca"><Calculator className="h-4 w-4 mr-1" />CA Scores</TabsTrigger>
+            <TabsTrigger value="queries">
+              <HelpCircle className="h-4 w-4 mr-1" />Queries
+              {markQueries && markQueries.filter((q: any) => q.status === "open").length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">
+                  {markQueries.filter((q: any) => q.status === "open").length}
+                </Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           {/* ─── COMPONENTS TAB ─── */}
@@ -590,7 +603,102 @@ const GradebookDetail = () => {
               </Card>
             )}
           </TabsContent>
+          {/* ─── QUERIES TAB ─── */}
+          <TabsContent value="queries" className="space-y-4">
+            <h3 className="font-semibold">Trainee Mark Queries</h3>
+            {markQueries && markQueries.length > 0 ? (
+              <div className="space-y-3">
+                {markQueries.map((q: any) => (
+                  <Card key={q.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{q.subject}</span>
+                            <Badge variant={q.status === "open" ? "destructive" : q.status === "resolved" ? "default" : q.status === "rejected" ? "outline" : "secondary"} className="capitalize text-xs">
+                              {q.status.replace(/_/g, " ")}
+                            </Badge>
+                            <Badge variant="outline" className="capitalize text-xs">{q.query_type.replace(/_/g, " ")}</Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            <span className="font-medium">{q.trainees?.first_name} {q.trainees?.last_name}</span>
+                            <span className="mx-1">•</span>
+                            <span className="font-mono text-xs">{q.trainees?.trainee_id}</span>
+                            <span className="mx-1">•</span>
+                            <span>{q.gradebook_components?.name} ({q.gradebook_components?.component_type})</span>
+                          </div>
+                          <p className="text-sm mt-2">{q.description}</p>
+                          {q.resolution_notes && (
+                            <div className="mt-2 p-2 bg-muted rounded text-sm">
+                              <span className="text-xs font-medium text-muted-foreground">Resolution: </span>
+                              {q.resolution_notes}
+                            </div>
+                          )}
+                        </div>
+                        {q.status === "open" && (
+                          <div className="flex gap-1 shrink-0">
+                            <Button size="sm" variant="outline" onClick={() => { setResolveDialog({ queryId: q.id, action: "resolved" }); setResolveNotes(""); }}>
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" />Resolve
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setResolveDialog({ queryId: q.id, action: "rejected" }); setResolveNotes(""); }}>
+                              <XCircle className="h-3.5 w-3.5 mr-1" />Reject
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  <HelpCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No mark queries from trainees.</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
         </Tabs>
+
+        {/* Resolve/Reject query dialog */}
+        <Dialog open={!!resolveDialog} onOpenChange={(open) => { if (!open) setResolveDialog(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{resolveDialog?.action === "resolved" ? "Resolve Query" : "Reject Query"}</DialogTitle>
+              <DialogDescription>
+                {resolveDialog?.action === "resolved" 
+                  ? "Provide a response to the trainee's query."
+                  : "Explain why this query is being rejected."}
+              </DialogDescription>
+            </DialogHeader>
+            <Textarea
+              placeholder="Notes / response..."
+              value={resolveNotes}
+              onChange={(e) => setResolveNotes(e.target.value)}
+              rows={3}
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setResolveDialog(null)}>Cancel</Button>
+              <Button
+                variant={resolveDialog?.action === "rejected" ? "destructive" : "default"}
+                onClick={async () => {
+                  if (!resolveDialog) return;
+                  await resolveQuery.mutateAsync({
+                    queryId: resolveDialog.queryId,
+                    status: resolveDialog.action,
+                    resolution_notes: resolveNotes,
+                  });
+                  setResolveDialog(null);
+                  setResolveNotes("");
+                }}
+                disabled={resolveQuery.isPending || !resolveNotes.trim()}
+              >
+                {resolveQuery.isPending ? "Saving..." : resolveDialog?.action === "resolved" ? "Mark Resolved" : "Reject Query"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

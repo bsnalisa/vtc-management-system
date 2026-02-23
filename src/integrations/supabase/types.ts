@@ -2429,6 +2429,83 @@ export type Database = {
           },
         ]
       }
+      gradebook_mark_queries: {
+        Row: {
+          component_id: string
+          created_at: string
+          description: string
+          gradebook_id: string
+          id: string
+          query_type: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          subject: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          component_id: string
+          created_at?: string
+          description: string
+          gradebook_id: string
+          id?: string
+          query_type?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          subject: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          component_id?: string
+          created_at?: string
+          description?: string
+          gradebook_id?: string
+          id?: string
+          query_type?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          subject?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gradebook_mark_queries_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "gradebook_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_mark_queries_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_mark_queries_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_mark_queries_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gradebook_marks: {
         Row: {
           competency_status: string
