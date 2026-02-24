@@ -276,9 +276,9 @@ const TraineeResultsPage = () => {
                     {results.map((result: any) => (
                       <div key={result.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border">
                         <div className="flex-1 mb-4 md:mb-0">
-                          <h4 className="font-medium">{result.unit_standards?.title || "Unit Standard"}</h4>
+                          <h4 className="font-medium">{result.unit_standards?.module_title || "Unit Standard"}</h4>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="font-mono">{result.unit_standards?.unit_standard_id || ""}</span>
+                            <span className="font-mono">{result.unit_standards?.unit_no || ""}</span>
                             <span>{result.unit_standards?.credit || 0} credits</span>
                             {result.assessment_date && <span>Assessed: {new Date(result.assessment_date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}</span>}
                           </div>
