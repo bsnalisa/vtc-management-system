@@ -4667,6 +4667,7 @@ export type Database = {
           created_at: string
           email_domain: string | null
           id: string
+          logo_url: string | null
           name: string
           package: Database["public"]["Enums"]["package_type"]
           subdomain: string | null
@@ -4678,6 +4679,7 @@ export type Database = {
           created_at?: string
           email_domain?: string | null
           id?: string
+          logo_url?: string | null
           name: string
           package?: Database["public"]["Enums"]["package_type"]
           subdomain?: string | null
@@ -4689,6 +4691,7 @@ export type Database = {
           created_at?: string
           email_domain?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
           package?: Database["public"]["Enums"]["package_type"]
           subdomain?: string | null
