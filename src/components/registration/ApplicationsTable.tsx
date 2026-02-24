@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, UserCheck, AlertCircle, Eye } from "lucide-react";
+import { CheckCircle, Clock, UserCheck, AlertCircle, FileText } from "lucide-react";
 
 interface Application {
   id: string;
@@ -203,10 +203,10 @@ export const ApplicationsTable = ({
               <TableCell>
                 <div className="flex gap-2 flex-nowrap">
                   {getActionButton(application)}
-                  {/* Only show view details for screened applications (not the screening icon) */}
+                  {/* Only show view details for screened applications */}
                   {application.qualification_status !== "pending" && (
-                    <Button size="sm" variant="ghost" onClick={() => onViewDetails(application)} title="View Details">
-                      <Eye className="h-4 w-4" />
+                    <Button size="sm" variant="ghost" onClick={() => onViewDetails(application)} title="View Application">
+                      <FileText className="h-4 w-4" />
                     </Button>
                   )}
                 </div>

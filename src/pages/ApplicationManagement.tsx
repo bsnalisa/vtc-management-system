@@ -10,6 +10,7 @@ import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { ApplicationsTable } from "@/components/registration/ApplicationsTable";
 import { ScreeningDialog } from "@/components/registration/ScreeningDialog";
 import { RegistrationDialog } from "@/components/registration/RegistrationDialog";
+import { ApplicationViewDialog } from "@/components/registration/ApplicationViewDialog";
 import { useTraineeApplications, useApplicationStats } from "@/hooks/useTraineeApplications";
 import { useTrades } from "@/hooks/useTrades";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -22,6 +23,7 @@ const ApplicationManagement = () => {
   const [activeTab, setActiveTab] = useState("qualified");
   const [screeningDialogOpen, setScreeningDialogOpen] = useState(false);
   const [registrationDialogOpen, setRegistrationDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
 
   // Fetch only screened applications (exclude pending)
@@ -76,7 +78,7 @@ const ApplicationManagement = () => {
 
   const handleViewDetails = (application: any) => {
     setSelectedApplication(application);
-    setScreeningDialogOpen(true);
+    setViewDialogOpen(true);
   };
 
   return (
@@ -201,6 +203,11 @@ const ApplicationManagement = () => {
             <RegistrationDialog
               open={registrationDialogOpen}
               onOpenChange={setRegistrationDialogOpen}
+              application={selectedApplication}
+            />
+            <ApplicationViewDialog
+              open={viewDialogOpen}
+              onOpenChange={setViewDialogOpen}
               application={selectedApplication}
             />
           </>
