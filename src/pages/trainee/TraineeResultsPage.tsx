@@ -1,150 +1,183 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Award, CheckCircle, XCircle, Clock, Loader2, BookOpen, MessageSquare, ChevronDown, ChevronRight, HelpCircle, Send } from "lucide-react";
+import { Award, Loader2, HelpCircle, Send, GraduationCap, User, BookOpen, ChevronDown, ChevronRight } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   useTraineeUserId,
   useTraineeRecord,
-  useTraineeAssessmentResults,
   useTraineeGradebookEntries,
   useTraineeGradebookMarks,
 } from "@/hooks/useTraineePortalData";
 import { useMyMarkQueries, useSubmitMarkQuery } from "@/hooks/useMarkQueries";
 
-const competencyBadge = (status: string | null) => {
-  switch (status) {
-    case "competent": return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Competent</Badge>;
-    case "not_yet_competent": return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Not Yet Competent</Badge>;
-    default: return <Badge className="bg-gray-100 text-gray-800"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
-  }
+// ─── Mark type label helper ───
+const markTypeLabel = (type: string) => {
+  const map: Record<string, string> = {
+    test: "TM : THEORY TEST MARK",
+    theory_test: "TM : THEORY TEST MARK",
+    practical: "PM : PRACTICAL MARK",
+    practical_test: "PT : PRACTICAL TEST MARK",
+    assignment: "TA : ASSIGNMENT MARK",
+    project: "PJ : PROJECT MARK",
+    mock: "MK : MOCK EXAM MARK",
+    exam: "EX : EXAM MARK",
+  };
+  return map[type] || type.replace(/_/g, " ").toUpperCase();
 };
 
-const statusLabel = (status: string) => {
-  if (status === "finalised") return { text: "Final", variant: "default" as const };
-  return { text: "Provisional", variant: "secondary" as const };
+const markTypeCode = (type: string) => {
+  const map: Record<string, string> = {
+    test: "TM",
+    theory_test: "TM",
+    practical: "PM",
+    practical_test: "PT",
+    assignment: "TA",
+    project: "PJ",
+    mock: "MK",
+    exam: "EX",
+  };
+  return map[type] || type.substring(0, 2).toUpperCase();
 };
 
-// ─── Gradebook detail card for a single gradebook ───
-const GradebookCard = ({ gradebook, traineeId, onRaiseQuery }: { gradebook: any; traineeId: string; onRaiseQuery: (gradebookId: string, componentId: string, componentName: string) => void }) => {
-  const [open, setOpen] = useState(false);
-  const { data, isLoading } = useTraineeGradebookMarks(open ? gradebook.id : null, traineeId);
+// ─── Subject card showing marks grouped by type ───
+const SubjectCard = ({
+  gradebook,
+  traineeId,
+  onRaiseQuery,
+}: {
+  gradebook: any;
+  traineeId: string;
+  onRaiseQuery: (gradebookId: string, componentId: string, componentName: string) => void;
+}) => {
+  const [open, setOpen] = useState(true);
+  const { data, isLoading } = useTraineeGradebookMarks(gradebook.id, traineeId);
 
   const isFinal = gradebook.status === "finalised";
-  const sl = statusLabel(gradebook.status);
+
+  // Group components by type
+  const groupedByType = (data?.components || []).reduce((acc: Record<string, any[]>, comp: any) => {
+    const type = comp.component_type || "other";
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(comp);
+    return acc;
+  }, {});
+
+  // Compute period mark (CA score or average of all marks)
+  const periodMark = data?.caScore?.ca_score != null
+    ? Number(data.caScore.ca_score).toFixed(0)
+    : null;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className="border-0 shadow-sm">
+      <Card className="border border-border rounded-lg overflow-hidden">
+        {/* Subject header row */}
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                <div>
-                  <CardTitle className="text-base">{gradebook.title}</CardTitle>
-                  <CardDescription>
-                    {gradebook.qualifications?.qualification_code} • Level {gradebook.level} • {gradebook.academic_year}
-                  </CardDescription>
+          <div className="bg-muted/60 px-4 py-3 cursor-pointer hover:bg-muted/80 transition-colors">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-2 flex-1 min-w-0">
+                {open ? <ChevronDown className="h-4 w-4 mt-1 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 mt-1 shrink-0 text-muted-foreground" />}
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm text-foreground leading-tight">
+                    Subject: <span className="text-primary">{gradebook.title}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Academic Period: {gradebook.academic_year} • Level {gradebook.level}
+                  </p>
                 </div>
               </div>
-              <Badge variant={sl.variant}>{sl.text}</Badge>
+              <div className="flex items-center gap-3 shrink-0 text-sm">
+                {periodMark && (
+                  <span className="text-xs">
+                    Full Period Mark: <span className="font-bold text-foreground">{periodMark}</span>
+                  </span>
+                )}
+                <Badge variant={isFinal ? "default" : "secondary"} className="text-xs">
+                  {isFinal ? "Final" : "Provisional"}
+                </Badge>
+              </div>
             </div>
-          </CardHeader>
+          </div>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="pt-0">
+          <CardContent className="p-0">
             {isLoading ? (
-              <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
-            ) : data ? (
-              <div className="space-y-4">
-                {/* CA Summary */}
-                {data.caScore && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-lg bg-muted/50">
-                    {data.caScore.test_average != null && (
-                      <div><p className="text-xs text-muted-foreground">Test Average</p><p className="text-lg font-semibold">{Number(data.caScore.test_average).toFixed(1)}%</p></div>
-                    )}
-                    {data.caScore.mock_average != null && (
-                      <div><p className="text-xs text-muted-foreground">Mock Average</p><p className="text-lg font-semibold">{Number(data.caScore.mock_average).toFixed(1)}%</p></div>
-                    )}
-                    {data.caScore.ca_score != null && (
-                      <div><p className="text-xs text-muted-foreground">CA Score</p><p className="text-lg font-bold text-primary">{Number(data.caScore.ca_score).toFixed(1)}%</p></div>
-                    )}
-                    <div><p className="text-xs text-muted-foreground">Overall</p>{competencyBadge(data.caScore.overall_competency)}</div>
-                  </div>
-                )}
-
-                {/* Component-level marks */}
-                <div className="space-y-3">
-                  {data.components.map((comp: any) => {
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : data && Object.keys(groupedByType).length > 0 ? (
+              <div className="divide-y divide-border">
+                {Object.entries(groupedByType).map(([type, components]) => {
+                  // Calculate mark type average
+                  const marksForType = (components as any[]).map((comp: any) => {
                     const mark = data.marks.find((m: any) => m.component_id === comp.id);
-                    const fb = data.feedback.find((f: any) => f.component_id === comp.id);
-                    return (
-                      <div key={comp.id} className="p-3 rounded-lg border">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{comp.name}</span>
-                              <Badge variant="outline" className="capitalize text-xs">{comp.component_type}</Badge>
-                              {(comp.group as any)?.name && (
-                                <Badge variant="secondary" className="text-xs">{(comp.group as any).name}</Badge>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {mark ? (
-                              <>
-                                {mark.marks_obtained != null && (
-                                  <span className="text-lg font-bold">{mark.marks_obtained}<span className="text-sm text-muted-foreground font-normal">/{comp.max_marks}</span></span>
-                                )}
-                                {competencyBadge(mark.competency_status)}
-                                <Badge variant={isFinal ? "default" : "secondary"} className="text-xs">
-                                  {isFinal ? "Final" : "Provisional"}
-                                </Badge>
-                              </>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">Not assessed</span>
-                            )}
-                          </div>
-                        </div>
-                        {/* Feedback */}
-                        {fb && fb.feedback_text && (
-                          <div className="mt-2 p-2 rounded bg-muted/50 text-sm flex items-start gap-2">
-                            <MessageSquare className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
-                            <div>
-                              <span className="text-muted-foreground text-xs font-medium">
-                                {fb.is_final ? "Final Feedback" : "Provisional Feedback"}:
-                              </span>
-                              <p className="mt-0.5">{fb.feedback_text}</p>
-                            </div>
-                          </div>
-                        )}
-                        {/* Query button */}
-                        {mark && (
-                          <div className="mt-2 flex justify-end">
-                            <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => onRaiseQuery(gradebook.id, comp.id, comp.name)}>
-                              <HelpCircle className="h-3 w-3 mr-1" />Query this mark
-                            </Button>
-                          </div>
+                    return mark?.marks_obtained;
+                  }).filter((m: any) => m != null);
+                  const typeAvg = marksForType.length > 0
+                    ? Math.round(marksForType.reduce((a: number, b: number) => a + b, 0) / marksForType.length)
+                    : null;
+
+                  return (
+                    <div key={type} className="px-4 py-3">
+                      {/* Mark type header */}
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Mark Type: <span className="text-foreground">{markTypeLabel(type)}</span>
+                        </p>
+                        {typeAvg !== null && (
+                          <p className="text-xs text-muted-foreground">
+                            Mark Type Mark: <span className="font-bold text-foreground">{typeAvg}</span>
+                          </p>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
+
+                      {/* Individual marks grid */}
+                      <div className="flex flex-wrap gap-x-6 gap-y-1 ml-2">
+                        {(components as any[]).map((comp: any, idx: number) => {
+                          const mark = data.marks.find((m: any) => m.component_id === comp.id);
+                          const displayMark = mark?.marks_obtained != null ? mark.marks_obtained : "";
+                          const groupName = (comp.group as any)?.name;
+                          return (
+                            <div key={comp.id} className="flex items-center gap-1 group">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {idx + 1} :
+                              </span>
+                              <span className={`text-xs font-semibold min-w-[24px] ${displayMark === "" ? "text-muted-foreground" : "text-foreground"}`}>
+                                {displayMark === "" ? " " : displayMark}
+                              </span>
+                              {groupName && (
+                                <span className="text-[10px] text-muted-foreground">({groupName})</span>
+                              )}
+                              {mark && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onRaiseQuery(gradebook.id, comp.id, comp.name); }}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Query this mark"
+                                >
+                                  <HelpCircle className="h-3 w-3 text-muted-foreground hover:text-primary" />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ) : null}
+            ) : (
+              <div className="px-4 py-4 text-sm text-muted-foreground">No marks recorded yet.</div>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Card>
@@ -156,7 +189,6 @@ const GradebookCard = ({ gradebook, traineeId, onRaiseQuery }: { gradebook: any;
 const TraineeResultsPage = () => {
   const userId = useTraineeUserId();
   const { data: trainee, isLoading: tLoading } = useTraineeRecord(userId);
-  const { data: results, isLoading: rLoading } = useTraineeAssessmentResults(trainee?.id);
   const { data: gradebooks, isLoading: gLoading } = useTraineeGradebookEntries(trainee?.id);
   const { data: myQueries } = useMyMarkQueries(trainee?.id);
   const submitQuery = useSubmitMarkQuery();
@@ -164,7 +196,7 @@ const TraineeResultsPage = () => {
   const [queryDialog, setQueryDialog] = useState<{ gradebookId: string; componentId: string; componentName: string } | null>(null);
   const [queryForm, setQueryForm] = useState({ query_type: "marks_query", subject: "", description: "" });
 
-  const isLoading = tLoading || rLoading || gLoading;
+  const isLoading = tLoading || gLoading;
 
   const handleSubmitQuery = async () => {
     if (!queryDialog || !trainee?.id || !queryForm.subject || !queryForm.description) return;
@@ -187,124 +219,128 @@ const TraineeResultsPage = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="My Results" subtitle="View your assessment results and progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
-        <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+      <DashboardLayout title="Progress Report" subtitle="View your academic progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
       </DashboardLayout>
     );
   }
 
-  const totalCredits = results?.reduce((s: number, r: any) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
-  const earnedCredits = results?.filter((r: any) => r.competency_status === "competent").reduce((s: number, r: any) => s + Number((r.unit_standards as any)?.credit || 0), 0) || 0;
-  const progressPercentage = totalCredits > 0 ? Math.round((earnedCredits / totalCredits) * 100) : 0;
+  // Group gradebooks by academic year + qualification
+  const grouped = (gradebooks || []).reduce((acc: Record<string, any[]>, gb: any) => {
+    const key = `${gb.academic_year}|${gb.qualifications?.qualification_code || ""}|${gb.qualifications?.qualification_title || ""}|${gb.level}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(gb);
+    return acc;
+  }, {});
 
-  const competentCount = results?.filter((r: any) => r.competency_status === "competent").length || 0;
-  const notCompetentCount = results?.filter((r: any) => r.competency_status === "not_yet_competent").length || 0;
-  const pendingCount = results?.filter((r: any) => !r.competency_status || r.competency_status === "pending").length || 0;
-
-  const hasGradebooks = gradebooks && gradebooks.length > 0;
+  const groupKeys = Object.keys(grouped).sort((a, b) => {
+    const yearA = a.split("|")[0];
+    const yearB = b.split("|")[0];
+    return yearB.localeCompare(yearA); // newest first
+  });
 
   return (
-    <DashboardLayout title="My Results" subtitle="View your assessment results and progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
-      <div className="space-y-6">
-        {/* Summary stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-primary/10"><Award className="h-5 w-5 text-primary" /></div><div><p className="text-sm text-muted-foreground">Credits Earned</p><p className="text-2xl font-bold">{earnedCredits}/{totalCredits}</p></div></div></CardContent></Card>
-          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-green-100"><CheckCircle className="h-5 w-5 text-green-600" /></div><div><p className="text-sm text-muted-foreground">Competent</p><p className="text-2xl font-bold text-green-600">{competentCount}</p></div></div></CardContent></Card>
-          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-red-100"><XCircle className="h-5 w-5 text-red-600" /></div><div><p className="text-sm text-muted-foreground">Not Yet Competent</p><p className="text-2xl font-bold text-red-600">{notCompetentCount}</p></div></div></CardContent></Card>
-          <Card className="border-0 shadow-md"><CardContent className="p-6"><div className="flex items-center gap-3"><div className="p-3 rounded-lg bg-gray-100"><Clock className="h-5 w-5 text-gray-600" /></div><div><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold">{pendingCount}</p></div></div></CardContent></Card>
-        </div>
-
-        {/* Progress bar */}
-        {totalCredits > 0 && (
-          <Card className="border-0 shadow-md">
-            <CardHeader><CardTitle>Overall Progress</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm"><span>Qualification Progress</span><span className="font-medium">{progressPercentage}%</span></div>
-                <Progress value={progressPercentage} className="h-3" />
-                <p className="text-sm text-muted-foreground">You have earned {earnedCredits} out of {totalCredits} credits.</p>
+    <DashboardLayout title="Progress Report" subtitle="View your academic progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
+      <div className="space-y-5 max-w-4xl">
+        {/* Student info banner */}
+        <Card className="border-0 shadow-md overflow-hidden">
+          <div className="bg-primary px-6 py-4">
+            <div className="flex items-center gap-3">
+              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+              <h2 className="text-lg font-bold text-primary-foreground">Progress Report</h2>
+            </div>
+          </div>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Student Number</p>
+                  <p className="font-semibold text-sm">{trainee?.trainee_id || "—"}</p>
+                </div>
               </div>
+              <div className="flex items-center gap-3">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Name</p>
+                  <p className="font-semibold text-sm">
+                    {trainee?.first_name} {trainee?.last_name}
+                  </p>
+                </div>
+              </div>
+              {(trainee as any)?.trades?.name && (
+                <div className="flex items-center gap-3">
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Trade / Programme</p>
+                    <p className="font-semibold text-sm">{(trainee as any).trades.name}</p>
+                  </div>
+                </div>
+              )}
+              {trainee?.level && (
+                <div className="flex items-center gap-3">
+                  <Award className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Current Level</p>
+                    <p className="font-semibold text-sm">Level {trainee.level}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Results grouped by Year & Qualification */}
+        {groupKeys.length === 0 ? (
+          <Card className="border-0 shadow-md">
+            <CardContent className="py-16 text-center">
+              <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="font-semibold text-lg">No Results Yet</h3>
+              <p className="text-muted-foreground text-sm mt-1">
+                Your marks will appear here as assessments are recorded by your trainers.
+              </p>
             </CardContent>
           </Card>
+        ) : (
+          groupKeys.map((key) => {
+            const [year, qualCode, qualTitle, level] = key.split("|");
+            const subjects = grouped[key];
+            return (
+              <div key={key} className="space-y-3">
+                {/* Year / Qualification header */}
+                <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3">
+                  <p className="text-sm font-bold text-primary">
+                    Year: {year}
+                  </p>
+                  {qualCode && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {qualCode}: {qualTitle} {level ? `• Level ${level}` : ""}
+                    </p>
+                  )}
+                </div>
+
+                {/* Subject cards */}
+                <div className="space-y-2 pl-0 sm:pl-2">
+                  {subjects.map((gb: any) => (
+                    <SubjectCard key={gb.id} gradebook={gb} traineeId={trainee!.id} onRaiseQuery={openQueryDialog} />
+                  ))}
+                </div>
+              </div>
+            );
+          })
         )}
 
-        {/* Tabbed content: Gradebook Marks + Unit Standard Results */}
-        <Tabs defaultValue={hasGradebooks ? "gradebooks" : "unit-standards"} className="space-y-4">
-          <TabsList>
-            {hasGradebooks && (
-              <TabsTrigger value="gradebooks">
-                <BookOpen className="h-4 w-4 mr-1" />Gradebook Marks
-                {gradebooks.some((g: any) => g.status !== "finalised") && (
-                  <Badge variant="secondary" className="ml-2 text-xs">Live</Badge>
-                )}
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="unit-standards">
-              <Award className="h-4 w-4 mr-1" />Unit Standard Results
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Gradebook marks */}
-          {hasGradebooks && (
-            <TabsContent value="gradebooks" className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Marks labeled <Badge variant="secondary" className="text-xs mx-1">Provisional</Badge> may change before finalisation.
-                Marks labeled <Badge variant="default" className="text-xs mx-1">Final</Badge> are the official record.
-              </p>
-              {gradebooks.map((gb: any) => (
-                <GradebookCard key={gb.id} gradebook={gb} traineeId={trainee!.id} onRaiseQuery={openQueryDialog} />
-              ))}
-            </TabsContent>
-          )}
-
-          {/* Legacy unit standard results */}
-          <TabsContent value="unit-standards">
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle>Unit Standard Results</CardTitle>
-                <CardDescription>Finalised results for each unit standard</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!results || results.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                    <h3 className="font-semibold">No Results Yet</h3>
-                    <p className="text-muted-foreground">Your assessment results will appear here once finalised.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {results.map((result: any) => (
-                      <div key={result.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border">
-                        <div className="flex-1 mb-4 md:mb-0">
-                          <h4 className="font-medium">{result.unit_standards?.module_title || "Unit Standard"}</h4>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="font-mono">{result.unit_standards?.unit_no || ""}</span>
-                            <span>{result.unit_standards?.credit || 0} credits</span>
-                            {result.assessment_date && <span>Assessed: {new Date(result.assessment_date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}</span>}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          {result.marks_obtained !== null && result.marks_obtained !== undefined && (
-                            <div className="text-right"><p className="text-2xl font-bold">{result.marks_obtained}%</p></div>
-                          )}
-                          {competencyBadge(result.competency_status)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
         {/* My Queries Section */}
         {myQueries && myQueries.length > 0 && (
           <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><HelpCircle className="h-5 w-5" />My Mark Queries</CardTitle>
-              <CardDescription>Track the status of your submitted queries</CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <HelpCircle className="h-4 w-4" />My Mark Queries
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2">
               {myQueries.map((q: any) => (
                 <div key={q.id} className="p-3 rounded-lg border space-y-1">
                   <div className="flex items-center justify-between">
@@ -333,7 +369,7 @@ const TraineeResultsPage = () => {
             <DialogHeader>
               <DialogTitle>Raise a Mark Query</DialogTitle>
               <DialogDescription>
-                Submit a query about your mark for <strong>{queryDialog?.componentName}</strong>. Your trainer will be notified.
+                Submit a query about your mark for <strong>{queryDialog?.componentName}</strong>.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
