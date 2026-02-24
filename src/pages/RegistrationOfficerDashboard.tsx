@@ -173,7 +173,6 @@ const RegistrationOfficerDashboard = () => {
               { icon: FileText, label: "Applications Inbox", desc: "Screen new applications", url: "/applications-inbox", badge: stats?.pending },
               { icon: ClipboardCheck, label: "Admission Results", desc: "View screening outcomes", url: "/applications" },
               { icon: Users, label: "Trainee List", desc: "View registered trainees", url: "/trainees" },
-              { icon: UserPlus, label: "Register Trainee", desc: "Direct registration", url: "/trainee-registration" },
             ].map(({ icon: Icon, label, desc, url, badge }) => (
               <button
                 key={url}
