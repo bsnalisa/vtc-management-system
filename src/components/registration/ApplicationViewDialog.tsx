@@ -55,7 +55,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
 
     // Fetch symbol points and org name in parallel
     const fetchData = async () => {
-      const [spRes, orgRes] = await Promise.all([
+      const [spRes, orgRes, settingsRes] = await Promise.all([
         supabase
           .from("symbol_points")
           .select("exam_level, symbol, points")
@@ -63,9 +63,14 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
           .eq("active", true),
         supabase
           .from("organizations")
-          .select("name, logo_url")
+          .select("name")
           .eq("id", application.organization_id)
           .single(),
+        supabase
+          .from("organization_settings")
+          .select("logo_url")
+          .eq("organization_id", application.organization_id)
+          .maybeSingle(),
       ]);
 
       if (spRes.data) {
@@ -77,7 +82,9 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
       }
       if (orgRes.data) {
         setOrgName(orgRes.data.name);
-        setOrgLogo(orgRes.data.logo_url || "");
+      }
+      if (settingsRes.data?.logo_url) {
+        setOrgLogo(settingsRes.data.logo_url);
       }
     };
     fetchData();
