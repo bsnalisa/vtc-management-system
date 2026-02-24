@@ -1,3 +1,4 @@
+import { useEffect, useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Download, User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, Home } from "lucide-react";
 import { EXAM_LEVELS } from "@/types/application";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationViewDialogProps {
   open: boolean;
@@ -44,42 +46,110 @@ const getExamLevelLabel = (value: string) => {
 };
 
 export const ApplicationViewDialog = ({ open, onOpenChange, application }: ApplicationViewDialogProps) => {
+  const [symbolPointsMap, setSymbolPointsMap] = useState<Record<string, number>>({});
+  const [orgName, setOrgName] = useState("");
+
+  useEffect(() => {
+    if (!application?.organization_id || !open) return;
+
+    // Fetch symbol points and org name in parallel
+    const fetchData = async () => {
+      const [spRes, orgRes] = await Promise.all([
+        supabase
+          .from("symbol_points")
+          .select("exam_level, symbol, points")
+          .eq("organization_id", application.organization_id)
+          .eq("active", true),
+        supabase
+          .from("organizations")
+          .select("name")
+          .eq("id", application.organization_id)
+          .single(),
+      ]);
+
+      if (spRes.data) {
+        const map: Record<string, number> = {};
+        spRes.data.forEach((sp: any) => {
+          map[`${sp.exam_level}|${sp.symbol}`] = sp.points;
+        });
+        setSymbolPointsMap(map);
+      }
+      if (orgRes.data) {
+        setOrgName(orgRes.data.name);
+      }
+    };
+    fetchData();
+  }, [application?.organization_id, open]);
+
   if (!application) return null;
 
   const subjects: any[] = Array.isArray(application.school_subjects) ? application.school_subjects : [];
   const ictAccess: string[] = Array.isArray(application.ict_access) ? application.ict_access : [];
   const additionalDocs: string[] = Array.isArray(application.additional_documents_paths) ? application.additional_documents_paths : [];
 
+  // Recalculate points from symbol_points map
+  const subjectsWithPoints = subjects.map((s: any) => ({
+    ...s,
+    points: symbolPointsMap[`${s.exam_level}|${s.symbol}`] ?? s.points ?? 0,
+  }));
+  const totalPoints = subjectsWithPoints.reduce((sum: number, s: any) => sum + (s.points || 0), 0);
+
+  const fullName = `${application.first_name || ""} ${application.last_name || ""}`.trim();
+  const applicationDate = application.created_at ? new Date(application.created_at).toLocaleDateString() : "";
+  const tradeName = application.trades?.name || "N/A";
+
   const handleDownloadPDF = () => {
-    // Build a printable view
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
-    const tradeName = application.trades?.name || "N/A";
+    const photoHtml = application.photo_path
+      ? `<img src="${application.photo_path}" alt="Passport Photo" style="width:100px;height:120px;object-fit:cover;border:1px solid #ccc;" />`
+      : `<div style="width:100px;height:120px;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999;text-align:center;">Passport<br/>Photo</div>`;
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html><head><title>Application - ${application.application_number}</title>
       <style>
         body { font-family: Arial, sans-serif; padding: 20px; font-size: 12px; color: #333; }
-        h1 { font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+        .header { text-align: center; border-bottom: 3px solid #333; padding-bottom: 12px; margin-bottom: 16px; }
+        .header h1 { font-size: 20px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .header h2 { font-size: 14px; margin: 0; color: #555; font-weight: normal; }
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .header-info { flex: 1; }
+        .photo-box { margin-left: 20px; }
         h2 { font-size: 14px; margin-top: 20px; color: #555; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
         .field { margin-bottom: 6px; }
         .field .label { font-weight: bold; display: inline-block; min-width: 180px; }
         table { border-collapse: collapse; width: 100%; margin-top: 8px; }
         th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; font-size: 11px; }
         th { background: #f0f0f0; }
-        .status { padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .declaration { margin-top: 20px; padding: 12px; border: 1px solid #ccc; background: #fafafa; }
+        .declaration p { margin: 6px 0; line-height: 1.6; }
+        .signature-row { display: flex; justify-content: space-between; margin-top: 24px; }
+        .signature-box { text-align: center; }
+        .signature-line { border-top: 1px solid #333; width: 200px; margin-top: 40px; padding-top: 4px; }
         @media print { body { padding: 0; } }
       </style></head><body>
-      <h1>Trainee Application Form</h1>
-      <div class="field"><span class="label">Application Number:</span> ${application.application_number || ""}</div>
-      <div class="field"><span class="label">Trainee Number:</span> ${application.trainee_number || "N/A"}</div>
-      <div class="field"><span class="label">Date Applied:</span> ${application.created_at ? new Date(application.created_at).toLocaleDateString() : ""}</div>
+
+      <div class="header">
+        <h1>${orgName || "Vocational Training Centre"}</h1>
+        <h2>Trainee Application Form</h2>
+      </div>
+
+      <div class="header-row">
+        <div class="header-info">
+          <div class="field"><span class="label">Application Number:</span> ${application.application_number || ""}</div>
+          <div class="field"><span class="label">Trainee Number:</span> ${application.trainee_number || "N/A"}</div>
+          <div class="field"><span class="label">Date Applied:</span> ${applicationDate}</div>
+        </div>
+        <div class="photo-box">
+          ${photoHtml}
+        </div>
+      </div>
 
       <h2>A. Applicant's Particulars</h2>
       <div class="field"><span class="label">Title:</span> ${application.title || ""}</div>
-      <div class="field"><span class="label">Full Name:</span> ${application.first_name} ${application.last_name}</div>
+      <div class="field"><span class="label">Full Name:</span> ${fullName}</div>
       <div class="field"><span class="label">Gender:</span> ${application.gender || ""}</div>
       <div class="field"><span class="label">Date of Birth:</span> ${application.date_of_birth || ""}</div>
       <div class="field"><span class="label">National ID:</span> ${application.national_id || ""}</div>
@@ -107,15 +177,16 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
 
       <h2>D. Educational History</h2>
       <div class="field"><span class="label">Highest Grade Passed:</span> ${application.highest_grade_passed || ""}</div>
-      <div class="field"><span class="label">Calculated Points:</span> ${application.calculated_points ?? "N/A"}</div>
+      <div class="field"><span class="label">Total Calculated Points:</span> <strong>${totalPoints}</strong></div>
       ${application.tertiary_institution ? `
         <div class="field"><span class="label">Tertiary Institution:</span> ${application.tertiary_institution}</div>
         <div class="field"><span class="label">Tertiary Region:</span> ${application.tertiary_region || ""}</div>
         <div class="field"><span class="label">Exam Year:</span> ${application.tertiary_exam_year || ""}</div>
       ` : ""}
-      ${subjects.length > 0 ? `
+      ${subjectsWithPoints.length > 0 ? `
         <table><tr><th>Subject</th><th>Exam Level</th><th>Symbol</th><th>Points</th></tr>
-        ${subjects.map((s: any) => `<tr><td>${s.subject_name || ""}</td><td>${s.exam_level || ""}</td><td>${s.symbol || ""}</td><td>${s.points ?? ""}</td></tr>`).join("")}
+        ${subjectsWithPoints.map((s: any) => `<tr><td>${s.subject_name || ""}</td><td>${getExamLevelLabel(s.exam_level)}</td><td>${s.symbol || ""}</td><td>${s.points ?? 0}</td></tr>`).join("")}
+        <tr style="font-weight:bold;background:#f0f0f0;"><td colspan="3" style="text-align:right;">Total Points:</td><td>${totalPoints}</td></tr>
         </table>
       ` : ""}
 
@@ -150,7 +221,20 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
       <div class="field">${ictAccess.length > 0 ? ictAccess.join(", ") : "None specified"}</div>
 
       <h2>J. Declaration</h2>
-      <div class="field"><span class="label">Declaration Accepted:</span> ${application.declaration_accepted ? "Yes" : "No"}</div>
+      <div class="declaration">
+        <p>I, <strong>${fullName}</strong>, hereby declare that all the information provided in this application form is true and correct to the best of my knowledge. I understand that any false or misleading information may result in the cancellation of my application or dismissal from the institution.</p>
+        <p>I further declare that I have read and understood the rules and regulations of <strong>${orgName || "the institution"}</strong> and agree to abide by them.</p>
+        <div class="signature-row">
+          <div class="signature-box">
+            <div class="signature-line">${application.declaration_accepted ? "✓ Accepted" : "Not accepted"}</div>
+            <p style="font-size:10px;margin-top:2px;">Signature / Initials</p>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line">${applicationDate}</div>
+            <p style="font-size:10px;margin-top:2px;">Date</p>
+          </div>
+        </div>
+      </div>
 
       <h2>K. Supporting Documents Attached</h2>
       <div class="field"><span class="label">ID Document:</span> ${application.id_document_path ? "Attached" : "Not attached"}</div>
@@ -178,7 +262,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
             </Button>
           </div>
           <div className="flex gap-2 mt-1">
-            <Badge variant="secondary">{application.first_name} {application.last_name}</Badge>
+            <Badge variant="secondary">{fullName}</Badge>
             {application.trainee_number && <Badge variant="outline">{application.trainee_number}</Badge>}
           </div>
         </DialogHeader>
@@ -238,14 +322,14 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
             <SectionCard title="Educational History" icon={GraduationCap}>
               <Field label="Highest Grade Passed" value={application.highest_grade_passed} />
               <div className="space-y-0.5">
-                <p className="text-xs text-muted-foreground">Calculated Points</p>
-                <p className="text-sm font-medium">{application.calculated_points ?? 0}</p>
+                <p className="text-xs text-muted-foreground">Total Calculated Points</p>
+                <p className="text-sm font-bold text-primary">{totalPoints}</p>
               </div>
               <Field label="Tertiary Institution" value={application.tertiary_institution} />
               <Field label="Tertiary Region" value={application.tertiary_region} />
               <Field label="Tertiary Exam Year" value={application.tertiary_exam_year} />
             </SectionCard>
-            {subjects.length > 0 && (
+            {subjectsWithPoints.length > 0 && (
               <Card>
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm">School Subjects</CardTitle>
@@ -262,14 +346,18 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
                         </tr>
                       </thead>
                       <tbody>
-                        {subjects.map((s: any, i: number) => (
+                        {subjectsWithPoints.map((s: any, i: number) => (
                           <tr key={i} className="border-b last:border-0">
                             <td className="py-1.5 px-2">{s.subject_name}</td>
                             <td className="py-1.5 px-2">{getExamLevelLabel(s.exam_level)}</td>
                             <td className="py-1.5 px-2">{s.symbol}</td>
-                            <td className="py-1.5 px-2">{s.points ?? "-"}</td>
+                            <td className="py-1.5 px-2">{s.points ?? 0}</td>
                           </tr>
                         ))}
+                        <tr className="font-semibold bg-muted/50">
+                          <td colSpan={3} className="py-1.5 px-2 text-right">Total Points:</td>
+                          <td className="py-1.5 px-2">{totalPoints}</td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
