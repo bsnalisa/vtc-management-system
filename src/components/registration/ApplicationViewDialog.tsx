@@ -48,6 +48,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
 
   const subjects: any[] = Array.isArray(application.school_subjects) ? application.school_subjects : [];
   const ictAccess: string[] = Array.isArray(application.ict_access) ? application.ict_access : [];
+  const additionalDocs: string[] = Array.isArray(application.additional_documents_paths) ? application.additional_documents_paths : [];
 
   const handleDownloadPDF = () => {
     // Build a printable view
@@ -151,6 +152,12 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
       <h2>J. Declaration</h2>
       <div class="field"><span class="label">Declaration Accepted:</span> ${application.declaration_accepted ? "Yes" : "No"}</div>
 
+      <h2>K. Supporting Documents Attached</h2>
+      <div class="field"><span class="label">ID Document:</span> ${application.id_document_path ? "Attached" : "Not attached"}</div>
+      <div class="field"><span class="label">School Leaving Certificate:</span> ${application.school_leaving_cert_path ? "Attached" : "Not attached"}</div>
+      <div class="field"><span class="label">Academic Qualifications:</span> ${application.academic_qualifications_path ? "Attached" : "Not attached"}</div>
+      ${additionalDocs.length > 0 ? `<div class="field"><span class="label">Additional Documents:</span> ${additionalDocs.length} document(s) attached</div>` : ""}
+
       </body></html>
     `);
     printWindow.document.close();
@@ -230,7 +237,10 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
           <TabsContent value="education" className="space-y-3 mt-3">
             <SectionCard title="Educational History" icon={GraduationCap}>
               <Field label="Highest Grade Passed" value={application.highest_grade_passed} />
-              <Field label="Calculated Points" value={application.calculated_points} />
+              <div className="space-y-0.5">
+                <p className="text-xs text-muted-foreground">Calculated Points</p>
+                <p className="text-sm font-medium">{application.calculated_points ?? 0}</p>
+              </div>
               <Field label="Tertiary Institution" value={application.tertiary_institution} />
               <Field label="Tertiary Region" value={application.tertiary_region} />
               <Field label="Tertiary Exam Year" value={application.tertiary_exam_year} />
