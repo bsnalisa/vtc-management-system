@@ -166,7 +166,7 @@ export const useTraineeAssessmentResults = (traineeId: string | null | undefined
         .from("assessment_results")
         .select(`
           id, marks_obtained, competency_status, assessment_date, remarks, assessment_status,
-          unit_standards (id, title, unit_standard_id, credit, nqf_level)
+          unit_standards (id, module_title, unit_no, credit, level)
         `)
         .eq("trainee_id", traineeId)
         .eq("assessment_status", "finalised")

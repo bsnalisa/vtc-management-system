@@ -8295,6 +8295,10 @@ export type Database = {
         Returns: number
       }
       get_system_stats: { Args: never; Returns: Json }
+      get_trainee_gradebook_ids: {
+        Args: { _user_id: string }
+        Returns: string[]
+      }
       get_user_organization: { Args: { _user_id: string }; Returns: string }
       global_search: {
         Args: { org_id?: string; search_limit?: number; search_query: string }
@@ -8330,6 +8334,10 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_trainee_in_gradebook: {
+        Args: { _gradebook_id: string; _user_id: string }
+        Returns: boolean
+      }
       log_audit_event: {
         Args: {
           _action: string
