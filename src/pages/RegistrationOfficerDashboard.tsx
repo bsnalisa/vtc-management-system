@@ -1,224 +1,318 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus, Users, GraduationCap, FileText, DollarSign, ClipboardCheck, BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Users, FileText, DollarSign, ClipboardCheck, BookOpen, ChevronRight, UserPlus, Shield, Clock, CheckCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { registrationOfficerNavItems } from "@/lib/navigationConfig";
 import { useApplicationStats } from "@/hooks/useTraineeApplications";
 import { useTrades } from "@/hooks/useTrades";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainees } from "@/hooks/useTrainees";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const RegistrationOfficerDashboard = () => {
-  const { data: stats } = useApplicationStats();
+  const navigate = useNavigate();
+  const { data: stats, isLoading } = useApplicationStats();
   const { data: trades } = useTrades();
   const { data: profile } = useProfile();
   const { data: trainees } = useTrainees();
 
-  // Count registered trainees from the trainees table (only active)
   const registeredTraineeCount = trainees?.filter(t => t.status === "active").length || 0;
 
   const tradeChartData =
     trades?.map((trade) => ({
       name: trade.code,
+      fullName: trade.name,
       applications: stats?.byTrade?.[trade.id] || 0,
-    })) || [];
+    }))
+    .sort((a, b) => b.applications - a.applications) || [];
+
+  const totalPipeline = (stats?.pending || 0) + (stats?.provisionallyQualified || 0) + (stats?.pendingPayment || 0) + registeredTraineeCount;
+  const registrationRate = totalPipeline > 0 ? Math.round((registeredTraineeCount / totalPipeline) * 100) : 0;
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
 
   return (
     <DashboardLayout
-      title={`Welcome back, ${profile?.firstname || 'User'}`}
-      subtitle="Manage trainee applications and registrations"
+      title=""
+      subtitle=""
       navItems={registrationOfficerNavItems}
       groupLabel="Registration"
     >
-      <div className="space-y-4">
-        {/* Stats Cards */}
-        <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Total Applications</CardTitle>
-              <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+      <div className="space-y-8">
+        {/* Hero Greeting */}
+        <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <UserPlus className="h-7 w-7" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {greeting()}, {profile?.firstname || "User"}
+              </h1>
+              <p className="text-muted-foreground mt-0.5">
+                Registration Command Center — manage applications, screening & enrollment
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-primary/10" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Applications</CardTitle>
+              <FileText className="h-4 w-4 text-primary" />
             </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{stats?.totalApplications || 0}</div>
-              <p className="text-[10px] text-muted-foreground">All time</p>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.totalApplications || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">All time submissions</p>
             </CardContent>
           </Card>
 
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Pending Screening</CardTitle>
-              <ClipboardCheck className="h-3.5 w-3.5 text-warning" />
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-amber-500/10" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Screening</CardTitle>
+              <Clock className="h-4 w-4 text-amber-500" />
             </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold text-warning">{stats?.pending || 0}</div>
-              <p className="text-[10px] text-muted-foreground">Awaiting review</p>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">{stats?.pending || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Awaiting review</p>
             </CardContent>
           </Card>
 
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Prov. Qualified</CardTitle>
-              <ClipboardCheck className="h-3.5 w-3.5 text-primary" />
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-accent/30" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Prov. Qualified</CardTitle>
+              <ClipboardCheck className="h-4 w-4 text-primary" />
             </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold text-primary">{stats?.provisionallyQualified || 0}</div>
-              <p className="text-[10px] text-muted-foreground">Ready for registration</p>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{stats?.provisionallyQualified || 0}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Ready for registration</p>
             </CardContent>
           </Card>
 
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Registered Trainees</CardTitle>
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-secondary/20" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Registered Trainees</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{registeredTraineeCount}</div>
-              <p className="text-[10px] text-muted-foreground">Active in system</p>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Pending Payments</CardTitle>
-              <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{stats?.pendingPayment || 0}</div>
-              <p className="text-[10px] text-muted-foreground">Awaiting clearance</p>
-            </CardContent>
-          </Card>
-
-          <Card className="p-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
-              <CardTitle className="text-xs font-medium">Available Trades</CardTitle>
-              <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="text-xl font-bold">{trades?.length || 0}</div>
-              <p className="text-[10px] text-muted-foreground">Training programs</p>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-8 w-16" /> : (
+                <div className="text-3xl font-bold">{registeredTraineeCount}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Active in system</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Chart and Quick Actions */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-base">Applications per Trade</CardTitle>
-              <CardDescription className="text-xs">Distribution across trades</CardDescription>
+        {/* Secondary Stats */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Payments</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="p-4 pt-0">
+            <CardContent>
+              {isLoading ? <Skeleton className="h-6 w-12" /> : (
+                <div className="text-2xl font-bold">{stats?.pendingPayment || 0}</div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Available Trades</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-6 w-12" /> : (
+                <div className="text-2xl font-bold">{trades?.length || 0}</div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Registration Rate</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-6 w-12" /> : (
+                <>
+                  <div className="text-2xl font-bold">{registrationRate}%</div>
+                  <Progress value={registrationRate} className="h-1.5 mt-2" />
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: FileText, label: "Applications Inbox", desc: "Screen new applications", url: "/applications-inbox", badge: stats?.pending },
+              { icon: ClipboardCheck, label: "Admission Results", desc: "View screening outcomes", url: "/applications" },
+              { icon: Users, label: "Trainee List", desc: "View registered trainees", url: "/trainees" },
+              { icon: UserPlus, label: "Register Trainee", desc: "Direct registration", url: "/trainee-registration" },
+            ].map(({ icon: Icon, label, desc, url, badge }) => (
+              <button
+                key={url}
+                onClick={() => navigate(url)}
+                className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm">{label}</p>
+                    {badge ? <Badge variant="secondary" className="h-5 px-1.5 text-xs">{badge}</Badge> : null}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Chart and Pipeline */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          {/* Chart */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Applications per Trade</CardTitle>
+                  <CardDescription>Distribution across training programs</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-4">
               {tradeChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={180}>
+                <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={tradeChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="applications" fill="hsl(var(--primary))" />
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                    <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                    <Tooltip
+                      contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }}
+                      labelFormatter={(label) => {
+                        const found = tradeChartData.find(t => t.name === label);
+                        return found?.fullName || label;
+                      }}
+                    />
+                    <Bar dataKey="applications" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-center py-6 text-muted-foreground text-sm">No data available</p>
+                <div className="py-10 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                    <BookOpen className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">No application data available</p>
+                </div>
               )}
             </CardContent>
           </Card>
 
+          {/* Registration Pipeline */}
           <Card>
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-base">Quick Actions</CardTitle>
-              <CardDescription className="text-xs">Registration tasks</CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ClipboardCheck className="h-5 w-5 text-primary" /> Pipeline
+              </CardTitle>
+              <CardDescription>Current status breakdown</CardDescription>
             </CardHeader>
-            <CardContent className="p-4 pt-2 space-y-2">
-              <Link to="/applications-inbox">
-                <div className="flex items-center gap-2 p-2.5 border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                  <FileText className="h-5 w-5 text-primary shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">Applications Inbox</p>
-                    <p className="text-[10px] text-muted-foreground truncate">Screen new applications</p>
+            <Separator />
+            <CardContent className="pt-4 space-y-4">
+              {[
+                { label: "Pending Screening", value: stats?.pending || 0, color: "bg-amber-500" },
+                { label: "Qualified", value: stats?.provisionallyQualified || 0, color: "bg-primary" },
+                { label: "Awaiting Payment", value: stats?.pendingPayment || 0, color: "bg-orange-500" },
+                { label: "Registered", value: registeredTraineeCount, color: "bg-emerald-500" },
+              ].map((item) => (
+                <div key={item.label} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">{item.label}</span>
+                    <span className="font-semibold">{item.value}</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${item.color} transition-all`}
+                      style={{ width: `${totalPipeline > 0 ? (item.value / totalPipeline) * 100 : 0}%` }}
+                    />
                   </div>
                 </div>
-              </Link>
-              <Link to="/applications">
-                <div className="flex items-center gap-2 p-2.5 border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                  <ClipboardCheck className="h-5 w-5 text-primary shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">Admission Results</p>
-                    <p className="text-[10px] text-muted-foreground truncate">View screening outcomes</p>
-                  </div>
-                </div>
-              </Link>
-              <Link to="/trainees">
-                <div className="flex items-center gap-2 p-2.5 border rounded-lg hover:border-primary transition-colors cursor-pointer">
-                  <Users className="h-5 w-5 text-primary shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">Trainee List</p>
-                    <p className="text-[10px] text-muted-foreground truncate">View registered trainees</p>
-                  </div>
-                </div>
-              </Link>
+              ))}
             </CardContent>
           </Card>
         </div>
 
-        {/* Registration Pipeline and Popular Trades */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardCheck className="h-4 w-4" />
-                Registration Pipeline
-              </CardTitle>
-              <CardDescription className="text-xs">Current status breakdown</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 pt-2 space-y-2">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Pending Screening</span>
-                <span className="font-medium text-warning">{stats?.pending || 0}</span>
+        {/* Popular Trades */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" /> Popular Trades
+                </CardTitle>
+                <CardDescription>Most applied-for training programs</CardDescription>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Qualified for Registration</span>
-                <span className="font-medium text-primary">{stats?.provisionallyQualified || 0}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Awaiting Payment</span>
-                <span className="font-medium text-warning">{stats?.pendingPayment || 0}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Registered Trainees</span>
-                <span className="font-medium text-primary">{registeredTraineeCount}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <BookOpen className="h-4 w-4" />
-                Popular Trades
-              </CardTitle>
-              <CardDescription className="text-xs">Most applied-for programs</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 pt-2 space-y-1.5">
-              {tradeChartData
-                .sort((a, b) => b.applications - a.applications)
-                .slice(0, 5)
-                .map((trade, index) => (
-                  <div key={trade.name} className="flex justify-between items-center text-sm">
-                    <span>
-                      <span className="font-medium mr-1.5">{index + 1}.</span>
-                      {trade.name}
-                    </span>
-                    <span className="font-medium">{trade.applications}</span>
+              <Button variant="outline" size="sm" onClick={() => navigate('/trade-management')}>
+                View All <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-4">
+            {tradeChartData.length > 0 ? (
+              <div className="space-y-3">
+                {tradeChartData.slice(0, 5).map((trade, index) => (
+                  <div key={trade.name} className="flex items-center justify-between rounded-lg border p-3 transition-all hover:border-primary/30 hover:bg-accent/50">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{trade.fullName}</p>
+                        <Badge variant="outline" className="text-xs font-mono mt-0.5">{trade.name}</Badge>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-sm font-semibold">{trade.applications}</Badge>
                   </div>
                 ))}
-              {tradeChartData.length === 0 && (
-                <p className="text-center text-muted-foreground py-2 text-sm">No data available</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            ) : (
+              <div className="py-10 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <CheckCircle className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">No trade data available</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
