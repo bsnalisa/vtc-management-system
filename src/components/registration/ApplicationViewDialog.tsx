@@ -48,6 +48,7 @@ const getExamLevelLabel = (value: string) => {
 export const ApplicationViewDialog = ({ open, onOpenChange, application }: ApplicationViewDialogProps) => {
   const [symbolPointsMap, setSymbolPointsMap] = useState<Record<string, number>>({});
   const [orgName, setOrgName] = useState("");
+  const [orgLogo, setOrgLogo] = useState("");
 
   useEffect(() => {
     if (!application?.organization_id || !open) return;
@@ -62,7 +63,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
           .eq("active", true),
         supabase
           .from("organizations")
-          .select("name")
+          .select("name, logo_url")
           .eq("id", application.organization_id)
           .single(),
       ]);
@@ -76,6 +77,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
       }
       if (orgRes.data) {
         setOrgName(orgRes.data.name);
+        setOrgLogo(orgRes.data.logo_url || "");
       }
     };
     fetchData();
@@ -132,6 +134,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
       </style></head><body>
 
       <div class="header">
+        ${orgLogo ? `<img src="${orgLogo}" alt="Logo" style="max-height:60px;max-width:200px;margin:0 auto 8px auto;display:block;" />` : ""}
         <h1>${orgName || "Vocational Training Centre"}</h1>
         <h2>Trainee Application Form</h2>
       </div>
