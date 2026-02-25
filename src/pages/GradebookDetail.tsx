@@ -108,6 +108,7 @@ const GradebookDetail = () => {
   const isDraft = gradebook?.status === "draft";
   const isLocked = gradebook?.is_locked;
   const canEdit = isTrainer && isDraft;
+  const canEnterMarks = isTrainer && isDraft;
   const canAddComponents = isTrainer && (isDraft || isLocked);
 
   const getMark = (componentId: string, traineeId: string) => {
@@ -630,11 +631,17 @@ const GradebookDetail = () => {
           <TabsContent value="marks" className="space-y-4">
             {components && components.length > 0 && gbTrainees && gbTrainees.length > 0 ? (
               <>
-                {canEdit && (
+                {canEnterMarks && (
                   <div className="flex justify-end">
                     <Button onClick={handleSubmit} disabled={submitGradebook.isPending}>
                       <Send className="h-4 w-4 mr-2" />{submitGradebook.isPending ? "Submitting..." : "Submit for Review"}
                     </Button>
+                  </div>
+                )}
+                {!canEnterMarks && isTrainer && !isDraft && (
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg text-sm text-muted-foreground">
+                    <Lock className="h-4 w-4" />
+                    This gradebook has been submitted and marks are now read-only. To edit marks, the gradebook must be returned to draft status.
                   </div>
                 )}
                 <Card>
@@ -672,7 +679,7 @@ const GradebookDetail = () => {
 
                                 return (
                                   <TableCell key={c.id} className="text-center p-2">
-                                    {canEdit ? (
+                                    {canEnterMarks ? (
                                       <div className="space-y-1">
                                         <Input
                                           type="number"
