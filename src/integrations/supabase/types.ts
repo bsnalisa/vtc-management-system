@@ -1832,6 +1832,164 @@ export type Database = {
           },
         ]
       }
+      exam_results: {
+        Row: {
+          assessor_name: string | null
+          competency_status: string
+          created_at: string
+          entered_at: string | null
+          entered_by: string | null
+          exam_date: string | null
+          exam_type: string
+          gradebook_id: string
+          id: string
+          marks_obtained: number | null
+          max_marks: number
+          notes: string | null
+          organization_id: string
+          subject_name: string
+          trainee_id: string
+          updated_at: string
+          upload_batch_id: string | null
+        }
+        Insert: {
+          assessor_name?: string | null
+          competency_status?: string
+          created_at?: string
+          entered_at?: string | null
+          entered_by?: string | null
+          exam_date?: string | null
+          exam_type?: string
+          gradebook_id: string
+          id?: string
+          marks_obtained?: number | null
+          max_marks?: number
+          notes?: string | null
+          organization_id: string
+          subject_name: string
+          trainee_id: string
+          updated_at?: string
+          upload_batch_id?: string | null
+        }
+        Update: {
+          assessor_name?: string | null
+          competency_status?: string
+          created_at?: string
+          entered_at?: string | null
+          entered_by?: string | null
+          exam_date?: string | null
+          exam_type?: string
+          gradebook_id?: string
+          id?: string
+          marks_obtained?: number | null
+          max_marks?: number
+          notes?: string | null
+          organization_id?: string
+          subject_name?: string
+          trainee_id?: string
+          updated_at?: string
+          upload_batch_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_results_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_timetables: {
+        Row: {
+          academic_year: string
+          created_at: string
+          created_by: string
+          end_time: string | null
+          exam_date: string
+          exam_type: string
+          id: string
+          level: number
+          notes: string | null
+          organization_id: string
+          qualification_id: string
+          start_time: string | null
+          subject_name: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          created_by: string
+          end_time?: string | null
+          exam_date: string
+          exam_type?: string
+          id?: string
+          level?: number
+          notes?: string | null
+          organization_id: string
+          qualification_id: string
+          start_time?: string | null
+          subject_name: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          created_by?: string
+          end_time?: string | null
+          exam_date?: string
+          exam_type?: string
+          id?: string
+          level?: number
+          notes?: string | null
+          organization_id?: string
+          qualification_id?: string
+          start_time?: string | null
+          subject_name?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_timetables_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_timetables_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_records: {
         Row: {
           academic_year: string
@@ -2641,6 +2799,8 @@ export type Database = {
           ac_return_reason: string | null
           academic_year: string
           created_at: string
+          exam_results_uploaded_at: string | null
+          exam_results_uploaded_by: string | null
           finalised_at: string | null
           finalised_by: string | null
           hot_approved_at: string | null
@@ -2654,6 +2814,7 @@ export type Database = {
           mock_weight: number
           organization_id: string
           qualification_id: string
+          results_release_date: string | null
           status: string
           submission_closes_at: string | null
           submission_opens_at: string | null
@@ -2670,6 +2831,8 @@ export type Database = {
           ac_return_reason?: string | null
           academic_year: string
           created_at?: string
+          exam_results_uploaded_at?: string | null
+          exam_results_uploaded_by?: string | null
           finalised_at?: string | null
           finalised_by?: string | null
           hot_approved_at?: string | null
@@ -2683,6 +2846,7 @@ export type Database = {
           mock_weight?: number
           organization_id: string
           qualification_id: string
+          results_release_date?: string | null
           status?: string
           submission_closes_at?: string | null
           submission_opens_at?: string | null
@@ -2699,6 +2863,8 @@ export type Database = {
           ac_return_reason?: string | null
           academic_year?: string
           created_at?: string
+          exam_results_uploaded_at?: string | null
+          exam_results_uploaded_by?: string | null
           finalised_at?: string | null
           finalised_by?: string | null
           hot_approved_at?: string | null
@@ -2712,6 +2878,7 @@ export type Database = {
           mock_weight?: number
           organization_id?: string
           qualification_id?: string
+          results_release_date?: string | null
           status?: string
           submission_closes_at?: string | null
           submission_opens_at?: string | null
@@ -8295,6 +8462,15 @@ export type Database = {
         Returns: number
       }
       get_system_stats: { Args: never; Returns: Json }
+      get_trainee_exam_eligibility: {
+        Args: { _gradebook_id: string; _trainee_id: string }
+        Returns: {
+          practical_avg: number
+          practical_eligible: boolean
+          theory_ca: number
+          theory_eligible: boolean
+        }[]
+      }
       get_trainee_gradebook_ids: {
         Args: { _user_id: string }
         Returns: string[]

@@ -36,6 +36,7 @@ const GradebookReview = () => {
   const navigate = useNavigate();
   const { navItems, groupLabel } = useRoleNavigation();
 
+  const { data: drafts } = useOrgGradebooks("draft");
   const { data: submitted } = useOrgGradebooks("submitted");
   const { data: approved } = useOrgGradebooks("hot_approved");
   const { data: allGradebooks } = useOrgGradebooks();
@@ -58,6 +59,7 @@ const GradebookReview = () => {
     setReturnReason("");
   };
 
+  const draftCount = drafts?.length || 0;
   const pendingCount = submitted?.length || 0;
   const approvedCount = approved?.length || 0;
 
@@ -130,14 +132,23 @@ const GradebookReview = () => {
 
   return (
     <DashboardLayout
-      title="Gradebook Review"
-      subtitle="Review and approve submitted gradebooks from trainers"
+      title="Gradebook Oversight"
+      subtitle="Monitor trainer progress and review submitted gradebooks"
       navItems={navItems}
       groupLabel={groupLabel}
     >
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">In Progress (Draft)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{draftCount}</div>
+              <p className="text-xs text-muted-foreground">Trainers actively recording marks</p>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
@@ -164,14 +175,21 @@ const GradebookReview = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="pending" className="space-y-4">
+        <Tabs defaultValue="in-progress" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="in-progress">
+              In Progress {draftCount > 0 && <Badge variant="secondary" className="ml-2 h-5 px-1.5">{draftCount}</Badge>}
+            </TabsTrigger>
             <TabsTrigger value="pending">
               Pending Review {pendingCount > 0 && <Badge variant="destructive" className="ml-2 h-5 px-1.5">{pendingCount}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="approved">Approved</TabsTrigger>
             <TabsTrigger value="all">All Gradebooks</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="in-progress">
+            <GradebookTable gradebooks={drafts || []} showActions={false} />
+          </TabsContent>
 
           <TabsContent value="pending">
             <GradebookTable gradebooks={submitted || []} showActions={true} />

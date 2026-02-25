@@ -17,6 +17,7 @@ import {
   useGradebookMarks, useGradebookFeedbackList, useGradebookCAScores,
   useCreateComponent, useCreateComponentGroup, useDeleteComponent,
   useAddGradebookTrainees, useSaveMark, useSaveFeedback, useSubmitGradebook,
+  useHoTApproveGradebook, useReturnGradebook, useACApproveGradebook,
 } from "@/hooks/useGradebooks";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +92,9 @@ const GradebookDetail = () => {
   const saveMark = useSaveMark();
   const saveFeedback = useSaveFeedback();
   const submitGradebook = useSubmitGradebook();
+  const hotApprove = useHoTApproveGradebook();
+  const returnGb = useReturnGradebook();
+  const acApprove = useACApproveGradebook();
 
   const [compDialog, setCompDialog] = useState(false);
   const [compForm, setCompForm] = useState({ name: "", component_type: "test", max_marks: "100", group_id: "" });
@@ -105,10 +109,11 @@ const GradebookDetail = () => {
   const { role } = useRoleNavigation();
   const isTrainer = role === "trainer";
   const isHoT = role === "head_of_training";
+  const isAC = role === "assessment_coordinator";
   const isDraft = gradebook?.status === "draft";
   const isLocked = gradebook?.is_locked;
   const canEdit = isTrainer && isDraft;
-  const canEnterMarks = isTrainer && isDraft;
+  const canEnterMarks = isTrainer && (isDraft || isLocked);
   const canAddComponents = isTrainer && (isDraft || isLocked);
 
   const getMark = (componentId: string, traineeId: string) => {
@@ -258,9 +263,33 @@ const GradebookDetail = () => {
           </CardContent>
         </Card>
 
-        {isHoT ? (
-          /* ─── HoT: Detailed Component-by-Component Assessment View ─── */
+        {(isHoT || isAC) ? (
+          /* ─── HoT / AC: Detailed Component-by-Component Assessment View ─── */
           <div className="space-y-6">
+            {isAC && gradebook?.status === "hot_approved" && (
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => {
+                  // Generate CSV template for external assessors
+                  if (!components || !gbTrainees) return;
+                  const headers = ["Trainee ID", "First Name", "Last Name", ...components.map((c: any) => `${c.name} (/${c.max_marks})`), "Assessor Name", "Exam Date"];
+                  const rows = gbTrainees.map((gt: any) => {
+                    const t = gt.trainees;
+                    return [t?.trainee_id || "", t?.first_name || "", t?.last_name || "", ...components.map(() => ""), "", ""].join(",");
+                  });
+                  const csv = [headers.join(","), ...rows].join("\n");
+                  const blob = new Blob([csv], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `exam-template-${gradebook.title.replace(/\s+/g, "-")}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast({ title: "Template Downloaded", description: "CSV exam template has been downloaded for external assessors." });
+                }}>
+                  <BookOpen className="h-4 w-4 mr-2" />Download Exam Template (CSV)
+                </Button>
+              </div>
+            )}
             <div>
               <h3 className="font-semibold text-lg">Trainee Assessment Summary</h3>
               <p className="text-sm text-muted-foreground mt-1">
@@ -446,6 +475,30 @@ const GradebookDetail = () => {
                 </Card>
               );
             })()}
+
+            {/* HoT Actions */}
+            {isHoT && gradebook?.status === "submitted" && id && (
+              <div className="flex gap-2 justify-end">
+                <Button onClick={() => hotApprove.mutateAsync(id)} disabled={hotApprove.isPending}>
+                  <CheckCircle className="h-4 w-4 mr-2" />{hotApprove.isPending ? "Approving..." : "Approve"}
+                </Button>
+                <Button variant="destructive" onClick={() => returnGb.mutateAsync({ gradebookId: id, returnTo: "draft" })} disabled={returnGb.isPending}>
+                  <XCircle className="h-4 w-4 mr-2" />{returnGb.isPending ? "Returning..." : "Return to Trainer"}
+                </Button>
+              </div>
+            )}
+
+            {/* AC Actions */}
+            {isAC && gradebook?.status === "hot_approved" && id && (
+              <div className="flex gap-2 justify-end">
+                <Button onClick={() => acApprove.mutateAsync(id)} disabled={acApprove.isPending}>
+                  <CheckCircle className="h-4 w-4 mr-2" />{acApprove.isPending ? "Approving..." : "Approve (AC)"}
+                </Button>
+                <Button variant="destructive" onClick={() => returnGb.mutateAsync({ gradebookId: id, returnTo: "submitted" })} disabled={returnGb.isPending}>
+                  <XCircle className="h-4 w-4 mr-2" />{returnGb.isPending ? "Returning..." : "Return to HoT"}
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
         <Tabs defaultValue="components" className="space-y-4">
@@ -638,7 +691,7 @@ const GradebookDetail = () => {
                     </Button>
                   </div>
                 )}
-                {!canEnterMarks && isTrainer && !isDraft && (
+                {isTrainer && !isDraft && !isLocked && gradebook?.status !== "draft" && (
                   <div className="flex items-center gap-2 p-3 bg-muted rounded-lg text-sm text-muted-foreground">
                     <Lock className="h-4 w-4" />
                     This gradebook has been submitted and marks are now read-only. To edit marks, the gradebook must be returned to draft status.
