@@ -108,6 +108,7 @@ const GradebookDetail = () => {
   const isDraft = gradebook?.status === "draft";
   const isLocked = gradebook?.is_locked;
   const canEdit = isTrainer && isDraft;
+  const canAddComponents = isTrainer && (isDraft || isLocked);
 
   const getMark = (componentId: string, traineeId: string) => {
     return marks?.find((m: any) => m.component_id === componentId && m.trainee_id === traineeId);
@@ -466,33 +467,75 @@ const GradebookDetail = () => {
           <TabsContent value="components" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Assessment Components</h3>
-              {canEdit && (
+              {canAddComponents && (
                 <Dialog open={compDialog} onOpenChange={setCompDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Component</Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                       <DialogTitle>Add Assessment Component</DialogTitle>
-                      <DialogDescription>Define a test, mock, practical, or assignment.</DialogDescription>
+                      <DialogDescription>Select a component type and configure it for your gradebook.</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label>Name</Label>
-                        <Input placeholder="e.g. Test 1, Mock Exam" value={compForm.name} onChange={e => setCompForm(p => ({ ...p, name: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>Type</Label>
+                        <Label>Component Type</Label>
                         <Select value={compForm.component_type} onValueChange={v => setCompForm(p => ({ ...p, component_type: v }))}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="test">Test</SelectItem>
-                            <SelectItem value="mock">Mock</SelectItem>
-                            <SelectItem value="assignment">Assignment</SelectItem>
-                            <SelectItem value="practical">Practical</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="test">
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">Theory Test</span>
+                                <span className="text-xs text-muted-foreground">e.g. Test 1, Test 2 – can cover a group of units</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="practical">
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">Practical</span>
+                                <span className="text-xs text-muted-foreground">Hands-on assessment – can be per unit or cover multiple units</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="assignment">
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">Assignment</span>
+                                <span className="text-xs text-muted-foreground">Written or research-based coursework</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="project">
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">Project</span>
+                                <span className="text-xs text-muted-foreground">Extended project work – individual or group</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="mock">
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">Mock Exam</span>
+                                <span className="text-xs text-muted-foreground">Practice examination under exam conditions</span>
+                              </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+                      <div>
+                        <Label>Name</Label>
+                        <Input 
+                          placeholder={
+                            compForm.component_type === "test" ? "e.g. Test 1 (Units 1-3)" :
+                            compForm.component_type === "practical" ? "e.g. Practical 1 – Unit 5" :
+                            compForm.component_type === "assignment" ? "e.g. Assignment 1" :
+                            compForm.component_type === "project" ? "e.g. Capstone Project" :
+                            compForm.component_type === "mock" ? "e.g. Mock Exam 1" : "Component name"
+                          }
+                          value={compForm.name} 
+                          onChange={e => setCompForm(p => ({ ...p, name: e.target.value }))} 
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {compForm.component_type === "test" && "A test can cover a group of unit standards. Name it Test 1, Test 2, etc."}
+                          {compForm.component_type === "practical" && "A practical can assess one unit or a group of units. One unit can have multiple practicals."}
+                          {compForm.component_type === "assignment" && "An assignment for written or research work."}
+                          {compForm.component_type === "project" && "A project-based assessment component."}
+                          {compForm.component_type === "mock" && "A mock examination that simulates final exam conditions."}
+                        </p>
                       </div>
                       <div>
                         <Label>Max Marks</Label>
