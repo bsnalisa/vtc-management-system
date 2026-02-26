@@ -49,7 +49,6 @@ export const adminNavItems: NavItem[] = [
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
 export const organizationAdminNavItems: NavItem[] = [
   { title: "Dashboard", url: "/organization-admin-dashboard", icon: LayoutDashboard },
-  { title: "Qualifications", url: "/qualifications", icon: GraduationCap },
   { title: "User Management", url: "/users", icon: Users },
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
@@ -63,9 +62,12 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-training-dashboard", icon: LayoutDashboard },
   { title: "Trade Management", url: "/trade-management", icon: Briefcase },
   { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
+  { title: "Template Approvals", url: "/assessment-template-approvals", icon: ClipboardList },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
+  { title: "Trainer Workload", url: "/trainer-workload", icon: BarChart3 },
   { title: "Class Management", url: "/classes", icon: GraduationCap },
-  { title: "Timetable", url: "/timetable", icon: Calendar },
+  { title: "Timetable Approvals", url: "/timetable-approvals", icon: Calendar },
+  { title: "Gradebook Oversight", url: "/gradebook-review", icon: BookOpen },
   { title: "Assessment Review", url: "/assessment-results", icon: ClipboardCheck },
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Reports", url: "/reports", icon: FileText },
@@ -108,11 +110,13 @@ export const hodNavItems: NavItem[] = [
 // Assessment Coordinator Navigation
 export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Dashboard", url: "/assessment-coordinator-dashboard", icon: LayoutDashboard },
+  { title: "Qualifications", url: "/qualifications", icon: GraduationCap },
+  { title: "Assessment Templates", url: "/assessment-templates", icon: ClipboardList },
+  { title: "Timetable", url: "/timetable", icon: Calendar },
   { title: "Gradebook Approval", url: "/gradebook-approval", icon: BookOpen },
   { title: "Assessment Results", url: "/assessment-results", icon: FileText },
-  { title: "Mark Management", url: "/assessment-results", icon: ClipboardCheck },
-  { title: "Reports", url: "/reports", icon: FileText },
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
+  { title: "Reports", url: "/reports", icon: FileText },
 ];
 
 // Debtor Officer Navigation (Financial Operations Only - Separate Routes)

@@ -113,5 +113,5 @@ const QualificationManagementPage = () => {
 };
 
 export default withRoleAccess(QualificationManagementPage, {
-  requiredRoles: ["organization_admin", "super_admin"],
+  requiredRoles: ["assessment_coordinator", "organization_admin", "super_admin"],
 });

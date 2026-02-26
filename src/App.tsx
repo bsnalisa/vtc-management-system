@@ -82,6 +82,9 @@ import EntryRequirementsManagement from "./pages/EntryRequirementsManagement";
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationApprovals from "./pages/QualificationApprovals";
 import TradeManagement from "./pages/TradeManagement";
+import AssessmentTemplateManagement from "./pages/AssessmentTemplateManagement";
+import AssessmentTemplateApprovals from "./pages/AssessmentTemplateApprovals";
+import TrainerWorkload from "./pages/TrainerWorkload";
 import HistoricalTrainees from "./pages/HistoricalTrainees";
 import ApplicationsInbox from "./pages/ApplicationsInbox";
 import GradingScale from "./pages/GradingScale";
@@ -97,6 +100,7 @@ import FirstLoginPasswordChange from "./pages/FirstLoginPasswordChange";
 import GradebookManagement from "./pages/GradebookManagement";
 import GradebookDetail from "./pages/GradebookDetail";
 import GradebookApproval from "./pages/GradebookApproval";
+import GradebookReview from "./pages/GradebookReview";
 import ApplicationFees from "./pages/debtors/ApplicationFees";
 import RegistrationFees from "./pages/debtors/RegistrationFees";
 import ClearedPayments from "./pages/debtors/ClearedPayments";
@@ -190,7 +194,7 @@ const ProtectedClassManagement = withRoleAccess(ClassManagement, {
   requiredRoles: ["admin", "head_of_training", "hod", "trainer"],
 });
 const ProtectedTimetableManagement = withRoleAccess(TimetableManagement, {
-  requiredRoles: ["admin", "head_of_training", "hod", "trainer"],
+  requiredRoles: ["admin", "head_of_training", "assessment_coordinator", "hod", "trainer"],
 });
 const ProtectedAnnouncements = withRoleAccess(Announcements, {
   requiredRoles: ["admin", "organization_admin"],
@@ -332,6 +336,7 @@ const App = () => (
           <Route path="/gradebooks" element={<ProtectedRoute><GradebookManagement /></ProtectedRoute>} />
           <Route path="/gradebooks/:id" element={<ProtectedRoute><GradebookDetail /></ProtectedRoute>} />
           <Route path="/gradebook-approval" element={<ProtectedRoute><GradebookApproval /></ProtectedRoute>} />
+          <Route path="/gradebook-review" element={<ProtectedRoute><GradebookReview /></ProtectedRoute>} />
           <Route path="/classes" element={<ProtectedRoute><ProtectedClassManagement /></ProtectedRoute>} />
           <Route path="/timetable" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/announcements" element={<ProtectedRoute><ProtectedAnnouncements /></ProtectedRoute>} />
@@ -375,6 +380,10 @@ const App = () => (
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
           <Route path="/qualification-approvals" element={<ProtectedRoute><QualificationApprovals /></ProtectedRoute>} />
           <Route path="/trade-management" element={<ProtectedRoute><TradeManagement /></ProtectedRoute>} />
+          <Route path="/assessment-templates" element={<ProtectedRoute><AssessmentTemplateManagement /></ProtectedRoute>} />
+          <Route path="/assessment-template-approvals" element={<ProtectedRoute><AssessmentTemplateApprovals /></ProtectedRoute>} />
+          <Route path="/trainer-workload" element={<ProtectedRoute><TrainerWorkload /></ProtectedRoute>} />
+          <Route path="/timetable-approvals" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/historical-trainees" element={<ProtectedRoute><HistoricalTrainees /></ProtectedRoute>} />
           <Route path="/applications-inbox" element={<ProtectedRoute><ApplicationsInbox /></ProtectedRoute>} />
           <Route path="/grading-scale" element={<ProtectedRoute><GradingScale /></ProtectedRoute>} />
