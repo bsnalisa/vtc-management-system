@@ -1,21 +1,27 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileCheck, Lock, CheckCircle, Users, Loader2 } from "lucide-react";
+import { FileCheck, Lock, CheckCircle, Users, Loader2, ClipboardList, GraduationCap, Calendar, ArrowRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { assessmentCoordinatorNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { useAssessmentResultsByStatus, useFinaliseAssessments } from "@/hooks/useAssessmentResults";
+import { useAssessmentTemplates } from "@/hooks/useAssessmentTemplates";
+import { useQualifications } from "@/hooks/useQualifications";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const AssessmentCoordinatorDashboard = () => {
+  const navigate = useNavigate();
   const { data: profile } = useProfile();
   const { organizationId } = useOrganizationContext();
   const { data: approvedResults, isLoading } = useAssessmentResultsByStatus(["approved_by_hot"], organizationId);
   const { data: finalisedResults } = useAssessmentResultsByStatus(["finalised"], organizationId);
+  const { data: templates } = useAssessmentTemplates();
+  const { data: qualifications } = useQualifications();
   const finalise = useFinaliseAssessments();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -40,16 +46,47 @@ const AssessmentCoordinatorDashboard = () => {
 
   const pendingCount = approvedResults?.length || 0;
   const finalisedCount = finalisedResults?.length || 0;
+  const draftTemplates = templates?.filter(t => t.status === "draft").length || 0;
+  const pendingTemplates = templates?.filter(t => t.status === "pending_approval").length || 0;
+  const approvedTemplates = templates?.filter(t => t.status === "approved").length || 0;
+  const totalQualifications = qualifications?.length || 0;
 
   return (
     <DashboardLayout
       title={`Welcome back, ${profile?.firstname || 'User'}`}
-      subtitle="Finalise approved assessments and lock marks"
+      subtitle="Assessment governance, templates, and qualification management"
       navItems={assessmentCoordinatorNavItems}
       groupLabel="Assessment Management"
     >
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
+        {/* Quick Actions */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/qualifications")}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Qualifications</CardTitle>
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalQualifications}</div>
+              <p className="text-xs text-muted-foreground">Total qualifications</p>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/assessment-templates")}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Templates</CardTitle>
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{approvedTemplates}</div>
+              <p className="text-xs text-muted-foreground">
+                {draftTemplates > 0 && `${draftTemplates} draft · `}
+                {pendingTemplates > 0 && `${pendingTemplates} pending`}
+                {draftTemplates === 0 && pendingTemplates === 0 && "Active templates"}
+              </p>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Awaiting Finalisation</CardTitle>
@@ -57,39 +94,29 @@ const AssessmentCoordinatorDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{pendingCount}</div>
-              <p className="text-xs text-muted-foreground">Approved by Head of Training</p>
+              <p className="text-xs text-muted-foreground">Approved by HoT</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Finalised This Term</CardTitle>
+              <CardTitle className="text-sm font-medium">Finalised</CardTitle>
               <Lock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{finalisedCount}</div>
-              <p className="text-xs text-muted-foreground">Locked and visible to trainees</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Selected</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{selectedIds.length}</div>
-              <p className="text-xs text-muted-foreground">Ready to finalise</p>
+              <p className="text-xs text-muted-foreground">Locked & visible to trainees</p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Finalisation Queue */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Assessments Awaiting Finalisation</CardTitle>
-                <CardDescription>These assessments have been approved by the Head of Training. Review and finalise to make them visible to trainees.</CardDescription>
+                <CardDescription>Approved by HoT. Review and finalise to make visible to trainees.</CardDescription>
               </div>
               <Button onClick={handleFinalise} disabled={selectedIds.length === 0 || finalise.isPending}>
                 <Lock className="h-4 w-4 mr-2" />

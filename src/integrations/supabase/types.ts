@@ -493,6 +493,164 @@ export type Database = {
           },
         ]
       }
+      assessment_template_audit: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          organization_id: string
+          performed_by: string
+          template_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          organization_id: string
+          performed_by: string
+          template_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          organization_id?: string
+          performed_by?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_template_audit_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_template_audit_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_template_components: {
+        Row: {
+          component_name: string
+          component_type: string
+          created_at: string
+          description: string | null
+          id: string
+          sequence_order: number
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          component_name: string
+          component_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          sequence_order?: number
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          component_name?: string
+          component_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          sequence_order?: number
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_template_components_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_templates: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          practical_pass_mark: number
+          qualification_id: string
+          rejection_reason: string | null
+          status: string
+          theory_pass_mark: number
+          updated_at: string
+          version_number: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id: string
+          practical_pass_mark?: number
+          qualification_id: string
+          rejection_reason?: string | null
+          status?: string
+          theory_pass_mark?: number
+          updated_at?: string
+          version_number?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          practical_pass_mark?: number
+          qualification_id?: string
+          rejection_reason?: string | null
+          status?: string
+          theory_pass_mark?: number
+          updated_at?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_templates_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: true
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_types: {
         Row: {
           active: boolean
@@ -1197,6 +1355,84 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ca_final_results: {
+        Row: {
+          academic_year: string
+          assessment_count: number
+          ca_average: number | null
+          calculated_at: string
+          created_at: string
+          id: string
+          organization_id: string
+          qualification_id: string
+          template_component_id: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          assessment_count?: number
+          ca_average?: number | null
+          calculated_at?: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          qualification_id: string
+          template_component_id: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          assessment_count?: number
+          ca_average?: number | null
+          calculated_at?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          qualification_id?: string
+          template_component_id?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ca_final_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ca_final_results_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ca_final_results_template_component_id_fkey"
+            columns: ["template_component_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_template_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ca_final_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ca_final_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
         ]
@@ -2491,6 +2727,7 @@ export type Database = {
           max_marks: number
           name: string
           sort_order: number
+          template_component_id: string | null
           updated_at: string
         }
         Insert: {
@@ -2502,6 +2739,7 @@ export type Database = {
           max_marks?: number
           name: string
           sort_order?: number
+          template_component_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -2513,6 +2751,7 @@ export type Database = {
           max_marks?: number
           name?: string
           sort_order?: number
+          template_component_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2528,6 +2767,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "gradebook_component_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gradebook_components_template_component_id_fkey"
+            columns: ["template_component_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_template_components"
             referencedColumns: ["id"]
           },
         ]
@@ -5795,6 +6041,96 @@ export type Database = {
           },
         ]
       }
+      qualification_results: {
+        Row: {
+          academic_year: string
+          approved_at: string | null
+          approved_by: string | null
+          ca_mark: number | null
+          created_at: string
+          id: string
+          is_locked: boolean
+          organization_id: string
+          pass_mark: number
+          qualification_id: string
+          result_status: string
+          sa_mark: number | null
+          template_component_id: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          approved_at?: string | null
+          approved_by?: string | null
+          ca_mark?: number | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          organization_id: string
+          pass_mark: number
+          qualification_id: string
+          result_status?: string
+          sa_mark?: number | null
+          template_component_id: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          ca_mark?: number | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          organization_id?: string
+          pass_mark?: number
+          qualification_id?: string
+          result_status?: string
+          sa_mark?: number | null
+          template_component_id?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_results_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_results_template_component_id_fkey"
+            columns: ["template_component_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_template_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       qualification_unit_standards: {
         Row: {
           created_at: string
@@ -6518,6 +6854,99 @@ export type Database = {
           },
         ]
       }
+      summative_results: {
+        Row: {
+          academic_year: string
+          created_at: string
+          id: string
+          is_locked: boolean
+          locked_at: string | null
+          locked_by: string | null
+          marks_obtained: number | null
+          max_marks: number
+          organization_id: string
+          percentage: number | null
+          qualification_id: string
+          recorded_at: string | null
+          recorded_by: string | null
+          template_component_id: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          locked_at?: string | null
+          locked_by?: string | null
+          marks_obtained?: number | null
+          max_marks?: number
+          organization_id: string
+          percentage?: number | null
+          qualification_id: string
+          recorded_at?: string | null
+          recorded_by?: string | null
+          template_component_id: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          locked_at?: string | null
+          locked_by?: string | null
+          marks_obtained?: number | null
+          max_marks?: number
+          organization_id?: string
+          percentage?: number | null
+          qualification_id?: string
+          recorded_at?: string | null
+          recorded_by?: string | null
+          template_component_id?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "summative_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summative_results_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summative_results_template_component_id_fkey"
+            columns: ["template_component_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_template_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summative_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summative_results_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       super_admin_audit_logs: {
         Row: {
           action: string
@@ -7053,6 +7482,62 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_submissions: {
+        Row: {
+          academic_year: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string
+          term: number
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by: string
+          term: number
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string
+          term?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
