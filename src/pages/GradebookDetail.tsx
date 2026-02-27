@@ -20,9 +20,10 @@ import {
   useHoTApproveGradebook, useReturnGradebook, useACApproveGradebook,
 } from "@/hooks/useGradebooks";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
+import { useTemplateForQualification, useTemplateComponents as useTemplateComps } from "@/hooks/useAssessmentTemplates";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2, Send, Lock, Users, BookOpen, Calculator, MessageSquare, HelpCircle, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Send, Lock, Users, BookOpen, Calculator, MessageSquare, HelpCircle, CheckCircle, XCircle, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useGradebookQueries, useResolveMarkQuery } from "@/hooks/useMarkQueries";
 
@@ -84,6 +85,8 @@ const GradebookDetail = () => {
   const { data: availableTrainees } = useAvailableTrainees(gradebook?.qualification_id, gradebook?.level);
   const { data: markQueries } = useGradebookQueries(id);
   const resolveQuery = useResolveMarkQuery();
+  const { data: qualTemplate } = useTemplateForQualification(gradebook?.qualification_id);
+  const { data: templateComponents } = useTemplateComps(qualTemplate?.id);
 
   const createComponent = useCreateComponent();
   const createGroup = useCreateComponentGroup();
@@ -97,7 +100,7 @@ const GradebookDetail = () => {
   const acApprove = useACApproveGradebook();
 
   const [compDialog, setCompDialog] = useState(false);
-  const [compForm, setCompForm] = useState({ name: "", component_type: "test", max_marks: "100", group_id: "" });
+  const [compForm, setCompForm] = useState({ name: "", component_type: "test", max_marks: "100", group_id: "", template_component_id: "" });
   const [traineeDialog, setTraineeDialog] = useState(false);
   const [selectedTraineeIds, setSelectedTraineeIds] = useState<string[]>([]);
   const [resolveDialog, setResolveDialog] = useState<{ queryId: string; action: "resolved" | "rejected" } | null>(null);
@@ -137,9 +140,10 @@ const GradebookDetail = () => {
       max_marks: parseFloat(compForm.max_marks) || 100,
       group_id: compForm.group_id && compForm.group_id !== "none" ? compForm.group_id : undefined,
       sort_order: (components?.length || 0) + 1,
+      template_component_id: compForm.template_component_id && compForm.template_component_id !== "none" ? compForm.template_component_id : undefined,
     });
     setCompDialog(false);
-    setCompForm({ name: "", component_type: "test", max_marks: "100", group_id: "" });
+    setCompForm({ name: "", component_type: "test", max_marks: "100", group_id: "", template_component_id: "" });
   };
 
   const handleAddTrainees = async () => {
@@ -605,6 +609,30 @@ const GradebookDetail = () => {
                               {groups.map((g: any) => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
                             </SelectContent>
                           </Select>
+                        </div>
+                      )}
+                      {templateComponents && templateComponents.length > 0 && (
+                        <div>
+                          <Label className="flex items-center gap-1"><Link2 className="h-3.5 w-3.5" />Link to Template Component</Label>
+                          <Select value={compForm.template_component_id} onValueChange={v => setCompForm(p => ({ ...p, template_component_id: v }))}>
+                            <SelectTrigger><SelectValue placeholder="Select template component" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No link</SelectItem>
+                              {templateComponents
+                                .filter((tc: any) => {
+                                  if (["test", "mock"].includes(compForm.component_type)) return tc.component_type === "theory";
+                                  return tc.component_type === "practical";
+                                })
+                                .map((tc: any) => (
+                                  <SelectItem key={tc.id} value={tc.id}>
+                                    {tc.component_name} ({tc.component_type})
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Links this assessment to the official template structure for CA calculation.
+                          </p>
                         </div>
                       )}
                     </div>
