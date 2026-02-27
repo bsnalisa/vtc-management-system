@@ -295,7 +295,7 @@ export const useCreateComponent = () => {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async (comp: { gradebook_id: string; group_id?: string; name: string; component_type: string; max_marks: number; sort_order: number }) => {
+    mutationFn: async (comp: { gradebook_id: string; group_id?: string; name: string; component_type: string; max_marks: number; sort_order: number; template_component_id?: string }) => {
       const { data, error } = await supabase
         .from("gradebook_components")
         .insert([comp])

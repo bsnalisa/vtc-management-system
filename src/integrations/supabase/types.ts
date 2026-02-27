@@ -8837,6 +8837,26 @@ export type Database = {
         Args: { _org_id: string; _school_subjects: Json }
         Returns: number
       }
+      calculate_ca_for_template_component: {
+        Args: {
+          _academic_year: string
+          _org_id: string
+          _qualification_id: string
+          _template_component_id: string
+          _trainee_id: string
+        }
+        Returns: number
+      }
+      calculate_qualification_result: {
+        Args: {
+          _academic_year: string
+          _org_id: string
+          _qualification_id: string
+          _template_component_id: string
+          _trainee_id: string
+        }
+        Returns: undefined
+      }
       calculate_trainee_gpa: { Args: { _trainee_id: string }; Returns: number }
       can_approve_qualifications: {
         Args: { _user_id: string }
