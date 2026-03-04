@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileCheck, Lock, CheckCircle, Users, Loader2, ClipboardList, GraduationCap, Calendar, ArrowRight } from "lucide-react";
+import { FileCheck, Lock, CheckCircle, Users, Loader2, ClipboardList, GraduationCap, Calendar, ArrowRight, Shield, FileSpreadsheet, BarChart3 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { assessmentCoordinatorNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -9,6 +9,7 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { useAssessmentResultsByStatus, useFinaliseAssessments } from "@/hooks/useAssessmentResults";
 import { useAssessmentTemplates } from "@/hooks/useAssessmentTemplates";
 import { useQualifications } from "@/hooks/useQualifications";
+import { useAssessmentAuditLogs } from "@/hooks/useAssessmentAudit";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +25,7 @@ const AssessmentCoordinatorDashboard = () => {
   const { data: qualifications } = useQualifications();
   const finalise = useFinaliseAssessments();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { data: recentAudit } = useAssessmentAuditLogs(undefined, 5);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -108,6 +110,30 @@ const AssessmentCoordinatorDashboard = () => {
               <p className="text-xs text-muted-foreground">Locked & visible to trainees</p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { icon: FileSpreadsheet, label: "Summative Assessment", desc: "Record SA marks", url: "/summative-assessment" },
+            { icon: BarChart3, label: "Qualification Results", desc: "View CA+SA results", url: "/qualification-results" },
+            { icon: Shield, label: "Governance", desc: "Audit & cycle control", url: "/assessment-governance" },
+            { icon: ClipboardList, label: "Templates", desc: "Manage templates", url: "/assessment-templates" },
+          ].map(({ icon: Icon, label, desc, url }) => (
+            <button
+              key={url}
+              onClick={() => navigate(url)}
+              className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-sm">{label}</p>
+                <p className="text-xs text-muted-foreground">{desc}</p>
+              </div>
+            </button>
+          ))}
         </div>
 
         {/* Finalisation Queue */}

@@ -139,6 +139,18 @@ export const useCreateAssessmentTemplate = () => {
         .single();
 
       if (error) throw error;
+
+      // Audit log
+      await supabase.from("assessment_template_audit").insert({
+        organization_id: organizationId,
+        template_id: result.id,
+        entity_type: "template",
+        entity_id: result.id,
+        action: "template_created",
+        new_data: result as any,
+        performed_by: user.user.id,
+      });
+
       return result;
     },
     onSuccess: () => {
@@ -252,6 +264,16 @@ export const useApproveTemplate = () => {
         .eq("id", templateId);
 
       if (error) throw error;
+
+      // Audit log
+      await supabase.from("assessment_template_audit").insert({
+        organization_id: (await supabase.from("assessment_templates").select("organization_id").eq("id", templateId).single()).data?.organization_id || "",
+        template_id: templateId,
+        entity_type: "template",
+        entity_id: templateId,
+        action: "template_approved",
+        performed_by: user.user.id,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assessment-templates"] });

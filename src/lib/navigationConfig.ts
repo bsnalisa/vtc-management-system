@@ -70,6 +70,7 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Gradebook Oversight", url: "/gradebook-review", icon: BookOpen },
   { title: "Qualification Results", url: "/qualification-results", icon: BarChart3 },
   { title: "Assessment Review", url: "/assessment-results", icon: ClipboardCheck },
+  { title: "Assessment Governance", url: "/assessment-governance", icon: Shield },
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
@@ -118,6 +119,7 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Timetable", url: "/timetable", icon: Calendar },
   { title: "Gradebook Approval", url: "/gradebook-approval", icon: BookOpen },
   { title: "Assessment Results", url: "/assessment-results", icon: FileText },
+  { title: "Assessment Governance", url: "/assessment-governance", icon: Shield },
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];

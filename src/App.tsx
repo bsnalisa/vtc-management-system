@@ -103,6 +103,7 @@ import GradebookApproval from "./pages/GradebookApproval";
 import GradebookReview from "./pages/GradebookReview";
 import SummativeAssessment from "./pages/SummativeAssessment";
 import QualificationResultsPage from "./pages/QualificationResultsPage";
+import AssessmentGovernance from "./pages/AssessmentGovernance";
 import ApplicationFees from "./pages/debtors/ApplicationFees";
 import RegistrationFees from "./pages/debtors/RegistrationFees";
 import ClearedPayments from "./pages/debtors/ClearedPayments";
@@ -341,6 +342,7 @@ const App = () => (
           <Route path="/gradebook-review" element={<ProtectedRoute><GradebookReview /></ProtectedRoute>} />
           <Route path="/summative-assessment" element={<ProtectedRoute><SummativeAssessment /></ProtectedRoute>} />
           <Route path="/qualification-results" element={<ProtectedRoute><QualificationResultsPage /></ProtectedRoute>} />
+          <Route path="/assessment-governance" element={<ProtectedRoute><AssessmentGovernance /></ProtectedRoute>} />
           <Route path="/classes" element={<ProtectedRoute><ProtectedClassManagement /></ProtectedRoute>} />
           <Route path="/timetable" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/announcements" element={<ProtectedRoute><ProtectedAnnouncements /></ProtectedRoute>} />

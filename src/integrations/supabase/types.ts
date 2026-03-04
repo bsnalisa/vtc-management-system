@@ -398,6 +398,63 @@ export type Database = {
           },
         ]
       }
+      assessment_cycles: {
+        Row: {
+          academic_year: string
+          created_at: string
+          id: string
+          lock_reason: string | null
+          locked_at: string | null
+          locked_by: string | null
+          organization_id: string
+          qualification_id: string
+          results_release_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string
+          id?: string
+          lock_reason?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          organization_id: string
+          qualification_id: string
+          results_release_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          id?: string
+          lock_reason?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          organization_id?: string
+          qualification_id?: string
+          results_release_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_cycles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_cycles_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_results: {
         Row: {
           ac_finalised_at: string | null
@@ -9018,6 +9075,27 @@ export type Database = {
       is_trainee_in_gradebook: {
         Args: { _gradebook_id: string; _user_id: string }
         Returns: boolean
+      }
+      lock_assessment_cycle: {
+        Args: {
+          _academic_year: string
+          _org_id: string
+          _qualification_id: string
+          _reason?: string
+        }
+        Returns: string
+      }
+      log_assessment_audit: {
+        Args: {
+          _action: string
+          _entity_id: string
+          _entity_type: string
+          _new_data?: Json
+          _old_data?: Json
+          _org_id: string
+          _template_id: string
+        }
+        Returns: string
       }
       log_audit_event: {
         Args: {
