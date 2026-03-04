@@ -11,8 +11,9 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useAssessmentTemplates, useTemplateComponents } from "@/hooks/useAssessmentTemplates";
 import { useSummativeResults, useSaveSummativeMark, useQualificationTrainees } from "@/hooks/useQualificationResults";
+import { useCycleStatus } from "@/hooks/useAssessmentCycles";
 import { useToast } from "@/hooks/use-toast";
-import { FileSpreadsheet, Save, Download, Upload, Lock, CheckCircle } from "lucide-react";
+import { FileSpreadsheet, Save, Download, Upload, Lock, CheckCircle, AlertTriangle } from "lucide-react";
 
 const SummativeAssessment = () => {
   const { navItems, groupLabel } = useRoleNavigation();
@@ -29,6 +30,8 @@ const SummativeAssessment = () => {
   const { data: trainees } = useQualificationTrainees(qualificationId, undefined);
   const { data: existingResults } = useSummativeResults(qualificationId, academicYear);
   const saveMark = useSaveSummativeMark();
+  const { data: cycleStatus } = useCycleStatus(qualificationId, academicYear);
+  const isCycleLocked = cycleStatus?.status === "locked" || cycleStatus?.status === "archived";
 
   // Marks editing state: { `${componentId}_${traineeId}`: { marks: string, maxMarks: number } }
   const [editingMarks, setEditingMarks] = useState<Record<string, { marks: string; maxMarks: number }>>({});
@@ -131,6 +134,21 @@ const SummativeAssessment = () => {
               </Badge>
             </div>
 
+            {isCycleLocked && (
+              <Card className="border-destructive/50 bg-destructive/5">
+                <CardContent className="py-3 flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Assessment Cycle Locked</p>
+                    <p className="text-xs text-muted-foreground">
+                      This cycle was locked on {cycleStatus?.locked_at ? new Date(cycleStatus.locked_at).toLocaleDateString("en-ZA") : "—"}.
+                      No further SA marks can be recorded or modified.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Tabs defaultValue="theory">
               <TabsList>
                 {theoryComponents.length > 0 && <TabsTrigger value="theory">Theory ({theoryComponents.length})</TabsTrigger>}
@@ -180,8 +198,8 @@ const SummativeAssessment = () => {
                                     <div className="text-xs text-muted-foreground font-mono">{trainee.trainee_id}</div>
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    {isLocked && !editing ? (
-                                      <span className="font-semibold">{existing?.marks_obtained}</span>
+                                    {(isLocked && !editing) || isCycleLocked ? (
+                                      <span className="font-semibold">{existing?.marks_obtained ?? "—"}</span>
                                     ) : (
                                       <Input
                                         type="number"

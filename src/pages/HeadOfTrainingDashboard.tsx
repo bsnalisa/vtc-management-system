@@ -269,12 +269,13 @@ const HeadOfTrainingDashboard = () => {
         {/* Quick Actions */}
         <div>
           <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
             {[
               { icon: Briefcase, label: "Trades", desc: "Manage trades", url: "/trade-management" },
               { icon: BookOpen, label: "Classes", desc: "Class management", url: "/classes" },
               { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable" },
               { icon: ClipboardCheck, label: "Assessments", desc: "Review results", url: "/assessment-results" },
+              { icon: Shield, label: "Governance", desc: "Audit & cycles", url: "/assessment-governance" },
               { icon: FileText, label: "Reports", desc: "Generate reports", url: "/reports" },
             ].map(({ icon: Icon, label, desc, url }) => (
               <button

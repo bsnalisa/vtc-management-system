@@ -11,7 +11,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useAssessmentTemplates, useTemplateComponents } from "@/hooks/useAssessmentTemplates";
 import { useQualificationResults, useApproveQualificationResults } from "@/hooks/useQualificationResults";
-import { CheckCircle, Lock, Shield, BarChart3 } from "lucide-react";
+import { useCycleStatus } from "@/hooks/useAssessmentCycles";
+import { CheckCircle, Lock, Shield, BarChart3, AlertTriangle } from "lucide-react";
 
 const QualificationResultsPage = () => {
   const { navItems, groupLabel, role } = useRoleNavigation();
@@ -28,6 +29,8 @@ const QualificationResultsPage = () => {
   const { data: templateComponents } = useTemplateComponents(selectedTemplateId || undefined);
   const { data: results } = useQualificationResults(qualificationId, academicYear);
   const approveResults = useApproveQualificationResults();
+  const { data: cycleStatus } = useCycleStatus(qualificationId, academicYear);
+  const isCycleLocked = cycleStatus?.status === "locked" || cycleStatus?.status === "archived";
 
   // Group results by trainee
   const traineeMap = new Map<string, { trainee: any; results: any[] }>();
@@ -111,6 +114,21 @@ const QualificationResultsPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Cycle Lock Indicator */}
+        {isCycleLocked && selectedTemplateId && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="py-3 flex items-center gap-3">
+              <Lock className="h-5 w-5 text-primary shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Assessment Cycle Locked</p>
+                <p className="text-xs text-muted-foreground">
+                  Results are finalized. No further modifications are possible for {academicYear}.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats */}
         {selectedTemplateId && totalResults > 0 && (
