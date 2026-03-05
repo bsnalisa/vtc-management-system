@@ -36,20 +36,62 @@ const SummativeAssessment = () => {
   const { data: cycleStatus } = useCycleStatus(qualificationId, academicYear);
   const isCycleLocked = cycleStatus?.status === "locked" || cycleStatus?.status === "archived";
 
-  // Fetch CA final results for Excel export
+  // Fetch CA marks directly from gradebook_marks via template_component_id link
+  // This works even before SA marks are saved (ca_final_results only populates on SA save)
   const { data: caResults } = useQuery({
-    queryKey: ["ca-final-results", qualificationId, academicYear],
+    queryKey: ["ca-live-results", qualificationId, academicYear, templateComponents],
     queryFn: async () => {
-      if (!qualificationId || !academicYear) return [];
-      const { data, error } = await supabase
-        .from("ca_final_results")
-        .select("trainee_id, template_component_id, ca_average")
-        .eq("qualification_id", qualificationId)
-        .eq("academic_year", academicYear);
+      if (!qualificationId || !academicYear || !templateComponents || !trainees) return [];
+      const componentIds = templateComponents.map((c: any) => c.id);
+      const traineeIds = trainees.map((t: any) => t.id);
+      
+      if (componentIds.length === 0 || traineeIds.length === 0) return [];
+
+      // Fetch all gradebook marks linked to these template components
+      const { data: marks, error } = await supabase
+        .from("gradebook_marks")
+        .select(`
+          trainee_id,
+          marks_obtained,
+          component:component_id(
+            id,
+            max_marks,
+            template_component_id,
+            gradebook:gradebook_id(qualification_id, academic_year)
+          )
+        `)
+        .in("trainee_id", traineeIds)
+        .not("marks_obtained", "is", null);
+
       if (error) throw error;
-      return data || [];
+      if (!marks) return [];
+
+      // Filter to relevant qualification/year and aggregate by template_component_id + trainee
+      const aggregated: Record<string, { sum: number; count: number }> = {};
+      for (const m of marks as any[]) {
+        const comp = m.component;
+        if (!comp?.template_component_id) continue;
+        const gb = comp.gradebook;
+        if (!gb || gb.qualification_id !== qualificationId || gb.academic_year !== academicYear) continue;
+        if (!componentIds.includes(comp.template_component_id)) continue;
+
+        const key = `${m.trainee_id}__${comp.template_component_id}`;
+        if (!aggregated[key]) aggregated[key] = { sum: 0, count: 0 };
+        const pct = (m.marks_obtained / (comp.max_marks || 100)) * 100;
+        aggregated[key].sum += pct;
+        aggregated[key].count += 1;
+      }
+
+      return Object.entries(aggregated).map(([key, val]) => {
+        const [trainee_id, template_component_id] = key.split("__");
+        return {
+          trainee_id,
+          template_component_id,
+          ca_average: Math.round((val.sum / val.count) * 100) / 100,
+        };
+      });
     },
-    enabled: !!qualificationId && !!academicYear,
+    enabled: !!qualificationId && !!academicYear && !!templateComponents && !!trainees,
   });
 
   // Marks editing state: { `${componentId}_${traineeId}`: { marks: string, maxMarks: number } }
