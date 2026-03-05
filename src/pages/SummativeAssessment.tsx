@@ -36,6 +36,22 @@ const SummativeAssessment = () => {
   const { data: cycleStatus } = useCycleStatus(qualificationId, academicYear);
   const isCycleLocked = cycleStatus?.status === "locked" || cycleStatus?.status === "archived";
 
+  // Fetch CA final results for Excel export
+  const { data: caResults } = useQuery({
+    queryKey: ["ca-final-results", qualificationId, academicYear],
+    queryFn: async () => {
+      if (!qualificationId || !academicYear) return [];
+      const { data, error } = await supabase
+        .from("ca_final_results")
+        .select("trainee_id, template_component_id, ca_average")
+        .eq("qualification_id", qualificationId)
+        .eq("academic_year", academicYear);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!qualificationId && !!academicYear,
+  });
+
   // Marks editing state: { `${componentId}_${traineeId}`: { marks: string, maxMarks: number } }
   const [editingMarks, setEditingMarks] = useState<Record<string, { marks: string; maxMarks: number }>>({});
 
