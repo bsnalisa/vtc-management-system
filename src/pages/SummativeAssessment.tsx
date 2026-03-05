@@ -63,22 +63,20 @@ const SummativeAssessment = () => {
 
   const handleDownloadTemplate = () => {
     if (!templateComponents || !trainees) return;
-    const headers = ["Trainee ID", "First Name", "Last Name",
-      ...templateComponents.map((c: any) => `${c.component_name} (${c.component_type}) /100`)
-    ];
-    const rows = trainees.map((t: any) => [
-      t.trainee_id, t.first_name, t.last_name,
-      ...templateComponents.map(() => "")
-    ].join(","));
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `sa-template-${selectedTemplate?.qualifications?.qualification_code || "qual"}-${academicYear}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "Template Downloaded" });
+    import("xlsx").then((XLSX) => {
+      const headers = ["Trainee ID", "First Name", "Last Name",
+        ...templateComponents.map((c: any) => `${c.component_name} (${c.component_type}) /100`)
+      ];
+      const rows = trainees.map((t: any) => [
+        t.trainee_id, t.first_name, t.last_name,
+        ...templateComponents.map(() => "")
+      ]);
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "SA Template");
+      XLSX.writeFile(wb, `sa-template-${selectedTemplate?.qualifications?.qualification_code || "qual"}-${academicYear}.xlsx`);
+      toast({ title: "Template Downloaded" });
+    });
   };
 
   const theoryComponents = templateComponents?.filter((c: any) => c.component_type === "theory") || [];
@@ -115,7 +113,7 @@ const SummativeAssessment = () => {
               </div>
               {selectedTemplateId && (
                 <Button variant="outline" onClick={handleDownloadTemplate}>
-                  <Download className="h-4 w-4 mr-2" />Download CSV Template
+                  <Download className="h-4 w-4 mr-2" />Download Excel Template
                 </Button>
               )}
             </div>
