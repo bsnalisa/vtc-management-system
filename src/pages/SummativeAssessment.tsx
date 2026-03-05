@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +15,7 @@ import { useAssessmentTemplates, useTemplateComponents } from "@/hooks/useAssess
 import { useSummativeResults, useSaveSummativeMark, useQualificationTrainees } from "@/hooks/useQualificationResults";
 import { useCycleStatus } from "@/hooks/useAssessmentCycles";
 import { useToast } from "@/hooks/use-toast";
+import { generateSAExcelTemplate } from "@/lib/saTemplateGenerator";
 import { FileSpreadsheet, Save, Download, Upload, Lock, CheckCircle, AlertTriangle } from "lucide-react";
 
 const SummativeAssessment = () => {
