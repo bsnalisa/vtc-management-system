@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +15,7 @@ import { useAssessmentTemplates, useTemplateComponents } from "@/hooks/useAssess
 import { useSummativeResults, useSaveSummativeMark, useQualificationTrainees } from "@/hooks/useQualificationResults";
 import { useCycleStatus } from "@/hooks/useAssessmentCycles";
 import { useToast } from "@/hooks/use-toast";
+import { generateSAExcelTemplate } from "@/lib/saTemplateGenerator";
 import { FileSpreadsheet, Save, Download, Upload, Lock, CheckCircle, AlertTriangle } from "lucide-react";
 
 const SummativeAssessment = () => {
@@ -32,6 +35,22 @@ const SummativeAssessment = () => {
   const saveMark = useSaveSummativeMark();
   const { data: cycleStatus } = useCycleStatus(qualificationId, academicYear);
   const isCycleLocked = cycleStatus?.status === "locked" || cycleStatus?.status === "archived";
+
+  // Fetch CA final results for Excel export
+  const { data: caResults } = useQuery({
+    queryKey: ["ca-final-results", qualificationId, academicYear],
+    queryFn: async () => {
+      if (!qualificationId || !academicYear) return [];
+      const { data, error } = await supabase
+        .from("ca_final_results")
+        .select("trainee_id, template_component_id, ca_average")
+        .eq("qualification_id", qualificationId)
+        .eq("academic_year", academicYear);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!qualificationId && !!academicYear,
+  });
 
   // Marks editing state: { `${componentId}_${traineeId}`: { marks: string, maxMarks: number } }
   const [editingMarks, setEditingMarks] = useState<Record<string, { marks: string; maxMarks: number }>>({});
@@ -63,80 +82,16 @@ const SummativeAssessment = () => {
 
   const handleDownloadTemplate = () => {
     if (!templateComponents || !trainees || !selectedTemplate) return;
-    import("xlsx").then((XLSX) => {
-      const qualCode = selectedTemplate.qualifications?.qualification_code || "N/A";
-      const qualTitle = selectedTemplate.qualifications?.qualification_title || "";
-
-      // Separate components by type
-      const theory = templateComponents.filter((c: any) => c.component_type === "theory");
-      const practicals = templateComponents.filter((c: any) => c.component_type === "practical");
-
-      // Build header row
-      // Fixed columns first
-      const fixedHeaders = [
-        "Qualification ID/Code", "Level", "Month of Assessment",
-        "Candidate Number", "Trainee ID", "Last Name", "First Name",
-        "Middle Name", "ID Number", "Gender",
-      ];
-      // Theory columns
-      const theoryHeaders = ["Theory", "CA", "SA", "Final Mark", "Grade"];
-      // Practical columns - one set per practical component
-      const practicalHeaders: string[] = [];
-      practicals.forEach((p: any, i: number) => {
-        practicalHeaders.push(
-          practicals.length > 1 ? `Practical ${i + 1} (${p.component_name})` : "Practical",
-          "CA", "SA", "Final Mark", "Grade"
-        );
-      });
-      // Overall
-      const headers = [...fixedHeaders, ...theoryHeaders, ...practicalHeaders, "Overall Outcome"];
-
-      // Build trainee rows
-      const rows = trainees.map((t: any, idx: number) => {
-        const fixed = [
-          qualCode, "", "", // Qualification, Level, Month - to be filled
-          idx + 1, // Candidate Number
-          t.trainee_id || "",
-          t.last_name || "",
-          t.first_name || "",
-          "", // Middle Name
-          t.national_id || "",
-          t.gender || "",
-        ];
-        // Theory: CA, SA, Final Mark, Grade (empty for filling)
-        const theoryCols = ["", "", "", "", ""];
-        // Practicals
-        const practicalCols: string[] = [];
-        practicals.forEach(() => {
-          practicalCols.push("", "", "", "", "");
-        });
-        return [...fixed, ...theoryCols, ...practicalCols, ""];
-      });
-
-      // Grading key rows
-      const spacer = [""];
-      const gradingTitle = ["GRADING KEYS"];
-      const gradingRows = [
-        ["49% and below", "F", "Fail"],
-        ["50% to 59%", "P", "*Pass"],
-        ["60% to 79%", "C", "Credit"],
-        ["80% to 100%", "D", "Distinction"],
-        [],
-        ["Disqualification - X", "Exempted - E", "Absent - A", "DNQ - Did Not Qualify"],
-      ];
-
-      const allRows = [headers, ...rows, spacer, spacer, gradingTitle, spacer, ...gradingRows];
-
-      const ws = XLSX.utils.aoa_to_sheet(allRows);
-
-      // Set column widths
-      ws["!cols"] = headers.map((h: string) => ({ wch: Math.max(h.length + 2, 14) }));
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "SA Template");
-      XLSX.writeFile(wb, `SA-Template-${qualCode}-${academicYear}.xlsx`);
-      toast({ title: "Excel Template Downloaded" });
+    const qualCode = selectedTemplate.qualifications?.qualification_code || "N/A";
+    generateSAExcelTemplate({
+      qualCode,
+      academicYear,
+      theoryComponents: templateComponents.filter((c: any) => c.component_type === "theory"),
+      practicalComponents: templateComponents.filter((c: any) => c.component_type === "practical"),
+      trainees: trainees as any,
+      caResults: caResults || [],
     });
+    toast({ title: "Excel Template Downloaded" });
   };
 
   const theoryComponents = templateComponents?.filter((c: any) => c.component_type === "theory") || [];
