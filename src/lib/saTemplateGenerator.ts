@@ -108,8 +108,8 @@ export function generateSAExcelTemplate(data: SATemplateData): void {
       const saRef = `${ec(c + 2)}${er}`;
       const fmRef = `${ec(c + 3)}${er}`;
 
-      // Final Mark = (CA + SA) / 2
-      setFormula(r, c + 3, `IFERROR((${caRef}+${saRef})/2,"")`);
+      // Final Mark = CA * 40% + SA * 60%
+      setFormula(r, c + 3, `IFERROR(${caRef}*0.4+${saRef}*0.6,"")`);
       // Grade
       setFormula(r, c + 4, `IF(${fmRef}="","",IF(${fmRef}>=80,"D",IF(${fmRef}>=60,"C",IF(${fmRef}>=50,"P","F"))))`);
       fmCols.push({ col: c + 3, passMark: 50 });
@@ -127,7 +127,8 @@ export function generateSAExcelTemplate(data: SATemplateData): void {
       const saRef = `${ec(c + 2)}${er}`;
       const fmRef = `${ec(c + 3)}${er}`;
 
-      setFormula(r, c + 3, `IFERROR((${caRef}+${saRef})/2,"")`);
+      // Final Mark = CA * 40% + SA * 60%
+      setFormula(r, c + 3, `IFERROR(${caRef}*0.4+${saRef}*0.6,"")`);
       setFormula(r, c + 4, `IF(${fmRef}="","",IF(${fmRef}>=80,"D",IF(${fmRef}>=60,"C",IF(${fmRef}>=50,"P","F"))))`);
       fmCols.push({ col: c + 3, passMark: 60 });
       c += GRP;
