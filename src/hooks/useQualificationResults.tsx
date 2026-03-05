@@ -215,7 +215,7 @@ export const useQualificationTrainees = (qualificationId?: string, level?: numbe
 
       let query = supabase
         .from("trainees")
-        .select("id, trainee_id, first_name, last_name, level")
+        .select("id, trainee_id, first_name, last_name, level, national_id, gender")
         .eq("trade_id", qual.trade_id)
         .eq("status", "active");
       if (level) query = query.eq("level", level);
