@@ -115,11 +115,9 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Qualifications", url: "/qualifications", icon: GraduationCap },
   { title: "Assessment Templates", url: "/assessment-templates", icon: ClipboardList },
   { title: "Summative Assessment", url: "/summative-assessment", icon: ClipboardCheck },
-  { title: "Qualification Results", url: "/qualification-results", icon: BarChart3 },
+  { title: "Results & Gradebooks", url: "/qualification-results", icon: BarChart3 },
+  { title: "Governance & Cycles", url: "/assessment-governance", icon: Shield },
   { title: "Timetable", url: "/timetable", icon: Calendar },
-  { title: "Gradebook Approval", url: "/gradebook-approval", icon: BookOpen },
-  { title: "Assessment Results", url: "/assessment-results", icon: FileText },
-  { title: "Assessment Governance", url: "/assessment-governance", icon: Shield },
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
