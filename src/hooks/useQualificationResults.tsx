@@ -67,14 +67,11 @@ export const useSaveSummativeMark = () => {
       if (!user.user) throw new Error("Not authenticated");
       if (!organizationId) throw new Error("No organization context");
 
-      const percentage = (mark.marks_obtained / mark.max_marks) * 100;
-
       const { data, error } = await supabase
         .from("summative_results")
         .upsert([{
           ...mark,
           organization_id: organizationId,
-          percentage: Math.round(percentage * 100) / 100,
           recorded_by: user.user.id,
           recorded_at: new Date().toISOString(),
           is_locked: true,
