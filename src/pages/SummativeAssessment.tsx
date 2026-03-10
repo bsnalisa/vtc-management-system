@@ -36,60 +36,77 @@ const SummativeAssessment = () => {
   const { data: cycleStatus } = useCycleStatus(qualificationId, academicYear);
   const isCycleLocked = cycleStatus?.status === "locked" || cycleStatus?.status === "archived";
 
-  // Fetch CA marks directly from gradebook_marks via template_component_id link
-  // This works even before SA marks are saved (ca_final_results only populates on SA save)
+  // Fetch CA scores from gradebook_ca_scores via gradebooks for this qualification/year
+  // gradebook_ca_scores has pre-calculated ca_score (theory) and practical_score per trainee
   const { data: caResults } = useQuery({
     queryKey: ["ca-live-results", qualificationId, academicYear, templateComponents],
     queryFn: async () => {
       if (!qualificationId || !academicYear || !templateComponents || !trainees) return [];
-      const componentIds = templateComponents.map((c: any) => c.id);
       const traineeIds = trainees.map((t: any) => t.id);
-      
-      if (componentIds.length === 0 || traineeIds.length === 0) return [];
+      if (traineeIds.length === 0) return [];
 
-      // Fetch all gradebook marks linked to these template components
-      const { data: marks, error } = await supabase
-        .from("gradebook_marks")
-        .select(`
-          trainee_id,
-          marks_obtained,
-          component:component_id(
-            id,
-            max_marks,
-            template_component_id,
-            gradebook:gradebook_id(qualification_id, academic_year)
-          )
-        `)
-        .in("trainee_id", traineeIds)
-        .not("marks_obtained", "is", null);
+      // Step 1: Find all gradebooks for this qualification + academic year
+      const { data: gradebooks, error: gbErr } = await supabase
+        .from("gradebooks")
+        .select("id")
+        .eq("qualification_id", qualificationId)
+        .eq("academic_year", academicYear);
 
-      if (error) throw error;
-      if (!marks) return [];
+      if (gbErr) throw gbErr;
+      if (!gradebooks || gradebooks.length === 0) return [];
 
-      // Filter to relevant qualification/year and aggregate by template_component_id + trainee
-      const aggregated: Record<string, { sum: number; count: number }> = {};
-      for (const m of marks as any[]) {
-        const comp = m.component;
-        if (!comp?.template_component_id) continue;
-        const gb = comp.gradebook;
-        if (!gb || gb.qualification_id !== qualificationId || gb.academic_year !== academicYear) continue;
-        if (!componentIds.includes(comp.template_component_id)) continue;
+      const gradebookIds = gradebooks.map(g => g.id);
 
-        const key = `${m.trainee_id}__${comp.template_component_id}`;
-        if (!aggregated[key]) aggregated[key] = { sum: 0, count: 0 };
-        const pct = (m.marks_obtained / (comp.max_marks || 100)) * 100;
-        aggregated[key].sum += pct;
-        aggregated[key].count += 1;
+      // Step 2: Get pre-calculated CA scores from gradebook_ca_scores
+      const { data: caScores, error: caErr } = await supabase
+        .from("gradebook_ca_scores")
+        .select("trainee_id, ca_score, practical_score, theory_score, gradebook_id")
+        .in("gradebook_id", gradebookIds)
+        .in("trainee_id", traineeIds);
+
+      if (caErr) throw caErr;
+      if (!caScores || caScores.length === 0) return [];
+
+      // Step 3: Map CA scores to template components
+      // ca_score = weighted theory CA (test*weight + mock*weight), practical_score = practical average
+      const theoryComps = templateComponents.filter((c: any) => c.component_type === "theory");
+      const practicalComps = templateComponents.filter((c: any) => c.component_type === "practical");
+
+      const results: Array<{ trainee_id: string; template_component_id: string; ca_average: number | null }> = [];
+
+      // Aggregate across multiple gradebooks per trainee (average if multiple)
+      const traineeAgg: Record<string, { caSum: number; caCount: number; pracSum: number; pracCount: number }> = {};
+      for (const cs of caScores) {
+        if (!traineeAgg[cs.trainee_id]) traineeAgg[cs.trainee_id] = { caSum: 0, caCount: 0, pracSum: 0, pracCount: 0 };
+        if (cs.ca_score != null) {
+          traineeAgg[cs.trainee_id].caSum += cs.ca_score;
+          traineeAgg[cs.trainee_id].caCount += 1;
+        }
+        if (cs.practical_score != null) {
+          traineeAgg[cs.trainee_id].pracSum += cs.practical_score;
+          traineeAgg[cs.trainee_id].pracCount += 1;
+        }
       }
 
-      return Object.entries(aggregated).map(([key, val]) => {
-        const [trainee_id, template_component_id] = key.split("__");
-        return {
-          trainee_id,
-          template_component_id,
-          ca_average: Math.round((val.sum / val.count) * 100) / 100,
-        };
-      });
+      for (const [traineeId, agg] of Object.entries(traineeAgg)) {
+        const theoryCA = agg.caCount > 0 ? Math.round((agg.caSum / agg.caCount) * 100) / 100 : null;
+        const practicalCA = agg.pracCount > 0 ? Math.round((agg.pracSum / agg.pracCount) * 100) / 100 : null;
+
+        // Map theory CA to all theory template components
+        for (const tc of theoryComps) {
+          if (theoryCA !== null) {
+            results.push({ trainee_id: traineeId, template_component_id: tc.id, ca_average: theoryCA });
+          }
+        }
+        // Map practical CA to all practical template components
+        for (const pc of practicalComps) {
+          if (practicalCA !== null) {
+            results.push({ trainee_id: traineeId, template_component_id: pc.id, ca_average: practicalCA });
+          }
+        }
+      }
+
+      return results;
     },
     enabled: !!qualificationId && !!academicYear && !!templateComponents && !!trainees,
   });
