@@ -57,7 +57,7 @@ class ErrorBoundary extends Component<Props, State> {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {process.env.NODE_ENV === "development" && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <div className="rounded-md bg-muted p-3 text-xs">
                   <p className="font-medium text-destructive mb-1">
                     {this.state.error.name}: {this.state.error.message}

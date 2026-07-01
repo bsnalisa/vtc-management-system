@@ -23,7 +23,7 @@ export function SearchInput({
   
   const debouncedOnChange = useCallback(
     (() => {
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
       return (newValue: string) => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {

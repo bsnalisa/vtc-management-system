@@ -147,7 +147,7 @@ export const useAutoSaveDraft = (
   enabled: boolean = true
 ) => {
   const saveDraft = useSaveApplicationDraft();
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastSavedRef = useRef<string>("");
 
   const save = useCallback(() => {
