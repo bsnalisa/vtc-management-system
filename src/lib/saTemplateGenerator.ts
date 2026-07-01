@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 export interface SATemplateData {
   qualCode: string;
@@ -20,11 +20,23 @@ export interface SATemplateData {
   }>;
 }
 
-export function generateSAExcelTemplate(data: SATemplateData): void {
+// Convert 0-indexed column to Excel letter (A, B, ..., Z, AA, ...)
+function colLetter(idx: number): string {
+  let n = idx + 1;
+  let s = "";
+  while (n > 0) {
+    const r = (n - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
+export async function generateSAExcelTemplate(data: SATemplateData): Promise<void> {
   const { qualCode, academicYear, theoryComponents, practicalComponents, trainees, caResults } = data;
 
-  const wb = XLSX.utils.book_new();
-  const ws: XLSX.WorkSheet = {};
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("SA Template");
 
   const FIXED = 10;
   const hasTheory = theoryComponents.length > 0;
@@ -32,14 +44,12 @@ export function generateSAExcelTemplate(data: SATemplateData): void {
   const GRP = 5; // component name, CA, SA, Final Mark, Grade
   const totalCols = FIXED + (hasTheory ? GRP : 0) + numPrac * GRP + 1;
 
-  const ec = XLSX.utils.encode_col;
-
   const setVal = (r: number, c: number, v: string | number) => {
-    const ref = XLSX.utils.encode_cell({ r, c });
-    ws[ref] = typeof v === "number" ? { t: "n", v } : { t: "s", v: v ?? "" };
+    // r, c are 0-indexed; ExcelJS is 1-indexed
+    ws.getRow(r + 1).getCell(c + 1).value = v;
   };
   const setFormula = (r: number, c: number, f: string) => {
-    ws[XLSX.utils.encode_cell({ r, c })] = { f };
+    ws.getRow(r + 1).getCell(c + 1).value = { formula: f } as ExcelJS.CellFormulaValue;
   };
 
   // ── Row 0: Headers ──
@@ -77,73 +87,65 @@ export function generateSAExcelTemplate(data: SATemplateData): void {
 
   // ── Trainee data rows ──
   trainees.forEach((t, idx) => {
-    const r = idx + 1;        // 0-indexed worksheet row
-    const er = idx + 2;       // 1-indexed Excel row (for formulas)
+    const r = idx + 1;      // 0-indexed worksheet row
+    const er = idx + 2;     // 1-indexed Excel row (for formulas)
 
-    // Fixed columns
     setVal(r, 0, qualCode);
-    setVal(r, 1, "");         // Level – to be filled
-    setVal(r, 2, "");         // Month – to be filled
-    setVal(r, 3, idx + 1);   // Candidate Number
+    setVal(r, 1, "");
+    setVal(r, 2, "");
+    setVal(r, 3, idx + 1);
     setVal(r, 4, t.trainee_id || "");
     setVal(r, 5, t.last_name || "");
     setVal(r, 6, t.first_name || "");
-    setVal(r, 7, "");         // Middle Name
+    setVal(r, 7, "");
     setVal(r, 8, t.national_id || "");
     setVal(r, 9, t.gender || "");
 
     let c = FIXED;
     const fmCols: { col: number; passMark: number }[] = [];
 
-    // Theory group
     if (hasTheory) {
       const comp = theoryComponents[0];
       const ca = getCA(t.id, comp.id);
 
-      setVal(r, c, comp.component_name);                       // repeat component name
-      if (ca !== null) setVal(r, c + 1, Math.round(ca * 100) / 100); // CA (read-only)
-      // SA at c+2 – left blank for manual entry
+      setVal(r, c, comp.component_name);
+      if (ca !== null) setVal(r, c + 1, Math.round(ca * 100) / 100);
 
-      const caRef = `${ec(c + 1)}${er}`;
-      const saRef = `${ec(c + 2)}${er}`;
-      const fmRef = `${ec(c + 3)}${er}`;
+      const caRef = `${colLetter(c + 1)}${er}`;
+      const saRef = `${colLetter(c + 2)}${er}`;
+      const fmRef = `${colLetter(c + 3)}${er}`;
 
-      // Final Mark = CA * 40% + SA * 60%
       setFormula(r, c + 3, `IFERROR(${caRef}*0.4+${saRef}*0.6,"")`);
-      // Grade
       setFormula(r, c + 4, `IF(${fmRef}="","",IF(${fmRef}>=80,"D",IF(${fmRef}>=60,"C",IF(${fmRef}>=50,"P","F"))))`);
       fmCols.push({ col: c + 3, passMark: 50 });
       c += GRP;
     }
 
-    // Practical groups
     practicalComponents.forEach((comp) => {
       const ca = getCA(t.id, comp.id);
 
-      setVal(r, c, comp.component_name);                       // repeat component name
+      setVal(r, c, comp.component_name);
       if (ca !== null) setVal(r, c + 1, Math.round(ca * 100) / 100);
 
-      const caRef = `${ec(c + 1)}${er}`;
-      const saRef = `${ec(c + 2)}${er}`;
-      const fmRef = `${ec(c + 3)}${er}`;
+      const caRef = `${colLetter(c + 1)}${er}`;
+      const saRef = `${colLetter(c + 2)}${er}`;
+      const fmRef = `${colLetter(c + 3)}${er}`;
 
-      // Final Mark = CA * 40% + SA * 60%
       setFormula(r, c + 3, `IFERROR(${caRef}*0.4+${saRef}*0.6,"")`);
       setFormula(r, c + 4, `IF(${fmRef}="","",IF(${fmRef}>=80,"D",IF(${fmRef}>=60,"C",IF(${fmRef}>=50,"P","F"))))`);
       fmCols.push({ col: c + 3, passMark: 60 });
       c += GRP;
     });
 
-    // Overall Outcome – C (Competent) if ALL pass, NYC otherwise
     if (fmCols.length > 0) {
-      const emptyChecks = fmCols.map((f) => `${ec(f.col)}${er}<>""`).join(",");
-      const passChecks = fmCols.map((f) => `${ec(f.col)}${er}>=${f.passMark}`).join(",");
+      const emptyChecks = fmCols.map((f) => `${colLetter(f.col)}${er}<>""`).join(",");
+      const passChecks = fmCols.map((f) => `${colLetter(f.col)}${er}>=${f.passMark}`).join(",");
       setFormula(r, c, `IF(NOT(AND(${emptyChecks})),"",IF(AND(${passChecks}),"C","NYC"))`);
     }
   });
 
   // ── Grading Keys + Signatures section ──
-  const gk = trainees.length + 3; // start row (2 blank rows after data)
+  const gk = trainees.length + 3;
 
   setVal(gk, 0, "GRADING KEYS");
   const keys: [string, string, string][] = [
@@ -163,23 +165,27 @@ export function generateSAExcelTemplate(data: SATemplateData): void {
   setVal(gk + 6, 2, "Absent - A");
   setVal(gk + 6, 3, "DNQ - Did Not Qualify");
 
-  // Signatures to the right of the grading-keys box
   const sigCol = 5;
   setVal(gk + 1, sigCol, "Confirmed by: ___________________________");
-  setVal(gk + 2, sigCol, "");
   setVal(gk + 3, sigCol, "Signature: ___________________________");
-  setVal(gk + 4, sigCol, "");
   setVal(gk + 5, sigCol, "Approved by: ___________________________");
-  setVal(gk + 6, sigCol, "");
   setVal(gk + 7, sigCol, "Signature: ___________________________");
 
-  // ── Worksheet range & column widths ──
-  const maxRow = gk + 8;
-  ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxRow, c: totalCols - 1 } });
-  ws["!cols"] = Array.from({ length: totalCols }, (_, i) => ({
-    wch: i <= 2 ? 22 : i <= 9 ? 16 : 14,
-  }));
+  // Column widths
+  for (let i = 0; i < totalCols; i++) {
+    ws.getColumn(i + 1).width = i <= 2 ? 22 : i <= 9 ? 16 : 14;
+  }
 
-  XLSX.utils.book_append_sheet(wb, ws, "SA Template");
-  XLSX.writeFile(wb, `SA-Template-${qualCode}-${academicYear}.xlsx`);
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SA-Template-${qualCode}-${academicYear}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
