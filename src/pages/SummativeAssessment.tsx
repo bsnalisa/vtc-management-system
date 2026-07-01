@@ -139,10 +139,10 @@ const SummativeAssessment = () => {
     });
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     if (!templateComponents || !trainees || !selectedTemplate) return;
     const qualCode = selectedTemplate.qualifications?.qualification_code || "N/A";
-    generateSAExcelTemplate({
+    await generateSAExcelTemplate({
       qualCode,
       academicYear,
       theoryComponents: templateComponents.filter((c: any) => c.component_type === "theory"),
