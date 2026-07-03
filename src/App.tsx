@@ -93,6 +93,7 @@ import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
 import TraineeAdmissionStatusPage from "./pages/trainee/TraineeAdmissionStatusPage";
 import TraineeHostelPage from "./pages/trainee/TraineeHostelPage";
 import TraineeExamTimetablePage from "./pages/trainee/TraineeExamTimetablePage";
+import ExamTimetablePublishing from "./pages/ExamTimetablePublishing";
 import TraineeResultsPage from "./pages/trainee/TraineeResultsPage";
 import TraineeFinancePage from "./pages/trainee/TraineeFinancePage";
 import TraineePaymentsPage from "./pages/trainee/TraineePaymentsPage";
