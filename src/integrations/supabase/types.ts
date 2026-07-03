@@ -2222,11 +2222,19 @@ export type Database = {
           end_time: string | null
           exam_date: string
           exam_type: string
+          gradebook_id: string | null
           id: string
+          invigilator_id: string | null
           level: number
+          min_practical_avg: number
+          min_theory_ca: number
           notes: string | null
           organization_id: string
+          published: boolean
+          published_at: string | null
+          published_by: string | null
           qualification_id: string
+          room_id: string | null
           start_time: string | null
           subject_name: string
           updated_at: string
@@ -2239,11 +2247,19 @@ export type Database = {
           end_time?: string | null
           exam_date: string
           exam_type?: string
+          gradebook_id?: string | null
           id?: string
+          invigilator_id?: string | null
           level?: number
+          min_practical_avg?: number
+          min_theory_ca?: number
           notes?: string | null
           organization_id: string
+          published?: boolean
+          published_at?: string | null
+          published_by?: string | null
           qualification_id: string
+          room_id?: string | null
           start_time?: string | null
           subject_name: string
           updated_at?: string
@@ -2256,17 +2272,39 @@ export type Database = {
           end_time?: string | null
           exam_date?: string
           exam_type?: string
+          gradebook_id?: string | null
           id?: string
+          invigilator_id?: string | null
           level?: number
+          min_practical_avg?: number
+          min_theory_ca?: number
           notes?: string | null
           organization_id?: string
+          published?: boolean
+          published_at?: string | null
+          published_by?: string | null
           qualification_id?: string
+          room_id?: string | null
           start_time?: string | null
           subject_name?: string
           updated_at?: string
           venue?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "exam_timetables_gradebook_id_fkey"
+            columns: ["gradebook_id"]
+            isOneToOne: false
+            referencedRelation: "gradebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_timetables_invigilator_id_fkey"
+            columns: ["invigilator_id"]
+            isOneToOne: false
+            referencedRelation: "invigilators"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "exam_timetables_organization_id_fkey"
             columns: ["organization_id"]
@@ -2279,6 +2317,13 @@ export type Database = {
             columns: ["qualification_id"]
             isOneToOne: false
             referencedRelation: "qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_timetables_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "training_rooms"
             referencedColumns: ["id"]
           },
         ]
@@ -3756,6 +3801,56 @@ export type Database = {
             columns: ["trainee_id"]
             isOneToOne: false
             referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invigilators: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          id: string
+          invigilator_type: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          invigilator_type?: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          invigilator_type?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invigilators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
