@@ -118,6 +118,7 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Results & Gradebooks", url: "/qualification-results", icon: BarChart3 },
   { title: "Governance & Cycles", url: "/assessment-governance", icon: Shield },
   { title: "Timetable", url: "/timetable", icon: Calendar },
+  { title: "Exam Publishing", url: "/exam-timetable-publishing", icon: Calendar },
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
