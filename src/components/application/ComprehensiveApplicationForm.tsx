@@ -38,7 +38,12 @@ interface ComprehensiveApplicationFormProps {
   initialTab?: string;
   draftId?: string;
   onDraftDeleted?: () => void;
+  /** Load trades for a specific centre (used by the public online application) */
+  organizationIdOverride?: string;
+  /** Disable draft auto-saving (public applicants have no organization context) */
+  enableAutoSave?: boolean;
 }
+
 
 const initialFormData: ComprehensiveApplicationData = {
   title: "",
