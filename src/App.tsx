@@ -290,7 +290,10 @@ const App = () => (
       <BrowserRouter>
         <OrganizationProvider>
           <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/apply" element={<PublicHome />} />
+          <Route path="/apply/:slug" element={<PublicHome />} />
+
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/first-login" element={<FirstLoginPasswordChange />} />
