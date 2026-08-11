@@ -94,7 +94,7 @@ export const ComprehensiveApplicationForm = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(draftId);
 
-  const { data: trades } = useTrades();
+  const { data: trades } = useTrades(organizationIdOverride);
   const { data: regions } = useNamibiaRegions();
   const { calculatePoints } = useCalculatePoints();
 
@@ -103,8 +103,9 @@ export const ComprehensiveApplicationForm = ({
     formData,
     activeTab,
     currentDraftId,
-    open // Only save when dialog is open
+    open && enableAutoSave // Only save when dialog is open
   );
+
 
   const calculatedPoints = calculatePoints(formData.school_subjects);
 
