@@ -7787,6 +7787,7 @@ export type Database = {
           address: string
           admission_letter_path: string | null
           application_number: string
+          application_source: string
           auto_qualification_result: Json | null
           calculated_points: number | null
           chef_jacket_size: string | null
@@ -7887,6 +7888,7 @@ export type Database = {
           address: string
           admission_letter_path?: string | null
           application_number: string
+          application_source?: string
           auto_qualification_result?: Json | null
           calculated_points?: number | null
           chef_jacket_size?: string | null
@@ -7987,6 +7989,7 @@ export type Database = {
           address?: string
           admission_letter_path?: string | null
           application_number?: string
+          application_source?: string
           auto_qualification_result?: Json | null
           calculated_points?: number | null
           chef_jacket_size?: string | null
