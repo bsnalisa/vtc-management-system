@@ -93,6 +93,9 @@ export const ComprehensiveApplicationForm = ({
   initialTab,
   draftId,
   onDraftDeleted,
+  organizationIdOverride,
+  enableAutoSave = true,
+
 }: ComprehensiveApplicationFormProps) => {
   const [formData, setFormData] = useState<ComprehensiveApplicationData>(initialData || initialFormData);
   const [activeTab, setActiveTab] = useState(initialTab || "personal");
