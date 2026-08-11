@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
+import PublicHome from "./pages/PublicHome";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
@@ -290,7 +290,10 @@ const App = () => (
       <BrowserRouter>
         <OrganizationProvider>
           <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/apply" element={<PublicHome />} />
+          <Route path="/apply/:slug" element={<PublicHome />} />
+
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/first-login" element={<FirstLoginPasswordChange />} />

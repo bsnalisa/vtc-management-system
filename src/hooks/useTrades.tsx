@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganizationContext } from "./useOrganizationContext";
 
-export const useTrades = () => {
-  const { organizationId } = useOrganizationContext();
+export const useTrades = (organizationIdOverride?: string) => {
+  const { organizationId: contextOrgId } = useOrganizationContext();
+  const organizationId = organizationIdOverride || contextOrgId;
 
   return useQuery({
     queryKey: ["trades", organizationId],

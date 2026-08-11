@@ -38,7 +38,12 @@ interface ComprehensiveApplicationFormProps {
   initialTab?: string;
   draftId?: string;
   onDraftDeleted?: () => void;
+  /** Load trades for a specific centre (used by the public online application) */
+  organizationIdOverride?: string;
+  /** Disable draft auto-saving (public applicants have no organization context) */
+  enableAutoSave?: boolean;
 }
+
 
 const initialFormData: ComprehensiveApplicationData = {
   title: "",
@@ -88,13 +93,16 @@ export const ComprehensiveApplicationForm = ({
   initialTab,
   draftId,
   onDraftDeleted,
+  organizationIdOverride,
+  enableAutoSave = true,
+
 }: ComprehensiveApplicationFormProps) => {
   const [formData, setFormData] = useState<ComprehensiveApplicationData>(initialData || initialFormData);
   const [activeTab, setActiveTab] = useState(initialTab || "personal");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(draftId);
 
-  const { data: trades } = useTrades();
+  const { data: trades } = useTrades(organizationIdOverride);
   const { data: regions } = useNamibiaRegions();
   const { calculatePoints } = useCalculatePoints();
 
@@ -103,8 +111,9 @@ export const ComprehensiveApplicationForm = ({
     formData,
     activeTab,
     currentDraftId,
-    open // Only save when dialog is open
+    open && enableAutoSave // Only save when dialog is open
   );
+
 
   const calculatedPoints = calculatePoints(formData.school_subjects);
 
