@@ -137,6 +137,7 @@ export const debtorOfficerNavItems: NavItem[] = [
 export const registrationOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/registration-officer-dashboard", icon: LayoutDashboard },
   { title: "Applications Inbox", url: "/applications-inbox", icon: FileText },
+  { title: "Online Applications", url: "/online-applications", icon: ClipboardList },
   { title: "Admission Results", url: "/applications", icon: ClipboardCheck },
   { title: "Register Trainee", url: "/trainees/register", icon: Users },
   { title: "Trainee List", url: "/trainees", icon: Users },

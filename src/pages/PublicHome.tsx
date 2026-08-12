@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,19 @@ const PublicHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [tab, setTab] = useState(slug || searchParams.get("tab") === "apply" ? "apply" : "home");
+  const location = useLocation();
+  const initialTab =
+    location.pathname.startsWith("/apply") || searchParams.get("tab") === "apply"
+      ? "apply"
+      : searchParams.get("tab") === "track"
+      ? "track"
+      : "home";
+  const [tab, setTabState] = useState(initialTab);
+
+  const setTab = (value: string) => {
+    setTabState(value);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<string>("");
@@ -342,11 +354,43 @@ const PublicHome = () => {
         </Tabs>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+      <footer className="border-t py-10">
+        <div className="container mx-auto grid gap-6 px-4 sm:grid-cols-3">
+          <div>
+            <div className="flex items-center gap-2 font-semibold">
+              <GraduationCap className="h-5 w-5 text-primary" /> VTC Management System
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Applications, training, assessment and finance for vocational training centres.
+            </p>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="font-medium">Applicants</div>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("apply")}>
+              Apply online
+            </button>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("track")}>
+              Track my application
+            </button>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("home")}>
+              Training centres
+            </button>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="font-medium">Centre staff</div>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => navigate("/auth")}>
+              Staff sign in
+            </button>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => navigate("/online-applications")}>
+              Applications inbox
+            </button>
+          </div>
+        </div>
+        <div className="container mx-auto mt-8 px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} VTC Management System
         </div>
       </footer>
+
 
       <ComprehensiveApplicationForm
         open={formOpen}

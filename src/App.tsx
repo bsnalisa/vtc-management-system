@@ -87,6 +87,7 @@ import AssessmentTemplateApprovals from "./pages/AssessmentTemplateApprovals";
 import TrainerWorkload from "./pages/TrainerWorkload";
 import HistoricalTrainees from "./pages/HistoricalTrainees";
 import ApplicationsInbox from "./pages/ApplicationsInbox";
+import OnlineApplicationsInbox from "./pages/OnlineApplicationsInbox";
 import GradingScale from "./pages/GradingScale";
 import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
 import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
@@ -396,6 +397,7 @@ const App = () => (
           <Route path="/timetable-approvals" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/historical-trainees" element={<ProtectedRoute><HistoricalTrainees /></ProtectedRoute>} />
           <Route path="/applications-inbox" element={<ProtectedRoute><ApplicationsInbox /></ProtectedRoute>} />
+          <Route path="/online-applications" element={<ProtectedRoute><OnlineApplicationsInbox /></ProtectedRoute>} />
           <Route path="/grading-scale" element={<ProtectedRoute><GradingScale /></ProtectedRoute>} />
           <Route path="/exam-timetable-publishing" element={<ProtectedRoute><ExamTimetablePublishing /></ProtectedRoute>} />
           {/* Trainee Portal Routes */}
