@@ -397,6 +397,7 @@ const App = () => (
           <Route path="/timetable-approvals" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/historical-trainees" element={<ProtectedRoute><HistoricalTrainees /></ProtectedRoute>} />
           <Route path="/applications-inbox" element={<ProtectedRoute><ApplicationsInbox /></ProtectedRoute>} />
+          <Route path="/online-applications" element={<ProtectedRoute><OnlineApplicationsInbox /></ProtectedRoute>} />
           <Route path="/grading-scale" element={<ProtectedRoute><GradingScale /></ProtectedRoute>} />
           <Route path="/exam-timetable-publishing" element={<ProtectedRoute><ExamTimetablePublishing /></ProtectedRoute>} />
           {/* Trainee Portal Routes */}
