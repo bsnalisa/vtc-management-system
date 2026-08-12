@@ -354,11 +354,43 @@ const PublicHome = () => {
         </Tabs>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+      <footer className="border-t py-10">
+        <div className="container mx-auto grid gap-6 px-4 sm:grid-cols-3">
+          <div>
+            <div className="flex items-center gap-2 font-semibold">
+              <GraduationCap className="h-5 w-5 text-primary" /> VTC Management System
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Applications, training, assessment and finance for vocational training centres.
+            </p>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="font-medium">Applicants</div>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("apply")}>
+              Apply online
+            </button>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("track")}>
+              Track my application
+            </button>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("home")}>
+              Training centres
+            </button>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="font-medium">Centre staff</div>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => navigate("/auth")}>
+              Staff sign in
+            </button>
+            <button className="block text-muted-foreground hover:text-foreground" onClick={() => navigate("/online-applications")}>
+              Applications inbox
+            </button>
+          </div>
+        </div>
+        <div className="container mx-auto mt-8 px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} VTC Management System
         </div>
       </footer>
+
 
       <ComprehensiveApplicationForm
         open={formOpen}
