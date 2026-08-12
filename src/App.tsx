@@ -87,6 +87,7 @@ import AssessmentTemplateApprovals from "./pages/AssessmentTemplateApprovals";
 import TrainerWorkload from "./pages/TrainerWorkload";
 import HistoricalTrainees from "./pages/HistoricalTrainees";
 import ApplicationsInbox from "./pages/ApplicationsInbox";
+import OnlineApplicationsInbox from "./pages/OnlineApplicationsInbox";
 import GradingScale from "./pages/GradingScale";
 import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
 import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
