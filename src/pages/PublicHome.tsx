@@ -45,7 +45,19 @@ const PublicHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [tab, setTab] = useState(slug || searchParams.get("tab") === "apply" ? "apply" : "home");
+  const location = useLocation();
+  const initialTab =
+    location.pathname.startsWith("/apply") || searchParams.get("tab") === "apply"
+      ? "apply"
+      : searchParams.get("tab") === "track"
+      ? "track"
+      : "home";
+  const [tab, setTabState] = useState(initialTab);
+
+  const setTab = (value: string) => {
+    setTabState(value);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<string>("");
