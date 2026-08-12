@@ -7,7 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useOrganizationSettings, useUpdateOrganizationSettings } from "@/hooks/useOrganizationSettings";
-import { Loader2, Palette, Upload, Image as ImageIcon, CheckCircle, AlertCircle, Globe, X } from "lucide-react";
+import {
+  Loader2,
+  Palette,
+  Upload,
+  Image as ImageIcon,
+  CheckCircle,
+  AlertCircle,
+  Globe,
+  X,
+  Save,
+  RefreshCw,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,24 +45,18 @@ export default function OrganizationSettings() {
   const [enableCustomDomain, setEnableCustomDomain] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Sync state with settings when loaded
   useEffect(() => {
     if (settings) {
-      console.log("Loaded settings:", settings);
-
       if (settings.color_theme?.primary) {
         const primaryHex = hslToHex(settings.color_theme.primary);
-        console.log("Primary color - HSL:", settings.color_theme.primary, "HEX:", primaryHex);
         setPrimaryColor(primaryHex);
       }
       if (settings.color_theme?.secondary) {
         const secondaryHex = hslToHex(settings.color_theme.secondary);
-        console.log("Secondary color - HSL:", settings.color_theme.secondary, "HEX:", secondaryHex);
         setSecondaryColor(secondaryHex);
       }
       if (settings.color_theme?.accent) {
         const accentHex = hslToHex(settings.color_theme.accent);
-        console.log("Accent color - HSL:", settings.color_theme.accent, "HEX:", accentHex);
         setAccentColor(accentHex);
       }
       if (settings.logo_url) {
@@ -69,7 +74,6 @@ export default function OrganizationSettings() {
     }
   }, [settings]);
 
-  // Check if form is dirty
   useEffect(() => {
     if (settings) {
       const currentPrimary = settings.color_theme?.primary ? hslToHex(settings.color_theme.primary) : "#0F172A";
@@ -89,7 +93,6 @@ export default function OrganizationSettings() {
     }
   }, [primaryColor, secondaryColor, accentColor, logoUrl, domain, organizationName, selectedFile, settings]);
 
-  // Apply colors to CSS variables when they change
   useEffect(() => {
     if (primaryColor && secondaryColor && accentColor) {
       applyColorsToDocument();
@@ -98,14 +101,9 @@ export default function OrganizationSettings() {
 
   const applyColorsToDocument = () => {
     const root = document.documentElement;
-
-    // Convert HEX to RGB for CSS variables
     const primaryRGB = hexToRGB(primaryColor);
     const secondaryRGB = hexToRGB(secondaryColor);
     const accentRGB = hexToRGB(accentColor);
-
-    console.log("Applying colors:", { primaryColor, secondaryColor, accentColor });
-    console.log("RGB values:", { primaryRGB, secondaryRGB, accentRGB });
 
     if (primaryRGB) {
       root.style.setProperty("--primary", primaryRGB);
@@ -121,23 +119,18 @@ export default function OrganizationSettings() {
     }
   };
 
-  // Helper function to convert HEX to RGB
   const hexToRGB = (hex: string): string => {
     hex = hex.replace(/^#/, "");
-
     if (hex.length === 3) {
       hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
     }
-
     const bigint = parseInt(hex, 16);
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
-
     return `${r} ${g} ${b}`;
   };
 
-  // Helper function to get contrast color (black or white)
   const getContrastColor = (hexcolor: string): string => {
     hexcolor = hexcolor.replace("#", "");
     const r = parseInt(hexcolor.substr(0, 2), 16);
@@ -152,7 +145,6 @@ export default function OrganizationSettings() {
       setDomainStatus("pending");
       return;
     }
-
     setTimeout(() => {
       const statuses: Array<"pending" | "verified" | "failed"> = ["pending", "verified", "failed"];
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -163,11 +155,7 @@ export default function OrganizationSettings() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    console.log("File selected:", file.name, file.type, file.size);
     setSelectedFile(file);
-
-    // Immediately validate and upload the file
     handleFileUpload(file);
   };
 
@@ -181,23 +169,21 @@ export default function OrganizationSettings() {
       return;
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
     if (!validTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: `Please upload a JPEG, PNG, WebP, or SVG image. Selected: ${file.type}`,
+        description: `Please upload a JPEG, PNG, WebP, or SVG image.`,
         variant: "destructive",
       });
       setSelectedFile(null);
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: `Please upload an image smaller than 5MB. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        description: `Please upload an image smaller than 5MB.`,
         variant: "destructive",
       });
       setSelectedFile(null);
@@ -207,33 +193,22 @@ export default function OrganizationSettings() {
     setUploading(true);
 
     try {
-      // Create a unique file name with timestamp to avoid cache issues
       const fileExt = file.name.split(".").pop()?.toLowerCase() || "png";
       const timestamp = Date.now();
       const fileName = `${organizationId}/logo-${timestamp}.${fileExt}`;
 
-      console.log("Uploading file:", fileName);
-
-      // Upload to storage
       const { error: uploadError } = await supabase.storage.from("organization-logos").upload(fileName, file, {
         upsert: true,
         cacheControl: "3600",
       });
 
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // Get public URL with cache busting
       const {
         data: { publicUrl },
       } = supabase.storage.from("organization-logos").getPublicUrl(fileName);
 
-      // Add timestamp to URL to prevent caching
       const finalLogoUrl = `${publicUrl}?t=${timestamp}`;
-      console.log("Logo URL:", finalLogoUrl);
-
       setLogoUrl(finalLogoUrl);
       setSelectedFile(null);
       setIsDirty(true);
@@ -241,10 +216,8 @@ export default function OrganizationSettings() {
       toast({
         title: "Logo uploaded successfully",
         description: "Your logo has been uploaded. Click 'Save Settings' to apply changes.",
-        variant: "default",
       });
     } catch (error: any) {
-      console.error("Upload error:", error);
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload logo. Please try again.",
@@ -258,47 +231,20 @@ export default function OrganizationSettings() {
 
   const handleRemoveLogo = async () => {
     if (!logoUrl || !organizationId) return;
-
-    try {
-      // Extract filename from URL to delete from storage
-      const urlParts = logoUrl.split("/");
-      const fileName = urlParts[urlParts.length - 1].split("?")[0];
-      const fullPath = `${organizationId}/${fileName}`;
-
-      console.log("Attempting to delete:", fullPath);
-
-      const { error: deleteError } = await supabase.storage.from("organization-logos").remove([fullPath]);
-
-      if (deleteError) {
-        console.error("Delete error:", deleteError);
-      }
-
-      setLogoUrl("");
-      setSelectedFile(null);
-      setIsDirty(true);
-
-      toast({
-        title: "Logo removed",
-        description: "Logo has been removed. Click 'Save Settings' to apply changes.",
-      });
-    } catch (error) {
-      console.error("Remove logo error:", error);
-      setLogoUrl("");
-      setSelectedFile(null);
-      setIsDirty(true);
-    }
+    setLogoUrl("");
+    setSelectedFile(null);
+    setIsDirty(true);
+    toast({
+      title: "Logo removed",
+      description: "Logo has been removed. Click 'Save Settings' to apply changes.",
+    });
   };
 
   const handleSaveSettings = async () => {
     try {
-      console.log("Saving colors:", { primaryColor, secondaryColor, accentColor });
-
-      // Convert HEX to HSL before saving
       const primaryHSL = hexToHSL(primaryColor);
       const secondaryHSL = hexToHSL(secondaryColor);
       const accentHSL = hexToHSL(accentColor);
-
-      console.log("Converted to HSL:", { primaryHSL, secondaryHSL, accentHSL });
 
       const updateData = {
         logo_url: logoUrl,
@@ -311,20 +257,15 @@ export default function OrganizationSettings() {
         organization_name: organizationName,
       };
 
-      console.log("Saving data:", updateData);
-
       await updateSettings.mutateAsync(updateData);
-
       setIsDirty(false);
       setSelectedFile(null);
 
       toast({
         title: "Settings saved successfully",
         description: "Your organization settings have been updated.",
-        variant: "default",
       });
     } catch (error) {
-      console.error("Save settings error:", error);
       toast({
         title: "Save failed",
         description: "Failed to save organization settings. Please try again.",
@@ -360,66 +301,80 @@ export default function OrganizationSettings() {
     switch (domainStatus) {
       case "verified":
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
+          <Badge variant="default" className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
             <CheckCircle className="h-3 w-3 mr-1" /> Verified
           </Badge>
         );
       case "failed":
         return (
-          <Badge variant="destructive">
+          <Badge variant="destructive" className="bg-red-50 text-red-700 border-red-200 hover:bg-red-50">
             <AlertCircle className="h-3 w-3 mr-1" /> Failed
           </Badge>
         );
       default:
         return (
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">
             <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Pending
           </Badge>
         );
     }
   };
 
-  // Preview component to show how colors will look
   const ColorPreview = () => (
-    <div className="p-4 border rounded-lg bg-muted/50">
-      <Label className="text-sm font-medium mb-3 block">Live Color Preview</Label>
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded border" style={{ backgroundColor: primaryColor }} />
-          <div className="flex-1">
+    <div className="p-6 border rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-800/50">
+      <Label className="text-sm font-semibold mb-4 block text-slate-700 dark:text-slate-300">Live Color Preview</Label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <div
-              className="h-10 rounded-lg transition-all flex items-center justify-center text-white font-medium"
+              className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
               style={{ backgroundColor: primaryColor }}
-            >
-              Primary Button
-            </div>
+            />
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Primary</span>
+          </div>
+          <div
+            className="h-12 rounded-lg shadow-sm flex items-center justify-center text-white font-medium text-sm transition-all hover:shadow-md"
+            style={{ backgroundColor: primaryColor }}
+          >
+            Primary Action
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded border" style={{ backgroundColor: secondaryColor }} />
-          <div className="flex-1">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <div
-              className="h-10 rounded-lg transition-all flex items-center justify-center text-white font-medium border"
-              style={{
-                backgroundColor: secondaryColor,
-                borderColor: secondaryColor,
-              }}
-            >
-              Secondary Button
-            </div>
+              className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+              style={{ backgroundColor: secondaryColor }}
+            />
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Secondary</span>
+          </div>
+          <div
+            className="h-12 rounded-lg shadow-sm flex items-center justify-center font-medium text-sm transition-all hover:shadow-md"
+            style={{
+              backgroundColor: secondaryColor,
+              color: getContrastColor(secondaryColor) === "255 255 255" ? "white" : "black",
+            }}
+          >
+            Secondary Action
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded border" style={{ backgroundColor: accentColor }} />
-          <div className="flex-1">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <div
-              className="h-10 rounded-lg transition-all flex items-center justify-center text-white font-medium"
+              className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
               style={{ backgroundColor: accentColor }}
-            >
-              Accent Element
-            </div>
+            />
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Accent</span>
+          </div>
+          <div
+            className="h-12 rounded-lg shadow-sm flex items-center justify-center font-medium text-sm transition-all hover:shadow-md"
+            style={{
+              backgroundColor: accentColor,
+              color: getContrastColor(accentColor) === "255 255 255" ? "white" : "black",
+            }}
+          >
+            Accent Element
           </div>
         </div>
       </div>
@@ -433,8 +388,11 @@ export default function OrganizationSettings() {
         subtitle="Configure your organization preferences"
         navItems={organizationAdminNavItems}
       >
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+            <p className="text-sm text-muted-foreground">Loading settings...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -443,204 +401,257 @@ export default function OrganizationSettings() {
   return (
     <DashboardLayout
       title="Organization Settings"
-      subtitle="Configure your organization preferences and branding"
+      subtitle="Manage your organization's branding, theme, and domain preferences"
       navItems={organizationAdminNavItems}
     >
-      <div className="space-y-6">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* Branding Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
-              Branding & Theme
-            </CardTitle>
-            <CardDescription>
-              Customize your organization's visual identity and color scheme. Changes are applied immediately for
-              preview.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="organizationName">Organization Name</Label>
-              <Input
-                id="organizationName"
-                value={organizationName}
-                onChange={(e) => setOrganizationName(e.target.value)}
-                placeholder="Enter your organization name"
-              />
+        <Card className="border shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <Palette className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Branding & Theme</CardTitle>
+                <CardDescription>Customize your organization's visual identity and color scheme</CardDescription>
+              </div>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-8 pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="organizationName" className="text-sm font-semibold">
+                  Organization Name
+                </Label>
+                <Input
+                  id="organizationName"
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                  placeholder="Enter your organization name"
+                  className="border-slate-200 focus:border-primary transition-colors"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="logo">Organization Logo</Label>
-              <div className="flex gap-6 items-start">
-                <div className="flex-1 space-y-3">
-                  <div className="flex gap-2">
-                    <Input
-                      id="logo"
-                      value={logoUrl}
-                      onChange={(e) => {
-                        setLogoUrl(e.target.value);
-                        setIsDirty(true);
-                      }}
-                      placeholder="Logo URL or upload a file"
-                      className="flex-1"
-                    />
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/webp,image/svg+xml"
-                      className="hidden"
-                      onChange={handleFileSelect}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="whitespace-nowrap"
-                    >
-                      {uploading ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : (
-                        <Upload className="h-4 w-4 mr-2" />
-                      )}
-                      {uploading ? "Uploading..." : "Upload"}
-                    </Button>
-                  </div>
-
-                  {selectedFile && (
-                    <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                      <p className="text-blue-800">
-                        <strong>Selected file:</strong> {selectedFile.name}({Math.round(selectedFile.size / 1024)} KB)
-                      </p>
-                      <p className="text-blue-600 text-xs mt-1">File will be uploaded automatically when selected</p>
-                    </div>
-                  )}
-
-                  <p className="text-xs text-muted-foreground">
-                    Upload an image (max 5MB) or enter a URL. Supported: JPEG, PNG, WebP, SVG
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center gap-2">
-                  {logoUrl ? (
-                    <div className="relative">
-                      <div className="w-32 h-32 border rounded-lg flex items-center justify-center bg-muted overflow-hidden">
-                        <img
-                          src={logoUrl}
-                          alt="Organization Logo"
-                          className="max-w-full max-h-full object-contain"
-                          onError={(e) => {
-                            console.error("Image load error:", logoUrl);
-                            e.currentTarget.src = "";
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                      </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Organization Logo</Label>
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <div className="flex gap-2">
+                      <Input
+                        value={logoUrl}
+                        onChange={(e) => {
+                          setLogoUrl(e.target.value);
+                          setIsDirty(true);
+                        }}
+                        placeholder="Logo URL"
+                        className="flex-1 border-slate-200 focus:border-primary transition-colors"
+                      />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/webp,image/svg+xml"
+                        className="hidden"
+                        onChange={handleFileSelect}
+                      />
                       <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={handleRemoveLogo}
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="whitespace-nowrap border-slate-200 hover:bg-slate-50"
                       >
-                        <X className="h-3 w-3" />
+                        {uploading ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        {uploading ? "Uploading..." : "Upload"}
                       </Button>
                     </div>
-                  ) : (
-                    <div className="w-32 h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted text-muted-foreground">
-                      <ImageIcon className="h-8 w-8 mb-2" />
-                      <span className="text-xs text-center px-2">No logo uploaded</span>
-                    </div>
-                  )}
+                    <p className="text-xs text-muted-foreground mt-1">Max 5MB. Supports JPEG, PNG, WebP, SVG</p>
+                  </div>
+
+                  <div className="flex-shrink-0">
+                    {logoUrl ? (
+                      <div className="relative group">
+                        <div className="w-20 h-20 rounded-lg border-2 border-slate-200 flex items-center justify-center bg-white overflow-hidden">
+                          <img
+                            src={logoUrl}
+                            alt="Organization Logo"
+                            className="max-w-full max-h-full object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = "";
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        </div>
+                        <button
+                          onClick={handleRemoveLogo}
+                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-sm hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center bg-slate-50">
+                        <ImageIcon className="h-6 w-6 text-slate-400" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="primary" className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full border" style={{ backgroundColor: primaryColor }} />
-                  Primary Color
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="primary"
-                    type="color"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="h-10 w-20 cursor-pointer p-1"
-                  />
-                  <Input
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    placeholder="#0F172A"
-                    className="font-mono"
-                  />
+            <div className="space-y-4">
+              <Label className="text-sm font-semibold">Color Theme</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primary" className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Primary Color
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="primary"
+                      type="color"
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      className="h-10 w-16 cursor-pointer p-1 border-slate-200"
+                    />
+                    <Input
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      placeholder="#0F172A"
+                      className="font-mono text-sm border-slate-200 focus:border-primary transition-colors"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="secondary" className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full border" style={{ backgroundColor: secondaryColor }} />
-                  Secondary Color
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="secondary"
-                    type="color"
-                    value={secondaryColor}
-                    onChange={(e) => setSecondaryColor(e.target.value)}
-                    className="h-10 w-20 cursor-pointer p-1"
-                  />
-                  <Input
-                    value={secondaryColor}
-                    onChange={(e) => setSecondaryColor(e.target.value)}
-                    placeholder="#3B82F6"
-                    className="font-mono"
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="secondary" className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Secondary Color
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="secondary"
+                      type="color"
+                      value={secondaryColor}
+                      onChange={(e) => setSecondaryColor(e.target.value)}
+                      className="h-10 w-16 cursor-pointer p-1 border-slate-200"
+                    />
+                    <Input
+                      value={secondaryColor}
+                      onChange={(e) => setSecondaryColor(e.target.value)}
+                      placeholder="#3B82F6"
+                      className="font-mono text-sm border-slate-200 focus:border-primary transition-colors"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="accent" className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full border" style={{ backgroundColor: accentColor }} />
-                  Accent Color
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="accent"
-                    type="color"
-                    value={accentColor}
-                    onChange={(e) => setAccentColor(e.target.value)}
-                    className="h-10 w-20 cursor-pointer p-1"
-                  />
-                  <Input
-                    value={accentColor}
-                    onChange={(e) => setAccentColor(e.target.value)}
-                    placeholder="#10B981"
-                    className="font-mono"
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="accent" className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Accent Color
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="accent"
+                      type="color"
+                      value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      className="h-10 w-16 cursor-pointer p-1 border-slate-200"
+                    />
+                    <Input
+                      value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      placeholder="#10B981"
+                      className="font-mono text-sm border-slate-200 focus:border-primary transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Enhanced Color Preview */}
             <ColorPreview />
           </CardContent>
         </Card>
 
+        {/* Custom Domain Settings */}
+        <Card className="border shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <Globe className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Custom Domain</CardTitle>
+                <CardDescription>Configure a custom domain for your organization's dashboard</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6">
+            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+              <input
+                type="checkbox"
+                id="enableDomain"
+                checked={enableCustomDomain}
+                onChange={(e) => setEnableCustomDomain(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+              />
+              <Label htmlFor="enableDomain" className="text-sm font-medium cursor-pointer">
+                Enable Custom Domain
+              </Label>
+            </div>
+
+            {enableCustomDomain && (
+              <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <div className="flex gap-3 items-end">
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="domain" className="text-sm font-semibold">
+                      Domain Name
+                    </Label>
+                    <Input
+                      id="domain"
+                      value={domain}
+                      onChange={(e) => setDomain(e.target.value)}
+                      placeholder="your-organization.com"
+                      className="border-slate-200 focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div className="pb-[2px]">{getDomainStatusBadge()}</div>
+                </div>
+                <p className="text-xs text-muted-foreground">Add a CNAME record pointing to your VMS dashboard URL</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Action Buttons */}
-        <div className="flex justify-between items-center pt-4 border-t">
-          <Button variant="outline" onClick={handleReset} disabled={!isDirty || updateSettings.isPending}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            disabled={!isDirty || updateSettings.isPending}
+            className="w-full sm:w-auto border-slate-200 hover:bg-slate-50"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
             Reset Changes
           </Button>
 
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate(-1)}>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="flex-1 sm:flex-none border-slate-200 hover:bg-slate-50"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveSettings} disabled={(!isDirty && !selectedFile) || updateSettings.isPending}>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={(!isDirty && !selectedFile) || updateSettings.isPending}
+              className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow transition-all"
+            >
               {updateSettings.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Save className="h-4 w-4 mr-2" />
               Save Settings
             </Button>
           </div>
@@ -648,10 +659,15 @@ export default function OrganizationSettings() {
 
         {/* Unsaved Changes Alert */}
         {isDirty && (
-          <div className="fixed bottom-4 right-4 z-50 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg shadow-lg">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
-              <span className="text-sm font-medium text-amber-800 dark:text-amber-400">You have unsaved changes</span>
+          <div className="fixed bottom-6 right-6 z-50 p-4 bg-amber-50 border border-amber-200 rounded-xl shadow-lg animate-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-amber-100">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Unsaved Changes</p>
+                <p className="text-xs text-amber-600">Don't forget to save your settings</p>
+              </div>
             </div>
           </div>
         )}
