@@ -394,7 +394,7 @@ const PublicHome = () => {
               Track my application
             </button>
             <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => setTab("home")}>
-              Training centres
+              How applying works
             </button>
           </div>
           <div className="space-y-2 text-sm">
@@ -403,9 +403,13 @@ const PublicHome = () => {
               Staff sign in
             </button>
             <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigate("/online-applications")}>
-              Applications inbox
+              Online applications inbox
+            </button>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigate("/applications-inbox?new=1")}>
+              Capture an application
             </button>
           </div>
+
         </div>
         <div className="container mx-auto mt-10 border-t px-4 pt-6 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} VTC Management System
