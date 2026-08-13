@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const ApplicationsInbox = () => {
   const { navItems, groupLabel } = useRoleNavigation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
   const [selectedIntake, setSelectedIntake] = useState<string>("all");
@@ -29,6 +31,15 @@ const ApplicationsInbox = () => {
     qualification_status: "pending",
   });
   const { data: trades } = useTrades();
+
+  // Deep-link support: /applications-inbox?new=1 opens the application form directly
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setCaptureDialogOpen(true);
+      searchParams.delete("new");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const filteredApplications = applications?.filter((app) => {
     const matchesSearch =

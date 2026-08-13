@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2,
-  ClipboardList, Wallet, BookOpen, Loader2, LogIn, MapPin, Sparkles,
+  ClipboardList, Wallet, BookOpen, Loader2, LogIn, Sparkles,
 } from "lucide-react";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
@@ -67,7 +67,7 @@ const PublicHome = () => {
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
 
-  const { data: organizations, isLoading: orgsLoading } = useActiveOrganizations();
+  const { data: organizations } = useActiveOrganizations();
   const { data: linkedOrg } = useOrganizationBySlug(slug);
   const { data: myApplications, isLoading: appsLoading } = useMyApplications();
 
