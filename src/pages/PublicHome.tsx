@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2,
-  ClipboardList, Wallet, BookOpen, Loader2, LogIn, MapPin, Sparkles,
+  ClipboardList, Wallet, BookOpen, Loader2, LogIn, Sparkles,
 } from "lucide-react";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
@@ -67,7 +67,7 @@ const PublicHome = () => {
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
 
-  const { data: organizations, isLoading: orgsLoading } = useActiveOrganizations();
+  const { data: organizations } = useActiveOrganizations();
   const { data: linkedOrg } = useOrganizationBySlug(slug);
   const { data: myApplications, isLoading: appsLoading } = useMyApplications();
 
@@ -125,7 +125,7 @@ const PublicHome = () => {
             <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-primary-foreground/5 blur-3xl" />
             <div className="container relative mx-auto px-4 py-16 md:py-24">
               <div className="max-w-3xl space-y-6 text-primary-foreground">
-                <Badge variant="secondary" className="w-fit gap-1.5">
+                <Badge variant="secondary" className="w-fit gap-1.5 border-primary-foreground/30 bg-primary-foreground/15 text-primary-foreground backdrop-blur">
                   <Sparkles className="h-3 w-3" /> TVET Management Platform
                 </Badge>
                 <h1 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
@@ -136,7 +136,7 @@ const PublicHome = () => {
                   and finance from application through to certification.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button size="lg" variant="secondary" className="shadow-lg" onClick={() => setTab("apply")}>
+                  <Button size="lg" className="bg-background text-foreground shadow-lg hover:bg-background/90" onClick={() => setTab("apply")}>
                     Start an application <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
@@ -179,58 +179,45 @@ const PublicHome = () => {
 
               <section className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <IconBadge icon={Building2} />
+                  <IconBadge icon={ClipboardList} />
                   <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Participating training centres</h2>
-                    <p className="text-muted-foreground">Choose a centre to apply to — your details go straight to that centre.</p>
+                    <h2 className="text-2xl font-bold tracking-tight">How applying works</h2>
+                    <p className="text-muted-foreground">
+                      Three steps from application to registration — pick your centre inside the form.
+                    </p>
                   </div>
                 </div>
-                {orgsLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Loading centres...
-                  </div>
-                ) : (
-                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {organizations?.map((org) => (
-                      <Card
-                        key={org.id}
-                        className="group border-border/60 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
-                      >
-                        <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                          {org.logo_url ? (
-                            <img src={org.logo_url} alt={`${org.name} logo`} className="h-12 w-12 rounded-xl border bg-card object-contain p-1" />
-                          ) : (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                              <Building2 className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <CardTitle className="truncate text-base">{org.name}</CardTitle>
-                            {org.subdomain && (
-                              <CardDescription className="flex items-center gap-1 truncate">
-                                <MapPin className="h-3 w-3" /> {org.subdomain}
-                              </CardDescription>
-                            )}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground"
-                            onClick={() => {
-                              setSelectedOrg(org.id);
-                              setTab("apply");
-                            }}
-                          >
-                            Apply to this centre <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                <div className="grid gap-5 md:grid-cols-3">
+                  {[
+                    { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn },
+                    { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText },
+                    { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search },
+                  ].map((s) => (
+                    <Card
+                      key={s.step}
+                      className="group relative overflow-hidden border-border/60 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
+                    >
+                      <span className="pointer-events-none absolute right-4 top-2 text-5xl font-bold text-primary/5">
+                        {s.step}
+                      </span>
+                      <CardHeader className="relative">
+                        <IconBadge icon={s.icon} className="mb-3" />
+                        <CardTitle className="text-base">{s.title}</CardTitle>
+                        <CardDescription className="leading-relaxed">{s.desc}</CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button size="lg" onClick={() => setTab("apply")}>
+                    Apply now <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Button size="lg" variant="outline" onClick={() => setTab("track")}>
+                    <Search className="mr-2 h-4 w-4" /> Track my application
+                  </Button>
+                </div>
               </section>
+
             </TabsContent>
 
             {/* Apply */}
@@ -407,7 +394,7 @@ const PublicHome = () => {
               Track my application
             </button>
             <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => setTab("home")}>
-              Training centres
+              How applying works
             </button>
           </div>
           <div className="space-y-2 text-sm">
@@ -416,9 +403,13 @@ const PublicHome = () => {
               Staff sign in
             </button>
             <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigate("/online-applications")}>
-              Applications inbox
+              Online applications inbox
+            </button>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigate("/applications-inbox?new=1")}>
+              Capture an application
             </button>
           </div>
+
         </div>
         <div className="container mx-auto mt-10 border-t px-4 pt-6 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} VTC Management System
