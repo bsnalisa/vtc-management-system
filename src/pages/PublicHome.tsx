@@ -2,17 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
 import {
   GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2,
-  ClipboardList, Wallet, BookOpen, Loader2, LogIn, MapPin,
+  ClipboardList, Wallet, BookOpen, Loader2, LogIn, MapPin, Sparkles,
 } from "lucide-react";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
@@ -39,11 +37,17 @@ const statusTone = (s?: string | null) => {
   return "secondary" as const;
 };
 
+/** Consistent gradient icon badge used across section headers */
+const IconBadge = ({ icon: Icon, className = "" }: { icon: any; className?: string }) => (
+  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/20 ${className}`}>
+    <Icon className="h-5 w-5" />
+  </div>
+);
+
 const PublicHome = () => {
   const { slug } = useParams<{ slug?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const location = useLocation();
   const initialTab =
@@ -92,10 +96,10 @@ const PublicHome = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-md shadow-primary/20">
               <GraduationCap className="h-5 w-5" />
             </div>
             <span className="text-lg font-bold tracking-tight">VTC Management System</span>
@@ -117,20 +121,22 @@ const PublicHome = () => {
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           {/* Hero */}
           <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary via-primary/90 to-accent">
-            <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary-foreground/10" />
-            <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-primary-foreground/5" />
-            <div className="container relative mx-auto px-4 py-14 md:py-20">
-              <div className="max-w-3xl space-y-5 text-primary-foreground">
-                <Badge variant="secondary" className="w-fit">TVET Management Platform</Badge>
-                <h1 className="text-3xl font-bold leading-tight md:text-5xl">
+            <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary-foreground/10 blur-2xl" />
+            <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-primary-foreground/5 blur-3xl" />
+            <div className="container relative mx-auto px-4 py-16 md:py-24">
+              <div className="max-w-3xl space-y-6 text-primary-foreground">
+                <Badge variant="secondary" className="w-fit gap-1.5">
+                  <Sparkles className="h-3 w-3" /> TVET Management Platform
+                </Badge>
+                <h1 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
                   {linkedOrg ? `Apply to ${linkedOrg.name}` : "One platform for every Vocational Training Centre"}
                 </h1>
-                <p className="text-base opacity-90 md:text-lg">
+                <p className="max-w-2xl text-base leading-relaxed opacity-90 md:text-lg">
                   Apply online, track your admission status, and manage training, assessment
                   and finance from application through to certification.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button size="lg" variant="secondary" onClick={() => setTab("apply")}>
+                  <Button size="lg" variant="secondary" className="shadow-lg" onClick={() => setTab("apply")}>
                     Start an application <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
@@ -146,48 +152,55 @@ const PublicHome = () => {
             </div>
           </section>
 
-          <div className="container mx-auto px-4 py-8">
-            <TabsList className="mb-8 grid w-full max-w-xl grid-cols-3">
-              <TabsTrigger value="home">Overview</TabsTrigger>
-              <TabsTrigger value="apply">Online Application</TabsTrigger>
-              <TabsTrigger value="track">My Applications</TabsTrigger>
+          <div className="container mx-auto px-4 py-10">
+            <TabsList className="mb-10 grid h-auto w-full max-w-xl grid-cols-3 rounded-xl p-1">
+              <TabsTrigger value="home" className="rounded-lg py-2">Overview</TabsTrigger>
+              <TabsTrigger value="apply" className="rounded-lg py-2">Online Application</TabsTrigger>
+              <TabsTrigger value="track" className="rounded-lg py-2">My Applications</TabsTrigger>
             </TabsList>
 
             {/* Overview */}
-            <TabsContent value="home" className="space-y-12">
-              <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <TabsContent value="home" className="space-y-14">
+              <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {FEATURES.map((f) => (
-                  <Card key={f.title} className="relative overflow-hidden">
-                    <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-primary/5" />
-                    <CardHeader>
-                      <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <f.icon className="h-5 w-5" />
-                      </div>
+                  <Card
+                    key={f.title}
+                    className="group relative overflow-hidden border-border/60 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
+                  >
+                    <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 transition-transform duration-300 group-hover:scale-150" />
+                    <CardHeader className="relative">
+                      <IconBadge icon={f.icon} className="mb-3" />
                       <CardTitle className="text-base">{f.title}</CardTitle>
-                      <CardDescription>{f.desc}</CardDescription>
+                      <CardDescription className="leading-relaxed">{f.desc}</CardDescription>
                     </CardHeader>
                   </Card>
                 ))}
               </section>
 
-              <section className="space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold">Participating training centres</h2>
-                  <p className="text-muted-foreground">Choose a centre to apply to — your details go straight to that centre.</p>
+              <section className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <IconBadge icon={Building2} />
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Participating training centres</h2>
+                    <p className="text-muted-foreground">Choose a centre to apply to — your details go straight to that centre.</p>
+                  </div>
                 </div>
                 {orgsLoading ? (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" /> Loading centres...
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {organizations?.map((org) => (
-                      <Card key={org.id} className="transition-shadow hover:shadow-md">
+                      <Card
+                        key={org.id}
+                        className="group border-border/60 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
+                      >
                         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                           {org.logo_url ? (
-                            <img src={org.logo_url} alt={`${org.name} logo`} className="h-10 w-10 rounded-md object-contain" />
+                            <img src={org.logo_url} alt={`${org.name} logo`} className="h-12 w-12 rounded-xl border bg-card object-contain p-1" />
                           ) : (
-                            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
                               <Building2 className="h-5 w-5 text-muted-foreground" />
                             </div>
                           )}
@@ -204,13 +217,13 @@ const PublicHome = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full"
+                            className="w-full transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground"
                             onClick={() => {
                               setSelectedOrg(org.id);
                               setTab("apply");
                             }}
                           >
-                            Apply to this centre
+                            Apply to this centre <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                           </Button>
                         </CardContent>
                       </Card>
@@ -223,27 +236,30 @@ const PublicHome = () => {
             {/* Apply */}
             <TabsContent value="apply" className="space-y-6">
               <div className="mx-auto max-w-2xl space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" /> Online application
-                    </CardTitle>
-                    <CardDescription>
-                      Complete the official application form. Your submission is sent directly to
-                      the training centre you select.
-                    </CardDescription>
+                <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
+                  <CardHeader className="border-b bg-muted/30">
+                    <div className="flex items-center gap-4">
+                      <IconBadge icon={FileText} />
+                      <div>
+                        <CardTitle>Online application</CardTitle>
+                        <CardDescription>
+                          Complete the official application form. Your submission is sent directly to
+                          the training centre you select.
+                        </CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent className="space-y-5">
+                  <CardContent className="space-y-5 pt-6">
                     <div className="space-y-2">
                       <Label>Training centre</Label>
                       {lockedToCentre ? (
-                        <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2">
+                        <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2.5">
                           <CheckCircle2 className="h-4 w-4 text-primary" />
                           <span className="font-medium">{linkedOrg?.name}</span>
                         </div>
                       ) : (
                         <Select value={selectedOrg} onValueChange={setSelectedOrg}>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11">
                             <SelectValue placeholder="Select the centre you are applying to" />
                           </SelectTrigger>
                           <SelectContent>
@@ -268,7 +284,7 @@ const PublicHome = () => {
                     )}
 
                     <Button
-                      className="w-full"
+                      className="h-12 w-full shadow-md"
                       size="lg"
                       disabled={!activeOrgId || !session}
                       onClick={() => setFormOpen(true)}
@@ -278,18 +294,19 @@ const PublicHome = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader>
+                <Card className="border-border/60">
+                  <CardHeader className="pb-3">
                     <CardTitle className="text-base">Before you start</CardTitle>
+                    <CardDescription>Have these ready to complete the form in one sitting.</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <CardContent className="grid gap-2.5 text-sm text-muted-foreground sm:grid-cols-2">
                     {[
                       "National ID / passport number and a passport photo",
                       "School results with subjects and symbols",
                       "Certified copies of qualifications",
                       "Emergency contact details",
                     ].map((item) => (
-                      <div key={item} className="flex items-start gap-2">
+                      <div key={item} className="flex items-start gap-2 rounded-lg border bg-muted/20 p-3">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                         <span>{item}</span>
                       </div>
@@ -301,8 +318,14 @@ const PublicHome = () => {
 
             {/* Track */}
             <TabsContent value="track">
-              <div className="mx-auto max-w-3xl space-y-4">
-                <h2 className="text-2xl font-bold">My applications</h2>
+              <div className="mx-auto max-w-3xl space-y-5">
+                <div className="flex items-center gap-4">
+                  <IconBadge icon={Search} />
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight">My applications</h2>
+                    <p className="text-muted-foreground">Track screening and registration progress for every submission.</p>
+                  </div>
+                </div>
                 {!session ? (
                   <Alert>
                     <AlertDescription>
@@ -317,8 +340,11 @@ const PublicHome = () => {
                     <Loader2 className="h-4 w-4 animate-spin" /> Loading...
                   </div>
                 ) : !myApplications?.length ? (
-                  <Card>
-                    <CardContent className="py-10 text-center text-muted-foreground">
+                  <Card className="border-dashed">
+                    <CardContent className="py-12 text-center text-muted-foreground">
+                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                        <FileText className="h-5 w-5" />
+                      </div>
                       No applications yet.
                       <div className="mt-4">
                         <Button onClick={() => setTab("apply")}>Start an application</Button>
@@ -327,13 +353,18 @@ const PublicHome = () => {
                   </Card>
                 ) : (
                   myApplications.map((app: any) => (
-                    <Card key={app.id}>
+                    <Card key={app.id} className="border-border/60 transition-shadow hover:shadow-md">
                       <CardHeader className="flex flex-row items-start justify-between space-y-0">
-                        <div>
-                          <CardTitle className="text-base">{app.application_number}</CardTitle>
-                          <CardDescription>
-                            {app.trades?.name || "Trade"} · {app.intake} {app.academic_year}
-                          </CardDescription>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">{app.application_number}</CardTitle>
+                            <CardDescription>
+                              {app.trades?.name || "Trade"} · {app.intake} {app.academic_year}
+                            </CardDescription>
+                          </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <Badge variant={statusTone(app.qualification_status)}>
@@ -354,43 +385,45 @@ const PublicHome = () => {
         </Tabs>
       </main>
 
-      <footer className="border-t py-10">
-        <div className="container mx-auto grid gap-6 px-4 sm:grid-cols-3">
+      <footer className="border-t bg-muted/30 py-12">
+        <div className="container mx-auto grid gap-8 px-4 sm:grid-cols-3">
           <div>
-            <div className="flex items-center gap-2 font-semibold">
-              <GraduationCap className="h-5 w-5 text-primary" /> VTC Management System
+            <div className="flex items-center gap-2.5 font-semibold">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground">
+                <GraduationCap className="h-4 w-4" />
+              </div>
+              VTC Management System
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Applications, training, assessment and finance for vocational training centres.
             </p>
           </div>
           <div className="space-y-2 text-sm">
             <div className="font-medium">Applicants</div>
-            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("apply")}>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => setTab("apply")}>
               Apply online
             </button>
-            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("track")}>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => setTab("track")}>
               Track my application
             </button>
-            <button className="block text-muted-foreground hover:text-foreground" onClick={() => setTab("home")}>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => setTab("home")}>
               Training centres
             </button>
           </div>
           <div className="space-y-2 text-sm">
             <div className="font-medium">Centre staff</div>
-            <button className="block text-muted-foreground hover:text-foreground" onClick={() => navigate("/auth")}>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigate("/auth")}>
               Staff sign in
             </button>
-            <button className="block text-muted-foreground hover:text-foreground" onClick={() => navigate("/online-applications")}>
+            <button className="block text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigate("/online-applications")}>
               Applications inbox
             </button>
           </div>
         </div>
-        <div className="container mx-auto mt-8 px-4 text-center text-sm text-muted-foreground">
+        <div className="container mx-auto mt-10 border-t px-4 pt-6 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} VTC Management System
         </div>
       </footer>
-
 
       <ComprehensiveApplicationForm
         open={formOpen}
