@@ -125,7 +125,7 @@ const PublicHome = () => {
             <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-primary-foreground/5 blur-3xl" />
             <div className="container relative mx-auto px-4 py-16 md:py-24">
               <div className="max-w-3xl space-y-6 text-primary-foreground">
-                <Badge variant="secondary" className="w-fit gap-1.5">
+                <Badge variant="secondary" className="w-fit gap-1.5 border-primary-foreground/30 bg-primary-foreground/15 text-primary-foreground backdrop-blur">
                   <Sparkles className="h-3 w-3" /> TVET Management Platform
                 </Badge>
                 <h1 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
@@ -136,7 +136,7 @@ const PublicHome = () => {
                   and finance from application through to certification.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button size="lg" variant="secondary" className="shadow-lg" onClick={() => setTab("apply")}>
+                  <Button size="lg" className="bg-background text-foreground shadow-lg hover:bg-background/90" onClick={() => setTab("apply")}>
                     Start an application <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
