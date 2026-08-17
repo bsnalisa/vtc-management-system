@@ -124,29 +124,39 @@ const PublicHome = () => {
             <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary-foreground/10 blur-2xl" />
             <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-primary-foreground/5 blur-3xl" />
             <div className="container relative mx-auto px-4 py-16 md:py-24">
-              <div className="max-w-3xl space-y-6 text-primary-foreground">
-                <Badge variant="secondary" className="w-fit gap-1.5 border-primary-foreground/30 bg-primary-foreground/15 text-primary-foreground backdrop-blur">
-                  <Sparkles className="h-3 w-3" /> TVET Management Platform
-                </Badge>
-                <h1 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
-                  {linkedOrg ? `Apply to ${linkedOrg.name}` : "One platform for every Vocational Training Centre"}
-                </h1>
-                <p className="max-w-2xl text-base leading-relaxed opacity-90 md:text-lg">
-                  Apply online, track your admission status, and manage training, assessment
-                  and finance from application through to certification.
-                </p>
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <Button size="lg" className="bg-background text-foreground shadow-lg hover:bg-background/90" onClick={() => setTab("apply")}>
-                    Start an application <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
-                    onClick={() => setTab("track")}
-                  >
-                    <Search className="mr-2 h-4 w-4" /> Track my application
-                  </Button>
+              <div className="grid items-center gap-10 lg:grid-cols-2">
+                <div className="max-w-3xl space-y-6 text-primary-foreground">
+                  <Badge variant="secondary" className="w-fit gap-1.5 border-primary-foreground/30 bg-primary-foreground/15 text-primary-foreground backdrop-blur">
+                    <Sparkles className="h-3 w-3" /> TVET Management Platform
+                  </Badge>
+                  <h1 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
+                    {linkedOrg ? `Apply to ${linkedOrg.name}` : "One platform for every Vocational Training Centre"}
+                  </h1>
+                  <p className="max-w-2xl text-base leading-relaxed opacity-90 md:text-lg">
+                    Apply online, track your admission status, and manage training, assessment
+                    and finance from application through to certification.
+                  </p>
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <Button size="lg" className="bg-background text-foreground shadow-lg hover:bg-background/90" onClick={() => setTab("apply")}>
+                      Start an application <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                      onClick={() => setTab("track")}
+                    >
+                      <Search className="mr-2 h-4 w-4" /> Track my application
+                    </Button>
+                  </div>
+                </div>
+                <div className="relative hidden justify-center lg:flex">
+                  <img
+                    src="/illustrations/hero.svg"
+                    alt="Person learning at a vocational training centre"
+                    className="relative z-10 w-full max-w-md drop-shadow-2xl"
+                    loading="eager"
+                  />
                 </div>
               </div>
             </div>
@@ -189,17 +199,25 @@ const PublicHome = () => {
                 </div>
                 <div className="grid gap-5 md:grid-cols-3">
                   {[
-                    { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn },
-                    { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText },
-                    { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search },
+                    { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn, image: "/illustrations/step1.svg" },
+                    { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText, image: "/illustrations/step2.svg" },
+                    { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search, image: "/illustrations/step3.svg" },
                   ].map((s) => (
                     <Card
                       key={s.step}
                       className="group relative overflow-hidden border-border/60 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
                     >
-                      <span className="pointer-events-none absolute right-4 top-2 text-5xl font-bold text-primary/5">
-                        {s.step}
-                      </span>
+                      <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5 p-6">
+                        <img
+                          src={s.image}
+                          alt={s.title}
+                          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <span className="absolute right-4 top-2 text-5xl font-bold text-primary/10">
+                          {s.step}
+                        </span>
+                      </div>
                       <CardHeader className="relative">
                         <IconBadge icon={s.icon} className="mb-3" />
                         <CardTitle className="text-base">{s.title}</CardTitle>
