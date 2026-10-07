@@ -69,7 +69,7 @@ export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreN
               <p className="training-hero-description max-w-md text-base leading-relaxed md:text-lg">Build your future through vocational training. Apply to your chosen centre and follow your journey from application to registration.</p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button size="lg" onClick={onApply}>Start an application <ArrowRight /></Button>
-                <Button size="lg" variant="outline" onClick={onTrack}>Track my application</Button>
+                <Button size="lg" variant="outline" className="text-foreground" onClick={onTrack}>Track my application</Button>
               </div>
             </div>
           </div>
