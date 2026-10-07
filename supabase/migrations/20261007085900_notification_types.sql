@@ -1,6 +1,5 @@
--- notifications.type is constrained; the new modules send these additional types.
+-- notifications.type was restricted to five values, which also broke existing senders (e.g. scheduled reports).
 ALTER TABLE public.notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
-ALTER TABLE public.notifications ADD CONSTRAINT notifications_type_check CHECK (type = ANY (ARRAY[
-  'fee_reminder', 'marks_released', 'marks_withheld', 'registration', 'general',
-  'library', 'graduation', 'assessment'
-]));
+-- The original constraint listed five types, but the application sends many more (report, trial_expired, library,
+-- workflow, ...). Keep a sanity check on the format only. NOT VALID so rows already in a live database cannot block this.
+ALTER TABLE public.notifications ADD CONSTRAINT notifications_type_check CHECK (type ~ '^[a-z][a-z_]*$') NOT VALID;

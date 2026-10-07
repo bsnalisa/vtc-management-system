@@ -104,6 +104,77 @@ export async function exportToExcel(data: any[], filename: string, sheetName = "
   );
 }
 
+/**
+ * Report workbook with a header block: logo (when it can be fetched), organisation name, report title and date,
+ * followed by the data table. Used by the Reports page.
+ */
+export async function exportBrandedExcel(
+  data: any[],
+  filename: string,
+  opts: { title: string; organizationName: string; logoUrl?: string | null },
+): Promise<void> {
+  if (!data || data.length === 0) {
+    console.warn("No data to export");
+    return;
+  }
+  const ExcelJS = (await import("exceljs")).default;
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet(opts.title.replace(/[:\\/?*[\]]/g, " ").slice(0, 31) || "Report");
+  const headers = Object.keys(data[0]);
+
+  // The logo is decorative: if it cannot be fetched (CORS, offline) the report is still produced.
+  let logoRows = 0;
+  if (opts.logoUrl) {
+    try {
+      const res = await fetch(opts.logoUrl);
+      if (res.ok) {
+        const type = (res.headers.get("content-type") ?? "").toLowerCase();
+        const extension = type.includes("png") ? "png" : type.includes("jpeg") || type.includes("jpg") ? "jpeg" : null;
+        if (extension) {
+          const id = workbook.addImage({ buffer: await res.arrayBuffer(), extension });
+          sheet.addImage(id, { tl: { col: 0, row: 0 }, ext: { width: 120, height: 60 } });
+          logoRows = 4;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  const put = (row: number, text: string, bold = false, size = 11) => {
+    const cell = sheet.getCell(row, logoRows ? 3 : 1);
+    cell.value = text;
+    cell.font = { bold, size };
+  };
+  const top = 1;
+  put(top, opts.organizationName, true, 14);
+  put(top + 1, opts.title, true, 12);
+  put(top + 2, `Generated ${new Date().toLocaleString()}`);
+  const headerRow = Math.max(top + 4, logoRows + 2);
+
+  headers.forEach((h, i) => {
+    const cell = sheet.getCell(headerRow, i + 1);
+    cell.value = h;
+    cell.font = { bold: true };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEEEEEE" } };
+  });
+  data.forEach((row, r) => {
+    headers.forEach((h, c) => {
+      const v = row[h];
+      sheet.getCell(headerRow + 1 + r, c + 1).value =
+        v !== null && typeof v === "object" && !(v instanceof Date) ? JSON.stringify(v) : v ?? null;
+    });
+  });
+  headers.forEach((h, i) => {
+    sheet.getColumn(i + 1).width = Math.min(50, Math.max(h.length, ...data.slice(0, 200).map((row) => cellText(row[h]).length)) + 2);
+  });
+  sheet.views = [{ state: "frozen", ySplit: headerRow }];
+  const buffer = await workbook.xlsx.writeBuffer();
+  download(
+    new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    `${filename}.xlsx`,
+  );
+}
+
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
