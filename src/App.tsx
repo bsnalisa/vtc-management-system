@@ -76,6 +76,7 @@ import ProjectsCoordinatorDashboard from "./pages/ProjectsCoordinatorDashboard";
 import HROfficerDashboard from "./pages/HROfficerDashboard";
 import BDLCoordinatorDashboard from "./pages/BDLCoordinatorDashboard";
 import RPLCoordinatorDashboard from "./pages/RPLCoordinatorDashboard";
+import RoleWorkspace, { ServicesDashboard, roleWorkspaces } from "./pages/RoleWorkspace";
 import PendingApprovals from "./pages/PendingApprovals";
 import EntryRequirementsManagement from "./pages/EntryRequirementsManagement";
 
@@ -177,6 +178,12 @@ const ProtectedBDLCoordinatorDashboard = withRoleAccess(BDLCoordinatorDashboard,
 });
 const ProtectedRPLCoordinatorDashboard = withRoleAccess(RPLCoordinatorDashboard, {
   requiredRoles: ["rpl_coordinator"],
+});
+const ProtectedLiaisonDashboard = withRoleAccess(() => <ServicesDashboard service="liaison" />, { requiredRoles: ["liaison_officer"] });
+const ProtectedResourceDashboard = withRoleAccess(() => <ServicesDashboard service="resources" />, { requiredRoles: ["resource_center_coordinator"] });
+const workspaceRoutes = Object.keys(roleWorkspaces).map(path => {
+  const requiredRoles = path.startsWith("/hr/") ? ["hr_officer" as const] : path.startsWith("/bdl/") ? ["bdl_coordinator" as const] : path.startsWith("/rpl/") ? ["rpl_coordinator" as const] : path.startsWith("/liaison/") ? ["liaison_officer" as const] : path.startsWith("/resource-center/") ? ["resource_center_coordinator" as const] : ["projects_coordinator" as const];
+  return { path, Component: withRoleAccess(RoleWorkspace, { requiredRoles }) };
 });
 
 // Wrap functional pages with role access control
@@ -327,6 +334,14 @@ const App = () => (
           <Route path="/hr-officer-dashboard" element={<ProtectedRoute><ProtectedHROfficerDashboard /></ProtectedRoute>} />
           <Route path="/bdl-coordinator-dashboard" element={<ProtectedRoute><ProtectedBDLCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/rpl-coordinator-dashboard" element={<ProtectedRoute><ProtectedRPLCoordinatorDashboard /></ProtectedRoute>} />
+          <Route path="/liaison-officer-dashboard" element={<ProtectedRoute><ProtectedLiaisonDashboard /></ProtectedRoute>} />
+          <Route path="/resource-center-coordinator-dashboard" element={<ProtectedRoute><ProtectedResourceDashboard /></ProtectedRoute>} />
+          {workspaceRoutes.map(({ path, Component }) => <Route key={path} path={path} element={<ProtectedRoute><Component key={path} /></ProtectedRoute>} />)}
+          <Route path="/hr" element={<ProtectedRoute><ProtectedHROfficerDashboard /></ProtectedRoute>} />
+          <Route path="/bdl" element={<ProtectedRoute><ProtectedBDLCoordinatorDashboard /></ProtectedRoute>} />
+          <Route path="/rpl" element={<ProtectedRoute><ProtectedRPLCoordinatorDashboard /></ProtectedRoute>} />
+          <Route path="/liaison" element={<ProtectedRoute><ProtectedLiaisonDashboard /></ProtectedRoute>} />
+          <Route path="/resource-center" element={<ProtectedRoute><ProtectedResourceDashboard /></ProtectedRoute>} />
           <Route path="/trainee-support-dashboard" element={<ProtectedRoute><ProtectedHeadOfTraineeSupportDashboard /></ProtectedRoute>} />
           <Route path="/trainee-support/pending-approvals" element={<ProtectedRoute><ProtectedPendingApprovals /></ProtectedRoute>} />
           <Route path="/trainee-support/officer-activity" element={<ProtectedRoute><ProtectedHeadOfTraineeSupportDashboard /></ProtectedRoute>} />
