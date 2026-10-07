@@ -13,7 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: { sans: ["Figtree", "sans-serif"], heading: ["Outfit", "sans-serif"] },
       colors: {
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
         border: "hsl(var(--border, 215 20% 88%))",
         input: "hsl(var(--input, 215 20% 88%))",
         ring: "hsl(var(--ring, 215 85% 25%))",
