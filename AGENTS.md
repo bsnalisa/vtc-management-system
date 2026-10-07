@@ -8,5 +8,6 @@
 - Dashboard shells render AppLogo only in the persistent header and use a persistent SidebarProvider with one shared SidebarTrigger inside the sidebar; collapsed navigation remains a scrollable icon rail at every size so staff never lose navigation access.
 - All animated loading states use LoadingIndicator directly or through LoadingSpinner/ButtonSpinner so pages, permission checks and action buttons share accessible graduation-cap motion.
 - Shared UI primitives own narrow-screen containment for tabs, tables and dialogs; page action rows stack before expanding to preserve readable text without hiding workflows.
+- Shared tables retain intrinsic column widths and non-wrapping cells with local horizontal scrolling; descriptive cells can opt into wrapping so sidebar expansion never crushes table text.
 - Attendance, timetable history, assessment and trainer-assignment read policies use authenticated centre-role membership and relevant trainee/trainer access; SECURITY DEFINER helpers avoid recursive related-table RLS checks, and write policies must not bypass read boundaries.
 - DashboardLayout derives sidebar items and group label from useRoleNavigation for the signed-in role, ignoring page-supplied menus, so navigation labels stay identical across every page a role visits.
