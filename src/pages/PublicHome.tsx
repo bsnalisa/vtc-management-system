@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2,
-  ClipboardList, Wallet, BookOpen, Loader2, LogIn, Sparkles,
+   ClipboardList, Wallet, BookOpen, Loader2, LogIn,
 } from "lucide-react";
+import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
   useActiveOrganizations,
@@ -119,47 +120,26 @@ const PublicHome = () => {
 
       <main>
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          {/* Hero */}
-                     <section className="border-b bg-card">
-             <div className="container mx-auto px-4 py-10 md:py-14 text-center">
-               <div className="mx-auto max-w-3xl space-y-5">
-                 <Badge variant="outline" className="gap-1.5 text-primary border-primary/20"><Sparkles className="h-3 w-3" /> TVET Management Platform</Badge>
-                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">{linkedOrg ? `Apply to ${linkedOrg.name}` : "VTC Management System"}</h1>
-                 <p className="mx-auto max-w-2xl text-muted-foreground text-base leading-relaxed">Apply online, track your admission status, and manage training, assessment and finance from application through to certification.</p>
-                 <div className="flex justify-center flex-wrap gap-3">
-                   <Button size="lg" onClick={() => setTab("apply")}>Start an application <ArrowRight className="h-4 w-4" /></Button>
-                   <Button size="lg" variant="outline" onClick={() => setTab("track")}><Search className="h-4 w-4" /> Track my application</Button>
-                 </div>
-               </div>
-               <img src="/illustrations/hero.svg" alt="Learning at a vocational training centre" className="mx-auto mt-8 h-36 md:h-48 w-full max-w-md object-contain" loading="eager" />
-             </div>
-           </section>
+          {tab === "home" ? (
+            <TrainingHeroCarousel centreName={linkedOrg?.name} onApply={() => setTab("apply")} onTrack={() => setTab("track")} />
+          ) : (
+            <section className="border-b bg-card">
+              <div className="container mx-auto px-4 py-8 md:py-10">
+                <p className="mb-2 text-sm font-medium text-primary">VTC Management System</p>
+                <h1 className="text-3xl font-bold">{tab === "apply" ? (linkedOrg ? `Apply to ${linkedOrg.name}` : "Online application") : "My applications"}</h1>
+              </div>
+            </section>
+          )}
 
           <div className="container mx-auto px-4 py-10">
             <TabsList className="mb-10 grid h-auto w-full max-w-xl grid-cols-3 rounded-lg p-1">
-              <TabsTrigger value="home" className="rounded-lg py-2">Overview</TabsTrigger>
-              <TabsTrigger value="apply" className="rounded-lg py-2">Online Application</TabsTrigger>
-              <TabsTrigger value="track" className="rounded-lg py-2">My Applications</TabsTrigger>
+              <TabsTrigger value="home" className="rounded-lg py-2 whitespace-normal">Overview</TabsTrigger>
+              <TabsTrigger value="apply" className="rounded-lg py-2 whitespace-normal">Online Application</TabsTrigger>
+              <TabsTrigger value="track" className="rounded-lg py-2 whitespace-normal">My Applications</TabsTrigger>
             </TabsList>
 
             {/* Overview */}
             <TabsContent value="home" className="space-y-14">
-              <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {FEATURES.map((f) => (
-                  <Card
-                    key={f.title}
-                    className="group relative overflow-hidden border-border/70 transition-colors hover:border-primary/30"
-                  >
-                    <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 transition-transform duration-300 group-hover:scale-150" />
-                    <CardHeader className="relative">
-                      <IconBadge icon={f.icon} className="mb-3" />
-                      <CardTitle className="text-base">{f.title}</CardTitle>
-                      <CardDescription className="leading-relaxed">{f.desc}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </section>
-
               <section className="space-y-6">
                 <div className="flex items-center gap-4">
                   <IconBadge icon={ClipboardList} />
@@ -208,7 +188,21 @@ const PublicHome = () => {
                   </Button>
                 </div>
               </section>
-
+              <section className="border-t pt-10">
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold">Your training journey, connected</h2>
+                  <p className="mt-2 text-muted-foreground">Applications, learning and centre services in one place.</p>
+                </div>
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                  {FEATURES.map((f) => (
+                    <div key={f.title}>
+                      <IconBadge icon={f.icon} className="mb-4" />
+                      <h3 className="mb-2 text-base font-semibold">{f.title}</h3>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </TabsContent>
 
             {/* Apply */}
