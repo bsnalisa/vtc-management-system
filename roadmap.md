@@ -1,3 +1,7 @@
+# Roles Management overlap follow-up
+- [ ] Reproduce and fix crowded headings, action buttons and role/permission tables; verify tablet and phone screens.
+- [ ] Resolve flagged assessment and trainer-trade read access after approval of access boundaries.
+
 # Mobile-first layout review
 - [x] Audit shared layouts, tables, tabs, dialogs and crowded pages for overlap.
 - [x] Apply presentation-only smaller-screen fixes and verify signed-in/public screens.
