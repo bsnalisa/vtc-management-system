@@ -223,7 +223,13 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
   ({ className, onClick, ...props }, ref) => {
     const { toggleSidebar, state, isMobile, openMobile } = useSidebar();
     const expanded = isMobile ? openMobile : state === "expanded";
-    const label = expanded ? "Collapse sidebar" : "Expand sidebar";
+    const label = isMobile
+      ? expanded
+        ? "Close navigation"
+        : "Open navigation"
+      : expanded
+        ? "Collapse sidebar"
+        : "Expand sidebar";
 
     return (
       <Button
