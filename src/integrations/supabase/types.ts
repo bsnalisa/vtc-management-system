@@ -9341,7 +9341,7 @@ export type Database = {
         | "deferred"
         | "withdrawn"
         | "archived"
-      training_mode: "fulltime" | "bdl" | "shortcourse"
+      training_mode: "fulltime" | "bdl" | "shortcourse" | "apprenticeship" | "rpl"
       training_room_type: "classroom" | "lab" | "workshop"
     }
     CompositeTypes: {
@@ -9563,7 +9563,7 @@ export const Constants = {
         "withdrawn",
         "archived",
       ],
-      training_mode: ["fulltime", "bdl", "shortcourse"],
+      training_mode: ["fulltime", "bdl", "shortcourse", "apprenticeship", "rpl"],
       training_room_type: ["classroom", "lab", "workshop"],
     },
   },

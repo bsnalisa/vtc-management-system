@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "./useOrganizationContext";
+import type { TrainingMode } from "@/lib/trainingModes";
 
 export interface HistoricalTraineeData {
   first_name: string;
@@ -13,7 +14,7 @@ export interface HistoricalTraineeData {
   trade_id: string;
   level: number;
   academic_year: string;
-  training_mode: "fulltime" | "bdl" | "shortcourse";
+  training_mode: TrainingMode;
   archive_notes?: string;
 }
 

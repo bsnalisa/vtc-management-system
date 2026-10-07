@@ -92,6 +92,8 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
       case "fulltime": return "Full Time";
       case "bdl": return "Block/Day Release";
       case "shortcourse": return "Short Course";
+      case "apprenticeship": return "Apprenticeship";
+      case "rpl": return "RPL";
       default: return mode;
     }
   };
@@ -165,6 +167,8 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                       <SelectItem value="fulltime">Full Time</SelectItem>
                       <SelectItem value="bdl">Block/Day Release</SelectItem>
                       <SelectItem value="shortcourse">Short Course</SelectItem>
+                      <SelectItem value="apprenticeship">Apprenticeship</SelectItem>
+                      <SelectItem value="rpl">Recognition of Prior Learning</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

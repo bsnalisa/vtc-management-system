@@ -21,6 +21,8 @@ const TrainerDashboard = () => {
       case "fulltime": return "Full-time";
       case "bdl": return "BDL";
       case "shortcourse": return "Short Course";
+      case "apprenticeship": return "Apprenticeship";
+      case "rpl": return "RPL";
       default: return mode;
     }
   };

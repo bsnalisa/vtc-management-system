@@ -90,6 +90,8 @@ const AttendanceRegister = () => {
                     <SelectItem value="fulltime">Full-time</SelectItem>
                     <SelectItem value="bdl">BDL</SelectItem>
                     <SelectItem value="shortcourse">Short Course</SelectItem>
+                    <SelectItem value="apprenticeship">Apprenticeship</SelectItem>
+                    <SelectItem value="rpl">Recognition of Prior Learning</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

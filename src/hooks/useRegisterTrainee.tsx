@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "./useOrganizationContext";
 import { withOrganizationId } from "@/lib/organizationUtils";
 import { isWithinLimit } from "@/lib/packageUtils";
+import type { TrainingMode } from "@/lib/trainingModes";
 
 export interface TraineeRegistrationData {
   first_name: string;
@@ -15,7 +16,7 @@ export interface TraineeRegistrationData {
   email?: string;
   address: string;
   trade_id: string;
-  training_mode: "fulltime" | "bdl" | "shortcourse";
+  training_mode: TrainingMode;
   level: number;
   academic_year: string;
 }

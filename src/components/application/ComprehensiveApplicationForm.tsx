@@ -624,6 +624,8 @@ export const ComprehensiveApplicationForm = ({
                             <SelectItem value="fulltime">Full Time</SelectItem>
                             <SelectItem value="bdl">Part Time / BDL</SelectItem>
                             <SelectItem value="shortcourse">Short Course</SelectItem>
+                            <SelectItem value="apprenticeship">Apprenticeship</SelectItem>
+                            <SelectItem value="rpl">Recognition of Prior Learning</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

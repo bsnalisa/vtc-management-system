@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { TrainingMode } from "@/lib/trainingModes";
 
 export interface TraineeData {
   firstName: string;
@@ -58,7 +59,7 @@ export const useRegisterTrainee = () => {
           email: traineeData.email,
           address: traineeData.address,
           trade_id: traineeData.trade_id,
-          training_mode: traineeData.training_mode as "fulltime" | "bdl" | "shortcourse",
+          training_mode: traineeData.training_mode as TrainingMode,
           level: traineeData.level,
           academic_year: traineeData.academic_year,
           organization_id: traineeData.organization_id,
