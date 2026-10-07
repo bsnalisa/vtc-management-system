@@ -175,8 +175,7 @@ function DashboardSidebar({
                               )}
                               {active && hasAccess && !isCollapsed && (
                                 <div 
-                                  className="ml-auto w-1.5 h-1.5 rounded-full shrink-0" 
-                                  style={{ backgroundColor: 'white' }}
+                                  className="ml-auto w-1.5 h-1.5 rounded-full shrink-0 bg-sidebar-primary"
                                 />
                               )}
                             </NavLink>
@@ -224,7 +223,7 @@ function TopHeader({
       {organizationName && (
         <div className="flex items-center gap-2 min-w-0">
           {settings?.logo_url && (
-            <Avatar className="h-8 w-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+            <Avatar className="h-8 w-8 shrink-0">
               <AvatarImage src={settings.logo_url} alt={organizationName} />
               <AvatarFallback className="text-xs">
                 {organizationName.substring(0, 2).toUpperCase()}
