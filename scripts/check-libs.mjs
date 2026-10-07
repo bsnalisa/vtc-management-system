@@ -67,5 +67,38 @@ ok(st.includes("Balance due"), "balance due line");
 
 
 }
+{
+const printUrl = url(compile("src/lib/printDocument.ts"));
+const tr = await import(url(compile("src/lib/transcriptDocument.ts").replace('"./printDocument"', `"${printUrl}"`)));
+const blk = { qualification: "Weld <i>", qualification_code: "W1", nqf_level: 1, academic_year: "2026", credits: 40, completed_credits: 40, average_mark: "72.5",
+  components: [{ component: "Mod A", ca_mark: 70, sa_mark: 75, final_mark: 72.5, pass_mark: 50, status: "pass" }, { component: "Mod B", ca_mark: null, sa_mark: null, final_mark: null, pass_mark: 50, status: "pending" }] };
+const td = { trainee_number: "T1", first_name: "Tina <b>", last_name: "O'Neil", national_id: null, organization: "X", blocks: [blk], total_credits: 40, completed_credits: 40, average_mark: 72.5 };
+const th = tr.transcriptHtml(td, "2026");
+ok(!th.includes("<b>") && th.includes("Tina &lt;b&gt;") && th.includes("Weld &lt;i&gt;"), "transcript escapes HTML in names");
+ok(th.includes("Total credits") && th.includes("<dd>40</dd>") && th.includes("Completed credits"), "transcript shows total and completed credits");
+ok(th.includes('<td class="r">-</td>'), "transcript shows missing marks as a dash");
+ok(th.includes("Final mark = average of CA and SA marks"), "transcript explains the rules");
+const eh = tr.transcriptHtml({ ...td, blocks: [], total_credits: 0, completed_credits: 0, average_mark: null }, null);
+ok(eh.includes("no approved results") && eh.includes("All years"), "transcript handles empty blocks");
+const ih = tr.transcriptHtml({ ...td, transcript_number: "TR-26-00001", issue_date: "2026-10-01" }, "2026");
+ok(ih.includes("TR-26-00001") && ih.includes("Date issued"), "issued transcript shows number and date");
+}
+{
+const csv = await load("src/lib/bankStatementCsv.ts");
+const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), m + (JSON.stringify(a) === JSON.stringify(b) ? "" : " got " + JSON.stringify(a)));
+let r = csv.parseBankCsv("Date,Description,Reference,Amount\n2026-10-01,Fees,062-26-12345,1500.00\n2026-10-02,Other,,-20.50\n");
+eq(r.lines, [{ date: "2026-10-01", description: "Fees", reference: "062-26-12345", amount: 1500 }, { date: "2026-10-02", description: "Other", reference: "", amount: -20.5 }], "comma delimited, ISO dates");
+r = csv.parseBankCsv("Date;Narrative;Reference;Amount\n05/10/2026;Pay;REF1;\"1 500,00\"\n");
+eq(r.lines.length, 1, "semicolon delimited line read"); eq(r.lines[0]?.date, "2026-10-05", "DD/MM/YYYY converted");
+r = csv.parseBankCsv("Date,Details,Reference,Amount\n01-10-2026,\"Smith, J \"\"Tina\"\"\",R,\"1,234.50\"\n");
+eq(r.lines[0]?.description, 'Smith, J "Tina"', "quoted commas and doubled quotes"); eq(r.lines[0]?.amount, 1234.5, "thousands separator removed"); eq(r.lines[0]?.date, "2026-10-01", "DD-MM-YYYY converted");
+r = csv.parseBankCsv("Date,Description,Amount\n2026-10-01,Fee,(250.00)\n");
+eq(r.lines[0]?.amount, -250, "parentheses mean negative");
+r = csv.parseBankCsv("Date,Description,Debit,Credit\n2026-10-01,Out,100.00,\n2026-10-02,In,,300.00\n");
+eq(r.lines.map((l) => l.amount), [-100, 300], "credit/debit columns give signed amounts");
+r = csv.parseBankCsv("Date,Description,Amount\nnot a date,X,5\n2026-10-01,Y,abc\n2026-10-01,Z,5\n");
+eq([r.lines.length, r.errors.length], [1, 2], "unreadable rows are reported, not dropped silently");
+eq(csv.parseBankCsv("Foo,Bar\n1,2\n").needsMapping, true, "unrecognised headers ask for column mapping");
+}
 process.exitCode = failures ? 1 : 0;
 console.log(failures ? `${failures} FAILED` : "all passed");

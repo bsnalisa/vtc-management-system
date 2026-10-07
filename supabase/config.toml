@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.sms-inbound]
 verify_jwt = false
+
+[functions.moodle-sync]
+verify_jwt = false

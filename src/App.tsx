@@ -65,6 +65,19 @@ import OrganizationSettings from "./pages/OrganizationSettings";
 import SupportTickets from "./pages/SupportTickets";
 import TraineeAffairs from "./pages/TraineeAffairs";
 import Library from "./pages/Library";
+import AcademicCalendar from "./pages/AcademicCalendar";
+import DeferralRequests from "./pages/DeferralRequests";
+import TraineeDeferralPage from "./pages/trainee/TraineeDeferralPage";
+import CourseCatalogue from "./pages/CourseCatalogue";
+import SupervisorSignoff from "./pages/SupervisorSignoff";
+import PublicRplApplication from "./pages/PublicRplApplication";
+import TraineeTranscriptPage from "./pages/trainee/TraineeTranscriptPage";
+import Transcripts from "./pages/Transcripts";
+import BankReconciliation from "./pages/BankReconciliation";
+import AccountingExport from "./pages/AccountingExport";
+import LearningSpace from "./pages/LearningSpace";
+import MoodleIntegration from "./pages/MoodleIntegration";
+
 import AssessmentRequests from "./pages/AssessmentRequests";
 import AssessmentDevelopment from "./pages/AssessmentDevelopment";
 import AssessmentSittings from "./pages/AssessmentSittings";
@@ -341,6 +354,8 @@ const App = () => (
           <Route path="/workflow/action/:token" element={<WorkflowAction />} />
           <Route path="/survey/:token" element={<SurveyResponse />} />
           <Route path="/graduation/rsvp/:token" element={<GraduationRsvp />} />
+          <Route path="/logbook/sign/:token" element={<SupervisorSignoff />} />
+          <Route path="/rpl-application/:slug" element={<PublicRplApplication />} />
 
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -463,6 +478,16 @@ const App = () => (
           <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
           <Route path="/trainee/requests" element={<ProtectedRoute><TraineeRequestsPage /></ProtectedRoute>} />
           <Route path="/trainee/logbook" element={<ProtectedRoute><TraineeLogbookPage /></ProtectedRoute>} />
+          <Route path="/academic-calendar" element={<ProtectedRoute><AcademicCalendar /></ProtectedRoute>} />
+          <Route path="/deferral-requests" element={<ProtectedRoute><DeferralRequests /></ProtectedRoute>} />
+          <Route path="/trainee/deferral" element={<ProtectedRoute><TraineeDeferralPage /></ProtectedRoute>} />
+          <Route path="/course-catalogue" element={<ProtectedRoute><CourseCatalogue /></ProtectedRoute>} />
+          <Route path="/trainee/transcript" element={<ProtectedRoute><TraineeTranscriptPage /></ProtectedRoute>} />
+          <Route path="/transcripts" element={<ProtectedRoute><Transcripts /></ProtectedRoute>} />
+          <Route path="/bank-reconciliation" element={<ProtectedRoute><BankReconciliation /></ProtectedRoute>} />
+          <Route path="/accounting-export" element={<ProtectedRoute><AccountingExport /></ProtectedRoute>} />
+          <Route path="/learning" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} />
+          <Route path="/moodle" element={<ProtectedRoute><MoodleIntegration /></ProtectedRoute>} />
           <Route path="/trainee/events" element={<ProtectedRoute><TraineeEventsPage /></ProtectedRoute>} />
           <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />

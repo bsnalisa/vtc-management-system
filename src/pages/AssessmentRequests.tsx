@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ExportMenu } from "@/components/ExportMenu";
+import { PublicRplInbox } from "@/components/assessment/PublicRplInbox";
 import { RequestDetailDialog } from "@/components/assessment/RequestDetailDialog";
 import { AssessmentRequest, REQUEST_LABELS, RequestType, useAssessmentRequests } from "@/hooks/useAssessmentRequests";
 
@@ -62,8 +63,10 @@ export default function AssessmentRequests() {
           <Tabs defaultValue="rpl">
             <TabsList>
               {(Object.keys(REQUEST_LABELS) as RequestType[]).map((t) => <TabsTrigger key={t} value={t}>{REQUEST_LABELS[t]} ({open(t)} open)</TabsTrigger>)}
+              <TabsTrigger value="public">Public applications</TabsTrigger>
             </TabsList>
             {(Object.keys(REQUEST_LABELS) as RequestType[]).map((t) => <TabsContent key={t} value={t}><RequestsTable type={t} /></TabsContent>)}
+            <TabsContent value="public"><PublicRplInbox /></TabsContent>
           </Tabs>
         </CardContent>
       </Card>

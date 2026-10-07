@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SupervisorLinkDialog } from "@/components/placement/SupervisorLinkDialog";
 import { LogbookEntry, useReviewQueue, useSaveLogbookEntry } from "@/hooks/useLogbook";
 
 function ReviewDialog({ entry, onClose }: { entry: LogbookEntry; onClose: () => void }) {
@@ -34,6 +35,7 @@ function ReviewDialog({ entry, onClose }: { entry: LogbookEntry; onClose: () => 
           </div>
           <div className="space-y-1"><Label>Comment (required when returning)</Label><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></div>
           <div className="flex flex-wrap gap-2">
+            <SupervisorLinkDialog placementId={entry.placement_id} />
             <Button variant="outline" disabled={save.isPending || !supervisor.trim()} title={supervisor.trim() ? "" : "Enter the supervisor's name"} onClick={() => act({ status: "supervisor_signed", supervisor_signed_by: supervisor.trim(), supervisor_signed_on: signedOn })}>Record supervisor sign-off</Button>
             <Button disabled={save.isPending || (!entry.supervisor_signed_by && !supervisor.trim())} title="A supervisor sign-off is needed before approval" onClick={() => act({ status: "approved", supervisor_signed_by: entry.supervisor_signed_by ?? supervisor.trim(), supervisor_signed_on: entry.supervisor_signed_on ?? signedOn, reviewer_comment: comment || null })}>Approve</Button>
             <Button variant="destructive" disabled={save.isPending || !comment.trim()} onClick={() => act({ status: "returned", reviewer_comment: comment.trim() })}>Return to trainee</Button>

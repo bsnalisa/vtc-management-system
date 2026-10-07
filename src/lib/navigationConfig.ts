@@ -53,6 +53,14 @@ export const adminNavItems: NavItem[] = [
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
+  { title: "Learning Space", url: "/learning", icon: BookOpen },
+  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
+  { title: "Transcripts", url: "/transcripts", icon: FileText },
+  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
+  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
+  { title: "Moodle", url: "/moodle", icon: GraduationCap },
 ];
 
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
@@ -73,6 +81,14 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
+  { title: "Learning Space", url: "/learning", icon: BookOpen },
+  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
+  { title: "Transcripts", url: "/transcripts", icon: FileText },
+  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
+  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
+  { title: "Moodle", url: "/moodle", icon: GraduationCap },
 ];
 
 // Head of Training Navigation (Academic Command Center)
@@ -94,6 +110,12 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
+  { title: "Learning Space", url: "/learning", icon: BookOpen },
+  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
+  { title: "Transcripts", url: "/transcripts", icon: FileText },
+  { title: "Moodle", url: "/moodle", icon: GraduationCap },
 ];
 
 // Trainer Navigation
@@ -108,6 +130,9 @@ export const trainerNavItems: NavItem[] = [
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
+  { title: "Learning Space", url: "/learning", icon: BookOpen },
 ];
 
 // --------------------- Trainee Navigation ---------------------
@@ -127,6 +152,11 @@ export const traineeNavItems: NavItem[] = [
   { title: "Assessment Requests", url: "/trainee/requests", icon: ClipboardCheck },
   { title: "Library", url: "/library", icon: BookOpen },
   { title: "Feedback & Suggestions", url: "/trainee/feedback", icon: MessageSquare },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
+  { title: "Learning Space", url: "/learning", icon: BookOpen },
+  { title: "Deferral", url: "/trainee/deferral", icon: ClipboardList },
+  { title: "Transcript", url: "/trainee/transcript", icon: FileText },
 ];
 
 // HOD Navigation
@@ -167,6 +197,8 @@ export const debtorOfficerNavItems: NavItem[] = [
   { title: "Trainee Accounts", url: "/debtors/accounts", icon: DollarSign },
   { title: "Fee Configuration", url: "/debtors/config", icon: Settings },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
+  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
 ];
 
 // Registration Officer Navigation
@@ -182,6 +214,10 @@ export const registrationOfficerNavItems: NavItem[] = [
   { title: "Grading Scale", url: "/grading-scale", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
+  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
+  { title: "Transcripts", url: "/transcripts", icon: FileText },
 ];
 
 // Stock Control Officer Navigation

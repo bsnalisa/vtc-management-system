@@ -10,6 +10,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { ExportMenu } from "@/components/ExportMenu";
+import { SupervisorLinkDialog } from "@/components/placement/SupervisorLinkDialog";
 import { LogbookEntry, useDeleteLogbookDraft, useLogbookEntries, useMyLogbookPlacements, useSaveLogbookEntry } from "@/hooks/useLogbook";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -81,6 +82,7 @@ const TraineeLogbookPage = () => {
               )}
               <div className="flex gap-2">
                 {!adding && !editing && <Button onClick={() => setAdding(true)}>Add entry</Button>}
+                {placement && <SupervisorLinkDialog key={placement.id} placementId={placement.id} defaultName={placement.supervisor_name} />}
                 <ExportMenu label="Export logbook" title={`Logbook ${placement?.placement_number ?? ""}`} filename={`logbook-${placement?.placement_number ?? "placement"}`} disabled={!entries?.length}
                   data={() => (entries ?? []).map((e) => ({ date: e.entry_date, hours: e.hours, activities: e.activities, skills_learned: e.skills_learned, challenges: e.challenges, status: e.status, supervisor: e.supervisor_signed_by, supervisor_signed_on: e.supervisor_signed_on, comment: e.reviewer_comment }))} />
               </div>
