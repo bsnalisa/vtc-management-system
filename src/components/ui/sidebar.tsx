@@ -61,6 +61,8 @@ const SidebarProvider = React.forwardRef<
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(() => {
+    if (typeof window === 'undefined') return defaultOpen;
+    if (persistent && window.matchMedia('(max-width: 639px)').matches) return false;
     const saved = document.cookie.split('; ').find(cookie => cookie.startsWith(`${SIDEBAR_COOKIE_NAME}=`))?.split('=')[1];
     if (saved === 'true' || saved === 'false') return saved === 'true';
     return persistent && window.matchMedia('(max-width: 639px)').matches ? false : defaultOpen;
@@ -209,7 +211,7 @@ const Sidebar = React.forwardRef<
       {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
-          "relative h-[calc(100svh-3.5rem)] w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear",
+          "relative h-[calc(100svh-var(--sidebar-top,3.5rem))] w-[--sidebar-width] max-sm:w-[--sidebar-width-icon] bg-transparent transition-[width] duration-200 ease-linear",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
@@ -219,7 +221,7 @@ const Sidebar = React.forwardRef<
       />
       <div
         className={cn(
-          "fixed top-14 bottom-0 z-10 flex h-[calc(100svh-3.5rem)] w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear",
+          "fixed top-[var(--sidebar-top,3.5rem)] bottom-0 z-30 flex h-[calc(100svh-var(--sidebar-top,3.5rem))] w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -233,6 +235,8 @@ const Sidebar = React.forwardRef<
       >
         <div
           id="app-sidebar"
+          role="navigation"
+          aria-label="Site navigation"
           data-sidebar="sidebar"
           className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
         >

@@ -159,7 +159,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   };
 
   return (
-    <SidebarProvider persistent>
+    <SidebarProvider persistent style={{ "--sidebar-top": "0rem" } as React.CSSProperties}>
       <div className="dashboard-workspace h-svh flex w-full overflow-hidden bg-background">
         <SuperAdminSidebar />
         

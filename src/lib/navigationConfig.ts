@@ -182,6 +182,7 @@ export const placementOfficerNavItems: NavItem[] = [
 
 export const liaisonOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/liaison-officer-dashboard", icon: LayoutDashboard },
+  { title: "Industry Partners", url: "/liaison/partners", icon: Briefcase },
   { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "Staff Training", url: "/onboarding", icon: BookOpen },
   { title: "Support Tickets", url: "/support-tickets", icon: FileText },
@@ -190,6 +191,8 @@ export const liaisonOfficerNavItems: NavItem[] = [
 
 export const resourceCenterNavItems: NavItem[] = [
   { title: "Dashboard", url: "/resource-center-coordinator-dashboard", icon: LayoutDashboard },
+  { title: "Resource Catalogue", url: "/resource-center/catalogue", icon: BookOpen },
+  { title: "Resource Loans", url: "/resource-center/loans", icon: ClipboardList },
   { title: "Staff Training", url: "/onboarding", icon: BookOpen },
   { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "Support Tickets", url: "/support-tickets", icon: FileText },
