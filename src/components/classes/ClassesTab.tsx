@@ -13,6 +13,7 @@ import { useTrades } from "@/hooks/useTrades";
 import { useTrainers } from "@/hooks/useTrainers";
 import { useQualifications } from "@/hooks/useQualifications";
 import { Badge } from "@/components/ui/badge";
+import { RecordCard } from "@/components/ui/record-card";
 
 const EMPTY_FORM: ClassData = {
   trade_id: "",
@@ -210,6 +211,25 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
           ) : !classes?.length ? (
             <div className="text-center py-8 text-muted-foreground">No classes found. Create one to get started.</div>
           ) : (
+            <div className="responsive-records">
+              <div className="record-cards">
+                {classes.map(cls => <RecordCard key={cls.id} title={cls.class_name} subtitle={cls.class_code}
+                  status={<Badge variant="outline">Level {cls.level}</Badge>}
+                  fields={[
+                    { label: "Trade", value: cls.trades?.code || "—" },
+                    { label: "Qualification", value: cls.qualifications ? `${cls.qualifications.qualification_code} – ${cls.qualifications.qualification_title}` : "—" },
+                    { label: "Training Mode", value: trainingModeLabel(cls.training_mode) },
+                    { label: "Trainer", value: cls.trainers?.full_name || "Unassigned" },
+                    { label: "Capacity", value: cls.capacity },
+                    { label: "Academic Year", value: cls.academic_year },
+                  ]}
+                  actions={!readOnly && <>
+                    <Button variant="outline" size="sm" aria-label={`Edit ${cls.class_name}`} onClick={() => handleOpenDialog(cls)}><Pencil className="mr-2 h-4 w-4" />Edit</Button>
+                    <AlertDialog><AlertDialogTrigger asChild><Button variant="outline" size="sm" aria-label={`Delete ${cls.class_name}`}><Trash2 className="mr-2 h-4 w-4 text-destructive" />Delete</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Class</AlertDialogTitle><AlertDialogDescription>Are you sure you want to delete "{cls.class_name}"?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteClass.mutateAsync(cls.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                  </>}
+                />)}
+              </div>
+              <div className="record-table">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -271,6 +291,8 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                 ))}
               </TableBody>
             </Table>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
