@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw, Briefcase, Award, ChevronRight, Shield, BarChart3 } from "lucide-react";
+import { Users, GraduationCap, BookOpen, Calendar, ClipboardCheck, FileText, Link2, AlertTriangle, CheckCircle, RotateCcw, Briefcase, Award, ChevronRight, Shield, BarChart3, DoorClosed } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { useHODStats, useActiveTrainers } from "@/hooks/useHODStats";
@@ -272,7 +272,7 @@ const HeadOfTrainingDashboard = () => {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
             {[
               { icon: Briefcase, label: "Trades", desc: "Manage trades", url: "/trade-management" },
-              { icon: BookOpen, label: "Classes", desc: "Class management", url: "/classes" },
+              { icon: DoorClosed, label: "Classes", desc: "Class management", url: "/classes" },
               { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable" },
               { icon: ClipboardCheck, label: "Assessments", desc: "Review results", url: "/assessment-results" },
               { icon: Shield, label: "Governance", desc: "Audit & cycles", url: "/assessment-governance" },

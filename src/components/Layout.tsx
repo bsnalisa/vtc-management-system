@@ -24,7 +24,7 @@ import {
   Calendar,
   Megaphone,
   UserCircle,
-  Package,
+  Package, DoorClosed,
   Search,
 } from "lucide-react";
 
@@ -70,7 +70,7 @@ const Layout = ({ children }: LayoutProps) => {
     ...(canAccessAttendance && hasModuleAccess(MODULE_CODES.ATTENDANCE_TRACKING) ? [{ title: "Attendance", url: "/attendance", icon: ClipboardList }] : []),
     ...(canAccessFees && hasModuleAccess(MODULE_CODES.FEE_MANAGEMENT) ? [{ title: "Fees", url: "/fees", icon: DollarSign }] : []),
     ...(canAccessReports ? [{ title: "Reports", url: "/reports", icon: FileText }] : []),
-    ...(canAccessClasses && hasModuleAccess(MODULE_CODES.CLASS_MANAGEMENT) ? [{ title: "Classes", url: "/classes", icon: BookOpen }] : []),
+    ...(canAccessClasses && hasModuleAccess(MODULE_CODES.CLASS_MANAGEMENT) ? [{ title: "Classes", url: "/classes", icon: DoorClosed }] : []),
     ...(canAccessTimetable && hasModuleAccess(MODULE_CODES.TIMETABLE_MANAGEMENT) ? [{ title: "Timetable", url: "/timetable", icon: Calendar }] : []),
     ...(canAccessPackages ? [{ title: "Packages", url: "/packages", icon: Package }] : []),
     ...(!isTrainee ? [{ title: "Announcements", url: "/announcements", icon: Megaphone }] : []),

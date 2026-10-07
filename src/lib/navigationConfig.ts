@@ -20,6 +20,7 @@ import {
   CreditCard,
   Home,
   History,
+  DoorClosed,
   LucideIcon,
 } from "lucide-react";
 
@@ -37,7 +38,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Training Modules", url: "/training-modules", icon: BookOpen },
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
-  { title: "Class Management", url: "/classes", icon: Users },
+  { title: "Class Management", url: "/classes", icon: DoorClosed },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Role Management", url: "/roles", icon: Shield },
@@ -65,7 +66,7 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Template Approvals", url: "/assessment-template-approvals", icon: ClipboardList },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
   { title: "Trainer Workload", url: "/trainer-workload", icon: BarChart3 },
-  { title: "Class Management", url: "/classes", icon: Users },
+  { title: "Class Management", url: "/classes", icon: DoorClosed },
   { title: "Timetable Approvals", url: "/timetable-approvals", icon: Calendar },
   { title: "Gradebook Oversight", url: "/gradebook-review", icon: BookOpen },
   { title: "Qualification Results", url: "/qualification-results", icon: BarChart3 },
@@ -78,7 +79,7 @@ export const headOfTrainingNavItems: NavItem[] = [
 // Trainer Navigation
 export const trainerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainer-dashboard", icon: LayoutDashboard },
-  { title: "My Classes", url: "/classes", icon: Users },
+  { title: "My Classes", url: "/classes", icon: DoorClosed },
   { title: "Gradebooks", url: "/gradebooks", icon: BookOpen },
   { title: "Attendance", url: "/attendance", icon: ClipboardCheck },
   { title: "Timetable", url: "/timetable", icon: Calendar },
@@ -103,7 +104,7 @@ export const traineeNavItems: NavItem[] = [
 // HOD Navigation
 export const hodNavItems: NavItem[] = [
   { title: "Dashboard", url: "/hod-dashboard", icon: LayoutDashboard },
-  { title: "Department Overview", url: "/classes", icon: GraduationCap },
+  { title: "Department Overview", url: "/classes", icon: DoorClosed },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Performance", url: "/assessment-results", icon: BarChart3 },

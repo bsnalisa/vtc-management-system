@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, ArrowRight, Building, Package, Briefcase, Users, GraduationCap } from "lucide-react";
+import { CheckCircle2, Circle, ArrowRight, Building, Package, Briefcase, Users, GraduationCap, DoorClosed } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +103,7 @@ const generalSteps: Omit<OnboardingStep, "completed">[] = [
     id: "classes",
     title: "Create Classes",
     description: "Set up classes for each trade and level",
-    icon: Users,
+    icon: DoorClosed,
     path: "/classes",
   },
   {
