@@ -30,6 +30,7 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast as showToast } from "sonner";
 import { signOutAndClearCaches } from "@/lib/authUtils";
+import { AppLogo } from "@/components/AppLogo";
 
 interface NavItem {
   title: string;
@@ -82,7 +83,7 @@ function DashboardSidebar({
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
       <SidebarContent className="pt-0">
-        <div className={`flex items-center gap-3 px-3 py-5 ${isCollapsed ? "justify-center" : ""}`}><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"><GraduationCap className="h-5 w-5" /></div>{!isCollapsed && <span className="font-semibold text-sidebar-foreground">VTC System</span>}</div>
+        <div className={`flex items-center gap-3 px-3 py-5 ${isCollapsed ? "justify-center" : ""}`}><AppLogo />{!isCollapsed && <span className="font-semibold text-sidebar-foreground">VTC System</span>}</div>
         {/* Sidebar Header with Toggle */}
         <div className={`flex items-center border-b h-14 px-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
@@ -219,6 +220,7 @@ function TopHeader({
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-card px-4 fixed top-0 left-0 right-0 z-50">
       <SidebarTrigger className="shrink-0 md:hidden" />
+      <AppLogo className="h-8 w-8" />
       {/* Organization Branding */}
       {organizationName && (
         <div className="flex items-center gap-2 min-w-0">

@@ -1,4 +1,5 @@
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
+import { AppLogo } from "@/components/AppLogo";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,9 +99,7 @@ const PublicHome = () => {
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="h-5 w-5" />
-            </div>
+            <AppLogo />
             <span className="public-home-brand text-lg font-bold"><span className="sm:hidden">VTC System</span><span className="hidden sm:inline">VTC Management System</span></span>
           </Link>
           <div className="flex items-center gap-2">
@@ -359,9 +358,7 @@ const PublicHome = () => {
         <div className="container mx-auto grid gap-8 px-4 sm:grid-cols-3">
           <div>
             <div className="flex items-center gap-2.5 font-semibold">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <GraduationCap className="h-4 w-4" />
-              </div>
+              <AppLogo />
               VTC Management System
             </div>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
