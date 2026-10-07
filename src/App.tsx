@@ -65,6 +65,8 @@ import OrganizationSettings from "./pages/OrganizationSettings";
 import SupportTickets from "./pages/SupportTickets";
 import TraineeAffairs from "./pages/TraineeAffairs";
 import Library from "./pages/Library";
+import AssessmentRequests from "./pages/AssessmentRequests";
+import TraineeRequestsPage from "./pages/trainee/TraineeRequestsPage";
 import GraduationSurveys from "./pages/GraduationSurveys";
 import SurveyResponse from "./pages/SurveyResponse";
 import GraduationRsvp from "./pages/GraduationRsvp";
@@ -272,6 +274,9 @@ const ProtectedAlumniManagement = withRoleAccess(AlumniManagement, {
 const ProtectedGraduationSurveys = withRoleAccess(GraduationSurveys, {
   requiredRoles: ["admin", "organization_admin", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
 });
+const ProtectedAssessmentRequests = withRoleAccess(AssessmentRequests, {
+  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer"],
+});
 const ProtectedHostelManagement = withRoleAccess(HostelManagement, {
   requiredRoles: ["hostel_coordinator", "admin"],
 });
@@ -403,6 +408,7 @@ const App = () => (
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
           <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />
           <Route path="/graduation" element={<ProtectedRoute><ProtectedGraduationSurveys /></ProtectedRoute>} />
+          <Route path="/assessment-requests" element={<ProtectedRoute><ProtectedAssessmentRequests /></ProtectedRoute>} />
           <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
@@ -422,6 +428,7 @@ const App = () => (
           <Route path="/trainee/registration" element={<ProtectedRoute><TraineeRegistrationPage /></ProtectedRoute>} />
           <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
           <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
+          <Route path="/trainee/requests" element={<ProtectedRoute><TraineeRequestsPage /></ProtectedRoute>} />
           <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />
           <Route path="/trainee/exams/timetable" element={<ProtectedRoute><TraineeExamTimetablePage /></ProtectedRoute>} />

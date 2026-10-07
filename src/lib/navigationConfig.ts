@@ -102,6 +102,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Results", url: "/trainee/exams/results", icon: BookOpen },
   { title: "Fee Statement", url: "/trainee/finance", icon: DollarSign },
   { title: "Payments", url: "/trainee/payments", icon: CreditCard },
+  { title: "Assessment Requests", url: "/trainee/requests", icon: ClipboardCheck },
   { title: "Library", url: "/library", icon: BookOpen },
   { title: "Feedback & Suggestions", url: "/trainee/feedback", icon: MessageSquare },
 ];
@@ -125,6 +126,7 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Governance & Cycles", url: "/assessment-governance", icon: Shield },
   { title: "Timetable", url: "/timetable", icon: Calendar },
   { title: "Exam Publishing", url: "/exam-timetable-publishing", icon: Calendar },
+  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
@@ -245,9 +247,6 @@ export const bdlCoordinatorNavItems: NavItem[] = [
 // RPL (Recognition of Prior Learning) Coordinator Navigation
 export const rplCoordinatorNavItems: NavItem[] = [
   { title: "Dashboard", url: "/rpl-coordinator-dashboard", icon: LayoutDashboard },
-  { title: "Applications", url: "/rpl/applications", icon: FileText },
-  { title: "Portfolio Assessment", url: "/rpl/portfolio", icon: ClipboardCheck },
-  { title: "Assessment Schedule", url: "/rpl/schedule", icon: Calendar },
-  { title: "Credit Mapping", url: "/rpl/credits", icon: BarChart3 },
+  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
