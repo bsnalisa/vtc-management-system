@@ -1,3 +1,8 @@
+# Role menus and persistent sidebar
+- [ ] Add dedicated Liaison Officer and Resource Centre Coordinator navigation and resolve missing menu destinations.
+- [ ] Keep navigation visible at all sizes with a scrollable icon strip when collapsed, consistent role labels and accessible controls.
+- [ ] Verify destinations and sidebar behaviour without changing permissions.
+
 # Dashboard navigation and logo cleanup
 - [x] Share state-aware honeycomb/undo sidebar controls across dashboard shells and keep the header toggle accessible.
 - [x] Remove duplicate sidebar and centre-header logos; verified a single system logo and working collapse/expand on Roles Management.
