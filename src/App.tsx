@@ -65,6 +65,9 @@ import OrganizationSettings from "./pages/OrganizationSettings";
 import SupportTickets from "./pages/SupportTickets";
 import TraineeAffairs from "./pages/TraineeAffairs";
 import Library from "./pages/Library";
+import GraduationSurveys from "./pages/GraduationSurveys";
+import SurveyResponse from "./pages/SurveyResponse";
+import GraduationRsvp from "./pages/GraduationRsvp";
 import RoleActivityDashboard from "./pages/RoleActivityDashboard";
 import ModulesManagement from "./pages/ModulesManagement";
 import NotFound from "./pages/NotFound";
@@ -266,6 +269,9 @@ const ProtectedRoleActivityDashboard = withRoleAccess(RoleActivityDashboard, {
 const ProtectedAlumniManagement = withRoleAccess(AlumniManagement, {
   requiredRoles: ["admin", "super_admin", "placement_officer"],
 });
+const ProtectedGraduationSurveys = withRoleAccess(GraduationSurveys, {
+  requiredRoles: ["admin", "organization_admin", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
+});
 const ProtectedHostelManagement = withRoleAccess(HostelManagement, {
   requiredRoles: ["hostel_coordinator", "admin"],
 });
@@ -300,6 +306,9 @@ const App = () => (
           <Route path="/" element={<PublicHome />} />
           <Route path="/apply" element={<PublicHome />} />
           <Route path="/apply/:slug" element={<PublicHome />} />
+
+          <Route path="/survey/:token" element={<SurveyResponse />} />
+          <Route path="/graduation/rsvp/:token" element={<GraduationRsvp />} />
 
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -393,6 +402,7 @@ const App = () => (
           <Route path="/organization-settings" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
           <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />
+          <Route path="/graduation" element={<ProtectedRoute><ProtectedGraduationSurveys /></ProtectedRoute>} />
           <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />

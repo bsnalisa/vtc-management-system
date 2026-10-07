@@ -44,6 +44,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Role Activity", url: "/role-activity", icon: BarChart3 },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
   { title: "Resource Centre", url: "/library", icon: BookOpen },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
 ];
 
@@ -55,6 +56,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
   { title: "Modules", url: "/modules-management", icon: BookOpen },
   { title: "Resource Centre", url: "/library", icon: BookOpen },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "System Logs", url: "/system-logs", icon: FileText },
 ];
@@ -182,6 +184,7 @@ export const procurementNavItems: NavItem[] = [
 export const placementOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/placement-officer-dashboard", icon: LayoutDashboard },
   { title: "Alumni Management", url: "/alumni", icon: Users },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
 ];
 
 // Hostel Coordinator Navigation
@@ -224,6 +227,7 @@ export const headOfTraineeSupportNavItems: NavItem[] = [
   { title: "Pending Approvals", url: "/trainee-support/pending-approvals", icon: ClipboardCheck },
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Trainee Affairs", url: "/trainee-affairs", icon: ClipboardList },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Officer Activity", url: "/trainee-support/officer-activity", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
