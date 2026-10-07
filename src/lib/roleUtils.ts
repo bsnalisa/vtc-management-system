@@ -22,6 +22,8 @@ export const getRoleDisplayName = (role: UserRole): string => {
     bdl_coordinator: "BDL Coordinator",
     rpl_coordinator: "RPL Coordinator",
     librarian: "Librarian",
+    subject_matter_expert: "Subject Matter Expert",
+    printing_distribution_officer: "Printing & Distribution Officer",
     trainee: "Trainee",
   };
 
@@ -50,6 +52,8 @@ export const getRoleDashboardPath = (role: UserRole): string => {
     bdl_coordinator: "/bdl-coordinator-dashboard",
     rpl_coordinator: "/rpl-coordinator-dashboard",
     librarian: "/library",
+    subject_matter_expert: "/assessment-development",
+    printing_distribution_officer: "/assessment-sittings",
     trainee: "/trainee-dashboard",
   };
 

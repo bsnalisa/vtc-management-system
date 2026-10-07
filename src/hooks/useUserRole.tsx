@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type UserRole = "super_admin" | "organization_admin" | "admin" | "head_of_training" | "trainer" | "registration_officer" | "debtor_officer" | "hod" | "assessment_coordinator" | "stock_control_officer" | "asset_maintenance_coordinator" | "procurement_officer" | "placement_officer" | "hostel_coordinator" | "head_of_trainee_support" | "liaison_officer" | "resource_center_coordinator" | "projects_coordinator" | "hr_officer" | "bdl_coordinator" | "rpl_coordinator" | "librarian" | "trainee" | null;
+export type UserRole = "super_admin" | "organization_admin" | "admin" | "head_of_training" | "trainer" | "registration_officer" | "debtor_officer" | "hod" | "assessment_coordinator" | "stock_control_officer" | "asset_maintenance_coordinator" | "procurement_officer" | "placement_officer" | "hostel_coordinator" | "head_of_trainee_support" | "liaison_officer" | "resource_center_coordinator" | "projects_coordinator" | "hr_officer" | "bdl_coordinator" | "rpl_coordinator" | "librarian" | "subject_matter_expert" | "printing_distribution_officer" | "trainee" | null;
 
 // Cache for current user's role to avoid repeated calls
 let cachedRole: UserRole = null;

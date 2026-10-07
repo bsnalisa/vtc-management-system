@@ -66,6 +66,9 @@ import SupportTickets from "./pages/SupportTickets";
 import TraineeAffairs from "./pages/TraineeAffairs";
 import Library from "./pages/Library";
 import AssessmentRequests from "./pages/AssessmentRequests";
+import AssessmentDevelopment from "./pages/AssessmentDevelopment";
+import AssessmentSittings from "./pages/AssessmentSittings";
+import SmeRegistration from "./pages/SmeRegistration";
 import TraineeRequestsPage from "./pages/trainee/TraineeRequestsPage";
 import GraduationSurveys from "./pages/GraduationSurveys";
 import SurveyResponse from "./pages/SurveyResponse";
@@ -277,6 +280,12 @@ const ProtectedGraduationSurveys = withRoleAccess(GraduationSurveys, {
 const ProtectedAssessmentRequests = withRoleAccess(AssessmentRequests, {
   requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer"],
 });
+const ProtectedAssessmentDevelopment = withRoleAccess(AssessmentDevelopment, {
+  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "subject_matter_expert"],
+});
+const ProtectedAssessmentSittings = withRoleAccess(AssessmentSittings, {
+  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "printing_distribution_officer"],
+});
 const ProtectedHostelManagement = withRoleAccess(HostelManagement, {
   requiredRoles: ["hostel_coordinator", "admin"],
 });
@@ -312,6 +321,7 @@ const App = () => (
           <Route path="/apply" element={<PublicHome />} />
           <Route path="/apply/:slug" element={<PublicHome />} />
 
+          <Route path="/sme-registration/:slug" element={<SmeRegistration />} />
           <Route path="/survey/:token" element={<SurveyResponse />} />
           <Route path="/graduation/rsvp/:token" element={<GraduationRsvp />} />
 
@@ -409,6 +419,8 @@ const App = () => (
           <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />
           <Route path="/graduation" element={<ProtectedRoute><ProtectedGraduationSurveys /></ProtectedRoute>} />
           <Route path="/assessment-requests" element={<ProtectedRoute><ProtectedAssessmentRequests /></ProtectedRoute>} />
+          <Route path="/assessment-development" element={<ProtectedRoute><ProtectedAssessmentDevelopment /></ProtectedRoute>} />
+          <Route path="/assessment-sittings" element={<ProtectedRoute><ProtectedAssessmentSittings /></ProtectedRoute>} />
           <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />

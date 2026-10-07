@@ -20,6 +20,8 @@ import {
   bdlCoordinatorNavItems,
   rplCoordinatorNavItems,
   librarianNavItems,
+  smeNavItems,
+  printingOfficerNavItems,
 } from "@/lib/navigationConfig";
 import { getRoleDashboardPath, getRoleDisplayName } from "@/lib/roleUtils";
 
@@ -70,6 +72,10 @@ export const useRoleNavigation = () => {
         return rplCoordinatorNavItems;
       case "librarian":
         return librarianNavItems;
+      case "subject_matter_expert":
+        return smeNavItems;
+      case "printing_distribution_officer":
+        return printingOfficerNavItems;
       default:
         return adminNavItems;
     }
@@ -119,6 +125,10 @@ export const useRoleNavigation = () => {
         return "RPL Management";
       case "librarian":
         return "Resource Centre";
+      case "subject_matter_expert":
+        return "Assessment Development";
+      case "printing_distribution_officer":
+        return "Printing & Distribution";
       default:
         return "Navigation";
     }

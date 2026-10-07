@@ -43,6 +43,9 @@ export const adminNavItems: NavItem[] = [
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Role Activity", url: "/role-activity", icon: BarChart3 },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
+  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
+  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
+  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
   { title: "Resource Centre", url: "/library", icon: BookOpen },
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
@@ -55,6 +58,9 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
   { title: "Modules", url: "/modules-management", icon: BookOpen },
+  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
+  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
+  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
   { title: "Resource Centre", url: "/library", icon: BookOpen },
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
@@ -127,6 +133,8 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Timetable", url: "/timetable", icon: Calendar },
   { title: "Exam Publishing", url: "/exam-timetable-publishing", icon: Calendar },
   { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
+  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
+  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
@@ -214,6 +222,16 @@ export const hrOfficerNavItems: NavItem[] = [
   { title: "Recruitment", url: "/hr/recruitment", icon: Briefcase },
   { title: "Performance", url: "/hr/performance", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
+];
+
+// Subject Matter Expert Navigation
+export const smeNavItems: NavItem[] = [
+  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
+];
+
+// Printing & Distribution Officer Navigation
+export const printingOfficerNavItems: NavItem[] = [
+  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
 ];
 
 // Librarian Navigation
