@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "./useOrganizationContext";
 
 // These tables are newer than the generated Supabase types, so access them untyped.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
 export type AffairsRecordType =
