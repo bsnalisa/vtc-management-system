@@ -1,7 +1,7 @@
 # Mobile-first layout review
 - [x] Audit shared layouts, tables, tabs, dialogs and crowded pages for overlap.
 - [x] Apply presentation-only smaller-screen fixes and verify signed-in/public screens.
-- [ ] Confirm access boundaries before addressing the three flagged security policies. Blocker: approval needed for attendance, schedule-history and permission visibility changes.
+- [ ] Apply and verify approved centre-scoped attendance, schedule-history and permission access.
 
 # Branding and loading consistency
 - [x] Unify application branding across public pages and shared signed-in layouts.
