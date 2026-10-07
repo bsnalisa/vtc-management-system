@@ -66,7 +66,7 @@ function SuperAdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <div className="flex items-center gap-3 px-3 py-5"><AppLogo />{open && <span className="font-semibold text-sidebar-foreground">VTC System</span>}</div>
+        {open && <div className="px-4 py-5 font-semibold text-sidebar-foreground">VTC System</div>}
         {/* Role Badge in Sidebar Header */}
         <div className="px-4 py-3 border-b">
           <div 

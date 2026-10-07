@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LogOut, UserCircle, LucideIcon, Shield, GraduationCap, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import { LogOut, UserCircle, LucideIcon, Shield, GraduationCap } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { useUserRole } from "@/hooks/useUserRole";
 import { getRoleDisplayName } from "@/lib/roleUtils";
@@ -27,7 +27,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Lock } from "lucide-react";
 import { useLogActivity } from "@/hooks/useRoleActivity";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast as showToast } from "sonner";
 import { signOutAndClearCaches } from "@/lib/authUtils";
 import { AppLogo } from "@/components/AppLogo";
@@ -58,7 +57,7 @@ function DashboardSidebar({
 }) {
   const location = useLocation();
   const { mutate: logActivity } = useLogActivity();
-  const { state, toggleSidebar } = useSidebar();
+   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => location.pathname === path;
@@ -83,7 +82,7 @@ function DashboardSidebar({
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
       <SidebarContent className="pt-0">
-        <div className={`flex items-center gap-3 px-3 py-5 ${isCollapsed ? "justify-center" : ""}`}><AppLogo />{!isCollapsed && <span className="font-semibold text-sidebar-foreground">VTC System</span>}</div>
+        {!isCollapsed && <div className="px-4 py-5 font-semibold text-sidebar-foreground">VTC System</div>}
         {/* Sidebar Header with Toggle */}
         <div className={`flex items-center border-b h-14 px-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
@@ -105,28 +104,7 @@ function DashboardSidebar({
             </TooltipProvider>
           )}
           
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  onClick={toggleSidebar}
-                >
-                  {isCollapsed ? (
-                    <PanelLeftOpen className="h-4 w-4" />
-                  ) : (
-                    <PanelLeftClose className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">Toggle Sidebar</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side={isCollapsed ? "right" : "bottom"}>
-                <p>{isCollapsed ? "Expand sidebar" : "Collapse sidebar"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <SidebarTrigger className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" />
         </div>
 
         {/* Collapsed Role Icon */}
@@ -219,19 +197,11 @@ function TopHeader({
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:gap-3 sm:px-4 fixed top-0 left-0 right-0 z-50">
-      <SidebarTrigger className="shrink-0 md:hidden" />
+      <SidebarTrigger className="shrink-0" />
       <AppLogo className="h-8 w-8" />
       {/* Organization Branding */}
       {organizationName && (
         <div className="flex flex-1 items-center gap-2 min-w-0">
-          {settings?.logo_url && (
-            <Avatar className="h-8 w-8 shrink-0">
-              <AvatarImage src={settings.logo_url} alt={organizationName} />
-              <AvatarFallback className="text-xs">
-                {organizationName.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          )}
           <span className="font-semibold text-foreground text-sm truncate">
             {organizationName}
           </span>
