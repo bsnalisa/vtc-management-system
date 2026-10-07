@@ -55,12 +55,12 @@ export default function RoleWorkspace() {
         case "library_items": {
           const { data, error } = await supabase.from("library_items").select("id,title,author,item_type,available_copies,total_copies,active").eq("organization_id", organizationId).order("title");
           if (error) throw error;
-          return data.map(row => ({ id: row.id, title: row.title, details: [row.author, row.item_type.replaceAll("_", " "), `${row.available_copies} of ${row.total_copies} copies available`].filter(Boolean).join(" · "), status: row.active ? "Active" : "Inactive" }));
+          return data.map(row => ({ id: row.id, title: row.title, details: [row.author, row.item_type.replace(/_/g, " "), `${row.available_copies} of ${row.total_copies} copies available`].filter(Boolean).join(" · "), status: row.active ? "Active" : "Inactive" }));
         }
         case "library_borrowing": {
           const { data, error } = await supabase.from("library_borrowing").select("id,due_date,borrow_date,status,library_items(title)").eq("organization_id", organizationId).order("borrow_date", { ascending: false });
           if (error) throw error;
-          return data.map(row => ({ id: row.id, title: row.library_items?.title || "Resource loan", details: `Borrowed ${row.borrow_date} · Due ${row.due_date}`, status: row.status.replaceAll("_", " ") }));
+          return data.map(row => ({ id: row.id, title: row.library_items?.title || "Resource loan", details: `Borrowed ${row.borrow_date} · Due ${row.due_date}`, status: row.status.replace(/_/g, " ") }));
         }
         case "public_rpl_applications": {
           const { data, error } = await supabase.from("public_rpl_applications").select("id,reference_number,applicant_name,occupation,years_experience,status,created_at,motivation,staff_notes").eq("organization_id", organizationId).order("created_at", { ascending: false });
