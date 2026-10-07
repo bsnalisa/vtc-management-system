@@ -4,3 +4,5 @@
 - Load locally packaged fonts through the global stylesheet so system typography does not depend on remote font requests.
 - Organization branding may customize content accent tokens, but sidebar tokens always inherit the shared workspace theme; removing branding restores stylesheet defaults.
 - Keep the public training hero in a dedicated component using the shared Embla carousel and UI controls, with pause-on-interaction and reduced-motion support to preserve accessibility independently of application workflows.
+- Use AppLogo and its shared favicon asset for application branding; keep uploaded organization logos separate as centre identity so tenant branding cannot replace the system mark.
+- All animated loading states use LoadingIndicator directly or through LoadingSpinner/ButtonSpinner so pages, permission checks and action buttons share accessible graduation-cap motion.
