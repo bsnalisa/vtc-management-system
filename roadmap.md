@@ -1,3 +1,8 @@
+# Mobile-first layout review
+- [ ] Audit shared layouts, tables, tabs, dialogs and crowded pages for overlap.
+- [ ] Apply presentation-only smaller-screen fixes and verify signed-in/public screens.
+- [ ] Confirm access boundaries before addressing the three flagged security policies.
+
 # Branding and loading consistency
 - [x] Unify application branding across public pages and shared signed-in layouts.
 - [x] Standardize loading indicators and verify public screens.
