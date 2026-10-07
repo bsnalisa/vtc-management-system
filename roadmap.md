@@ -1,7 +1,8 @@
 # Role menus and persistent sidebar
-- [ ] Add dedicated Liaison Officer and Resource Centre Coordinator navigation and resolve missing menu destinations.
-- [ ] Keep navigation visible at all sizes with a scrollable icon strip when collapsed, consistent role labels and accessible controls.
-- [ ] Verify destinations and sidebar behaviour without changing permissions.
+- [x] Add dedicated Liaison Officer and Resource Centre Coordinator menus, dashboards, partner directory, resource catalogue and loans; resolve missing menu destinations with explicit setup-required pages where no persistent records module exists.
+- [x] Keep navigation visible at all sizes with a scrollable icon strip when collapsed, consistent role labels and accessible controls.
+- [x] Verify all new destinations using the available Super Admin session and sidebar keyboard behaviour at 320, 375, 763 and 1280px without changing permissions; role-specific centre records need corresponding sessions.
+- [ ] Implement persistent HR, project, BDL delivery and RPL portfolio/scheduling/credit modules separately; current setup-required pages do not create or manage those records.
 
 # Dashboard navigation and logo cleanup
 - [x] Share state-aware honeycomb/undo sidebar controls across dashboard shells and keep the header toggle accessible.
