@@ -1,3 +1,7 @@
+# Dashboard navigation and logo cleanup
+- [x] Share state-aware honeycomb/undo sidebar controls across dashboard shells and keep the header toggle accessible.
+- [x] Remove duplicate sidebar and centre-header logos; verified a single system logo and working collapse/expand on Roles Management.
+
 # Roles Management overlap follow-up
 - [x] Reproduce and fix crowded headings, action buttons and role/permission tables; verified heading/action separation and no page overflow at 320, 375, 824 and 1280px, plus working Create Role and Permissions controls.
 - [x] Applied approved centre-scoped assessment and trainer-trade read access; verified persisted predicates and anonymous SELECT denial. Other-role end-to-end checks require matching sessions and records.

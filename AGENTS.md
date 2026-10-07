@@ -5,6 +5,7 @@
 - Organization branding may customize content accent tokens, but sidebar tokens always inherit the shared workspace theme; removing branding restores stylesheet defaults.
 - Keep the public training hero in a dedicated component using the shared Embla carousel and UI controls, with pause-on-interaction and reduced-motion support to preserve accessibility independently of application workflows.
 - Use AppLogo and its shared favicon asset for application branding; keep uploaded organization logos separate as centre identity so tenant branding cannot replace the system mark.
+- Dashboard shells render AppLogo only in the persistent header and use shared SidebarTrigger for state-aware navigation controls, keeping branding unique and reopening navigation accessible.
 - All animated loading states use LoadingIndicator directly or through LoadingSpinner/ButtonSpinner so pages, permission checks and action buttons share accessible graduation-cap motion.
 - Shared UI primitives own narrow-screen containment for tabs, tables and dialogs; page action rows stack before expanding to preserve readable text without hiding workflows.
 - Attendance, timetable history, assessment and trainer-assignment read policies use authenticated centre-role membership and relevant trainee/trainer access; SECURITY DEFINER helpers avoid recursive related-table RLS checks, and write policies must not bypass read boundaries.

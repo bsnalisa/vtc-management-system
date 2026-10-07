@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-import { PanelLeft } from "lucide-react";
+import { Undo2 } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -218,7 +218,9 @@ Sidebar.displayName = "Sidebar";
 
 const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.ComponentProps<typeof Button>>(
   ({ className, onClick, ...props }, ref) => {
-    const { toggleSidebar } = useSidebar();
+    const { toggleSidebar, state, isMobile, openMobile } = useSidebar();
+    const expanded = isMobile ? openMobile : state === "expanded";
+    const label = expanded ? "Collapse sidebar" : "Expand sidebar";
 
     return (
       <Button
@@ -226,15 +228,22 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         data-sidebar="trigger"
         variant="ghost"
         size="icon"
-        className={cn("h-7 w-7", className)}
+        className={cn("h-9 w-9 shrink-0 rounded-md transition-colors", className)}
+        aria-label={label}
+        aria-expanded={expanded}
+        title={label}
         onClick={(event) => {
           onClick?.(event);
           toggleSidebar();
         }}
         {...props}
       >
-        <PanelLeft />
-        <span className="sr-only">Toggle Sidebar</span>
+        {expanded ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true" className="h-5 w-5">
+            <path d="M8 2 12 4.3v4.6L8 11 4 8.9V4.3Z M16 2 20 4.3v4.6L16 11 12 8.9V4.3Z M12 11 16 13.3v4.6L12 20 8 17.9v-4.6Z" />
+          </svg>
+        ) : <Undo2 className="h-5 w-5" aria-hidden="true" />}
+        <span className="sr-only">{label}</span>
       </Button>
     );
   },
