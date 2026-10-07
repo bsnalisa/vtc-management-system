@@ -47,9 +47,11 @@ const SidebarProvider = React.forwardRef<
     defaultOpen?: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    persistent?: boolean;
   }
->(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
-  const isMobile = useIsMobile();
+>(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, persistent = false, className, style, children, ...props }, ref) => {
+  const smallScreen = useIsMobile();
+  const isMobile = smallScreen && !persistent;
   const [openMobile, setOpenMobile] = React.useState(false);
   // The control that opened the mobile navigation panel, so focus can return to it on close.
   const mobileOpenerRef = React.useRef<HTMLElement | null>(null);
@@ -58,7 +60,13 @@ const SidebarProvider = React.forwardRef<
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  const [_open, _setOpen] = React.useState(() => {
+    if (typeof window === 'undefined') return defaultOpen;
+    if (persistent && window.matchMedia('(max-width: 639px)').matches) return false;
+    const saved = document.cookie.split('; ').find(cookie => cookie.startsWith(`${SIDEBAR_COOKIE_NAME}=`))?.split('=')[1];
+    if (saved === 'true' || saved === 'false') return saved === 'true';
+    return persistent && window.matchMedia('(max-width: 639px)').matches ? false : defaultOpen;
+  });
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -194,7 +202,7 @@ const Sidebar = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="group peer hidden text-sidebar-foreground md:block"
+      className="group peer block shrink-0 text-sidebar-foreground"
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
@@ -203,7 +211,7 @@ const Sidebar = React.forwardRef<
       {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
-          "relative h-[calc(100svh-3.5rem)] w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear",
+          "relative h-[calc(100svh-var(--sidebar-top,3.5rem))] w-[--sidebar-width] max-sm:w-[--sidebar-width-icon] bg-transparent transition-[width] duration-200 ease-linear",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
@@ -213,7 +221,7 @@ const Sidebar = React.forwardRef<
       />
       <div
         className={cn(
-          "fixed top-14 bottom-0 z-10 hidden h-[calc(100svh-3.5rem)] w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed top-[var(--sidebar-top,3.5rem)] bottom-0 z-[60] flex h-[calc(100svh-var(--sidebar-top,3.5rem))] w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -227,6 +235,8 @@ const Sidebar = React.forwardRef<
       >
         <div
           id="app-sidebar"
+          role="navigation"
+          aria-label="Site navigation"
           data-sidebar="sidebar"
           className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
         >
@@ -373,7 +383,7 @@ const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"di
       ref={ref}
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden",
         className,
       )}
       {...props}

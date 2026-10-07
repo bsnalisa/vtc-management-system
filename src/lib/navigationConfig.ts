@@ -180,6 +180,25 @@ export const placementOfficerNavItems: NavItem[] = [
   { title: "Alumni Management", url: "/alumni", icon: Users },
 ];
 
+export const liaisonOfficerNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/liaison-officer-dashboard", icon: LayoutDashboard },
+  { title: "Industry Partners", url: "/liaison/partners", icon: Briefcase },
+  { title: "Messages", url: "/messages", icon: MessageSquare },
+  { title: "Staff Training", url: "/onboarding", icon: BookOpen },
+  { title: "Support Tickets", url: "/support-tickets", icon: FileText },
+  { title: "My Profile", url: "/profile", icon: UserCircle },
+];
+
+export const resourceCenterNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/resource-center-coordinator-dashboard", icon: LayoutDashboard },
+  { title: "Resource Catalogue", url: "/resource-center/catalogue", icon: BookOpen },
+  { title: "Resource Loans", url: "/resource-center/loans", icon: ClipboardList },
+  { title: "Staff Training", url: "/onboarding", icon: BookOpen },
+  { title: "Messages", url: "/messages", icon: MessageSquare },
+  { title: "Support Tickets", url: "/support-tickets", icon: FileText },
+  { title: "My Profile", url: "/profile", icon: UserCircle },
+];
+
 // Hostel Coordinator Navigation
 export const hostelCoordinatorNavItems: NavItem[] = [
   { title: "Dashboard", url: "/hostel-coordinator-dashboard", icon: LayoutDashboard },
@@ -193,7 +212,7 @@ export const hostelCoordinatorNavItems: NavItem[] = [
 export const projectsCoordinatorNavItems: NavItem[] = [
   { title: "Dashboard", url: "/projects-coordinator-dashboard", icon: LayoutDashboard },
   { title: "Projects", url: "/projects", icon: Briefcase },
-  { title: "Milestones", url: "/projects", icon: ClipboardCheck },
+  { title: "Milestones", url: "/projects/milestones", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 
@@ -222,7 +241,7 @@ export const bdlCoordinatorNavItems: NavItem[] = [
   { title: "Blended Courses", url: "/bdl/courses", icon: BookOpen },
   { title: "Learning Materials", url: "/bdl/materials", icon: FileText },
   { title: "Virtual Sessions", url: "/bdl/sessions", icon: Calendar },
-  { title: "Student Progress", url: "/bdl/progress", icon: BarChart3 },
+  { title: "Trainee Progress", url: "/bdl/progress", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 

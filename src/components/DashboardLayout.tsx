@@ -140,9 +140,10 @@ function DashboardSidebar({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <SidebarMenuButton asChild tooltip={item.title}>
+                          <SidebarMenuButton asChild tooltip={item.title} isActive={active}>
                             <NavLink
                               to={item.url}
+                               aria-label={item.title}
                               end
                                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isCollapsed ? 'justify-center px-2' : ''} ${active ? 'bg-sidebar-primary/20 text-sidebar-primary-foreground font-semibold' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}
                             >
@@ -198,7 +199,6 @@ function TopHeader({
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:gap-3 sm:px-4 fixed top-0 left-0 right-0 z-50">
-      <SidebarTrigger className="md:hidden text-muted-foreground hover:bg-accent hover:text-foreground" />
       <AppLogo className="h-8 w-8" />
       {/* Organization Branding */}
       {organizationName && (
@@ -253,9 +253,8 @@ export const DashboardLayout = ({
   const { role } = useUserRole();
   const roleNav = useRoleNavigation();
   // Navigation is always derived from the signed-in role so labels stay consistent across pages.
-  const useRoleNav = !!role && pageNavItems.length > 0;
-  const navItems = useRoleNav ? roleNav.navItems : pageNavItems;
-  const groupLabel = useRoleNav ? roleNav.groupLabel : pageGroupLabel;
+  const navItems = roleNav.navItems;
+  const groupLabel = roleNav.groupLabel;
   const { organizationName, settings } = useOrganizationContext();
   const queryClient = useQueryClient();
 
@@ -279,7 +278,7 @@ export const DashboardLayout = ({
   }, [location.pathname, role, title]);
   
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={true} persistent>
       <div className="dashboard-workspace h-svh flex flex-col w-full bg-background overflow-hidden">
         {/* Top Navigation Bar */}
         <TopHeader 

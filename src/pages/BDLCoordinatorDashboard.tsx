@@ -93,6 +93,7 @@ export default function BDLCoordinatorDashboard() {
       navItems={bdlCoordinatorNavItems}
     >
       <div className="space-y-6">
+        <Card className="border-amber-200 bg-amber-50"><CardContent className="p-4 text-sm text-amber-950">Demonstration dashboard: the figures and records below are sample data, not live BDL records. Use Learning Materials in the sidebar to browse actual centre library resources.</CardContent></Card>
         {/* Stats Overview */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>

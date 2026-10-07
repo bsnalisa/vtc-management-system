@@ -88,15 +88,16 @@ function SuperAdminSidebar() {
                 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={active}>
                       <NavLink
                         to={item.url}
+                        aria-label={item.title}
                         end={item.url === "/super-admin"}
                         className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${active ? "bg-sidebar-primary/20 text-sidebar-primary-foreground font-semibold" : "text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}
                       >
                         <Icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                        {active && (
+                        {open && <span>{item.title}</span>}
+                        {active && open && (
                           <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sidebar-primary" />
                         )}
                       </NavLink>
@@ -109,7 +110,7 @@ function SuperAdminSidebar() {
         </SidebarGroup>
 
         {/* Quick Stats Section */}
-        <SidebarGroup className="mt-8">
+        {open && <SidebarGroup className="mt-8">
           <SidebarGroupLabel>Platform Stats</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-3 px-2 py-1">
@@ -127,7 +128,7 @@ function SuperAdminSidebar() {
               </div>
             </div>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>}
       </SidebarContent>
     </Sidebar>
   );
@@ -158,7 +159,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider persistent style={{ "--sidebar-top": "0rem" } as React.CSSProperties}>
       <div className="dashboard-workspace h-svh flex w-full overflow-hidden bg-background">
         <SuperAdminSidebar />
         
@@ -168,7 +169,6 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
             <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3">
               <div className="flex min-w-0 items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-                  <SidebarTrigger className="md:hidden text-muted-foreground hover:bg-accent hover:text-foreground" />
                   <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <AppLogo className="h-8 w-8" />
                     <div className="min-w-0">
