@@ -268,39 +268,39 @@ export const ComprehensiveApplicationForm = ({
                 <TabsList className="w-full justify-start flex-nowrap h-auto py-2 bg-transparent gap-0.5 sm:gap-1 min-w-max">
                   <TabsTrigger value="personal" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <User className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden xs:inline">Personal</span>
+                    <span>Personal</span>
                   </TabsTrigger>
                   <TabsTrigger value="emergency" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden xs:inline">Emergency</span>
+                    <span>Emergency</span>
                   </TabsTrigger>
                   <TabsTrigger value="training" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <GraduationCap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden xs:inline">Training</span>
+                    <span>Training</span>
                   </TabsTrigger>
                   <TabsTrigger value="education" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Education</span>
+                    <span>Education</span>
                   </TabsTrigger>
                   <TabsTrigger value="employment" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <Briefcase className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Employment</span>
+                    <span>Employment</span>
                   </TabsTrigger>
                   <TabsTrigger value="assistance" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <Home className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Assistance</span>
+                    <span>Assistance</span>
                   </TabsTrigger>
                   <TabsTrigger value="health" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <Heart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Health</span>
+                    <span>Health</span>
                   </TabsTrigger>
                   <TabsTrigger value="ppe" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">PPE</span>
+                    <span>PPE</span>
                   </TabsTrigger>
                   <TabsTrigger value="declaration" className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Declaration</span>
+                    <span>Declaration</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
