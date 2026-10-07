@@ -94,16 +94,16 @@ export function PermissionsEditor({ role }: PermissionsEditorProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
+    <div className="min-w-0 space-y-6">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
+        <div className="min-w-0 break-words">
           <h3 className="text-lg font-semibold">Module Permissions</h3>
           <p className="text-sm text-muted-foreground">
             Configure what {role.role_name} can access and do
           </p>
         </div>
         {hasChanges && (
-          <Button onClick={handleSaveAll} disabled={upsertPermission.isPending}>
+          <Button className="shrink-0" onClick={handleSaveAll} disabled={upsertPermission.isPending}>
             {upsertPermission.isPending ? "Saving..." : "Save All Changes"}
           </Button>
         )}
@@ -119,7 +119,7 @@ export function PermissionsEditor({ role }: PermissionsEditorProps) {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[650px] table-fixed">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[250px]">Module</TableHead>
