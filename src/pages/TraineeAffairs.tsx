@@ -22,6 +22,7 @@ import {
   useCreateAffairsRecord,
   useUpdateAffairsRecord,
   useExtracurricularEvents,
+  useSendEventReminders,
   useCreateExtracurricularEvent,
   useAnonymousSubmissions,
   useUpdateAnonymousSubmission,
@@ -172,6 +173,7 @@ function RecordsTab({ type, label, hasSeverity }: { type: AffairsRecordType; lab
 function EventsTab() {
   const { data, isLoading } = useExtracurricularEvents();
   const create = useCreateExtracurricularEvent();
+  const remind = useSendEventReminders();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", category: "sport", location: "", start_date: "", description: "", reminder_days_before: 1 });
 
@@ -184,7 +186,8 @@ function EventsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" disabled={remind.isPending} onClick={() => remind.mutate()}>Send due reminders now</Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Schedule event</Button></DialogTrigger>
           <DialogContent>
@@ -217,7 +220,7 @@ function EventsTab() {
         <p className="text-sm text-muted-foreground text-center py-8">No events scheduled.</p>
       ) : (
         <Table>
-          <TableHeader><TableRow><TableHead>When</TableHead><TableHead>Event</TableHead><TableHead>Category</TableHead><TableHead>Location</TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>When</TableHead><TableHead>Event</TableHead><TableHead>Category</TableHead><TableHead>Location</TableHead><TableHead>Reminder</TableHead></TableRow></TableHeader>
           <TableBody>
             {data.map((ev) => (
               <TableRow key={ev.id}>
@@ -225,6 +228,7 @@ function EventsTab() {
                 <TableCell className="font-medium">{ev.title}</TableCell>
                 <TableCell><Badge variant="secondary">{ev.category.replace("_", " ")}</Badge></TableCell>
                 <TableCell>{ev.location ?? "-"}</TableCell>
+                <TableCell>{ev.reminder_sent ? "Sent" : `${ev.reminder_days_before} day(s) before`}</TableCell>
               </TableRow>
             ))}
           </TableBody>

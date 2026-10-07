@@ -122,6 +122,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Results", url: "/trainee/exams/results", icon: BookOpen },
   { title: "Fee Statement", url: "/trainee/finance", icon: DollarSign },
   { title: "Payments", url: "/trainee/payments", icon: CreditCard },
+  { title: "Calendar & Events", url: "/trainee/events", icon: Calendar },
   { title: "Industrial Logbook", url: "/trainee/logbook", icon: BookOpen },
   { title: "Assessment Requests", url: "/trainee/requests", icon: ClipboardCheck },
   { title: "Library", url: "/library", icon: BookOpen },

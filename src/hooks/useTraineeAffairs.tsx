@@ -35,6 +35,7 @@ export interface ExtracurricularEvent {
   start_date: string;
   end_date: string | null;
   reminder_days_before: number;
+  reminder_sent: boolean;
 }
 
 export interface AnonymousSubmission {
@@ -184,3 +185,23 @@ export const useUpdateAnonymousSubmission = () =>
     ["anonymous-submissions"],
     "Status updated",
   );
+
+/** Sends the reminders that are due. Each event is reminded once; the same function also runs on a schedule. */
+export const useSendEventReminders = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { organizationId } = useOrganizationContext();
+  return useMutation({
+    mutationFn: async () => {
+      if (!organizationId) throw new Error("No organization ID");
+      const { data, error } = await db.rpc("extracurricular_send_reminders", { _org: organizationId });
+      if (error) throw error;
+      return data as number;
+    },
+    onSuccess: (n) => {
+      queryClient.invalidateQueries({ queryKey: ["extracurricular-events"] });
+      toast({ title: n ? "Reminders sent" : "Nothing to send", description: n ? `Reminders went out for ${n} event${n === 1 ? "" : "s"}.` : "No event is inside its reminder window, or its reminder was already sent." });
+    },
+    onError: (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
+  });
+};

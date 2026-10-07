@@ -74,6 +74,7 @@ import MyApprovals from "./pages/MyApprovals";
 import WorkflowAction from "./pages/WorkflowAction";
 import LogbookReview from "./pages/LogbookReview";
 import TraineeLogbookPage from "./pages/trainee/TraineeLogbookPage";
+import TraineeEventsPage from "./pages/trainee/TraineeEventsPage";
 import SmeRegistration from "./pages/SmeRegistration";
 import TraineeRequestsPage from "./pages/trainee/TraineeRequestsPage";
 import GraduationSurveys from "./pages/GraduationSurveys";
@@ -462,6 +463,7 @@ const App = () => (
           <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
           <Route path="/trainee/requests" element={<ProtectedRoute><TraineeRequestsPage /></ProtectedRoute>} />
           <Route path="/trainee/logbook" element={<ProtectedRoute><TraineeLogbookPage /></ProtectedRoute>} />
+          <Route path="/trainee/events" element={<ProtectedRoute><TraineeEventsPage /></ProtectedRoute>} />
           <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />
           <Route path="/trainee/exams/timetable" element={<ProtectedRoute><TraineeExamTimetablePage /></ProtectedRoute>} />
