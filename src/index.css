@@ -63,6 +63,9 @@ All colors MUST be HSL.
     --shadow-raised: 0 8px 24px hsl(var(--foreground) / 0.08);
     --success: 152 55% 34%;
     --warning: 36 85% 36%;
+    --hero-foreground: 0 0% 100%;
+    --hero-overlay: 218 40% 8%;
+    --hero-shade: linear-gradient(90deg, hsl(var(--hero-overlay) / 0.86) 0%, hsl(var(--hero-overlay) / 0.68) 32%, hsl(var(--hero-overlay) / 0.12) 65%, hsl(var(--hero-overlay) / 0.05) 100%);
 
     --sidebar-background: 217.895 47.5% 15.686%;
     --sidebar-foreground: 0 0% 100%;
@@ -145,6 +148,20 @@ All colors MUST be HSL.
 }
 
 @layer components {
+  .training-hero-frame { height: min(650px, 68svh); min-height: 470px; overflow: hidden; }
+  .training-hero-image { height: 100%; width: 100%; object-fit: cover; object-position: center; }
+  .training-hero-shade { background: var(--hero-shade); }
+  .training-hero-copy, .training-hero-caption { color: hsl(var(--hero-foreground)); }
+  .training-hero-description { color: hsl(var(--hero-foreground) / 0.85); }
+  .hero-outline { background: hsl(var(--hero-overlay) / 0.15); color: hsl(var(--hero-foreground)); border-color: hsl(var(--hero-foreground) / 0.5); }
+  .hero-outline:hover { background: hsl(var(--hero-foreground) / 0.15); color: hsl(var(--hero-foreground)); }
+  @media (max-width: 639px) {
+    .training-hero-frame { height: min(610px, 72svh); min-height: 490px; }
+    .training-hero-image { object-position: 62% center; }
+    .training-hero-shade { background: linear-gradient(90deg, hsl(var(--hero-overlay) / 0.84), hsl(var(--hero-overlay) / 0.45)); }
+    .training-hero-copy { padding-bottom: 12px; }
+    .training-hero-copy h1 { font-size: 2.25rem; overflow-wrap: anywhere; }
+  }
   .workspace-panel { box-shadow: var(--shadow-panel); }
   .workspace-panel:hover { box-shadow: var(--shadow-raised); }
   .dashboard-workspace [data-sidebar="menu-button"] { min-height: 2.5rem; }
