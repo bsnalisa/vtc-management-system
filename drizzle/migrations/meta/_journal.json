@@ -8,6 +8,13 @@
       "when": 1791405231333,
       "tag": "0000_scope_flagged_record_access_to_centres",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791405538447,
+      "tag": "0001_scope_assessment_and_trainer_assignment_reads",
+      "breakpoints": true
     }
   ]
 }

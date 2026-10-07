@@ -1,6 +1,6 @@
 # Roles Management overlap follow-up
 - [x] Reproduce and fix crowded headings, action buttons and role/permission tables; verified heading/action separation and no page overflow at 320, 375, 824 and 1280px, plus working Create Role and Permissions controls.
-- [ ] Resolve flagged assessment and trainer-trade read access after approval of access boundaries.
+- [x] Applied approved centre-scoped assessment and trainer-trade read access; verified persisted predicates and anonymous SELECT denial. Other-role end-to-end checks require matching sessions and records.
 
 # Mobile-first layout review
 - [x] Audit shared layouts, tables, tabs, dialogs and crowded pages for overlap.
