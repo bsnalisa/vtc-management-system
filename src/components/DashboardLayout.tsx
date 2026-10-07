@@ -30,6 +30,7 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { toast as showToast } from "sonner";
 import { signOutAndClearCaches } from "@/lib/authUtils";
 import { AppLogo } from "@/components/AppLogo";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 
 interface NavItem {
   title: string;
@@ -242,14 +243,19 @@ export const DashboardLayout = ({
   children, 
   title, 
   subtitle,
-  navItems,
-  groupLabel,
+  navItems: pageNavItems,
+  groupLabel: pageGroupLabel,
   statsContent
 }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const location = useLocation();
   const { role } = useUserRole();
+  const roleNav = useRoleNavigation();
+  // Navigation is always derived from the signed-in role so labels stay consistent across pages.
+  const useRoleNav = !!role && pageNavItems.length > 0;
+  const navItems = useRoleNav ? roleNav.navItems : pageNavItems;
+  const groupLabel = useRoleNav ? roleNav.groupLabel : pageGroupLabel;
   const { organizationName, settings } = useOrganizationContext();
   const queryClient = useQueryClient();
 
