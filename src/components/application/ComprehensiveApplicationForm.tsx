@@ -255,7 +255,7 @@ export const ComprehensiveApplicationForm = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-[95vw] max-w-5xl max-h-[95vh] p-0 flex flex-col overflow-hidden">
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0 shrink-0">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <DialogTitle className="text-lg sm:text-xl">Trainee Application Form</DialogTitle>
             <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
           </div>
@@ -315,7 +315,7 @@ export const ComprehensiveApplicationForm = ({
                     <CardDescription>Upload a passport-sized photo</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                       <div className="w-32 h-40 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted">
                         <Camera className="h-8 w-8 text-muted-foreground" />
                       </div>
@@ -999,7 +999,7 @@ export const ComprehensiveApplicationForm = ({
                     <CardDescription>Provide your clothing sizes for PPE allocation</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label>Shoe Size</Label>
                         <Select value={formData.shoe_size || ""} onValueChange={(v) => updateField("shoe_size", v)}>
@@ -1167,7 +1167,7 @@ export const ComprehensiveApplicationForm = ({
                 className="flex-1 sm:flex-none"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">Previous</span>
+                <span>Previous</span>
               </Button>
               {activeTab !== TAB_ORDER[TAB_ORDER.length - 1] ? (
                 <Button
@@ -1175,7 +1175,7 @@ export const ComprehensiveApplicationForm = ({
                   onClick={goToNextTab}
                   className="flex-1 sm:flex-none"
                 >
-                  <span className="hidden sm:inline">Next</span>
+                  <span>Next</span>
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
