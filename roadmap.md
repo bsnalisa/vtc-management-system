@@ -1,4 +1,8 @@
 # System UI refresh
+# Homepage carousel
+- [ ] Add vocational-training imagery and an interactive homepage carousel.
+- [ ] Rearrange homepage sections and verify carousel controls and application navigation.
+
 - [x] Apply Quiet workspace colour, font and shared control styling.
 - [x] Restyle shared navigation and role dashboards without workflow changes.
 - [x] Align public homepage with the selected visual language.
