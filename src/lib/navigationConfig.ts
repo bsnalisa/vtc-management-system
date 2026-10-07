@@ -20,6 +20,7 @@ import {
   CreditCard,
   Home,
   History,
+  DoorClosed,
   LucideIcon,
 } from "lucide-react";
 
