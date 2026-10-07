@@ -27,6 +27,7 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  mobileOpenerRef: React.MutableRefObject<HTMLElement | null>;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -50,6 +51,10 @@ const SidebarProvider = React.forwardRef<
 >(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
+  // The control that opened the mobile navigation panel, so focus can return to it on close.
+  const mobileOpenerRef = React.useRef<HTMLElement | null>(null);
+  const openMobileRef = React.useRef(openMobile);
+  openMobileRef.current = openMobile;
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -72,7 +77,13 @@ const SidebarProvider = React.forwardRef<
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
+    if (isMobile) {
+      if (!openMobileRef.current) {
+        mobileOpenerRef.current = document.activeElement as HTMLElement | null;
+      }
+      return setOpenMobile((open) => !open);
+    }
+    return setOpen((open) => !open);
   }, [isMobile, setOpen, setOpenMobile]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
@@ -101,6 +112,7 @@ const SidebarProvider = React.forwardRef<
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      mobileOpenerRef,
     }),
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
