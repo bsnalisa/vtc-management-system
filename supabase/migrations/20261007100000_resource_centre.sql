@@ -205,7 +205,8 @@ DECLARE
   n integer := 0;
   d integer;
 BEGIN
-  IF auth.uid() IS NOT NULL AND NOT public.is_library_staff(auth.uid(), _org) THEN
+  -- Library staff, or the scheduler (service role). Anonymous callers have no uid and must not pass.
+  IF NOT (public.is_library_staff(auth.uid(), _org) OR auth.role() = 'service_role') THEN
     RAISE EXCEPTION 'Not authorised';
   END IF;
   SELECT * INTO s FROM public.library_settings WHERE organization_id = _org;
@@ -271,3 +272,8 @@ BEGIN
   GET DIAGNOSTICS n = ROW_COUNT;
   RETURN n;
 END $$;
+
+-- The librarian role must exist in custom_roles or validate_role_assignment() rejects it.
+INSERT INTO public.custom_roles (role_code, role_name, description, is_system_role, active)
+VALUES ('librarian', 'Librarian', 'Manages the resource centre: catalogue, circulation, members and fines', true, true)
+ON CONFLICT (role_code) DO NOTHING;

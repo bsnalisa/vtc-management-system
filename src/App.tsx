@@ -68,6 +68,9 @@ import Library from "./pages/Library";
 import AssessmentRequests from "./pages/AssessmentRequests";
 import AssessmentDevelopment from "./pages/AssessmentDevelopment";
 import AssessmentSittings from "./pages/AssessmentSittings";
+import DeliveryPlans from "./pages/DeliveryPlans";
+import LogbookReview from "./pages/LogbookReview";
+import TraineeLogbookPage from "./pages/trainee/TraineeLogbookPage";
 import SmeRegistration from "./pages/SmeRegistration";
 import TraineeRequestsPage from "./pages/trainee/TraineeRequestsPage";
 import GraduationSurveys from "./pages/GraduationSurveys";
@@ -286,6 +289,12 @@ const ProtectedAssessmentDevelopment = withRoleAccess(AssessmentDevelopment, {
 const ProtectedAssessmentSittings = withRoleAccess(AssessmentSittings, {
   requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "printing_distribution_officer"],
 });
+const ProtectedDeliveryPlans = withRoleAccess(DeliveryPlans, {
+  requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "assessment_coordinator", "trainer"],
+});
+const ProtectedLogbookReview = withRoleAccess(LogbookReview, {
+  requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "placement_officer", "trainer"],
+});
 const ProtectedHostelManagement = withRoleAccess(HostelManagement, {
   requiredRoles: ["hostel_coordinator", "admin"],
 });
@@ -421,6 +430,8 @@ const App = () => (
           <Route path="/assessment-requests" element={<ProtectedRoute><ProtectedAssessmentRequests /></ProtectedRoute>} />
           <Route path="/assessment-development" element={<ProtectedRoute><ProtectedAssessmentDevelopment /></ProtectedRoute>} />
           <Route path="/assessment-sittings" element={<ProtectedRoute><ProtectedAssessmentSittings /></ProtectedRoute>} />
+          <Route path="/delivery-plans" element={<ProtectedRoute><ProtectedDeliveryPlans /></ProtectedRoute>} />
+          <Route path="/logbook-review" element={<ProtectedRoute><ProtectedLogbookReview /></ProtectedRoute>} />
           <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
@@ -441,6 +452,7 @@ const App = () => (
           <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
           <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
           <Route path="/trainee/requests" element={<ProtectedRoute><TraineeRequestsPage /></ProtectedRoute>} />
+          <Route path="/trainee/logbook" element={<ProtectedRoute><TraineeLogbookPage /></ProtectedRoute>} />
           <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />
           <Route path="/trainee/exams/timetable" element={<ProtectedRoute><TraineeExamTimetablePage /></ProtectedRoute>} />

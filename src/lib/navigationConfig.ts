@@ -38,6 +38,8 @@ export const adminNavItems: NavItem[] = [
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Trainer Management", url: "/trainers", icon: GraduationCap },
   { title: "Class Management", url: "/classes", icon: GraduationCap },
+  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar },
+  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Role Management", url: "/roles", icon: Shield },
@@ -65,6 +67,8 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "System Logs", url: "/system-logs", icon: FileText },
+  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar },
+  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
 ];
 
 // Head of Training Navigation (Academic Command Center)
@@ -82,6 +86,8 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Assessment Review", url: "/assessment-results", icon: ClipboardCheck },
   { title: "Assessment Governance", url: "/assessment-governance", icon: Shield },
   { title: "Trainee List", url: "/trainees", icon: Users },
+  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar },
+  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 
@@ -92,6 +98,8 @@ export const trainerNavItems: NavItem[] = [
   { title: "Gradebooks", url: "/gradebooks", icon: BookOpen },
   { title: "Attendance", url: "/attendance", icon: ClipboardCheck },
   { title: "Timetable", url: "/timetable", icon: Calendar },
+  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar },
+  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Messages", url: "/messages", icon: MessageSquare },
 ];
@@ -108,6 +116,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Results", url: "/trainee/exams/results", icon: BookOpen },
   { title: "Fee Statement", url: "/trainee/finance", icon: DollarSign },
   { title: "Payments", url: "/trainee/payments", icon: CreditCard },
+  { title: "Industrial Logbook", url: "/trainee/logbook", icon: BookOpen },
   { title: "Assessment Requests", url: "/trainee/requests", icon: ClipboardCheck },
   { title: "Library", url: "/library", icon: BookOpen },
   { title: "Feedback & Suggestions", url: "/trainee/feedback", icon: MessageSquare },
@@ -117,6 +126,7 @@ export const traineeNavItems: NavItem[] = [
 export const hodNavItems: NavItem[] = [
   { title: "Dashboard", url: "/hod-dashboard", icon: LayoutDashboard },
   { title: "Department Overview", url: "/classes", icon: GraduationCap },
+  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Performance", url: "/assessment-results", icon: BarChart3 },
@@ -195,6 +205,7 @@ export const placementOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/placement-officer-dashboard", icon: LayoutDashboard },
   { title: "Alumni Management", url: "/alumni", icon: Users },
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
+  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
 ];
 
 // Hostel Coordinator Navigation
