@@ -1,4 +1,4 @@
-import { FileText, TrendingUp, Users, GraduationCap, BookOpen, Award, Building2 } from "lucide-react";
+import { FileText, TrendingUp, Users, GraduationCap, BookOpen, Award, Building2, DoorClosed } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { hodNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -41,7 +41,7 @@ const HODDashboard = () => {
         actions={[
           { icon: FileText, label: "Reports", desc: "Departmental reports", url: "/reports" },
           { icon: TrendingUp, label: "Assessments", desc: "Results & progress", url: "/assessment-results" },
-          { icon: BookOpen, label: "Classes", desc: "Manage classes", url: "/classes" },
+          { icon: DoorClosed, label: "Classes", desc: "Manage classes", url: "/classes" },
           { icon: Users, label: "Trainers", desc: "Team & workload", url: "/trainers" },
         ]}
         actionCols={4}
