@@ -156,6 +156,8 @@ const Sidebar = React.forwardRef<
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
+          id="app-sidebar"
+          aria-label="Site navigation"
           className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={
             {
@@ -205,6 +207,7 @@ const Sidebar = React.forwardRef<
         {...props}
       >
         <div
+          id="app-sidebar"
           data-sidebar="sidebar"
           className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
         >
@@ -228,9 +231,15 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         data-sidebar="trigger"
         variant="ghost"
         size="icon"
-        className={cn("h-9 w-9 shrink-0 rounded-md transition-colors", className)}
+        className={cn(
+          "h-11 w-11 shrink-0 rounded-md transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          className,
+        )}
         aria-label={label}
         aria-expanded={expanded}
+        aria-controls="app-sidebar"
+        aria-keyshortcuts="Control+B Meta+B"
         title={label}
         onClick={(event) => {
           onClick?.(event);
@@ -243,7 +252,6 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         ) : (
           <PanelLeftOpen className="h-5 w-5" aria-hidden="true" />
         )}
-        <span className="sr-only">{label}</span>
       </Button>
     );
   },
