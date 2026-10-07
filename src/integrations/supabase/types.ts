@@ -9029,6 +9029,14 @@ export type Database = {
         Args: { _register_id: string; _trainee_id: string }
         Returns: boolean
       }
+      can_read_centre_assessment: {
+        Args: { _academic_year: string; _course_id: string }
+        Returns: boolean
+      }
+      can_read_centre_trainer_assignment: {
+        Args: { _trainer_id: string }
+        Returns: boolean
+      }
       can_trainee_enroll: {
         Args: {
           _trainee_id: string
