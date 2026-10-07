@@ -96,6 +96,7 @@ export default function HROfficerDashboard() {
       subtitle="Manage employees, leave requests, recruitment, and performance reviews"
     >
       <div className="space-y-6">
+        <Card className="border-amber-200 bg-amber-50"><CardContent className="p-4 text-sm text-amber-950">Demonstration dashboard: the figures and records below are sample data, not live HR records. Use the sidebar workspaces to check module availability.</CardContent></Card>
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
