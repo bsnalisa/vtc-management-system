@@ -7,3 +7,4 @@
 - Use AppLogo and its shared favicon asset for application branding; keep uploaded organization logos separate as centre identity so tenant branding cannot replace the system mark.
 - All animated loading states use LoadingIndicator directly or through LoadingSpinner/ButtonSpinner so pages, permission checks and action buttons share accessible graduation-cap motion.
 - Shared UI primitives own narrow-screen containment for tabs, tables and dialogs; page action rows stack before expanding to preserve readable text without hiding workflows.
+- Attendance and timetable history policies use authenticated centre-role membership, with separate trainee-own attendance access; SECURITY DEFINER helpers avoid recursive related-table RLS checks.

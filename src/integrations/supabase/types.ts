@@ -9017,8 +9017,16 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      can_manage_attendance_record: {
+        Args: { _register_id: string; _trainee_id: string }
+        Returns: boolean
+      }
       can_manage_qualifications: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      can_read_attendance_record: {
+        Args: { _register_id: string; _trainee_id: string }
         Returns: boolean
       }
       can_trainee_enroll: {
@@ -9144,6 +9152,10 @@ export type Database = {
           result_id: string
           result_type: string
         }[]
+      }
+      has_centre_role: {
+        Args: { _organization_id: string; _roles: string[] }
+        Returns: boolean
       }
       has_custom_permission: {
         Args: {
