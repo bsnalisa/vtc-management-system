@@ -104,7 +104,7 @@ export const traineeNavItems: NavItem[] = [
 // HOD Navigation
 export const hodNavItems: NavItem[] = [
   { title: "Dashboard", url: "/hod-dashboard", icon: LayoutDashboard },
-  { title: "Department Overview", url: "/classes", icon: GraduationCap },
+  { title: "Department Overview", url: "/classes", icon: DoorClosed },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Performance", url: "/assessment-results", icon: BarChart3 },
