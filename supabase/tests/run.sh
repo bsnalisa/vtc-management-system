@@ -36,7 +36,7 @@ for t in "$here"/[0-9][0-9]_*.sql; do
   echo "== $(basename "$t")"
   rc=0
   out=$(psql -q -tA -v ON_ERROR_STOP=1 -d "$db" -f "$t" 2>&1) || rc=$?
-  echo "$out" | grep -E "^OK|ERROR|ASSERT|DETAIL" || true
+  echo "$out" | grep -E -i "^OK|error|ASSERT|DETAIL" || true
   [ "$rc" -eq 0 ] || status=1
 done
 psql -q -d postgres -c "drop database if exists vtc_test_run" -c "drop database if exists $tmpl" >/dev/null 2>&1

@@ -3,7 +3,7 @@ create or replace function public.assert(cond boolean, msg text) returns void la
 create or replace function public.expect_error(q text, pat text, msg text) returns void language plpgsql as $$
 begin
   begin execute q; exception when others then
-    if sqlerrm ilike '%'||pat||'%' then return; end if;
+    if sqlerrm ~* pat then return; end if;
     raise exception 'ASSERT FAILED: % (wrong error: %)', msg, sqlerrm;
   end;
   raise exception 'ASSERT FAILED: % (no error raised)', msg;

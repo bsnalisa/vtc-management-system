@@ -69,6 +69,9 @@ import AssessmentRequests from "./pages/AssessmentRequests";
 import AssessmentDevelopment from "./pages/AssessmentDevelopment";
 import AssessmentSittings from "./pages/AssessmentSittings";
 import DeliveryPlans from "./pages/DeliveryPlans";
+import Workflows from "./pages/Workflows";
+import MyApprovals from "./pages/MyApprovals";
+import WorkflowAction from "./pages/WorkflowAction";
 import LogbookReview from "./pages/LogbookReview";
 import TraineeLogbookPage from "./pages/trainee/TraineeLogbookPage";
 import SmeRegistration from "./pages/SmeRegistration";
@@ -295,6 +298,9 @@ const ProtectedDeliveryPlans = withRoleAccess(DeliveryPlans, {
 const ProtectedLogbookReview = withRoleAccess(LogbookReview, {
   requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "placement_officer", "trainer"],
 });
+const ProtectedWorkflows = withRoleAccess(Workflows, {
+  requiredRoles: ["admin", "organization_admin"],
+});
 const ProtectedHostelManagement = withRoleAccess(HostelManagement, {
   requiredRoles: ["hostel_coordinator", "admin"],
 });
@@ -331,6 +337,7 @@ const App = () => (
           <Route path="/apply/:slug" element={<PublicHome />} />
 
           <Route path="/sme-registration/:slug" element={<SmeRegistration />} />
+          <Route path="/workflow/action/:token" element={<WorkflowAction />} />
           <Route path="/survey/:token" element={<SurveyResponse />} />
           <Route path="/graduation/rsvp/:token" element={<GraduationRsvp />} />
 
@@ -432,6 +439,8 @@ const App = () => (
           <Route path="/assessment-sittings" element={<ProtectedRoute><ProtectedAssessmentSittings /></ProtectedRoute>} />
           <Route path="/delivery-plans" element={<ProtectedRoute><ProtectedDeliveryPlans /></ProtectedRoute>} />
           <Route path="/logbook-review" element={<ProtectedRoute><ProtectedLogbookReview /></ProtectedRoute>} />
+          <Route path="/workflows" element={<ProtectedRoute><ProtectedWorkflows /></ProtectedRoute>} />
+          <Route path="/my-approvals" element={<ProtectedRoute><MyApprovals /></ProtectedRoute>} />
           <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
