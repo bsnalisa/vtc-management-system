@@ -64,6 +64,7 @@ import TrainingModules from "./pages/TrainingModules";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import SupportTickets from "./pages/SupportTickets";
 import TraineeAffairs from "./pages/TraineeAffairs";
+import Library from "./pages/Library";
 import RoleActivityDashboard from "./pages/RoleActivityDashboard";
 import ModulesManagement from "./pages/ModulesManagement";
 import NotFound from "./pages/NotFound";
@@ -392,6 +393,7 @@ const App = () => (
           <Route path="/organization-settings" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
           <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />
+          <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />

@@ -43,6 +43,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Role Activity", url: "/role-activity", icon: BarChart3 },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
+  { title: "Resource Centre", url: "/library", icon: BookOpen },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
 ];
 
@@ -53,6 +54,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
   { title: "Modules", url: "/modules-management", icon: BookOpen },
+  { title: "Resource Centre", url: "/library", icon: BookOpen },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "System Logs", url: "/system-logs", icon: FileText },
 ];
@@ -98,6 +100,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Results", url: "/trainee/exams/results", icon: BookOpen },
   { title: "Fee Statement", url: "/trainee/finance", icon: DollarSign },
   { title: "Payments", url: "/trainee/payments", icon: CreditCard },
+  { title: "Library", url: "/library", icon: BookOpen },
   { title: "Feedback & Suggestions", url: "/trainee/feedback", icon: MessageSquare },
 ];
 
@@ -205,6 +208,13 @@ export const hrOfficerNavItems: NavItem[] = [
   { title: "Leave Management", url: "/hr/leave", icon: Calendar },
   { title: "Recruitment", url: "/hr/recruitment", icon: Briefcase },
   { title: "Performance", url: "/hr/performance", icon: BarChart3 },
+  { title: "Reports", url: "/reports", icon: FileText },
+];
+
+// Librarian Navigation
+export const librarianNavItems: NavItem[] = [
+  { title: "Resource Centre", url: "/library", icon: BookOpen },
+  { title: "Announcements", url: "/announcements", icon: MessageSquare },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 

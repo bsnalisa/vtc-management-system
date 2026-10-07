@@ -21,6 +21,7 @@ export const getRoleDisplayName = (role: UserRole): string => {
     hr_officer: "HR Officer",
     bdl_coordinator: "BDL Coordinator",
     rpl_coordinator: "RPL Coordinator",
+    librarian: "Librarian",
     trainee: "Trainee",
   };
 
@@ -48,6 +49,7 @@ export const getRoleDashboardPath = (role: UserRole): string => {
     hr_officer: "/hr-officer-dashboard",
     bdl_coordinator: "/bdl-coordinator-dashboard",
     rpl_coordinator: "/rpl-coordinator-dashboard",
+    librarian: "/library",
     trainee: "/trainee-dashboard",
   };
 

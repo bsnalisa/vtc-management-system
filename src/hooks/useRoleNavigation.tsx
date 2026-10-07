@@ -19,6 +19,7 @@ import {
   hrOfficerNavItems,
   bdlCoordinatorNavItems,
   rplCoordinatorNavItems,
+  librarianNavItems,
 } from "@/lib/navigationConfig";
 import { getRoleDashboardPath, getRoleDisplayName } from "@/lib/roleUtils";
 
@@ -67,6 +68,8 @@ export const useRoleNavigation = () => {
         return bdlCoordinatorNavItems;
       case "rpl_coordinator":
         return rplCoordinatorNavItems;
+      case "librarian":
+        return librarianNavItems;
       default:
         return adminNavItems;
     }
@@ -114,6 +117,8 @@ export const useRoleNavigation = () => {
         return "Distance Learning";
       case "rpl_coordinator":
         return "RPL Management";
+      case "librarian":
+        return "Resource Centre";
       default:
         return "Navigation";
     }
