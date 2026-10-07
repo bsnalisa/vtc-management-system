@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-import { ArrowRight, PanelLeftClose } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -240,7 +240,9 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
       >
         {expanded ? (
           <PanelLeftClose className="h-5 w-5" aria-hidden="true" />
-        ) : <ArrowRight className="h-5 w-5" aria-hidden="true" />}
+        ) : (
+          <PanelLeftOpen className="h-5 w-5" aria-hidden="true" />
+        )}
         <span className="sr-only">{label}</span>
       </Button>
     );
