@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,7 +177,7 @@ const PackageManagement = () => {
           <div className="grid lg:grid-cols-3 gap-6">
             {packagesLoading ? (
               <div className="col-span-3 text-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                <LoadingIndicator className="h-8 w-8 mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground">Loading packages...</p>
               </div>
             ) : (
@@ -259,7 +260,7 @@ const PackageManagement = () => {
                         >
                           {upgradePackage.isPending && isSelected ? (
                             <>
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                              <LoadingIndicator className="h-4 w-4 mr-2" />
                               Upgrading...
                             </>
                           ) : (

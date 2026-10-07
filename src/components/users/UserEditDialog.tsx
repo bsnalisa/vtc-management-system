@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Loader2, KeyRound } from "lucide-react";
+import { Search, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserEditDialogProps {
@@ -224,7 +225,7 @@ export const UserEditDialog = ({
                 disabled={resettingPassword || isLoading}
               >
                 {resettingPassword ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingIndicator className="mr-2 h-4 w-4" />
                 ) : (
                   <KeyRound className="mr-2 h-4 w-4" />
                 )}
@@ -245,7 +246,7 @@ export const UserEditDialog = ({
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingIndicator className="mr-2 h-4 w-4" />
                   Saving...
                 </>
               ) : (

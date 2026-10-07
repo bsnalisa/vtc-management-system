@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+
 
 interface UserDeleteDialogProps {
   open: boolean;
@@ -61,7 +62,7 @@ export const UserDeleteDialog = ({
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <LoadingIndicator className="mr-2 h-4 w-4" />
                 Processing...
               </>
             ) : (

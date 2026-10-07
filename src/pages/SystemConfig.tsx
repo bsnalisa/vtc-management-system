@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,23 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { useSystemAuditLogs } from "@/hooks/useSystemAuditLogs";
-import {
-  Settings,
-  Save,
-  RefreshCw,
-  Shield,
-  Mail,
-  DollarSign,
-  BookOpen,
-  Users,
-  FileText,
-  Database,
-  Bell,
-  Package,
-  BarChart3,
-  Plug,
-  Scale,
-} from "lucide-react";
+import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, BookOpen, Users, FileText, Database, Bell, Package, BarChart3, Plug, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Mock configuration data - System-wide configurations for Super Admin only
@@ -643,7 +628,7 @@ const SystemConfig = () => {
     return (
       <SuperAdminLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <LoadingIndicator className="h-8 w-8 text-primary" />
         </div>
       </SuperAdminLayout>
     );

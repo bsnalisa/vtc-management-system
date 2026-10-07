@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { GraduationCap, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { GraduationCap, CheckCircle, AlertCircle } from "lucide-react";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ const ResetPassword = () => {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <LoadingIndicator className="h-8 w-8 text-primary" />
               <p className="text-muted-foreground">Verifying reset link...</p>
             </div>
           </CardContent>
@@ -209,7 +210,7 @@ const ResetPassword = () => {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingIndicator className="mr-2 h-4 w-4" />
                   Updating Password...
                 </>
               ) : (

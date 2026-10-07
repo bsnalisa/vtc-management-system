@@ -1,9 +1,10 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { CreditCard, Download, Receipt, CheckCircle, Calendar, Loader2 } from "lucide-react";
+import { CreditCard, Download, Receipt, CheckCircle, Calendar } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,7 +76,7 @@ const TraineePaymentsPage = () => {
       <div className="space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <LoadingIndicator className="h-8 w-8 text-muted-foreground" />
           </div>
         ) : (
           <>

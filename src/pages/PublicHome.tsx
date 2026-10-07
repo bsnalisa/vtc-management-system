@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2,
-   ClipboardList, Wallet, BookOpen, Loader2, LogIn,
-} from "lucide-react";
+import { GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
 import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
@@ -309,7 +307,7 @@ const PublicHome = () => {
                   </Alert>
                 ) : appsLoading ? (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+                    <LoadingIndicator className="h-4 w-4" /> Loading...
                   </div>
                 ) : !myApplications?.length ? (
                   <Card className="border-dashed">

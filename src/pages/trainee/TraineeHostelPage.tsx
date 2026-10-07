@@ -1,8 +1,9 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Building, Bed, Calendar, DollarSign, AlertCircle, CheckCircle, Phone, Loader2 } from "lucide-react";
+import { Building, Bed, Calendar, DollarSign, AlertCircle, CheckCircle, Phone } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Separator } from "@/components/ui/separator";
 import { useTraineeUserId, useTraineeRecord, useTraineeHostelAllocation, useTraineeRoommates, useTraineeHostelFees } from "@/hooks/useTraineePortalData";
@@ -19,7 +20,7 @@ const TraineeHostelPage = () => {
   if (isLoading) {
     return (
       <DashboardLayout title="Hostel Accommodation" subtitle="View your hostel allocation and details" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
-        <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+        <div className="flex items-center justify-center h-64"><LoadingIndicator className="h-8 w-8 text-muted-foreground" /></div>
       </DashboardLayout>
     );
   }

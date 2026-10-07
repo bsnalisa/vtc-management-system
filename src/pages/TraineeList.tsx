@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Download, Filter, UserPlus, Loader2 } from "lucide-react";
+import { Search, Download, Filter, UserPlus } from "lucide-react";
 import { useTrainees } from "@/hooks/useTrainees";
 import { useTrades } from "@/hooks/useTrades";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -188,7 +189,7 @@ const TraineeList = () => {
           <CardContent>
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                <LoadingIndicator className="h-8 w-8 text-primary mb-2" />
                 <p className="text-sm text-muted-foreground">Loading trainees...</p>
               </div>
             ) : (

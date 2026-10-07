@@ -1,8 +1,9 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Calendar, Clock, MapPin, User, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, User, CheckCircle2, XCircle } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { useTraineeUserId, useTraineeRecord } from "@/hooks/useTraineePortalData";
 import { useTraineePublishedExams } from "@/hooks/useExamTimetables";
@@ -17,7 +18,7 @@ const TraineeExamTimetablePage = () => {
   if (isLoading) {
     return (
       <DashboardLayout title="Exam Timetable" subtitle="Your published examinations" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
-        <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+        <div className="flex items-center justify-center h-64"><LoadingIndicator className="h-8 w-8 text-muted-foreground" /></div>
       </DashboardLayout>
     );
   }

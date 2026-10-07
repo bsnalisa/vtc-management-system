@@ -1,6 +1,7 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -60,7 +61,7 @@ export const TrainerDeactivateDialog = ({ open, onOpenChange, trainer }: Trainer
         <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button variant="destructive" onClick={() => deactivateMutation.mutate()} disabled={deactivateMutation.isPending}>
-            {deactivateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {deactivateMutation.isPending && <LoadingIndicator className="h-4 w-4 mr-2" />}
             Deactivate
           </Button>
         </div>

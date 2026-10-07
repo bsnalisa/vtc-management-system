@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,17 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useOrganizations } from "@/hooks/useOrganizations";
 import { usePackages, useAssignPackage } from "@/hooks/usePackages";
 import { withRoleAccess } from "@/components/withRoleAccess";
-import { 
-  Package, 
-  Building2, 
-  Calendar,
-  CheckCircle2,
-  AlertCircle,
-  Users,
-  Zap,
-  Crown,
-  Rocket
-} from "lucide-react";
+import { Package, Building2, Calendar, CheckCircle2, AlertCircle, Users, Zap, Crown, Rocket } from "lucide-react";
 
 const SuperAdminPackageAssignment = () => {
   const { data: organizations } = useOrganizations();
@@ -223,7 +214,7 @@ const SuperAdminPackageAssignment = () => {
               >
                 {assignPackage.isPending ? (
                   <>
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                    <LoadingIndicator className="h-5 w-5 mr-2" />
                     Assigning Package...
                   </>
                 ) : (

@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SupportTicketDialog } from "@/components/support/SupportTicketDialog";
 import { SupportTicketsTable } from "@/components/support/SupportTicketsTable";
 import { useSupportTickets } from "@/hooks/useSupportTickets";
-import { Loader2 } from "lucide-react";
+
 
 export default function SupportTickets() {
   const { role, navItems, groupLabel } = useRoleNavigation();
@@ -26,7 +27,7 @@ export default function SupportTickets() {
         groupLabel={groupLabel}
       >
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="h-8 w-8 text-muted-foreground" />
         </div>
       </DashboardLayout>
     );
