@@ -161,6 +161,13 @@ All colors MUST be HSL.
     .training-hero-copy h1 { font-size: 2.25rem; overflow-wrap: anywhere; }
   }
   .workspace-panel { box-shadow: var(--shadow-panel); }
+  .responsive-records { container-type: inline-size; }
+  .responsive-records > .record-cards { display: grid; gap: 1rem; }
+  .responsive-records > .record-table { display: none; }
+  @container (min-width: 700px) {
+    .responsive-records > .record-cards { display: none; }
+    .responsive-records > .record-table { display: block; }
+  }
   /* Let text and chart/table regions shrink inside flex and grid tracks. */
   .workspace-content .grid > *, .workspace-content .flex > * { min-width: 0; }
   .workspace-content h1, .workspace-content h2, .workspace-content h3,
