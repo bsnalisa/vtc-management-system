@@ -148,7 +148,7 @@ const Sidebar = React.forwardRef<
     collapsible?: "offcanvas" | "icon" | "none";
   }
 >(({ side = "left", variant = "sidebar", collapsible = "offcanvas", className, children, ...props }, ref) => {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile, mobileOpenerRef } = useSidebar();
 
   if (collapsible === "none") {
     return (
@@ -171,6 +171,13 @@ const Sidebar = React.forwardRef<
           id="app-sidebar"
           aria-label="Site navigation"
           className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          onCloseAutoFocus={(event) => {
+            const opener = mobileOpenerRef.current;
+            if (opener && opener.isConnected) {
+              event.preventDefault();
+              opener.focus();
+            }
+          }}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
