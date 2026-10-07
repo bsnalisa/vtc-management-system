@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -164,7 +165,7 @@ export const DocumentUpload = ({
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
             {uploading ? (
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <LoadingIndicator className="h-5 w-5" />
                 <span className="text-sm text-muted-foreground">Uploading...</span>
               </div>
             ) : (
@@ -325,7 +326,7 @@ export const MultipleDocumentUpload = ({
         >
           {uploading ? (
             <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
+              <LoadingIndicator className="h-4 w-4 mr-2" />
               Uploading...
             </>
           ) : (

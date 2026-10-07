@@ -1,10 +1,11 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Award, Loader2, HelpCircle, Send, GraduationCap, User, BookOpen, ChevronDown, ChevronRight } from "lucide-react";
+import { Award, HelpCircle, Send, GraduationCap, User, BookOpen, ChevronDown, ChevronRight } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -113,7 +114,7 @@ const SubjectCard = ({
           <CardContent className="p-0">
             {isLoading ? (
               <div className="flex justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="h-5 w-5 text-muted-foreground" />
               </div>
             ) : data && Object.keys(groupedByType).length > 0 ? (
               <div className="divide-y divide-border">
@@ -221,7 +222,7 @@ const TraineeResultsPage = () => {
     return (
       <DashboardLayout title="Progress Report" subtitle="View your academic progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="h-8 w-8 text-muted-foreground" />
         </div>
       </DashboardLayout>
     );

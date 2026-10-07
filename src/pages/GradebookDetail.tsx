@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,7 +218,7 @@ const GradebookDetail = () => {
     return (
       <DashboardLayout title="Loading..." subtitle="" navItems={navItems} groupLabel={groupLabel}>
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <LoadingIndicator className="h-8 w-8 text-primary" />
         </div>
       </DashboardLayout>
     );

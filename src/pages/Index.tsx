@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -7,19 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useOrganizationSettings, useUpdateOrganizationSettings } from "@/hooks/useOrganizationSettings";
-import {
-  Loader2,
-  Palette,
-  Upload,
-  Image as ImageIcon,
-  CheckCircle,
-  AlertCircle,
-  Globe,
-  X,
-  Save,
-  RefreshCw,
-  Building2,
-} from "lucide-react";
+import { Palette, Upload, Image as ImageIcon, CheckCircle, AlertCircle, Globe, X, Save, RefreshCw, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -317,7 +306,7 @@ export default function OrganizationSettings() {
             variant="secondary"
             className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50 px-3 py-1"
           >
-            <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Pending
+            <LoadingIndicator className="h-3 w-3 mr-1" /> Pending
           </Badge>
         );
     }
@@ -400,7 +389,7 @@ export default function OrganizationSettings() {
       >
         <div className="flex items-center justify-center h-96">
           <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+            <LoadingIndicator className="h-12 w-12 text-primary mx-auto" />
             <p className="text-sm text-muted-foreground">Loading settings...</p>
           </div>
         </div>
@@ -476,7 +465,7 @@ export default function OrganizationSettings() {
                         disabled={uploading}
                         className="h-11 border-slate-200 hover:bg-slate-50 hover:border-primary transition-all"
                       >
-                        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        {uploading ? <LoadingIndicator className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1.5">Max 5MB · JPEG, PNG, WebP, SVG</p>
@@ -675,7 +664,7 @@ export default function OrganizationSettings() {
               disabled={(!isDirty && !selectedFile) || updateSettings.isPending}
               className="flex-1 sm:flex-none bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-sm hover:shadow transition-all duration-200"
             >
-              {updateSettings.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateSettings.isPending && <LoadingIndicator className="mr-2 h-4 w-4" />}
               <Save className="h-4 w-4 mr-2" />
               Save Settings
             </Button>

@@ -1,3 +1,5 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
+import { AppLogo } from "@/components/AppLogo";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { GraduationCap, Loader2, Lock, CheckCircle, AlertCircle } from "lucide-react";
+import { GraduationCap, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const FirstLoginPasswordChange = () => {
@@ -158,7 +160,7 @@ const FirstLoginPasswordChange = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <LoadingIndicator className="h-6 w-6 text-primary" />
           </CardContent>
         </Card>
       </div>
@@ -169,9 +171,7 @@ const FirstLoginPasswordChange = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-lg bg-primary flex items-center justify-center mb-4">
-            <Lock className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <AppLogo className="mx-auto mb-4 h-12 w-12" />
           <CardTitle>Change Your Password</CardTitle>
           <CardDescription>
             For security, you must change your default password before accessing the portal.
@@ -239,7 +239,7 @@ const FirstLoginPasswordChange = () => {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingIndicator className="mr-2 h-4 w-4" />
                   Changing Password...
                 </>
               ) : (

@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -351,7 +352,7 @@ const SuperAdminModulesManagement = () => {
         {isLoading ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <LoadingIndicator className="h-8 w-8 text-primary" />
             </CardContent>
           </Card>
         ) : modules && modules.length > 0 ? (

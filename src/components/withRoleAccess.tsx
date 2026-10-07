@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { ComponentType, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole, UserRole } from "@/hooks/useUserRole";
@@ -27,7 +28,7 @@ export function withRoleAccess<P extends object>(
       return (
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+            <LoadingIndicator className="h-8 w-8 mx-auto text-primary" />
             <p className="mt-4 text-muted-foreground">Checking permissions...</p>
           </div>
         </div>

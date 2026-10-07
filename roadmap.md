@@ -1,3 +1,7 @@
+# Branding and loading consistency
+- [x] Unify application branding across public pages and shared signed-in layouts.
+- [x] Standardize loading indicators and verify public screens.
+
 # Homepage carousel
 - [x] Add vocational-training imagery and an interactive homepage carousel.
 - [x] Rearrange homepage sections and verify carousel controls and application navigation.

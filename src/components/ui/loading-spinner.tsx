@@ -1,6 +1,15 @@
 import { cn } from "@/lib/utils";
 import { GraduationCap } from "lucide-react";
 
+export function LoadingIndicator({ className }: { className?: string }) {
+  return (
+    <span role="status" aria-label="Loading" className={cn("relative inline-flex h-4 w-4 shrink-0 items-center justify-center align-middle [&>svg]:size-full", className)}>
+      <GraduationCap aria-hidden="true" className="animate-graduation-bounce" />
+      <span aria-hidden="true" className="absolute -bottom-1 left-1/2 h-0.5 w-3/4 rounded-full bg-current opacity-20 animate-graduation-shadow" />
+    </span>
+  );
+}
+
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -25,17 +34,9 @@ export function LoadingSpinner({
       "flex flex-col items-center justify-center gap-3",
       className
     )}>
-      <div className="relative">
-        <GraduationCap 
-          className={cn(
-            "text-primary animate-graduation-bounce",
-            sizeClasses[size]
-          )} 
-        />
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-primary/20 rounded-full animate-graduation-shadow" />
-      </div>
+      <LoadingIndicator className={cn("text-primary", sizeClasses[size])} />
       {text && (
-        <p className="text-sm text-muted-foreground animate-pulse">{text}</p>
+        <p className="text-sm text-muted-foreground">{text}</p>
       )}
     </div>
   );
@@ -62,5 +63,5 @@ export function PageLoader({ text = "Loading..." }: { text?: string }) {
 
 // Inline button loading state
 export function ButtonSpinner({ className }: { className?: string }) {
-  return <GraduationCap className={cn("h-4 w-4 animate-graduation-bounce", className)} />;
+  return <LoadingIndicator className={className} />;
 }

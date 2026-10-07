@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -8,7 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Trash2, CheckCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, Trash2, CheckCircle } from "lucide-react";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -79,7 +80,7 @@ export function ConfirmDialog({
             onClick={handleConfirm}
             disabled={isLoading}
           >
-            {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isLoading && <LoadingIndicator className="h-4 w-4 mr-2" />}
             {confirmText}
           </Button>
         </AlertDialogFooter>

@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useOrganizationSettings, useUpdateOrganizationSettings } from "@/hooks/useOrganizationSettings";
-import { Loader2, Palette, Upload, Image as ImageIcon, CheckCircle, AlertCircle, Globe, X, Hash } from "lucide-react";
+import { Palette, Upload, Image as ImageIcon, CheckCircle, AlertCircle, Globe, X, Hash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -337,7 +338,7 @@ export default function OrganizationSettings() {
       default:
         return (
           <Badge variant="secondary">
-            <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Pending
+            <LoadingIndicator className="h-3 w-3 mr-1" /> Pending
           </Badge>
         );
     }
@@ -352,7 +353,7 @@ export default function OrganizationSettings() {
         groupLabel={groupLabel}
       >
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="h-8 w-8 text-muted-foreground" />
         </div>
       </DashboardLayout>
     );
@@ -453,7 +454,7 @@ export default function OrganizationSettings() {
                       className="whitespace-nowrap"
                     >
                       {uploading ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        <LoadingIndicator className="h-4 w-4 mr-2" />
                       ) : (
                         <Upload className="h-4 w-4 mr-2" />
                       )}
@@ -601,7 +602,7 @@ export default function OrganizationSettings() {
               Cancel
             </Button>
             <Button onClick={handleSaveSettings} disabled={(!isDirty && !selectedFile) || updateSettings.isPending}>
-              {updateSettings.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateSettings.isPending && <LoadingIndicator className="mr-2 h-4 w-4" />}
               Save Settings
             </Button>
           </div>

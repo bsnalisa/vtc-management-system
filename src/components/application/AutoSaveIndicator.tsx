@@ -1,4 +1,5 @@
-import { Cloud, CloudOff, Loader2, Check } from "lucide-react";
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
+import { Cloud, CloudOff, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,7 @@ export const AutoSaveIndicator = ({
   if (isSaving) {
     return (
       <div className={cn("flex items-center gap-1.5 text-xs text-muted-foreground", className)}>
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <LoadingIndicator className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Saving...</span>
       </div>
     );

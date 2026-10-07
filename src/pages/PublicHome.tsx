@@ -1,3 +1,5 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
+import { AppLogo } from "@/components/AppLogo";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2,
-   ClipboardList, Wallet, BookOpen, Loader2, LogIn,
-} from "lucide-react";
+import { GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
 import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
@@ -100,9 +99,7 @@ const PublicHome = () => {
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="h-5 w-5" />
-            </div>
+            <AppLogo />
             <span className="public-home-brand text-lg font-bold"><span className="sm:hidden">VTC System</span><span className="hidden sm:inline">VTC Management System</span></span>
           </Link>
           <div className="flex items-center gap-2">
@@ -309,7 +306,7 @@ const PublicHome = () => {
                   </Alert>
                 ) : appsLoading ? (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+                    <LoadingIndicator className="h-4 w-4" /> Loading...
                   </div>
                 ) : !myApplications?.length ? (
                   <Card className="border-dashed">
@@ -361,9 +358,7 @@ const PublicHome = () => {
         <div className="container mx-auto grid gap-8 px-4 sm:grid-cols-3">
           <div>
             <div className="flex items-center gap-2.5 font-semibold">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <GraduationCap className="h-4 w-4" />
-              </div>
+              <AppLogo />
               VTC Management System
             </div>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">

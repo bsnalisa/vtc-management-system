@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Bell, Check, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,7 +93,7 @@ export function NotificationBell() {
         <Separator />
         <ScrollArea className="h-[400px]">
           {isLoading ? (
-            <div className="p-4 text-center text-muted-foreground">Loading...</div>
+            <LoadingSpinner size="sm" text="Loading..." className="p-4" />
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />

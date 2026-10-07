@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { signOutAndClearCaches } from "@/lib/authUtils";
+import { AppLogo } from "@/components/AppLogo";
 
 interface SuperAdminLayoutProps {
   children: ReactNode;
@@ -65,6 +66,7 @@ function SuperAdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
+        <div className="flex items-center gap-3 px-3 py-5"><AppLogo />{open && <span className="font-semibold text-sidebar-foreground">VTC System</span>}</div>
         {/* Role Badge in Sidebar Header */}
         <div className="px-4 py-3 border-b">
           <div 
@@ -167,9 +169,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
                 <div className="flex items-center gap-4">
                   <SidebarTrigger />
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                      <Shield className="h-4 w-4 text-primary-foreground" />
-                    </div>
+                    <AppLogo className="h-8 w-8" />
                     <div>
                       <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
                       <p className="text-xs text-muted-foreground">Platform Management Dashboard</p>

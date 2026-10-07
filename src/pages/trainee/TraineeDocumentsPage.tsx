@@ -1,9 +1,10 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { FileText, Upload, Download, Eye, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { FileText, Upload, Download, Eye, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { useTraineeUserId, useTraineeApplication } from "@/hooks/useTraineePortalData";
 
@@ -14,7 +15,7 @@ const TraineeDocumentsPage = () => {
   if (isLoading) {
     return (
       <DashboardLayout title="My Documents" subtitle="Manage your uploaded documents" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
-        <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+        <div className="flex items-center justify-center h-64"><LoadingIndicator className="h-8 w-8 text-muted-foreground" /></div>
       </DashboardLayout>
     );
   }

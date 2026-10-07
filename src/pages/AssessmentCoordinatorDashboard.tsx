@@ -1,7 +1,8 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileCheck, Lock, CheckCircle, Loader2, GraduationCap, ClipboardList, Shield, Award, ChevronRight, BarChart3, BookOpen, FileSpreadsheet, Calendar } from "lucide-react";
+import { FileCheck, Lock, CheckCircle, GraduationCap, ClipboardList, Shield, Award, ChevronRight, BarChart3, BookOpen, FileSpreadsheet, Calendar } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { assessmentCoordinatorNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -236,7 +237,7 @@ const AssessmentCoordinatorDashboard = () => {
               <CardContent className="pt-4">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <LoadingIndicator className="h-8 w-8 text-muted-foreground" />
                   </div>
                 ) : !approvedResults || approvedResults.length === 0 ? (
                   <div className="py-10 text-center">

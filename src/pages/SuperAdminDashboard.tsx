@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Link, useLocation } from "react-router-dom";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,22 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useOrganizations } from "@/hooks/useOrganizations";
 import { useSuperAdminStats } from "@/hooks/useSuperAdminStats";
 import { useProfile } from "@/hooks/useProfile";
-import {
-  Building2,
-  Users,
-  Package,
-  Shield,
-  TrendingUp,
-  Activity,
-  Plus,
-  Eye,
-  Settings,
-  CheckCircle2,
-  Clock,
-  Home,
-  BarChart3,
-  UserCog,
-} from "lucide-react";
+import { Building2, Users, Package, Shield, TrendingUp, Activity, Plus, Eye, Settings, CheckCircle2, Clock, Home, BarChart3, UserCog } from "lucide-react";
 
 // Chart components
 import {
@@ -68,7 +54,7 @@ const SuperAdminDashboard = () => {
     return (
       <SuperAdminLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <LoadingIndicator className="h-8 w-8 text-primary" />
         </div>
       </SuperAdminLayout>
     );

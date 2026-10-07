@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,7 +145,7 @@ const EntryRequirementsManagement = () => {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8">Loading...</div>
+              <LoadingSpinner text="Loading..." className="py-8" />
             ) : !requirements || requirements.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No entry requirements configured yet

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User } from "lucide-react";
 import { useAIChat } from "@/hooks/useAIChat";
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 
 export const AIChat = () => {
   const [input, setInput] = useState("");
@@ -93,11 +94,7 @@ export const AIChat = () => {
                   </div>
                 </div>
                 <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
-                  <div className="flex gap-1">
-                    <div className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" />
-                    <div className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0.1s" }} />
-                    <div className="h-2 w-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0.2s" }} />
-                  </div>
+                  <LoadingIndicator className="h-5 w-5 text-primary" />
                 </div>
               </div>
             )}
