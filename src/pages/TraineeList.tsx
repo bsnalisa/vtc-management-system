@@ -15,6 +15,7 @@ import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { usePagination } from "@/hooks/usePagination";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { exportToCSV } from "@/lib/exportUtils";
+import { RecordCard } from "@/components/ui/record-card";
 
 const TraineeList = () => {
   const navigate = useNavigate();
@@ -194,7 +195,23 @@ const TraineeList = () => {
               </div>
             ) : (
               <>
-                <div className="overflow-x-auto">
+                <div className="responsive-records">
+                  <div className="record-cards">
+                    {paginatedData.length === 0 ? <div className="py-8 text-center text-muted-foreground"><p>{searchTerm || filterTrade !== "all" || filterStatus !== "all" ? "No trainees match your search criteria" : "No trainees registered yet"}</p>{!searchTerm && filterTrade === "all" && filterStatus === "all" && <Button variant="outline" className="mt-4 h-auto whitespace-normal" onClick={() => navigate("/trainees/register")}>Register First Trainee</Button>}</div> : paginatedData.map(trainee => <RecordCard
+                      key={trainee.id}
+                      title={`${trainee.first_name} ${trainee.last_name}`}
+                      subtitle={trainee.trainee_id}
+                      status={<Badge variant={getStatusBadgeVariant(trainee.status)} className="max-w-full whitespace-normal">{trainee.status}</Badge>}
+                      fields={[
+                        { label: "Gender", value: trainee.gender },
+                        { label: "Trade", value: trainee.trades?.name || "N/A" },
+                        { label: "Level", value: `Level ${trainee.level}` },
+                        { label: "Training Mode", value: trainee.training_mode.replace(/_/g, " ") },
+                      ]}
+                      actions={<Button variant="outline" className="w-full" aria-label={`View ${trainee.first_name} ${trainee.last_name}`} onClick={() => navigate(`/trainees/${trainee.id}`)}>View</Button>}
+                    />)}
+                  </div>
+                  <div className="record-table">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -261,6 +278,7 @@ const TraineeList = () => {
                       )}
                     </TableBody>
                   </Table>
+                  </div>
                 </div>
                 {totalItems > 0 && (
                   <DataTablePagination
