@@ -63,6 +63,7 @@ import StaffOnboarding from "./pages/StaffOnboarding";
 import TrainingModules from "./pages/TrainingModules";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import SupportTickets from "./pages/SupportTickets";
+import TraineeAffairs from "./pages/TraineeAffairs";
 import RoleActivityDashboard from "./pages/RoleActivityDashboard";
 import ModulesManagement from "./pages/ModulesManagement";
 import NotFound from "./pages/NotFound";
@@ -93,6 +94,7 @@ import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
 import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
 import TraineeAdmissionStatusPage from "./pages/trainee/TraineeAdmissionStatusPage";
 import TraineeHostelPage from "./pages/trainee/TraineeHostelPage";
+import TraineeFeedbackPage from "./pages/trainee/TraineeFeedbackPage";
 import TraineeExamTimetablePage from "./pages/trainee/TraineeExamTimetablePage";
 import ExamTimetablePublishing from "./pages/ExamTimetablePublishing";
 import TraineeResultsPage from "./pages/trainee/TraineeResultsPage";
@@ -278,6 +280,9 @@ const ProtectedTraineeDetail = withRoleAccess(TraineeDetail, {
 const ProtectedPendingApprovals = withRoleAccess(PendingApprovals, {
   requiredRoles: ["head_of_trainee_support"],
 });
+const ProtectedTraineeAffairs = withRoleAccess(TraineeAffairs, {
+  requiredRoles: ["admin", "organization_admin", "head_of_trainee_support", "registration_officer"],
+});
 const ProtectedEntryRequirements = withRoleAccess(EntryRequirementsManagement, {
   requiredRoles: ["registration_officer", "admin", "head_of_trainee_support"],
 });
@@ -386,6 +391,7 @@ const App = () => (
           <Route path="/role-activity" element={<ProtectedRoute><ProtectedRoleActivityDashboard /></ProtectedRoute>} />
           <Route path="/organization-settings" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
+          <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
@@ -404,6 +410,7 @@ const App = () => (
           <Route path="/trainee/registration" element={<ProtectedRoute><TraineeRegistrationPage /></ProtectedRoute>} />
           <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
           <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
+          <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />
           <Route path="/trainee/exams/timetable" element={<ProtectedRoute><TraineeExamTimetablePage /></ProtectedRoute>} />
           <Route path="/trainee/exams/results" element={<ProtectedRoute><TraineeResultsPage /></ProtectedRoute>} />

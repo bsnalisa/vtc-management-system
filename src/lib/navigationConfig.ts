@@ -98,6 +98,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Results", url: "/trainee/exams/results", icon: BookOpen },
   { title: "Fee Statement", url: "/trainee/finance", icon: DollarSign },
   { title: "Payments", url: "/trainee/payments", icon: CreditCard },
+  { title: "Feedback & Suggestions", url: "/trainee/feedback", icon: MessageSquare },
 ];
 
 // HOD Navigation
@@ -212,6 +213,7 @@ export const headOfTraineeSupportNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainee-support-dashboard", icon: LayoutDashboard },
   { title: "Pending Approvals", url: "/trainee-support/pending-approvals", icon: ClipboardCheck },
   { title: "Trainee List", url: "/trainees", icon: Users },
+  { title: "Trainee Affairs", url: "/trainee-affairs", icon: ClipboardList },
   { title: "Officer Activity", url: "/trainee-support/officer-activity", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
