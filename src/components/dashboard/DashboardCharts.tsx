@@ -67,7 +67,7 @@ export const FeeCollectionChart = ({ data }: { data: ChartData[] }) => (
               outerRadius={80}
               paddingAngle={5}
               dataKey="value"
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+               label={false}
               labelLine={false}
             >
               {data.map((_, index) => (
@@ -84,12 +84,18 @@ export const FeeCollectionChart = ({ data }: { data: ChartData[] }) => (
           </PieChart>
         </ResponsiveContainer>
       </div>
+      <ul className="mt-3 space-y-2 text-sm" aria-label="Fee collection breakdown">
+        {data.map((item) => {
+          const total = data.reduce((sum, row) => sum + row.value, 0);
+          return <li key={item.name} className="flex flex-wrap justify-between gap-2"><span className="min-w-0 break-words text-muted-foreground">{item.name}</span><span className="font-medium">{total ? Math.round(item.value / total * 100) : 0}%</span></li>;
+        })}
+      </ul>
     </CardContent>
   </Card>
 );
 
 export const EnrollmentTrendChart = ({ data }: { data: EnrollmentTrend[] }) => (
-  <Card className="col-span-2">
+  <Card className="md:col-span-2">
     <CardHeader>
       <CardTitle className="text-base">Enrollment Trends</CardTitle>
       <CardDescription>Monthly enrollment and completion rates</CardDescription>

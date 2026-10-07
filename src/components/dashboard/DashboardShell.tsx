@@ -146,7 +146,7 @@ export function DashboardShell({
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-sm">{a.label}</p>
                       {a.badge !== undefined && a.badge !== 0 && a.badge !== "" && (
                         <Badge variant="secondary" className="h-5 px-1.5 text-xs">{a.badge}</Badge>

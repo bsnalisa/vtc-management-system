@@ -6,3 +6,4 @@
 - Keep the public training hero in a dedicated component using the shared Embla carousel and UI controls, with pause-on-interaction and reduced-motion support to preserve accessibility independently of application workflows.
 - Use AppLogo and its shared favicon asset for application branding; keep uploaded organization logos separate as centre identity so tenant branding cannot replace the system mark.
 - All animated loading states use LoadingIndicator directly or through LoadingSpinner/ButtonSpinner so pages, permission checks and action buttons share accessible graduation-cap motion.
+- Shared UI primitives own narrow-screen containment for tabs, tables and dialogs; page action rows stack before expanding to preserve readable text without hiding workflows.

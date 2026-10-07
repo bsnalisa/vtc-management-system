@@ -218,12 +218,12 @@ function TopHeader({
   const navigate = useNavigate();
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-card px-4 fixed top-0 left-0 right-0 z-50">
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:gap-3 sm:px-4 fixed top-0 left-0 right-0 z-50">
       <SidebarTrigger className="shrink-0 md:hidden" />
       <AppLogo className="h-8 w-8" />
       {/* Organization Branding */}
       {organizationName && (
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex flex-1 items-center gap-2 min-w-0">
           {settings?.logo_url && (
             <Avatar className="h-8 w-8 shrink-0">
               <AvatarImage src={settings.logo_url} alt={organizationName} />
@@ -238,15 +238,16 @@ function TopHeader({
         </div>
       )}
 
-      <div className="flex-1" />
+      {!organizationName && <div className="flex-1" />}
 
       {/* User Actions */}
-      <div className="flex items-center gap-1 sm:gap-2">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <RoleSwitcher />
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => navigate("/profile")}
+          aria-label="Profile"
           className="flex items-center gap-2 h-8 px-2 sm:px-3"
         >
           <UserCircle className="h-4 w-4" />
@@ -256,6 +257,7 @@ function TopHeader({
           variant="ghost" 
           size="sm" 
           onClick={onSignOut}
+          aria-label="Sign out"
           className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-2 sm:px-3"
         >
           <LogOut className="h-4 w-4" />
@@ -334,8 +336,8 @@ export const DashboardLayout = ({
             </div>}
 
             {/* Main Content */}
-            <div className="workspace-content flex-1 p-5 sm:p-8 bg-background">
-              <div className="max-w-7xl mx-auto">
+            <div className="workspace-content min-w-0 flex-1 p-3 sm:p-5 lg:p-8 bg-background">
+              <div className="min-w-0 max-w-7xl mx-auto">
                 {children}
               </div>
             </div>
