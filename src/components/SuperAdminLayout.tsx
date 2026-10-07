@@ -68,10 +68,7 @@ function SuperAdminSidebar() {
         {/* Role Badge in Sidebar Header */}
         <div className="px-4 py-3 border-b">
           <div 
-            className="w-full flex justify-center items-center gap-2 px-3 py-2 rounded-md text-white text-xs font-medium"
-            style={{
-              backgroundColor: `hsl(var(--role-super-admin))`
-            }}
+            className="w-full flex justify-center items-center gap-2 px-3 py-2 rounded-lg bg-sidebar-accent text-sidebar-foreground text-xs font-medium"
           >
             <Shield className="h-3 w-3" />
             <span>Super Admin</span>
@@ -92,34 +89,12 @@ function SuperAdminSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/super-admin"}
-                        className="flex items-center gap-3 rounded-md px-3 py-2 transition-all duration-200"
-                        style={({ isActive }) => 
-                          isActive ? {
-                            backgroundColor: `hsl(var(--role-super-admin))`,
-                            color: 'white',
-                            fontWeight: '500',
-                            boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
-                          } : {
-                            color: 'hsl(var(--muted-foreground))'
-                          }
-                        }
-                        onMouseEnter={(e) => {
-                          if (!isActive(item.url)) {
-                            e.currentTarget.style.backgroundColor = `hsl(var(--role-super-admin) / 0.1)`;
-                            e.currentTarget.style.color = `hsl(var(--role-super-admin))`;
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isActive(item.url)) {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.color = 'hsl(var(--muted-foreground))';
-                          }
-                        }}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${active ? "bg-sidebar-primary/20 text-sidebar-primary-foreground font-semibold" : "text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}
                       >
                         <Icon className="h-4 w-4" />
                         <span>{item.title}</span>
                         {active && (
-                          <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'white' }} />
+                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sidebar-primary" />
                         )}
                       </NavLink>
                     </SidebarMenuButton>
@@ -136,15 +111,15 @@ function SuperAdminSidebar() {
           <SidebarGroupContent>
             <div className="space-y-3 px-2 py-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Active VTCs</span>
+                <span className="text-sidebar-foreground/65">Active VTCs</span>
                 <span className="font-medium text-green-600 dark:text-green-500">24</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Total Users</span>
+                <span className="text-sidebar-foreground/65">Total Users</span>
                 <span className="font-medium text-blue-600 dark:text-blue-500">1,234</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">System Health</span>
+                <span className="text-sidebar-foreground/65">System Health</span>
                 <span className="font-medium text-green-600 dark:text-green-500">99.8%</span>
               </div>
             </div>
@@ -181,7 +156,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="dashboard-workspace min-h-screen flex w-full bg-background">
         <SuperAdminSidebar />
         
         <div className="flex-1 flex flex-col min-w-0">
@@ -192,7 +167,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
                 <div className="flex items-center gap-4">
                   <SidebarTrigger />
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                       <Shield className="h-4 w-4 text-primary-foreground" />
                     </div>
                     <div>
@@ -229,7 +204,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 bg-muted/20">
+          <main className="workspace-content flex-1 p-5 sm:p-8 bg-background">
             <div className="max-w-7xl mx-auto">
               {children}
             </div>

@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LogOut, UserCircle, LucideIcon, Shield, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import { LogOut, UserCircle, LucideIcon, Shield, GraduationCap, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { useUserRole } from "@/hooks/useUserRole";
 import { getRoleDisplayName } from "@/lib/roleUtils";
@@ -82,6 +82,7 @@ function DashboardSidebar({
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
       <SidebarContent className="pt-0">
+        <div className={`flex items-center gap-3 px-3 py-5 ${isCollapsed ? "justify-center" : ""}`}><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"><GraduationCap className="h-5 w-5" /></div>{!isCollapsed && <span className="font-semibold text-sidebar-foreground">VTC System</span>}</div>
         {/* Sidebar Header with Toggle */}
         <div className={`flex items-center border-b h-14 px-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
@@ -90,7 +91,7 @@ function DashboardSidebar({
                 <TooltipTrigger asChild>
                   <Badge 
                     variant="outline" 
-                    className={`gap-1.5 text-white border-transparent ${roleColorClass}`}
+                    className="gap-1.5 text-sidebar-foreground border-sidebar-border bg-sidebar-accent"
                   >
                     <Shield className="h-3 w-3" />
                     <span className="text-xs font-medium truncate max-w-[120px]">{roleDisplayName}</span>
@@ -109,7 +110,7 @@ function DashboardSidebar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0"
+                  className="h-8 w-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   onClick={toggleSidebar}
                 >
                   {isCollapsed ? (
@@ -133,8 +134,8 @@ function DashboardSidebar({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${roleColorClass}`}>
-                    <Shield className="h-4 w-4 text-white" />
+                  <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
+                    <Shield className="h-4 w-4 text-sidebar-primary-foreground" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
@@ -162,29 +163,8 @@ function DashboardSidebar({
                           <SidebarMenuButton asChild tooltip={item.title}>
                             <NavLink
                               to={item.url}
-                              className={`flex items-center gap-3 rounded-md px-3 py-2 transition-all duration-200 ${!hasAccess ? 'opacity-60' : ''} ${isCollapsed ? 'justify-center px-2' : ''}`}
-                              style={({ isActive }) => 
-                                isActive ? {
-                                  backgroundColor: 'hsl(var(--sidebar-primary))',
-                                  color: 'white',
-                                  fontWeight: '500',
-                                  boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
-                                } : {
-                                  color: 'hsl(var(--sidebar-foreground))'
-                                }
-                              }
-                              onMouseEnter={(e) => {
-                                if (!isActive(item.url)) {
-                                  e.currentTarget.style.backgroundColor = 'hsl(var(--sidebar-accent))';
-                                  e.currentTarget.style.color = 'hsl(var(--sidebar-accent-foreground))';
-                                }
-                              }}
-                              onMouseLeave={(e) => {
-                                if (!isActive(item.url)) {
-                                  e.currentTarget.style.backgroundColor = 'transparent';
-                                  e.currentTarget.style.color = 'hsl(var(--sidebar-foreground))';
-                                }
-                              }}
+                              end
+                               className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isCollapsed ? 'justify-center px-2' : ''} ${active ? 'bg-sidebar-primary/20 text-sidebar-primary-foreground font-semibold' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}
                             >
                               <Icon className="h-4 w-4 shrink-0" />
                               {!isCollapsed && (
@@ -239,18 +219,19 @@ function TopHeader({
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-card px-4 fixed top-0 left-0 right-0 z-50">
+      <SidebarTrigger className="shrink-0 md:hidden" />
       {/* Organization Branding */}
       {organizationName && (
         <div className="flex items-center gap-2 min-w-0">
           {settings?.logo_url && (
-            <Avatar className="h-8 w-8 shrink-0">
+            <Avatar className="h-8 w-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
               <AvatarImage src={settings.logo_url} alt={organizationName} />
               <AvatarFallback className="text-xs">
                 {organizationName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           )}
-          <span className="font-semibold text-foreground text-sm truncate hidden sm:block">
+          <span className="font-semibold text-foreground text-sm truncate">
             {organizationName}
           </span>
         </div>
@@ -320,7 +301,7 @@ export const DashboardLayout = ({
   
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full bg-background">
+      <div className="dashboard-workspace h-svh flex flex-col w-full bg-background overflow-hidden">
         {/* Top Navigation Bar */}
         <TopHeader 
           organizationName={organizationName} 
@@ -332,7 +313,7 @@ export const DashboardLayout = ({
         <div className="h-14 shrink-0" />
 
         {/* Sidebar and content container */}
-        <div className="flex flex-1 w-full">
+        <div className="flex flex-1 min-h-0 w-full">
           <DashboardSidebar 
             navItems={navItems} 
             groupLabel={groupLabel}
@@ -341,7 +322,7 @@ export const DashboardLayout = ({
           
           <main className="flex-1 flex flex-col min-w-0 overflow-auto">
             {/* Page Header */}
-            <div className="border-b bg-card shrink-0">
+            {(title || subtitle) && <div className="shrink-0">
               <div className="px-4 sm:px-6 py-2 sm:py-3 space-y-1">
                 <div>
                   <h1 className="text-base sm:text-lg font-bold text-foreground">{title}</h1>
@@ -349,10 +330,10 @@ export const DashboardLayout = ({
                 </div>
                 <Breadcrumb />
               </div>
-            </div>
+            </div>}
 
             {/* Main Content */}
-            <div className="flex-1 p-4 sm:p-6 bg-muted/20">
+            <div className="workspace-content flex-1 p-5 sm:p-8 bg-background">
               <div className="max-w-7xl mx-auto">
                 {children}
               </div>
