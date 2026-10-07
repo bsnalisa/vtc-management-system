@@ -205,8 +205,8 @@ DECLARE
   n integer := 0;
   d integer;
 BEGIN
-  -- Library staff, or the scheduler (service role). Anonymous callers have no uid and must not pass.
-  IF NOT (public.is_library_staff(auth.uid(), _org) OR auth.role() = 'service_role') THEN
+  -- Library staff, or the scheduler (service role / pg_cron). Anonymous callers must not pass.
+  IF NOT (public.is_library_staff(auth.uid(), _org) OR public.is_job_runner()) THEN
     RAISE EXCEPTION 'Not authorised';
   END IF;
   SELECT * INTO s FROM public.library_settings WHERE organization_id = _org;

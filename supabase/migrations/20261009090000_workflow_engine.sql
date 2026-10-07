@@ -590,7 +590,7 @@ RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE r record; s public.workflow_steps%ROWTYPE; i public.workflow_instances%ROWTYPE; n integer := 0; _added integer; a record;
 BEGIN
-  IF NOT (public.is_workflow_admin(auth.uid(), _org) OR auth.role() = 'service_role') THEN RAISE EXCEPTION 'Not authorised'; END IF;
+  IF NOT (public.is_workflow_admin(auth.uid(), _org) OR public.is_job_runner()) THEN RAISE EXCEPTION 'Not authorised'; END IF;
   FOR r IN SELECT t.* FROM public.workflow_tasks t JOIN public.workflow_instances ins ON ins.id = t.instance_id
            WHERE ins.organization_id = _org AND t.status = 'pending' AND ins.status = 'in_progress'
              AND t.due_at IS NOT NULL AND t.due_at < now() AND t.escalated_at IS NULL

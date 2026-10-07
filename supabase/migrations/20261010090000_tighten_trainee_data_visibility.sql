@@ -34,58 +34,71 @@ $$;
 
 -- ---- trainee-linked tables: staff of the centre, or the trainee themselves --------------------------------------
 DROP POLICY IF EXISTS "Users can view alumni in their organization" ON public.alumni;
+DROP POLICY IF EXISTS "Staff or the graduate view alumni" ON public.alumni;
 CREATE POLICY "Staff or the graduate view alumni" ON public.alumni FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Staff can view ca final results" ON public.ca_final_results;
+DROP POLICY IF EXISTS "Staff or the trainee view ca final results" ON public.ca_final_results;
 CREATE POLICY "Staff or the trainee view ca final results" ON public.ca_final_results FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 -- trainees could previously insert/update/delete these; only assessment and academic staff may write directly
 DROP POLICY IF EXISTS "System can manage ca final results" ON public.ca_final_results;
+DROP POLICY IF EXISTS "Assessment staff manage ca final results" ON public.ca_final_results;
 CREATE POLICY "Assessment staff manage ca final results" ON public.ca_final_results FOR ALL
   USING (public.has_org_role(auth.uid(), organization_id, ARRAY['assessment_coordinator','admin','organization_admin','head_of_training']))
   WITH CHECK (public.has_org_role(auth.uid(), organization_id, ARRAY['assessment_coordinator','admin','organization_admin','head_of_training']));
 
 DROP POLICY IF EXISTS "Users can view fees in their organization" ON public.hostel_fees;
+DROP POLICY IF EXISTS "Staff or the resident view hostel fees" ON public.hostel_fees;
 CREATE POLICY "Staff or the resident view hostel fees" ON public.hostel_fees FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Users can view visitors in their organization" ON public.hostel_visitors;
+DROP POLICY IF EXISTS "Staff or the resident view hostel visitors" ON public.hostel_visitors;
 CREATE POLICY "Staff or the resident view hostel visitors" ON public.hostel_visitors FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Users can view invoices in their organization" ON public.invoices;
+DROP POLICY IF EXISTS "Staff or the trainee view invoices" ON public.invoices;
 CREATE POLICY "Staff or the trainee view invoices" ON public.invoices FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Users can view payment plans in their organization" ON public.payment_plans;
+DROP POLICY IF EXISTS "Staff or the trainee view payment plans" ON public.payment_plans;
 CREATE POLICY "Staff or the trainee view payment plans" ON public.payment_plans FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Staff can view summative results" ON public.summative_results;
+DROP POLICY IF EXISTS "Staff or the trainee view summative results" ON public.summative_results;
 CREATE POLICY "Staff or the trainee view summative results" ON public.summative_results FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Staff can view qualification results" ON public.qualification_results;
+DROP POLICY IF EXISTS "Staff or the trainee view qualification results" ON public.qualification_results;
 CREATE POLICY "Staff or the trainee view qualification results" ON public.qualification_results FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 DROP POLICY IF EXISTS "Users can view proof of registrations" ON public.proof_of_registrations;
+DROP POLICY IF EXISTS "Staff or the trainee view proof of registrations" ON public.proof_of_registrations;
 CREATE POLICY "Staff or the trainee view proof of registrations" ON public.proof_of_registrations FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id));
 
 -- Admins of ANOTHER organisation could read these (is_admin() is not organisation-scoped); admins of this one already
 -- have "Admins can manage transcripts".
 DROP POLICY IF EXISTS "Trainees can view their transcripts" ON public.transcripts;
+DROP POLICY IF EXISTS "Trainees view their own transcripts" ON public.transcripts;
 CREATE POLICY "Trainees view their own transcripts" ON public.transcripts FOR SELECT
   USING (public.is_own_trainee(trainee_id));
 
 -- ---- finance ---------------------------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "tfa_org_read" ON public.trainee_financial_accounts;
+DROP POLICY IF EXISTS "tfa_staff_or_owner_read" ON public.trainee_financial_accounts;
 CREATE POLICY "tfa_staff_or_owner_read" ON public.trainee_financial_accounts FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR public.is_own_trainee(trainee_id) OR public.is_own_application(application_id));
 
 DROP POLICY IF EXISTS "ft_org_read" ON public.financial_transactions;
+DROP POLICY IF EXISTS "ft_staff_or_owner_read" ON public.financial_transactions;
 CREATE POLICY "ft_staff_or_owner_read" ON public.financial_transactions FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id) OR EXISTS (
     SELECT 1 FROM public.trainee_financial_accounts a
@@ -94,24 +107,37 @@ CREATE POLICY "ft_staff_or_owner_read" ON public.financial_transactions FOR SELE
 
 -- ---- exam timetables: unpublished ones are for staff only (trainees keep "Trainees can view published exam timetables")
 DROP POLICY IF EXISTS "Staff can view exam timetables" ON public.exam_timetables;
+DROP POLICY IF EXISTS "Staff can view exam timetables" ON public.exam_timetables;
 CREATE POLICY "Staff can view exam timetables" ON public.exam_timetables FOR SELECT
   USING (public.is_org_staff(auth.uid(), organization_id));
 
 -- ---- attendance: was readable by any signed-in user of any organisation, and writable by trainers/admins of any ---
-DROP POLICY IF EXISTS "Authenticated users can view attendance records" ON public.attendance_records;
-DROP POLICY IF EXISTS "Trainers and admins can manage attendance records" ON public.attendance_records;
-CREATE POLICY "Staff or the trainee view attendance" ON public.attendance_records FOR SELECT
-  USING (public.is_own_trainee(trainee_id) OR EXISTS (
-    SELECT 1 FROM public.attendance_registers r WHERE r.id = attendance_records.register_id AND public.is_org_staff(auth.uid(), r.organization_id)));
-CREATE POLICY "Teaching staff manage attendance in their centre" ON public.attendance_records FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.attendance_registers r WHERE r.id = attendance_records.register_id
-                 AND public.has_org_role(auth.uid(), r.organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod'])))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.attendance_registers r WHERE r.id = attendance_records.register_id
-                 AND public.has_org_role(auth.uid(), r.organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod'])));
+-- Some databases (production among them) already replaced these policies with scoped ones. Only act where the old
+-- permissive policies are still present, so a stricter existing setup is never widened by adding mine next to it.
+DO $att$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'attendance_records'
+             AND policyname IN ('Authenticated users can view attendance records', 'Trainers and admins can manage attendance records')) THEN
+    DROP POLICY IF EXISTS "Authenticated users can view attendance records" ON public.attendance_records;
+    DROP POLICY IF EXISTS "Trainers and admins can manage attendance records" ON public.attendance_records;
+    DROP POLICY IF EXISTS "Staff or the trainee view attendance" ON public.attendance_records;
+    DROP POLICY IF EXISTS "Teaching staff manage attendance in their centre" ON public.attendance_records;
+    CREATE POLICY "Staff or the trainee view attendance" ON public.attendance_records FOR SELECT
+      USING (public.is_own_trainee(trainee_id) OR EXISTS (
+        SELECT 1 FROM public.attendance_registers r WHERE r.id = attendance_records.register_id AND public.is_org_staff(auth.uid(), r.organization_id)));
+    CREATE POLICY "Teaching staff manage attendance in their centre" ON public.attendance_records FOR ALL
+      USING (EXISTS (SELECT 1 FROM public.attendance_registers r WHERE r.id = attendance_records.register_id
+                     AND public.has_org_role(auth.uid(), r.organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod'])))
+      WITH CHECK (EXISTS (SELECT 1 FROM public.attendance_registers r WHERE r.id = attendance_records.register_id
+                     AND public.has_org_role(auth.uid(), r.organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod'])));
+  END IF;
+END $att$;
 
 DROP POLICY IF EXISTS "Trainers and admins can create attendance registers" ON public.attendance_registers;
+DROP POLICY IF EXISTS "Teaching staff create attendance registers in their centre" ON public.attendance_registers;
 CREATE POLICY "Teaching staff create attendance registers in their centre" ON public.attendance_registers FOR INSERT
   WITH CHECK (public.has_org_role(auth.uid(), organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod']));
+DROP POLICY IF EXISTS "Teaching staff update attendance registers in their centre" ON public.attendance_registers;
 CREATE POLICY "Teaching staff update attendance registers in their centre" ON public.attendance_registers FOR UPDATE
   USING (public.has_org_role(auth.uid(), organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod']))
   WITH CHECK (public.has_org_role(auth.uid(), organization_id, ARRAY['trainer','admin','organization_admin','head_of_training','hod']));

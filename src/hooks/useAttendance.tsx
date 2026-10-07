@@ -118,7 +118,7 @@ export const useSaveAttendance = () => {
       queryClient.invalidateQueries({ queryKey: ["attendance-range"] });
       toast.success(`Attendance saved for ${n} trainee${n === 1 ? "" : "s"}`);
     },
-    onError: (e: Error) => toast.error(/row-level security/.test(e.message) ? "Only trainers, heads of department and administrators can record attendance" : e.message),
+    onError: (e: Error) => toast.error(/row-level security/.test(e.message) ? "You do not have permission to record attendance for this class" : e.message),
   });
 };
 

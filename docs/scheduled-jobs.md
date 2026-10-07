@@ -11,24 +11,33 @@ Everything else is event-driven; these four need a schedule. Each can also be ru
 
 Set-up for the dispatcher is in `docs/messaging-setup.md`.
 
-## Example (pg_cron)
+## How they are scheduled
+
+Migration `20261010120000_schedule_recurring_jobs.sql` schedules all four with pg_cron (when the extension is installed):
+
+| pg_cron job | Schedule (UTC) | Calls |
+|---|---|---|
+| `vms-workflow-escalation` | every 30 minutes | `run_scheduled_job('workflow_escalation')` |
+| `vms-library-overdue` | daily 04:00 | `run_scheduled_job('library_overdue')` |
+| `vms-event-reminders` | hourly at :15 | `run_scheduled_job('event_reminders')` |
+| `vms-message-dispatcher` | every 5 minutes | `invoke_message_dispatcher()` |
+
+`run_scheduled_job` loops over active organisations and isolates failures per organisation. The scheduler runs as the database
+owner with no signed-in user; `is_job_runner()` recognises that (or the service-role key) and the functions refuse everyone else.
+
+Check with `select jobname, schedule from cron.job where jobname like 'vms-%';` and `supabase/verify/post_apply_checks.sql`.
+
+### Dispatcher set-up (one time)
+
+The dispatcher job does nothing until it knows where the edge function lives. Store two Vault secrets:
 
 ```sql
-select cron.schedule('workflow-escalation', '*/30 * * * *', $$
-  select public.workflow_escalate_overdue(id) from public.organizations where active;
-$$);
-
-select cron.schedule('library-overdue', '0 6 * * *', $$
-  select public.library_process_overdue(id) from public.organizations where active;
-$$);
-
-select cron.schedule('event-reminders', '0 * * * *', $$
-  select public.extracurricular_send_reminders(id) from public.organizations where active;
-$$);
+select vault.create_secret('https://<project-ref>.supabase.co/functions/v1', 'vms_functions_url');
+select vault.create_secret('<long random string>', 'vms_dispatch_secret');
 ```
 
-These run as the database owner (not a signed-in user), which each function accepts. If your scheduler calls them through the
-API instead, use the service-role key.
+and set the same random string as the edge-function secret `DISPATCH_SECRET`, plus the provider secrets listed in
+`docs/messaging-setup.md`. Queued messages older than 7 days are marked failed rather than sent late.
 
 ## Notifications that need no schedule
 

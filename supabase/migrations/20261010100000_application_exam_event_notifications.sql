@@ -137,7 +137,7 @@ RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE e public.extracurricular_events%ROWTYPE; r record; n integer := 0; _msg text;
 BEGIN
-  IF NOT (public.is_trainee_affairs_staff(auth.uid(), _org) OR auth.role() = 'service_role') THEN RAISE EXCEPTION 'Not authorised'; END IF;
+  IF NOT (public.is_trainee_affairs_staff(auth.uid(), _org) OR public.is_job_runner()) THEN RAISE EXCEPTION 'Not authorised'; END IF;
 
   UPDATE public.extracurricular_events SET reminder_sent = true
    WHERE organization_id = _org AND NOT reminder_sent AND start_date <= now();

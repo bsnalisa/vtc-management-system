@@ -11,10 +11,18 @@ ALTER TABLE public.outbound_messages
 -- Rows stuck in 'sending' for more than 10 minutes (crashed run) are picked up again.
 CREATE OR REPLACE FUNCTION public.claim_outbound_messages(_limit integer DEFAULT 50)
 RETURNS SETOF public.outbound_messages
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+BEGIN
+  -- A notice that has waited for a week (dispatcher switched off, provider down) is no longer worth sending:
+  -- "your exam is tomorrow" must not arrive a month late. Mark it failed so it is visible rather than silently dropped.
+  UPDATE public.outbound_messages
+     SET status = 'failed', error = COALESCE(error || '; ', '') || 'expired before it could be sent'
+   WHERE status IN ('queued', 'sending') AND created_at < now() - interval '7 days';
+
+  RETURN QUERY
   UPDATE public.outbound_messages m
   SET status = 'sending', claimed_at = now(), attempts = m.attempts + 1
   WHERE m.id IN (
@@ -26,6 +34,7 @@ AS $$
     FOR UPDATE SKIP LOCKED
   )
   RETURNING m.*;
+END;
 $$;
 REVOKE ALL ON FUNCTION public.claim_outbound_messages(integer) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_outbound_messages(integer) TO service_role;
