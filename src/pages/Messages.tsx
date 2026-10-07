@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Button } from "@/components/ui/button";
@@ -160,10 +161,10 @@ export default function Messages() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="inbox">
-            {inboxLoading ? <p>Loading...</p> : <MessageList messages={inboxMessages || []} type="inbox" />}
+            {inboxLoading ? <LoadingSpinner text="Loading..." className="py-8" /> : <MessageList messages={inboxMessages || []} type="inbox" />}
           </TabsContent>
           <TabsContent value="sent">
-            {sentLoading ? <p>Loading...</p> : <MessageList messages={sentMessages || []} type="sent" />}
+            {sentLoading ? <LoadingSpinner text="Loading..." className="py-8" /> : <MessageList messages={sentMessages || []} type="sent" />}
           </TabsContent>
         </Tabs>
 

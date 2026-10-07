@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, XCircle, AlertCircle, Calculator } from "lucide-react";
 import { QualificationResult } from "@/types/application";
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 
 interface QualificationIndicatorProps {
   result?: QualificationResult | null;
@@ -19,7 +20,7 @@ export const QualificationIndicator = ({
       <Card className="border-muted">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Calculator className="h-4 w-4 animate-pulse" />
+            <LoadingIndicator className="h-4 w-4 text-primary" />
             Calculating Qualification...
           </CardTitle>
         </CardHeader>

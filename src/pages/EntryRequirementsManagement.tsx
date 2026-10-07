@@ -144,7 +144,7 @@ const EntryRequirementsManagement = () => {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8">Loading...</div>
+              <LoadingSpinner text="Loading..." className="py-8" />
             ) : !requirements || requirements.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No entry requirements configured yet
