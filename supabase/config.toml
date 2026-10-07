@@ -56,3 +56,9 @@ verify_jwt = true
 
 [functions.subscription-monitor]
 verify_jwt = false
+
+[functions.dispatch-outbound-messages]
+verify_jwt = false
+
+[functions.sms-inbound]
+verify_jwt = false
