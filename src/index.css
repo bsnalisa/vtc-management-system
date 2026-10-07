@@ -161,6 +161,17 @@ All colors MUST be HSL.
     .training-hero-copy h1 { font-size: 2.25rem; overflow-wrap: anywhere; }
   }
   .workspace-panel { box-shadow: var(--shadow-panel); }
+  /* Let text and chart/table regions shrink inside flex and grid tracks. */
+  .workspace-content .grid > *, .workspace-content .flex > * { min-width: 0; }
+  .workspace-content h1, .workspace-content h2, .workspace-content h3,
+  .workspace-content p, [role="dialog"] label { overflow-wrap: anywhere; }
+  [role="dialog"], [role="alertdialog"] { max-width: calc(100vw - 1.5rem); max-height: calc(100svh - 1.5rem); overflow-y: auto; }
+  [role="dialog"] > :first-child { padding-right: 1.5rem; }
+  @media (max-width: 639px) {
+    [role="dialog"], [role="alertdialog"] { padding: 1rem; }
+    [role="dialog"].p-0 { padding: 0; }
+    .workspace-content .flex.justify-between:not(.flex-col) { flex-wrap: wrap; gap: 0.75rem; }
+  }
   .workspace-panel:hover { box-shadow: var(--shadow-raised); }
   .dashboard-workspace [data-sidebar="menu-button"] { min-height: 2.5rem; }
   .dashboard-workspace [data-sidebar="group-label"] { color: hsl(var(--sidebar-foreground) / 0.55); }

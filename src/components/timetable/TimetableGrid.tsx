@@ -83,7 +83,7 @@ const TimetableGrid = ({
               <CardTitle className="text-base">{className}</CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto p-0">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[900px] table-fixed text-sm">
                 <thead>
                   <tr className="border-b">
                     <th className="p-2 text-left font-medium text-muted-foreground w-24">Period</th>
@@ -128,7 +128,7 @@ const TimetableGrid = ({
                                 <div className="font-medium truncate">{courseName}</div>
                                 <div className="text-muted-foreground truncate">{trainer}</div>
                                 <div className="flex items-center justify-between mt-0.5">
-                                  <span className="text-muted-foreground truncate">{room}</span>
+                                  <span className="min-w-0 text-muted-foreground truncate">{room}</span>
                                   <Button
                                     variant="ghost"
                                     size="icon"

@@ -158,29 +158,30 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="dashboard-workspace min-h-screen flex w-full bg-background">
+      <div className="dashboard-workspace h-svh flex w-full overflow-hidden bg-background">
         <SuperAdminSidebar />
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50">
-            <div className="px-6 py-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+          <header className="shrink-0 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 z-40">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3">
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                   <SidebarTrigger />
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <AppLogo className="h-8 w-8" />
-                    <div>
-                      <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
+                    <div className="min-w-0">
+                      <h1 className="break-words text-base sm:text-lg font-bold text-foreground">{getPageTitle()}</h1>
                       <p className="text-xs text-muted-foreground">Platform Management Dashboard</p>
                     </div>
                   </div>
                 </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => navigate("/profile")}
+                  aria-label="Profile"
                   className="flex items-center gap-2"
                 >
                   <UserCircle className="h-4 w-4" />
@@ -190,6 +191,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
                   variant="ghost" 
                   size="sm" 
                   onClick={handleSignOut}
+                  aria-label="Sign out"
                   className="flex items-center gap-2 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                 >
                   <LogOut className="h-4 w-4" />
@@ -204,8 +206,8 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
           </header>
 
           {/* Main Content */}
-          <main className="workspace-content flex-1 p-5 sm:p-8 bg-background">
-            <div className="max-w-7xl mx-auto">
+          <main className="workspace-content min-h-0 min-w-0 overflow-auto flex-1 p-3 sm:p-5 lg:p-8 bg-background">
+            <div className="min-w-0 max-w-7xl mx-auto">
               {children}
             </div>
           </main>

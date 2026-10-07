@@ -329,14 +329,14 @@ const SuperAdminModulesManagement = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-between items-center">
-          <div>
+        <div className="flex flex-col items-start justify-between gap-4 xl:flex-row xl:items-center">
+          <div className="min-w-0">
             <h2 className="text-2xl font-bold">System Modules</h2>
             <p className="text-muted-foreground">
               Manage all available modules that VTCs can subscribe to
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <Button variant="outline" onClick={handleInitializeModules}>
               <PackageOpen className="h-4 w-4 mr-2" />
               Initialize Standard Modules
@@ -364,10 +364,10 @@ const SuperAdminModulesManagement = () => {
                   <TabsTrigger
                     key={category}
                     value={category}
-                    className="flex items-center gap-2 data-[state=active]:bg-background"
+                    className="flex min-w-0 items-center gap-1 px-1 text-xs sm:gap-2 sm:px-3 sm:text-sm data-[state=active]:bg-background"
                   >
                     {getCategoryIcon(category)}
-                    <span className="hidden sm:inline">{category}</span>
+                    <span className="min-w-0 break-words whitespace-normal">{category}</span>
                     <Badge variant="secondary" className="ml-1">{count}</Badge>
                   </TabsTrigger>
                 );
@@ -387,7 +387,7 @@ const SuperAdminModulesManagement = () => {
                         <Badge variant="secondary">{categoryModules.length}</Badge>
                       </CardTitle>
                       <CardDescription>
-                        {category === "Academic" && "Training, education, and student lifecycle management"}
+                        {category === "Academic" && "Training, education, and trainee lifecycle management"}
                         {category === "Financial" && "Fee management, payments, and financial tracking"}
                         {category === "Operations" && "Facilities, resources, and operational management"}
                         {category === "Administration" && "System configuration, users, and support"}
@@ -396,7 +396,7 @@ const SuperAdminModulesManagement = () => {
                     <CardContent>
                       {categoryModules.length > 0 ? (
                         <div className="rounded-md border">
-                          <Table>
+                          <Table className="min-w-[760px]">
                             <TableHeader>
                               <TableRow>
                                 <TableHead className="w-[250px]">Module Name</TableHead>

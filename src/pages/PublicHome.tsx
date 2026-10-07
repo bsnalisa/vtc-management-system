@@ -129,7 +129,7 @@ const PublicHome = () => {
           )}
 
           <div className="container mx-auto px-4 py-10">
-            <TabsList className="mb-10 grid h-auto w-full max-w-xl grid-cols-3 rounded-lg p-1">
+            <TabsList className="mb-10 grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-lg p-1 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
               <TabsTrigger value="home" className="rounded-lg py-2 whitespace-normal">Overview</TabsTrigger>
               <TabsTrigger value="apply" className="rounded-lg py-2 whitespace-normal">Online Application</TabsTrigger>
               <TabsTrigger value="track" className="rounded-lg py-2 whitespace-normal">My Applications</TabsTrigger>

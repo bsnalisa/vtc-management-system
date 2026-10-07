@@ -207,7 +207,7 @@ const AdminDashboard = () => {
                     <DialogDescription>Add a new staff member with role assignment</DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleRegisterSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="firstname">First Name</Label>
                         <Input

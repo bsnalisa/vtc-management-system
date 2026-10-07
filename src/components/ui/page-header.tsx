@@ -28,7 +28,7 @@ export function PageHeader({
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           {backUrl && (
             <Button
               variant="ghost"
@@ -44,7 +44,7 @@ export function PageHeader({
               {icon}
             </div>
           )}
-          <div>
+          <div className="min-w-0 break-words">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
             {description && (
               <p className="text-muted-foreground mt-1">{description}</p>
@@ -52,7 +52,7 @@ export function PageHeader({
           </div>
         </div>
         {actions && (
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 w-full sm:w-auto">
             {actions}
           </div>
         )}

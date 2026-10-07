@@ -1,3 +1,8 @@
+# Mobile-first layout review
+- [x] Audit shared layouts, tables, tabs, dialogs and crowded pages for overlap.
+- [x] Apply presentation-only smaller-screen fixes and verify signed-in/public screens.
+- [ ] Confirm access boundaries before addressing the three flagged security policies. Blocker: approval needed for attendance, schedule-history and permission visibility changes.
+
 # Branding and loading consistency
 - [x] Unify application branding across public pages and shared signed-in layouts.
 - [x] Standardize loading indicators and verify public screens.
@@ -11,4 +16,4 @@
 - [x] Restyle shared navigation and role dashboards without workflow changes.
 - [x] Align public homepage with the selected visual language.
 - [x] Verify public pages, application navigation, mobile layout and current build status.
-- [ ] Verify signed-in role dashboards. Blocker: user must sign in through the preview; no account matched for managed test access.
+- [x] Verify signed-in Super Admin screens using the available preview session; other role-only workflows remain outside this account's access.
