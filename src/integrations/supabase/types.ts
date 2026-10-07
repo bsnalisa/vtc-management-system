@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_calendar_events: {
+        Row: {
+          academic_year: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          event_type: string
+          id: string
+          organization_id: string
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          organization_id: string
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          organization_id?: string
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       academic_time_structure: {
         Row: {
           created_at: string
@@ -1424,6 +1466,54 @@ export type Database = {
           },
         ]
       }
+      assignment_submissions: {
+        Row: {
+          answer_text: string | null
+          assignment_id: string
+          feedback: string | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          late: boolean
+          link_url: string | null
+          marks: number | null
+          organization_id: string
+          status: string
+          submitted_at: string
+          trainee_id: string
+        }
+        Insert: {
+          answer_text?: string | null
+          assignment_id: string
+          feedback?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          late?: boolean
+          link_url?: string | null
+          marks?: number | null
+          organization_id: string
+          status?: string
+          submitted_at?: string
+          trainee_id: string
+        }
+        Update: {
+          answer_text?: string | null
+          assignment_id?: string
+          feedback?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          late?: boolean
+          link_url?: string | null
+          marks?: number | null
+          organization_id?: string
+          status?: string
+          submitted_at?: string
+          trainee_id?: string
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           attendance_date: string
@@ -1539,6 +1629,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bank_statement_imports: {
+        Row: {
+          bank_name: string | null
+          duplicate_count: number
+          file_name: string
+          id: string
+          imported_at: string
+          imported_by: string | null
+          line_count: number
+          organization_id: string
+        }
+        Insert: {
+          bank_name?: string | null
+          duplicate_count?: number
+          file_name: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          line_count?: number
+          organization_id: string
+        }
+        Update: {
+          bank_name?: string | null
+          duplicate_count?: number
+          file_name?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          line_count?: number
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      bank_statement_lines: {
+        Row: {
+          amount: number
+          description: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          import_id: string
+          line_hash: string
+          matched_fee_record_id: string | null
+          matched_trainee_id: string | null
+          organization_id: string
+          payment_id: string | null
+          reference: string | null
+          status: string
+          txn_date: string
+        }
+        Insert: {
+          amount: number
+          description?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          import_id: string
+          line_hash: string
+          matched_fee_record_id?: string | null
+          matched_trainee_id?: string | null
+          organization_id: string
+          payment_id?: string | null
+          reference?: string | null
+          status?: string
+          txn_date: string
+        }
+        Update: {
+          amount?: number
+          description?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          import_id?: string
+          line_hash?: string
+          matched_fee_record_id?: string | null
+          matched_trainee_id?: string | null
+          organization_id?: string
+          payment_id?: string | null
+          reference?: string | null
+          status?: string
+          txn_date?: string
+        }
+        Relationships: []
       }
       billing_records: {
         Row: {
@@ -2040,6 +2214,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      deferral_requests: {
+        Row: {
+          created_at: string
+          created_by: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          defer_from: string
+          expected_return: string | null
+          id: string
+          organization_id: string
+          reason: string
+          status: string
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          defer_from?: string
+          expected_return?: string | null
+          id?: string
+          organization_id: string
+          reason: string
+          status?: string
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          defer_from?: string
+          expected_return?: string | null
+          id?: string
+          organization_id?: string
+          reason?: string
+          status?: string
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       delivery_plan_weeks: {
         Row: {
@@ -3021,6 +3243,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      forum_posts: {
+        Row: {
+          author_id: string
+          author_name: string | null
+          body: string
+          created_at: string
+          id: string
+          organization_id: string
+          topic_id: string
+        }
+        Insert: {
+          author_id?: string
+          author_name?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          topic_id: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          topic_id?: string
+        }
+        Relationships: []
+      }
+      forum_topics: {
+        Row: {
+          author_id: string
+          author_name: string | null
+          body: string | null
+          class_id: string
+          created_at: string
+          id: string
+          locked: boolean
+          organization_id: string
+          title: string
+        }
+        Insert: {
+          author_id?: string
+          author_name?: string | null
+          body?: string | null
+          class_id: string
+          created_at?: string
+          id?: string
+          locked?: boolean
+          organization_id: string
+          title: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string | null
+          body?: string | null
+          class_id?: string
+          created_at?: string
+          id?: string
+          locked?: boolean
+          organization_id?: string
+          title?: string
+        }
+        Relationships: []
       }
       generated_documents: {
         Row: {
@@ -4724,6 +5012,135 @@ export type Database = {
           },
         ]
       }
+      learning_assignments: {
+        Row: {
+          class_id: string
+          created_at: string
+          created_by: string | null
+          due_at: string | null
+          id: string
+          instructions: string | null
+          max_marks: number
+          organization_id: string
+          published: boolean
+          title: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          created_by?: string | null
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          max_marks?: number
+          organization_id: string
+          published?: boolean
+          title: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          created_by?: string | null
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          max_marks?: number
+          organization_id?: string
+          published?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
+      learning_items: {
+        Row: {
+          body: string | null
+          class_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          item_type: string
+          organization_id: string
+          position: number
+          published: boolean
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          body?: string | null
+          class_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_type?: string
+          organization_id: string
+          position?: number
+          published?: boolean
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          body?: string | null
+          class_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_type?: string
+          organization_id?: string
+          position?: number
+          published?: boolean
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      learning_quizzes: {
+        Row: {
+          attempts_allowed: number
+          class_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          instructions: string | null
+          organization_id: string
+          pass_percent: number
+          published: boolean
+          show_answers: boolean
+          time_limit_minutes: number | null
+          title: string
+        }
+        Insert: {
+          attempts_allowed?: number
+          class_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions?: string | null
+          organization_id: string
+          pass_percent?: number
+          published?: boolean
+          show_answers?: boolean
+          time_limit_minutes?: number | null
+          title: string
+        }
+        Update: {
+          attempts_allowed?: number
+          class_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions?: string | null
+          organization_id?: string
+          pass_percent?: number
+          published?: boolean
+          show_answers?: boolean
+          time_limit_minutes?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
       library_borrowing: {
         Row: {
           borrow_date: string
@@ -5150,6 +5567,45 @@ export type Database = {
           supervisor_signed_on?: string | null
           trainee_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      logbook_supervisor_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          last_used_at: string | null
+          organization_id: string
+          placement_id: string
+          revoked: boolean
+          supervisor_email: string | null
+          supervisor_name: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          last_used_at?: string | null
+          organization_id: string
+          placement_id: string
+          revoked?: boolean
+          supervisor_email?: string | null
+          supervisor_name?: string | null
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          last_used_at?: string | null
+          organization_id?: string
+          placement_id?: string
+          revoked?: boolean
+          supervisor_email?: string | null
+          supervisor_name?: string | null
+          token?: string
         }
         Relationships: []
       }
@@ -5783,6 +6239,102 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      moodle_course_links: {
+        Row: {
+          class_id: string
+          id: string
+          last_enrol_at: string | null
+          last_grades_at: string | null
+          linked_at: string
+          linked_by: string | null
+          moodle_course_id: number
+          moodle_course_name: string | null
+          organization_id: string
+        }
+        Insert: {
+          class_id: string
+          id?: string
+          last_enrol_at?: string | null
+          last_grades_at?: string | null
+          linked_at?: string
+          linked_by?: string | null
+          moodle_course_id: number
+          moodle_course_name?: string | null
+          organization_id: string
+        }
+        Update: {
+          class_id?: string
+          id?: string
+          last_enrol_at?: string | null
+          last_grades_at?: string | null
+          linked_at?: string
+          linked_by?: string | null
+          moodle_course_id?: number
+          moodle_course_name?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      moodle_grade_imports: {
+        Row: {
+          class_id: string
+          grade: number | null
+          grade_max: number | null
+          id: string
+          imported_at: string
+          item_name: string
+          organization_id: string
+          percentage: string | null
+          trainee_id: string
+        }
+        Insert: {
+          class_id: string
+          grade?: number | null
+          grade_max?: number | null
+          id?: string
+          imported_at?: string
+          item_name: string
+          organization_id: string
+          percentage?: string | null
+          trainee_id: string
+        }
+        Update: {
+          class_id?: string
+          grade?: number | null
+          grade_max?: number | null
+          id?: string
+          imported_at?: string
+          item_name?: string
+          organization_id?: string
+          percentage?: string | null
+          trainee_id?: string
+        }
+        Relationships: []
+      }
+      moodle_user_links: {
+        Row: {
+          created_at: string
+          id: string
+          moodle_user_id: number
+          organization_id: string
+          trainee_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          moodle_user_id: number
+          organization_id: string
+          trainee_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          moodle_user_id?: number
+          organization_id?: string
+          trainee_id?: string
         }
         Relationships: []
       }
@@ -6788,6 +7340,63 @@ export type Database = {
           },
         ]
       }
+      public_rpl_applications: {
+        Row: {
+          applicant_name: string
+          converted_request_id: string | null
+          created_at: string
+          email: string | null
+          handled_by: string | null
+          id: string
+          motivation: string
+          national_id: string | null
+          occupation: string | null
+          organization_id: string
+          phone: string | null
+          qualification_id: string | null
+          reference_number: string
+          staff_notes: string | null
+          status: string
+          years_experience: number | null
+        }
+        Insert: {
+          applicant_name: string
+          converted_request_id?: string | null
+          created_at?: string
+          email?: string | null
+          handled_by?: string | null
+          id?: string
+          motivation: string
+          national_id?: string | null
+          occupation?: string | null
+          organization_id: string
+          phone?: string | null
+          qualification_id?: string | null
+          reference_number: string
+          staff_notes?: string | null
+          status?: string
+          years_experience?: number | null
+        }
+        Update: {
+          applicant_name?: string
+          converted_request_id?: string | null
+          created_at?: string
+          email?: string | null
+          handled_by?: string | null
+          id?: string
+          motivation?: string
+          national_id?: string | null
+          occupation?: string | null
+          organization_id?: string
+          phone?: string | null
+          qualification_id?: string | null
+          reference_number?: string
+          staff_notes?: string | null
+          status?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       purchase_order_items: {
         Row: {
           created_at: string
@@ -7371,6 +7980,78 @@ export type Database = {
           title?: string
           total_marks?: number
           unit_standard_id?: string | null
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json | null
+          id: string
+          organization_id: string
+          passed: boolean | null
+          quiz_id: string
+          score: number | null
+          started_at: string
+          submitted_at: string | null
+          total: number | null
+          trainee_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          id?: string
+          organization_id: string
+          passed?: boolean | null
+          quiz_id: string
+          score?: number | null
+          started_at?: string
+          submitted_at?: string | null
+          total?: number | null
+          trainee_id: string
+        }
+        Update: {
+          answers?: Json | null
+          id?: string
+          organization_id?: string
+          passed?: boolean | null
+          quiz_id?: string
+          score?: number | null
+          started_at?: string
+          submitted_at?: string | null
+          total?: number | null
+          trainee_id?: string
+        }
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          correct_answer: string
+          id: string
+          marks: number
+          options: Json
+          position: number
+          question_text: string
+          question_type: string
+          quiz_id: string
+        }
+        Insert: {
+          correct_answer: string
+          id?: string
+          marks?: number
+          options?: Json
+          position?: number
+          question_text: string
+          question_type?: string
+          quiz_id: string
+        }
+        Update: {
+          correct_answer?: string
+          id?: string
+          marks?: number
+          options?: Json
+          position?: number
+          question_text?: string
+          question_type?: string
+          quiz_id?: string
         }
         Relationships: []
       }
@@ -10479,6 +11160,18 @@ export type Database = {
       }
     }
     Functions: {
+      bank_apply_line: {
+        Args: { _line: string; _fee_record?: string }
+        Returns: string
+      }
+      bank_import_lines: {
+        Args: { _file_name: string; _bank: string; _lines: Json }
+        Returns: Json
+      }
+      bank_set_line_status: {
+        Args: { _line: string; _ignore: boolean }
+        Returns: undefined
+      }
       calculate_application_points: {
         Args: { _org_id: string; _school_subjects: Json }
         Returns: number
@@ -10512,8 +11205,16 @@ export type Database = {
         Args: { _user_id: string; _plan: string }
         Returns: boolean
       }
+      can_manage_class_learning: {
+        Args: { _user_id: string; _class: string }
+        Returns: boolean
+      }
       can_manage_qualifications: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      can_manage_supervisor_link: {
+        Args: { _user_id: string; _placement: string }
         Returns: boolean
       }
       can_review_logbook: {
@@ -10525,6 +11226,10 @@ export type Database = {
           _trainee_id: string
           _training_mode: Database["public"]["Enums"]["training_mode"]
         }
+        Returns: boolean
+      }
+      can_use_class_forum: {
+        Args: { _user_id: string; _class: string }
         Returns: boolean
       }
       check_organization_limit: {
@@ -10568,6 +11273,18 @@ export type Database = {
           _payment_method: string
         }
         Returns: boolean
+      }
+      convert_public_rpl_application: {
+        Args: { _id: string }
+        Returns: string
+      }
+      create_supervisor_link: {
+        Args: { _placement: string; _name: string; _email: string; _base_url?: string }
+        Returns: string
+      }
+      decide_deferral: {
+        Args: { _id: string; _approve: boolean; _notes?: string }
+        Returns: string
       }
       expire_trial_packages: {
         Args: never
@@ -10625,6 +11342,10 @@ export type Database = {
         Returns: number
       }
       get_graduation_invitation: {
+        Args: { _token: string }
+        Returns: Json
+      }
+      get_logbook_for_supervisor: {
         Args: { _token: string }
         Returns: Json
       }
@@ -10704,6 +11425,18 @@ export type Database = {
         Args: { _user_id: string; _org: string }
         Returns: boolean
       }
+      is_deferral_staff: {
+        Args: { _user_id: string; _org: string }
+        Returns: boolean
+      }
+      is_enrolled_in_class: {
+        Args: { _user_id: string; _class: string }
+        Returns: boolean
+      }
+      is_finance_staff: {
+        Args: { _user_id: string; _org: string }
+        Returns: boolean
+      }
       is_graduation_staff: {
         Args: { _user_id: string; _org: string }
         Returns: boolean
@@ -10753,6 +11486,10 @@ export type Database = {
         Args: { _registration: string }
         Returns: Json
       }
+      issue_transcript: {
+        Args: { _trainee: string; _academic_year: string }
+        Returns: Json
+      }
       library_process_overdue: {
         Args: { _org: string }
         Returns: number
@@ -10760,6 +11497,10 @@ export type Database = {
       library_send_announcement: {
         Args: { _org: string; _title: string; _message: string }
         Returns: number
+      }
+      list_public_qualifications: {
+        Args: { _org_slug: string }
+        Returns: { id: string; title: string; code: string; nqf_level: number }[]
       }
       list_smes: {
         Args: { _org: string }
@@ -10833,6 +11574,10 @@ export type Database = {
         }
         Returns: string
       }
+      my_learning_classes: {
+        Args: never
+        Returns: { class_id: string; class_name: string; class_code: string; academic_year: string; can_manage: boolean }[]
+      }
       my_logbook_placements: {
         Args: never
         Returns: { id: string; trainee_id: string; placement_number: string; start_date: string; end_date: string; status: string; employer_name: string; supervisor_name: string }[]
@@ -10852,6 +11597,10 @@ export type Database = {
       organization_has_module: {
         Args: { _module_code: string; _org_id: string }
         Returns: boolean
+      }
+      reinstate_deferred_trainee: {
+        Args: { _id: string }
+        Returns: undefined
       }
       respond_graduation_invitation: {
         Args: { _token: string; _code: number; _channel?: string }
@@ -10881,6 +11630,18 @@ export type Database = {
         Args: { _ceremony: string; _base_url?: string }
         Returns: number
       }
+      start_quiz_attempt: {
+        Args: { _quiz: string }
+        Returns: Json
+      }
+      submit_public_rpl_application: {
+        Args: { _org_slug: string; _name: string; _national_id: string; _phone: string; _email: string; _qualification: string; _occupation: string; _years: number; _motivation: string; _website?: string }
+        Returns: string
+      }
+      submit_quiz_attempt: {
+        Args: { _attempt: string; _answers: Json }
+        Returns: Json
+      }
       submit_sme_application: {
         Args: { _org_slug: string; _full_name: string; _email: string; _phone: string; _national_id: string; _expertise: string; _experience: string }
         Returns: string
@@ -10889,9 +11650,17 @@ export type Database = {
         Args: { _token: string; _answers: Json }
         Returns: boolean
       }
+      supervisor_sign_entries: {
+        Args: { _token: string; _entry_ids: string[]; _signer: string; _return?: boolean; _comment?: string }
+        Returns: number
+      }
       trainee_has_outstanding_fees: {
         Args: { _academic_year: string; _trainee_id: string }
         Returns: boolean
+      }
+      transcript_data: {
+        Args: { _trainee: string; _academic_year?: string }
+        Returns: Json
       }
       workflow_act: {
         Args: { _task: string; _action: string; _comment?: string }
@@ -10978,6 +11747,8 @@ export type Database = {
         | "bdl_coordinator"
         | "rpl_coordinator"
         | "head_trainee_support"
+        | "subject_matter_expert"
+        | "printing_distribution_officer"
         | "subject_matter_expert"
         | "printing_distribution_officer"
       approval_action: "submitted" | "approved" | "rejected" | "returned"
@@ -11195,6 +11966,8 @@ export const Constants = {
         "bdl_coordinator",
         "rpl_coordinator",
         "head_trainee_support",
+        "subject_matter_expert",
+        "printing_distribution_officer",
         "subject_matter_expert",
         "printing_distribution_officer",
       ],
