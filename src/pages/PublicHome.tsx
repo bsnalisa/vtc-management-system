@@ -99,10 +99,10 @@ const PublicHome = () => {
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="public-home-brand text-lg font-bold">VTC Management System</span>
+            <span className="public-home-brand text-lg font-bold"><span className="sm:hidden">VTC System</span><span className="hidden sm:inline">VTC Management System</span></span>
           </Link>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setTab("apply")}>Apply</Button>

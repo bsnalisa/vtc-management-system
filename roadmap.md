@@ -1,5 +1,6 @@
 # System UI refresh
-- [ ] Apply Quiet workspace colour, font and shared control styling.
-- [ ] Restyle shared navigation and role dashboards without workflow changes.
-- [ ] Align public homepage with the selected visual language.
-- [ ] Verify visible pages, navigation and current build status.
+- [x] Apply Quiet workspace colour, font and shared control styling.
+- [x] Restyle shared navigation and role dashboards without workflow changes.
+- [x] Align public homepage with the selected visual language.
+- [x] Verify public pages, application navigation, mobile layout and current build status.
+- [ ] Verify signed-in role dashboards. Blocker: user must sign in through the preview; no account matched for managed test access.
