@@ -50,9 +50,9 @@ const RegistrationOfficerDashboard = () => {
     >
       <div className="space-y-8">
         {/* Hero Greeting */}
-        <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+        <div className="pb-2">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
               <UserPlus className="h-7 w-7" />
             </div>
             <div>
@@ -69,7 +69,6 @@ const RegistrationOfficerDashboard = () => {
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-primary/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Applications</CardTitle>
               <FileText className="h-4 w-4 text-primary" />
@@ -83,21 +82,19 @@ const RegistrationOfficerDashboard = () => {
           </Card>
 
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-amber-500/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Pending Screening</CardTitle>
-              <Clock className="h-4 w-4 text-amber-500" />
+              <Clock className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
               {isLoading ? <Skeleton className="h-8 w-16" /> : (
-                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">{stats?.pending || 0}</div>
+                <div className="text-3xl font-bold text-warning">{stats?.pending || 0}</div>
               )}
               <p className="text-xs text-muted-foreground mt-1">Awaiting review</p>
             </CardContent>
           </Card>
 
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-accent/30" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Prov. Qualified</CardTitle>
               <ClipboardCheck className="h-4 w-4 text-primary" />
@@ -111,7 +108,6 @@ const RegistrationOfficerDashboard = () => {
           </Card>
 
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-secondary/20" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Registered Trainees</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -175,10 +171,11 @@ const RegistrationOfficerDashboard = () => {
               { icon: Users, label: "Trainee List", desc: "View registered trainees", url: "/trainees" },
               { icon: UserPlus, label: "Register Trainee", desc: "Direct registration", url: "/trainee-registration" },
             ].map(({ icon: Icon, label, desc, url, badge }) => (
-              <button
+              <Button
+                  variant="workspace"
                 key={url}
                 onClick={() => navigate(url)}
-                className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+                className="gap-3 rounded-lg p-4"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
@@ -190,7 +187,7 @@ const RegistrationOfficerDashboard = () => {
                   </div>
                   <p className="text-xs text-muted-foreground">{desc}</p>
                 </div>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -247,10 +244,10 @@ const RegistrationOfficerDashboard = () => {
             <Separator />
             <CardContent className="pt-4 space-y-4">
               {[
-                { label: "Pending Screening", value: stats?.pending || 0, color: "bg-amber-500" },
+                { label: "Pending Screening", value: stats?.pending || 0, color: "bg-warning" },
                 { label: "Qualified", value: stats?.provisionallyQualified || 0, color: "bg-primary" },
-                { label: "Awaiting Payment", value: stats?.pendingPayment || 0, color: "bg-orange-500" },
-                { label: "Registered", value: registeredTraineeCount, color: "bg-emerald-500" },
+                { label: "Awaiting Payment", value: stats?.pendingPayment || 0, color: "bg-warning" },
+                { label: "Registered", value: registeredTraineeCount, color: "bg-success" },
               ].map((item) => (
                 <div key={item.label} className="space-y-1.5">
                   <div className="flex justify-between items-center text-sm">
