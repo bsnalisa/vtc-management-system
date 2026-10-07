@@ -27,6 +27,7 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  mobileOpenerRef: React.MutableRefObject<HTMLElement | null>;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -50,6 +51,10 @@ const SidebarProvider = React.forwardRef<
 >(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
+  // The control that opened the mobile navigation panel, so focus can return to it on close.
+  const mobileOpenerRef = React.useRef<HTMLElement | null>(null);
+  const openMobileRef = React.useRef(openMobile);
+  openMobileRef.current = openMobile;
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -72,7 +77,13 @@ const SidebarProvider = React.forwardRef<
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
+    if (isMobile) {
+      if (!openMobileRef.current) {
+        mobileOpenerRef.current = document.activeElement as HTMLElement | null;
+      }
+      return setOpenMobile((open) => !open);
+    }
+    return setOpen((open) => !open);
   }, [isMobile, setOpen, setOpenMobile]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
@@ -101,6 +112,7 @@ const SidebarProvider = React.forwardRef<
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      mobileOpenerRef,
     }),
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
@@ -136,7 +148,7 @@ const Sidebar = React.forwardRef<
     collapsible?: "offcanvas" | "icon" | "none";
   }
 >(({ side = "left", variant = "sidebar", collapsible = "offcanvas", className, children, ...props }, ref) => {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile, mobileOpenerRef } = useSidebar();
 
   if (collapsible === "none") {
     return (
@@ -156,7 +168,16 @@ const Sidebar = React.forwardRef<
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
+          id="app-sidebar"
+          aria-label="Site navigation"
           className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          onCloseAutoFocus={(event) => {
+            const opener = mobileOpenerRef.current;
+            if (opener && opener.isConnected) {
+              event.preventDefault();
+              opener.focus();
+            }
+          }}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -205,6 +226,7 @@ const Sidebar = React.forwardRef<
         {...props}
       >
         <div
+          id="app-sidebar"
           data-sidebar="sidebar"
           className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
         >
@@ -220,7 +242,13 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
   ({ className, onClick, ...props }, ref) => {
     const { toggleSidebar, state, isMobile, openMobile } = useSidebar();
     const expanded = isMobile ? openMobile : state === "expanded";
-    const label = expanded ? "Collapse sidebar" : "Expand sidebar";
+    const label = isMobile
+      ? expanded
+        ? "Close navigation"
+        : "Open navigation"
+      : expanded
+        ? "Collapse sidebar"
+        : "Expand sidebar";
 
     return (
       <Button
@@ -228,9 +256,15 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         data-sidebar="trigger"
         variant="ghost"
         size="icon"
-        className={cn("h-9 w-9 shrink-0 rounded-md transition-colors", className)}
+        className={cn(
+          "h-11 w-11 shrink-0 rounded-md transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          className,
+        )}
         aria-label={label}
         aria-expanded={expanded}
+        aria-controls="app-sidebar"
+        aria-keyshortcuts="Control+B Meta+B"
         title={label}
         onClick={(event) => {
           onClick?.(event);
@@ -243,7 +277,6 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         ) : (
           <PanelLeftOpen className="h-5 w-5" aria-hidden="true" />
         )}
-        <span className="sr-only">{label}</span>
       </Button>
     );
   },

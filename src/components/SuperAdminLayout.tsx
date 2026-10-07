@@ -168,6 +168,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
             <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3">
               <div className="flex min-w-0 items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                  <SidebarTrigger className="md:hidden text-muted-foreground hover:bg-accent hover:text-foreground" />
                   <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <AppLogo className="h-8 w-8" />
                     <div className="min-w-0">

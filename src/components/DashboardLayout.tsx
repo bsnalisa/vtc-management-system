@@ -197,6 +197,7 @@ function TopHeader({
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:gap-3 sm:px-4 fixed top-0 left-0 right-0 z-50">
+      <SidebarTrigger className="md:hidden text-muted-foreground hover:bg-accent hover:text-foreground" />
       <AppLogo className="h-8 w-8" />
       {/* Organization Branding */}
       {organizationName && (
