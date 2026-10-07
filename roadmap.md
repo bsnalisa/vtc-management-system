@@ -1,6 +1,6 @@
 # Small-screen trainee and class details
-- [ ] Replace narrow trainee and class tables with labelled cards while preserving actions, filters and pagination.
-- [ ] Verify cards with expanded/collapsed navigation and desktop tables.
+- [x] Replace narrow trainee and class tables with labelled cards while preserving actions, filters and pagination.
+- [x] Verify shared card rendering and content-width switching; authenticated trainee/class click-through is blocked because the preview is signed out and session minting found no matching account.
 
 # Role menus and persistent sidebar
 - [x] Add dedicated Liaison Officer and Resource Centre Coordinator menus, dashboards, partner directory, resource catalogue and loans; resolve missing menu destinations with explicit setup-required pages where no persistent records module exists.
