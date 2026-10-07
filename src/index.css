@@ -153,8 +153,6 @@ All colors MUST be HSL.
   .training-hero-shade { background: var(--hero-shade); }
   .training-hero-copy, .training-hero-caption { color: hsl(var(--hero-foreground)); }
   .training-hero-description { color: hsl(var(--hero-foreground) / 0.85); }
-  .hero-outline { background: hsl(var(--hero-overlay) / 0.15); color: hsl(var(--hero-foreground)); border-color: hsl(var(--hero-foreground) / 0.5); }
-  .hero-outline:hover { background: hsl(var(--hero-foreground) / 0.15); color: hsl(var(--hero-foreground)); }
   @media (max-width: 639px) {
     .training-hero-frame { height: min(610px, 72svh); min-height: 490px; }
     .training-hero-image { object-position: 62% center; }
