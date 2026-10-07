@@ -5,6 +5,7 @@ import { Session } from "@supabase/supabase-js";
 import { getRoleDashboardPath } from "@/lib/roleUtils";
 import { UserRole } from "@/hooks/useUserRole";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { IdleSessionLock } from "@/components/IdleSessionLock";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -84,7 +85,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <IdleSessionLock email={session.user.email} />
+    </>
+  );
 };
 
 export default ProtectedRoute;

@@ -13,7 +13,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { usePagination } from "@/hooks/usePagination";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { exportToCSV } from "@/lib/exportUtils";
+import { ExportMenu } from "@/components/ExportMenu";
 
 const TraineeList = () => {
   const navigate = useNavigate();
@@ -51,10 +51,8 @@ const TraineeList = () => {
     setPageSize,
   } = usePagination({ data: filteredTrainees, defaultPageSize: 20 });
 
-  const handleExport = () => {
-    if (!filteredTrainees.length) return;
-    
-    const exportData = filteredTrainees.map(trainee => ({
+  const buildExportRows = () =>
+    filteredTrainees.map(trainee => ({
       "Trainee ID": trainee.trainee_id,
       "First Name": trainee.first_name,
       "Last Name": trainee.last_name,
@@ -67,9 +65,6 @@ const TraineeList = () => {
       "Phone": trainee.phone || "",
       "Email": trainee.email || "",
     }));
-    
-    exportToCSV(exportData, `trainees-export-${new Date().toISOString().split('T')[0]}`);
-  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -161,15 +156,7 @@ const TraineeList = () => {
                   <SelectItem value="withdrawn">Withdrawn</SelectItem>
                 </SelectContent>
               </Select>
-              <Button 
-                variant="outline" 
-                className="w-full md:w-auto"
-                onClick={handleExport}
-                disabled={!filteredTrainees.length}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
+              <ExportMenu data={buildExportRows} filename={`trainees-export-${new Date().toISOString().split('T')[0]}`} title="Trainees" disabled={!filteredTrainees.length} />
             </div>
           </CardContent>
         </Card>

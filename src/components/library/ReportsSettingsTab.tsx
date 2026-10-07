@@ -10,7 +10,7 @@ import {
   DEFAULT_LIBRARY_SETTINGS, LibrarySettings, useLibrarySettings, useSaveLibrarySettings,
   useLibraryMembers, useSendLibraryAnnouncement,
 } from "@/hooks/useLibraryCentre";
-import { exportToCSV } from "@/lib/exportUtils";
+import { ExportMenu } from "@/components/ExportMenu";
 
 export function ReportsSettingsTab() {
   const { data: items } = useLibraryItems();
@@ -58,8 +58,8 @@ export function ReportsSettingsTab() {
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle className="text-base">Most borrowed titles</CardTitle>
           <div className="space-x-2">
-            <Button size="sm" variant="outline" onClick={() => exportToCSV(loans?.map((l) => ({ item: l.library_items?.title, borrower: l.borrower_id, borrowed: l.borrow_date, due: l.due_date, returned: l.return_date, status: l.status })) ?? [], "library-loans")}>Export loans</Button>
-            <Button size="sm" variant="outline" onClick={() => exportToCSV(items?.map((i) => ({ title: i.title, author: i.author, type: i.item_type, total: i.total_copies, available: i.available_copies, location: i.location })) ?? [], "library-catalogue")}>Export catalogue</Button>
+            <ExportMenu size="sm" label="Export loans" title="Library loans" filename="library-loans" data={() => loans?.map((l) => ({ item: l.library_items?.title, borrower: l.borrower_id, borrowed: l.borrow_date, due: l.due_date, returned: l.return_date, status: l.status })) ?? []} />
+            <ExportMenu size="sm" label="Export catalogue" title="Library catalogue" filename="library-catalogue" data={() => items?.map((i) => ({ title: i.title, author: i.author, type: i.item_type, total: i.total_copies, available: i.available_copies, location: i.location })) ?? []} />
           </div>
         </CardHeader>
         <CardContent>

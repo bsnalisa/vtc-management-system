@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
 import { SurveyQuestion, useSurveyResults } from "@/hooks/useGraduation";
-import { exportToCSV } from "@/lib/exportUtils";
+import { ExportMenu } from "@/components/ExportMenu";
 
 const asArray = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : v == null || v === "" ? [] : [String(v)]);
 
@@ -60,7 +60,7 @@ export function SurveyResults({ surveyId, title }: { surveyId: string; title: st
         <Card><CardContent className="p-4"><div className="text-2xl font-bold">{rate}%</div><div className="text-xs text-muted-foreground">Response rate</div></CardContent></Card>
       </div>
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" disabled={!responses.length} onClick={() => exportToCSV(exportRows, `survey-${title.replace(/\W+/g, "-").toLowerCase()}`)}>Export responses (CSV)</Button>
+        <ExportMenu size="sm" label="Export responses" data={exportRows} title={title} filename={`survey-${title.replace(/\W+/g, "-").toLowerCase()}`} disabled={!responses.length} />
       </div>
       {questions.map((q) => (
         <Card key={q.id}>

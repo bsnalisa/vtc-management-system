@@ -20,7 +20,7 @@ import { UserEditDialog } from "@/components/users/UserEditDialog";
 import { UserDeleteDialog } from "@/components/users/UserDeleteDialog";
 import { usePagination } from "@/hooks/usePagination";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { exportToCSV } from "@/lib/exportUtils";
+import { ExportMenu } from "@/components/ExportMenu";
 
 type UserWithRoles = {
   id: string;
@@ -109,10 +109,8 @@ const UserManagement = () => {
     setPageSize,
   } = usePagination({ data: filteredUsers, defaultPageSize: 20 });
 
-  const handleExport = () => {
-    if (!filteredUsers?.length) return;
-    
-    const exportData = filteredUsers.map(user => ({
+  const buildExportRows = () =>
+    (filteredUsers ?? []).map(user => ({
       "First Name": user.firstname || "",
       "Last Name": user.surname || "",
       "Email": user.email || "",
@@ -120,9 +118,6 @@ const UserManagement = () => {
       "Organization": user.user_roles?.[0]?.organizations?.name || "",
       "Roles": user.user_roles?.map(ur => ur.role.replace(/_/g, " ")).join(", ") || "",
     }));
-    
-    exportToCSV(exportData, `users-export-${new Date().toISOString().split('T')[0]}`);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,10 +212,7 @@ const UserManagement = () => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleExport} disabled={!filteredUsers?.length}>
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
+            <ExportMenu data={buildExportRows} filename={`users-export-${new Date().toISOString().split('T')[0]}`} title="Users" disabled={!filteredUsers?.length} />
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
