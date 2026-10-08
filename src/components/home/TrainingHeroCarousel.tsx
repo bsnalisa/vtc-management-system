@@ -6,11 +6,25 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import electrical from "@/assets/training-electrical.jpg";
 import automotive from "@/assets/training-automotive.jpg";
 import hospitality from "@/assets/training-hospitality.jpg";
+import networking from "@/assets/training-networking.jpg";
+import welding from "@/assets/training-welding.jpg";
+import webdev from "@/assets/training-webdev.jpg";
+import plumbing from "@/assets/training-plumbing.jpg";
+import carpentry from "@/assets/training-carpentry.jpg";
+import solar from "@/assets/training-solar.jpg";
+import baking from "@/assets/training-baking.jpg";
 
 const slides = [
   { image: electrical, title: "Electrical training", caption: "Precision. Practice. Possibility.", alt: "Trainees and an instructor working at an electrical training bench" },
   { image: automotive, title: "Automotive training", caption: "Practical skills. Real-world confidence.", alt: "Trainees inspecting an engine with their automotive instructor" },
   { image: hospitality, title: "Hospitality & culinary", caption: "Craft. Creativity. Care.", alt: "Culinary trainees learning to plate food in a teaching kitchen" },
+  { image: networking, title: "Networking", caption: "Connect. Configure. Communicate.", alt: "Trainees and an instructor working with server racks and network cables" },
+  { image: welding, title: "Welding & fabrication", caption: "Strong hands. Strong futures.", alt: "A trainee welding metal with sparks while an instructor supervises" },
+  { image: webdev, title: "Web development", caption: "Code. Create. Launch.", alt: "Trainees coding websites on laptops in a modern computer classroom" },
+  { image: plumbing, title: "Plumbing", caption: "Skill. Precision. Reliability.", alt: "A trainee installing copper pipes on a training rig with an instructor" },
+  { image: carpentry, title: "Carpentry & joinery", caption: "Measure twice. Build once.", alt: "Trainees measuring and cutting timber in a woodworking workshop" },
+  { image: solar, title: "Solar & renewable energy", caption: "Powering tomorrow, today.", alt: "Trainees installing a solar panel on a training roof rig" },
+  { image: baking, title: "Baking & pastry", caption: "Rise to the occasion.", alt: "A trainee in chef whites baking bread and pastries in a training kitchen" },
 ];
 
 export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreName?: string; onApply: () => void; onTrack: () => void }) {
@@ -55,7 +69,7 @@ export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreN
           {slides.map((slide, index) => (
             <CarouselItem key={slide.title} className="pl-0" aria-label={`${index + 1} of ${slides.length}: ${slide.title}`}>
               <div className="training-hero-frame">
-                <img src={slide.image} alt={slide.alt} width={1920} height={1024} loading={index === 0 ? "eager" : "lazy"} className="training-hero-image" />
+                <img src={slide.image} alt={slide.alt} width={1280} height={720} loading={index === 0 ? "eager" : "lazy"} className="training-hero-image" />
               </div>
             </CarouselItem>
           ))}
@@ -80,15 +94,14 @@ export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreN
         </div>
       </Carousel>
       <div className="border-b bg-card">
-        <div className="container mx-auto flex items-center justify-between gap-3 px-4 md:px-10">
-          <div className="grid min-w-0 flex-1 grid-cols-3 md:max-w-2xl">
+        <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-2 md:px-10">
+          <div className="flex min-w-0 flex-1 items-center gap-2" role="tablist" aria-label="Choose a course slide">
             {slides.map((slide, index) => (
-              <Button key={slide.title} variant="ghost" onClick={() => api?.scrollTo(index)} aria-label={`Show ${slide.title}`} aria-pressed={active === index}
-                className={`hero-slide-selector h-auto min-h-20 justify-start gap-3 whitespace-normal rounded-none border-b-2 px-2 py-4 text-left md:px-5 ${active === index ? "border-primary bg-accent text-primary" : "border-transparent text-muted-foreground"}`}>
-                <span className="hidden text-xs md:inline">0{index + 1}</span>
-                <span className="text-xs font-semibold md:text-sm">{slide.title}</span>
-              </Button>
+              <button key={slide.title} type="button" role="tab" aria-selected={active === index} aria-label={`Show ${slide.title}`}
+                onClick={() => api?.scrollTo(index)}
+                className={`h-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active === index ? "w-6 bg-primary" : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`} />
             ))}
+            <span className="ml-2 hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">{current.title}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1 md:gap-2">
             {[{ label: "Previous image", icon: ArrowLeft, action: () => api?.scrollPrev() }, { label: "Next image", icon: ArrowRight, action: () => api?.scrollNext() },
