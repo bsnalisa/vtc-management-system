@@ -1,3 +1,4 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { convertToModelMessages, streamText, type UIMessage } from "npm:ai@7";
 import {
@@ -14,7 +15,7 @@ const corsHeaders = {
   "Access-Control-Expose-Headers": "X-Lovable-AIG-Run-ID",
 };
 
-const INSTRUCTIONS = `You are Skilla, the friendly AI assistant of the VTC Management System in Namibia. You help prospective trainees, trainees and staff with: the online application, the Namibian vocational education and training (TVET) landscape, Vocational Training Centres, course offerings, the Namibia Training Authority (NTA), NTF, NQF and how the system works.
+const BASE_INSTRUCTIONS = `You are Skilla, the friendly AI assistant of the VTC Management System in Namibia. You help prospective trainees, trainees and staff with: the online application, the Namibian vocational education and training (TVET) landscape, Vocational Training Centres, course offerings, the Namibia Training Authority (NTA), NTF, NQF and how the system works.
 For application questions, base answers on the published application instructions. For TVET questions, use the background knowledge and your general knowledge of Namibia, flagging when details may have changed and should be confirmed with NTA or the centre. Use clear, simple language, short paragraphs and numbered steps where helpful. Always say "trainee", never "student".
 If the answer is not in the instructions (e.g. exact fees, dates, specific entry requirements, or the outcome of someone's application), say so honestly and advise contacting the registration office of the chosen centre. Never invent fees, dates or requirements.
 Politely decline questions unrelated to vocational training, the centres or this system.
@@ -22,6 +23,34 @@ Politely decline questions unrelated to vocational training, the centres or this
 ${APPLICATION_GUIDE}
 
 ${NAMIBIA_TVET_KNOWLEDGE}`;
+
+const buildInstructions = (centres: string) => `${BASE_INSTRUCTIONS}
+
+# Live centre data from the VTC Management System (authoritative)
+Only state courses, fees and contact details that appear here. If a centre's item says "not yet published", say so plainly and do not guess or use general knowledge for it. Only centres listed here accept online applications through this system.
+
+${centres}`;
+
+async function loadCentreData(): Promise<string> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return "Centre data is currently unavailable.";
+  const db = createClient(url, key);
+  const [orgs, trades, fees] = await Promise.all([
+    db.from("organizations").select("id,name").eq("active", true).order("name"),
+    db.from("trades").select("organization_id,name,code,description").eq("active", true).order("name"),
+    db.from("fee_types").select("organization_id,name,default_amount,category,is_mandatory,recurring_frequency").eq("active", true),
+  ]);
+  if (orgs.error) return "Centre data is currently unavailable.";
+  return (orgs.data ?? []).map((o) => {
+    const t = (trades.data ?? []).filter((x) => x.organization_id === o.id);
+    const f = (fees.data ?? []).filter((x) => x.organization_id === o.id);
+    return `### ${o.name}
+Courses/trades: ${t.length ? t.map((x) => x.name + (x.description ? ` (${x.description})` : "")).join("; ") : "not yet published in the system"}
+Fees: ${f.length ? f.map((x) => `${x.name}: N$${Number(x.default_amount ?? 0).toFixed(2)}${x.is_mandatory ? " (mandatory)" : ""}${x.recurring_frequency ? `, ${x.recurring_frequency}` : ""}`).join("; ") : "not yet published in the system"}
+Contact details: not yet published in the system – contact the centre's registration office.`;
+  }).join("\n\n");
+}
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
@@ -56,7 +85,7 @@ Deno.serve(async (req) => {
   try {
     const result = streamText({
       model: provider.responses("openai/gpt-6-astra"),
-      instructions: INSTRUCTIONS,
+      instructions: buildInstructions(await loadCentreData()),
       messages: await convertToModelMessages(messages),
       abortSignal: req.signal,
       providerOptions: {
