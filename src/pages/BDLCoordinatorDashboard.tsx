@@ -1,479 +1,119 @@
-import { useState } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BookOpen, CalendarClock, GraduationCap, Layers, TrendingUp, UserX, Users, FileText, Video, ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { bdlCoordinatorNavItems } from "@/lib/navigationConfig";
-import { 
-  BookOpen, 
-  Users, 
-  Video, 
-  FileText, 
-  Calendar,
-  Plus,
-  Search,
-  Monitor,
-  Clock,
-  TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  PlayCircle,
-  Upload,
-  Settings
-} from "lucide-react";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { withRoleAccess } from "@/components/withRoleAccess";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
+import { useProfile } from "@/hooks/useProfile";
+import { contentPercent, isInactive, overallPercent, useAllClassProgress, useBdlClasses, useVirtualSessions } from "@/hooks/useBdl";
+import { BDL_ROLES } from "@/components/bdl/BdlClassSelect";
 
-// Static data for demonstration
-const blendedCourses = [
-  { id: "1", code: "BDL-001", name: "Introduction to Welding (Blended)", trade: "Welding", enrolled: 45, online: 60, faceToFace: 40, status: "active" },
-  { id: "2", code: "BDL-002", name: "Electrical Fundamentals (Distance)", trade: "Electrical", enrolled: 38, online: 80, faceToFace: 20, status: "active" },
-  { id: "3", code: "BDL-003", name: "Carpentry Basics (Blended)", trade: "Carpentry", enrolled: 32, online: 50, faceToFace: 50, status: "active" },
-  { id: "4", code: "BDL-004", name: "Plumbing Theory (Distance)", trade: "Plumbing", enrolled: 28, online: 90, faceToFace: 10, status: "draft" },
-];
+const BDLCoordinatorDashboard = () => {
+  const { navItems, groupLabel } = useRoleNavigation();
+  const { data: profile } = useProfile();
+  const { data: classes = [], isLoading, error } = useBdlClasses();
+  const { data: sessions = [], error: sessionError } = useVirtualSessions();
+  const progress = useAllClassProgress(classes.map((c) => c.id));
 
-const learningMaterials = [
-  { id: "1", title: "Welding Safety Guidelines", type: "Video", course: "BDL-001", duration: "45 min", views: 234, status: "published" },
-  { id: "2", title: "Electrical Circuit Theory", type: "Document", course: "BDL-002", pages: 25, downloads: 189, status: "published" },
-  { id: "3", title: "Wood Types and Properties", type: "Interactive", course: "BDL-003", duration: "30 min", completions: 156, status: "published" },
-  { id: "4", title: "Pipe Fitting Techniques", type: "Video", course: "BDL-004", duration: "60 min", views: 0, status: "draft" },
-];
+  const now = Date.now();
+  const next = useMemo(() => sessions.filter((s) => s.status === "scheduled" && new Date(s.starts_at).getTime() >= now).slice(0, 5), [sessions, now]);
+  const inWeek = next.length && sessions.filter((s) => s.status === "scheduled" && new Date(s.starts_at).getTime() >= now && new Date(s.starts_at).getTime() <= now + 7 * 86400000).length;
+  const classNames = new Map(classes.map((c) => [c.id, c.class_name]));
 
-const virtualSessions = [
-  { id: "1", title: "Live Q&A: Welding Techniques", course: "BDL-001", date: "2024-01-15", time: "10:00 AM", trainer: "John Smith", registered: 32, status: "scheduled" },
-  { id: "2", title: "Electrical Safety Workshop", course: "BDL-002", date: "2024-01-16", time: "2:00 PM", trainer: "Mary Johnson", registered: 28, status: "scheduled" },
-  { id: "3", title: "Carpentry Tools Demo", course: "BDL-003", date: "2024-01-14", time: "11:00 AM", trainer: "Peter Brown", registered: 25, status: "completed" },
-];
-
-const traineeProgress = [
-  { id: "1", name: "Alice Moyo", course: "BDL-001", progress: 78, lastActive: "2024-01-14", assignments: 8, completed: 6, status: "on-track" },
-  { id: "2", name: "Brian Ncube", course: "BDL-002", progress: 45, lastActive: "2024-01-10", assignments: 10, completed: 4, status: "at-risk" },
-  { id: "3", name: "Chipo Dube", course: "BDL-003", progress: 92, lastActive: "2024-01-15", assignments: 12, completed: 11, status: "on-track" },
-  { id: "4", name: "David Sithole", course: "BDL-001", progress: 35, lastActive: "2024-01-05", assignments: 8, completed: 2, status: "at-risk" },
-];
-
-const getStatusBadge = (status: string) => {
-  const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-    active: "default",
-    published: "default",
-    scheduled: "secondary",
-    completed: "outline",
-    draft: "outline",
-    "on-track": "default",
-    "at-risk": "destructive",
-  };
-  return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
-};
-
-const getMaterialIcon = (type: string) => {
-  switch (type) {
-    case "Video": return <PlayCircle className="h-4 w-4" />;
-    case "Document": return <FileText className="h-4 w-4" />;
-    case "Interactive": return <Monitor className="h-4 w-4" />;
-    default: return <FileText className="h-4 w-4" />;
-  }
-};
-
-export default function BDLCoordinatorDashboard() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
-  const [isAddMaterialOpen, setIsAddMaterialOpen] = useState(false);
-  const [isScheduleSessionOpen, setIsScheduleSessionOpen] = useState(false);
+  const allRows = progress.byClass.flatMap((c) => c.rows.map((r) => ({ ...r, classId: c.classId })));
+  const avgContent = allRows.length ? Math.round(allRows.reduce((s, r) => s + contentPercent(r), 0) / allRows.length) : 0;
+  const behind = allRows.filter((r) => isInactive(r.last_activity)).sort((a, b) => overallPercent(a) - overallPercent(b));
+  const chart = progress.byClass.filter((c) => c.rows.length).map((c) => ({
+    name: classNames.get(c.classId) ?? "Class", value: Math.round(c.rows.reduce((s, r) => s + contentPercent(r), 0) / c.rows.length),
+  }));
+  const enrolled = classes.reduce((s, c) => s + c.enrolled, 0);
+  const loading = isLoading || progress.isLoading;
 
   return (
-    <DashboardLayout 
-      title="BDL Coordinator Dashboard" 
-      subtitle="Manage blended and distance learning programs"
-      groupLabel="Distance Learning"
-      navItems={bdlCoordinatorNavItems}
-    >
-      <div className="space-y-6">
-        <Card className="border-amber-200 bg-amber-50"><CardContent className="p-4 text-sm text-amber-950">Demonstration dashboard: the figures and records below are sample data, not live BDL records. Use Learning Materials in the sidebar to browse actual centre library resources.</CardContent></Card>
-        {/* Stats Overview */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <DashboardLayout title="Blended Learning" subtitle="Blended and distance learning overview" navItems={navItems} groupLabel={groupLabel}>
+      <DashboardShell
+        name={profile?.firstname || undefined}
+        heroIcon={Layers}
+        heroSubtitle="Blended classes, virtual sessions and trainee engagement."
+        stats={[
+          { label: "Blended classes", value: classes.length, icon: BookOpen, loading: isLoading, hint: "Training mode: blended / distance" },
+          { label: "Enrolled trainees", value: enrolled, icon: Users, loading: isLoading, hint: "Active enrolments", tone: "secondary" },
+          { label: "Sessions in 7 days", value: inWeek || 0, icon: CalendarClock, hint: "Scheduled virtual sessions", tone: "accent" },
+          { label: "Content completion", value: `${avgContent}%`, icon: TrendingUp, loading, progress: avgContent, hint: "Average across trainees" },
+        ]}
+        actions={[
+          { icon: BookOpen, label: "Blended classes", desc: "Classes and learning spaces", url: "/bdl/courses" },
+          { icon: FileText, label: "Materials", desc: "Manage class content", url: "/bdl/materials" },
+          { icon: Video, label: "Virtual sessions", desc: "Schedule live sessions", url: "/bdl/sessions" },
+          { icon: TrendingUp, label: "Progress", desc: "Trainee engagement", url: "/bdl/progress", badge: behind.length || undefined },
+          { icon: GraduationCap, label: "Learning space", desc: "Assignments and quizzes", url: "/learning" },
+          { icon: ClipboardCheck, label: "Reports", desc: "Centre reports", url: "/reports" },
+          { icon: ClipboardCheck, label: "My approvals", desc: "Items awaiting you", url: "/my-approvals" },
+        ]}
+        actionCols={4}
+      >
+        {(error || sessionError || progress.error) && (
+          <p className="text-sm text-destructive">Could not load some figures: {((error || sessionError || progress.error) as Error).message}</p>
+        )}
+        <div className="grid gap-4 lg:grid-cols-2">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
+            <CardHeader><CardTitle className="text-base">Content completion by class</CardTitle><CardDescription>Average share of published content trainees have marked done</CardDescription></CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{blendedCourses.filter(c => c.status === "active").length}</div>
-              <p className="text-xs text-muted-foreground">+2 new this month</p>
+              {chart.length ? (
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chart} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                      <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
+                      <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} />
+                      <Bar dataKey="value" name="Completion %" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : <p className="text-sm text-muted-foreground text-center py-8">{loading ? "Loading..." : "No enrolled trainees in blended classes yet."}</p>}
             </CardContent>
           </Card>
+
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Enrolled Trainees</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{blendedCourses.reduce((acc, c) => acc + c.enrolled, 0)}</div>
-              <p className="text-xs text-muted-foreground">Across all BDL courses</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Learning Materials</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{learningMaterials.length}</div>
-              <p className="text-xs text-muted-foreground">{learningMaterials.filter(m => m.status === "published").length} published</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Virtual Sessions</CardTitle>
-              <Video className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{virtualSessions.filter(s => s.status === "scheduled").length}</div>
-              <p className="text-xs text-muted-foreground">Scheduled this week</p>
+            <CardHeader><CardTitle className="text-base">Next sessions</CardTitle><CardDescription>Upcoming virtual sessions</CardDescription></CardHeader>
+            <CardContent className="space-y-2">
+              {next.map((s) => (
+                <div key={s.id} className="flex justify-between gap-2 border-b pb-2 text-sm">
+                  <div className="min-w-0"><p className="font-medium">{s.title}</p><p className="text-muted-foreground">{classNames.get(s.class_id) ?? ""}</p></div>
+                  <span className="text-muted-foreground shrink-0">{new Date(s.starts_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
+                </div>
+              ))}
+              {!next.length && <p className="text-sm text-muted-foreground text-center py-8">No sessions scheduled.</p>}
+              <Button variant="link" asChild className="px-0"><Link to="/bdl/sessions">Manage sessions</Link></Button>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="courses" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="materials">Learning Materials</TabsTrigger>
-            <TabsTrigger value="sessions">Virtual Sessions</TabsTrigger>
-            <TabsTrigger value="progress">Trainee Progress</TabsTrigger>
-          </TabsList>
-
-          {/* Courses Tab */}
-          <TabsContent value="courses" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search courses..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2"><UserX className="h-4 w-4" />Trainees falling behind</CardTitle>
+            <CardDescription>No activity for 14+ days ({behind.length} trainee{behind.length === 1 ? "" : "s"})</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {behind.slice(0, 8).map((r) => (
+              <div key={`${r.classId}-${r.trainee_id}`} className="flex justify-between gap-2 border-b pb-2 text-sm">
+                <div><p className="font-medium">{r.first_name} {r.last_name}</p><p className="text-muted-foreground">{classNames.get(r.classId)}</p></div>
+                <div className="text-right"><Badge variant="outline">{overallPercent(r)}% done</Badge><p className="text-xs text-muted-foreground mt-1">{r.last_activity ? new Date(r.last_activity).toLocaleDateString() : "No activity"}</p></div>
               </div>
-              <Dialog open={isAddCourseOpen} onOpenChange={setIsAddCourseOpen}>
-                <DialogTrigger asChild>
-                  <Button><Plus className="mr-2 h-4 w-4" /> Add Course</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create Blended/Distance Course</DialogTitle>
-                    <DialogDescription>Set up a new blended or distance learning course.</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label>Course Code</Label>
-                      <Input placeholder="e.g., BDL-005" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Course Name</Label>
-                      <Input placeholder="Enter course name" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Trade</Label>
-                      <Select>
-                        <SelectTrigger><SelectValue placeholder="Select trade" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="welding">Welding</SelectItem>
-                          <SelectItem value="electrical">Electrical</SelectItem>
-                          <SelectItem value="carpentry">Carpentry</SelectItem>
-                          <SelectItem value="plumbing">Plumbing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label>Online Component (%)</Label>
-                        <Input type="number" placeholder="60" />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label>Face-to-Face (%)</Label>
-                        <Input type="number" placeholder="40" />
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsAddCourseOpen(false)}>Cancel</Button>
-                    <Button onClick={() => setIsAddCourseOpen(false)}>Create Course</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Course Name</TableHead>
-                    <TableHead>Trade</TableHead>
-                    <TableHead>Enrolled</TableHead>
-                    <TableHead>Online/F2F Split</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {blendedCourses.map((course) => (
-                    <TableRow key={course.id}>
-                      <TableCell className="font-medium">{course.code}</TableCell>
-                      <TableCell>{course.name}</TableCell>
-                      <TableCell>{course.trade}</TableCell>
-                      <TableCell>{course.enrolled}</TableCell>
-                      <TableCell>{course.online}% / {course.faceToFace}%</TableCell>
-                      <TableCell>{getStatusBadge(course.status)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Manage</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          {/* Learning Materials Tab */}
-          <TabsContent value="materials" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search materials..." className="pl-8" />
-              </div>
-              <Dialog open={isAddMaterialOpen} onOpenChange={setIsAddMaterialOpen}>
-                <DialogTrigger asChild>
-                  <Button><Upload className="mr-2 h-4 w-4" /> Upload Material</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Upload Learning Material</DialogTitle>
-                    <DialogDescription>Add new learning content for BDL courses.</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label>Title</Label>
-                      <Input placeholder="Material title" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Type</Label>
-                      <Select>
-                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="video">Video</SelectItem>
-                          <SelectItem value="document">Document</SelectItem>
-                          <SelectItem value="interactive">Interactive Module</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Course</Label>
-                      <Select>
-                        <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                        <SelectContent>
-                          {blendedCourses.map(c => (
-                            <SelectItem key={c.id} value={c.code}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Description</Label>
-                      <Textarea placeholder="Brief description of the material" />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsAddMaterialOpen(false)}>Cancel</Button>
-                    <Button onClick={() => setIsAddMaterialOpen(false)}>Upload</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Duration/Size</TableHead>
-                    <TableHead>Engagement</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {learningMaterials.map((material) => (
-                    <TableRow key={material.id}>
-                      <TableCell>{getMaterialIcon(material.type)}</TableCell>
-                      <TableCell className="font-medium">{material.title}</TableCell>
-                      <TableCell>{material.course}</TableCell>
-                      <TableCell>{"duration" in material ? material.duration : `${material.pages} pages`}</TableCell>
-                      <TableCell>{"views" in material ? `${material.views} views` : "downloads" in material ? `${material.downloads} downloads` : `${material.completions} completions`}</TableCell>
-                      <TableCell>{getStatusBadge(material.status)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Edit</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          {/* Virtual Sessions Tab */}
-          <TabsContent value="sessions" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search sessions..." className="pl-8" />
-              </div>
-              <Dialog open={isScheduleSessionOpen} onOpenChange={setIsScheduleSessionOpen}>
-                <DialogTrigger asChild>
-                  <Button><Calendar className="mr-2 h-4 w-4" /> Schedule Session</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Schedule Virtual Session</DialogTitle>
-                    <DialogDescription>Plan a live online session for trainees.</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label>Session Title</Label>
-                      <Input placeholder="e.g., Live Q&A: Welding Techniques" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Course</Label>
-                      <Select>
-                        <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                        <SelectContent>
-                          {blendedCourses.map(c => (
-                            <SelectItem key={c.id} value={c.code}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label>Date</Label>
-                        <Input type="date" />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label>Time</Label>
-                        <Input type="time" />
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Trainer</Label>
-                      <Input placeholder="Trainer name" />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsScheduleSessionOpen(false)}>Cancel</Button>
-                    <Button onClick={() => setIsScheduleSessionOpen(false)}>Schedule</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Trainer</TableHead>
-                    <TableHead>Registered</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {virtualSessions.map((session) => (
-                    <TableRow key={session.id}>
-                      <TableCell className="font-medium">{session.title}</TableCell>
-                      <TableCell>{session.course}</TableCell>
-                      <TableCell>{session.date} at {session.time}</TableCell>
-                      <TableCell>{session.trainer}</TableCell>
-                      <TableCell>{session.registered}</TableCell>
-                      <TableCell>{getStatusBadge(session.status)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          {session.status === "scheduled" ? "Join" : "View"}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          {/* Student Progress Tab */}
-          <TabsContent value="progress" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search trainees..." className="pl-8" />
-              </div>
-              <Select defaultValue="all">
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Trainees</SelectItem>
-                  <SelectItem value="on-track">On Track</SelectItem>
-                  <SelectItem value="at-risk">At Risk</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Trainee Name</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Progress</TableHead>
-                    <TableHead>Last Active</TableHead>
-                    <TableHead>Assignments</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {traineeProgress.map((trainee) => (
-                    <TableRow key={trainee.id}>
-                      <TableCell className="font-medium">{trainee.name}</TableCell>
-                      <TableCell>{trainee.course}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${trainee.progress >= 70 ? 'bg-green-500' : trainee.progress >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${trainee.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-sm">{trainee.progress}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{trainee.lastActive}</TableCell>
-                      <TableCell>{trainee.completed}/{trainee.assignments}</TableCell>
-                      <TableCell>{getStatusBadge(trainee.status)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">View Details</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+            ))}
+            {!behind.length && <p className="text-sm text-muted-foreground text-center py-6">{loading ? "Loading..." : "Every enrolled trainee has been active recently."}</p>}
+            {behind.length > 0 && <Button variant="link" asChild className="px-0"><Link to="/bdl/progress">See full progress</Link></Button>}
+          </CardContent>
+        </Card>
+      </DashboardShell>
     </DashboardLayout>
   );
-}
+};
+
+export default withRoleAccess(BDLCoordinatorDashboard, { requiredRoles: [...BDL_ROLES] });
