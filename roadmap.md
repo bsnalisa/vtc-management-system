@@ -26,8 +26,8 @@
 - [x] Standardize loading indicators and verify public screens.
 
 # Homepage carousel
-- [ ] Add Networking, Welding and Web Development images and compact pagination for up to ten courses; verify images and controls.
-- [ ] Review the workflow process-type security finding and preserve legitimate reference-data access.
+- [x] Add Networking, Welding and Web Development images and compact wrapping pagination for up to ten courses; verified course selection, image loading and controls at 320, 375, 587 and 1280px. Existing 320px header overflow is outside the carousel.
+- [ ] Await approval to dismiss the workflow process-type security false positive: the table contains only shared category names/descriptions, not private records; existing signed-in read access is intentional.
 - [x] Add vocational-training imagery and an interactive homepage carousel.
 - [x] Rearrange homepage sections and verify carousel controls and application navigation.
 
