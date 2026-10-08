@@ -29,6 +29,13 @@
       "when": 1791492267738,
       "tag": "0003_fix_applicant_document_upload_policy",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791492401753,
+      "tag": "0004_server_generated_application_numbers",
+      "breakpoints": true
     }
   ]
 }
