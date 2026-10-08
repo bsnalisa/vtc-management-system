@@ -19,12 +19,16 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import guideIcon from "@/assets/application-guide.png";
 
 const STORAGE_KEY = "vtc-application-assistant-messages";
 const CHAT_ID = "application-assistant";
 
 const SUGGESTIONS = [
+  "What can I do on this platform?",
   "What documents do I need to apply?",
   "What does the NTA do?",
   "Which VTCs are in Namibia?",
@@ -47,15 +51,26 @@ export function ApplicationAssistant() {
   const [open, setOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const initialMessages = useMemo(loadMessages, []);
+  const location = useLocation();
+  const { navItems } = useRoleNavigation();
+  const ctxRef = useRef({ page: "", menu: [] as string[] });
+  ctxRef.current = {
+    page: location.pathname,
+    menu: navItems.flatMap((n) => [n.title, ...(n.children?.map((c) => `${n.title} > ${c.title}`) ?? [])]),
+  };
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/application-assistant`,
-        headers: {
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        headers: async () => {
+          const { data } = await supabase.auth.getSession();
+          return {
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${data.session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          };
         },
+        body: () => ({ context: ctxRef.current }),
       }),
     [],
   );
@@ -120,7 +135,7 @@ export function ApplicationAssistant() {
               <div className="min-w-0 flex-1">
                 <SheetTitle className="text-base">Skilla · VTC Assistant</SheetTitle>
                 <SheetDescription className="text-xs">
-                  AI-powered help on applying, courses, VTCs and the NTA.
+                  AI-powered help with the platform, applying, courses and the NTA.
                 </SheetDescription>
               </div>
               {messages.length > 0 && (
@@ -137,7 +152,7 @@ export function ApplicationAssistant() {
                 <ConversationEmptyState
                   icon={<img src={guideIcon} alt="" className="h-16 w-16" />}
                   title="Hi, I'm Skilla!"
-                  description="Ask me about applying, courses, VTCs in Namibia or the NTA."
+                  description="Ask me anything about the platform. I answer for what your role can access."
                 >
                   <div className="flex flex-col items-center gap-3">
                     <img src={guideIcon} alt="" className="h-16 w-16" />

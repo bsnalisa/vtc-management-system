@@ -41,3 +41,4 @@
 - [x] Skilla uses real per-centre courses, fees, contacts from the system
 - [x] Move Skilla to the Online Application tab
 - [x] Publish and test Skilla with real NTA/centre questions
+- [x] Skilla available on every page, answers limited to signed-in role
