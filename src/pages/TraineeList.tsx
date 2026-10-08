@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useMemo } from "react";
 import { TRAINING_MODES, trainingModeLabel } from "@/lib/trainingModes";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Download, Filter, UserPlus, Loader2 } from "lucide-react";
+import { Search, Download, Filter, UserPlus } from "lucide-react";
 import { useTrainees } from "@/hooks/useTrainees";
 import { useTrades } from "@/hooks/useTrades";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -15,6 +16,7 @@ import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { usePagination } from "@/hooks/usePagination";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { ExportMenu } from "@/components/ExportMenu";
+import { RecordCard } from "@/components/ui/record-card";
 
 const TraineeList = () => {
   const navigate = useNavigate();
@@ -187,12 +189,28 @@ const TraineeList = () => {
           <CardContent>
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                <LoadingIndicator className="h-8 w-8 text-primary mb-2" />
                 <p className="text-sm text-muted-foreground">Loading trainees...</p>
               </div>
             ) : (
               <>
-                <div className="overflow-x-auto">
+                <div className="responsive-records">
+                  <div className="record-cards">
+                    {paginatedData.length === 0 ? <div className="py-8 text-center text-muted-foreground"><p>{searchTerm || filterTrade !== "all" || filterStatus !== "all" ? "No trainees match your search criteria" : "No trainees registered yet"}</p>{!searchTerm && filterTrade === "all" && filterStatus === "all" && <Button variant="outline" className="mt-4 h-auto whitespace-normal" onClick={() => navigate("/trainees/register")}>Register First Trainee</Button>}</div> : paginatedData.map(trainee => <RecordCard
+                      key={trainee.id}
+                      title={`${trainee.first_name} ${trainee.last_name}`}
+                      subtitle={trainee.trainee_id}
+                      status={<Badge variant={getStatusBadgeVariant(trainee.status)} className="max-w-full whitespace-normal">{trainee.status}</Badge>}
+                      fields={[
+                        { label: "Gender", value: trainee.gender },
+                        { label: "Trade", value: trainee.trades?.name || "N/A" },
+                        { label: "Level", value: `Level ${trainee.level}` },
+                        { label: "Training Mode", value: trainee.training_mode.replace(/_/g, " ") },
+                      ]}
+                      actions={<Button variant="outline" className="w-full" aria-label={`View ${trainee.first_name} ${trainee.last_name}`} onClick={() => navigate(`/trainees/${trainee.id}`)}>View</Button>}
+                    />)}
+                  </div>
+                  <div className="record-table">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -259,6 +277,7 @@ const TraineeList = () => {
                       )}
                     </TableBody>
                   </Table>
+                  </div>
                 </div>
                 {totalItems > 0 && (
                   <DataTablePagination

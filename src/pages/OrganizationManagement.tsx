@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,19 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Building2, 
-  Search,
-  Filter,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Users,
-  Calendar,
-  TrendingUp
-} from "lucide-react";
+import { Plus, Building2, Search, Filter, MoreHorizontal, Eye, Edit, Trash2, Users, Calendar, TrendingUp } from "lucide-react";
 import { useOrganizations, useCreateOrganization, useUpdateOrganization } from "@/hooks/useOrganizations";
 
 const OrganizationManagement = () => {
@@ -168,7 +157,7 @@ const OrganizationManagement = () => {
                   >
                     {createOrganization.isPending ? (
                       <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                        <LoadingIndicator className="h-4 w-4 mr-2" />
                         Creating...
                       </>
                     ) : (
@@ -276,7 +265,7 @@ const OrganizationManagement = () => {
           <CardContent>
             {isLoading ? (
               <div className="text-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                <LoadingIndicator className="h-8 w-8 mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground">Loading organizations...</p>
               </div>
             ) : filteredOrganizations?.length === 0 ? (

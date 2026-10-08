@@ -1,3 +1,9 @@
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/700.css";
+@import "@fontsource/figtree/400.css";
+@import "@fontsource/figtree/500.css";
+@import "@fontsource/figtree/600.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,8 +14,8 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 215 25% 15%;
+    --background: 216 33.333% 97.255%;
+    --foreground: 217.895 47.5% 15.686%;
 
     /* Role-specific accent colors */
     --role-super-admin: 280 100% 60%;
@@ -26,40 +32,49 @@ All colors MUST be HSL.
     --role-trainee: 199 89% 48%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 217.895 47.5% 15.686%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 217.895 47.5% 15.686%;
 
-    --primary: 215 85% 25%;
+    --primary: 219.755 69.362% 46.078%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 187 85% 45%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 217 28% 93%;
+    --secondary-foreground: 217.895 47.5% 15.686%;
 
-    --muted: 215 20% 95%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 216 25% 94%;
+    --muted-foreground: 217 16% 44%;
 
-    --accent: 187 75% 92%;
-    --accent-foreground: 215 85% 25%;
+    --accent: 220 80% 96%;
+    --accent-foreground: 219.755 69.362% 46.078%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 215 85% 25%;
+    --border: 216 25% 90%;
+    --input: 216 25% 86%;
+    --ring: 219.755 69.362% 46.078%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    --font-heading: "Outfit", sans-serif;
+    --font-body: "Figtree", sans-serif;
+    --shadow-panel: 0 2px 6px hsl(var(--foreground) / 0.035);
+    --shadow-raised: 0 8px 24px hsl(var(--foreground) / 0.08);
+    --success: 152 55% 34%;
+    --warning: 36 85% 36%;
+    --hero-foreground: 0 0% 100%;
+    --hero-overlay: 218 40% 8%;
+    --hero-shade: linear-gradient(90deg, hsl(var(--hero-overlay) / 0.86) 0%, hsl(var(--hero-overlay) / 0.68) 32%, hsl(var(--hero-overlay) / 0.12) 65%, hsl(var(--hero-overlay) / 0.05) 100%);
 
-    --sidebar-background: 215 85% 25%;
+    --sidebar-background: 217.895 47.5% 15.686%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 187 85% 45%;
+    --sidebar-primary: 219.755 69.362% 46.078%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 75% 30%;
+    --sidebar-accent: 219 36% 23%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 75% 20%;
-    --sidebar-ring: 187 85% 45%;
+    --sidebar-border: 218 31% 24%;
+    --sidebar-ring: 219.755 69.362% 46.078%;
   }
 
   .dark {
@@ -86,11 +101,11 @@ All colors MUST be HSL.
     --popover: 215 28% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 187 85% 45%;
-    --primary-foreground: 215 30% 10%;
+    --primary: 219 86% 70%;
+    --primary-foreground: 217.895 47.5% 15.686%;
 
     --secondary: 215 75% 30%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary-foreground: 217.895 47.5% 15.686%;
 
     --muted: 215 25% 20%;
     --muted-foreground: 215 15% 65%;
@@ -106,12 +121,12 @@ All colors MUST be HSL.
     --ring: 187 85% 45%;
     --sidebar-background: 215 35% 8%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 187 85% 45%;
+    --sidebar-primary: 219.755 69.362% 46.078%;
     --sidebar-primary-foreground: 215 30% 10%;
     --sidebar-accent: 215 30% 15%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 215 30% 15%;
-    --sidebar-ring: 187 85% 45%;
+    --sidebar-ring: 219.755 69.362% 46.078%;
   }
 }
 
@@ -122,5 +137,70 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    letter-spacing: 0;
   }
+}
+
+@layer base {
+  h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: 0; }
+  .tracking-tight, .tracking-tighter { letter-spacing: 0; }
+}
+
+@layer components {
+  .training-hero-frame { height: min(650px, 68svh); min-height: 470px; overflow: hidden; }
+  .training-hero-image { height: 100%; width: 100%; object-fit: cover; object-position: center; }
+  .training-hero-shade { background: var(--hero-shade); }
+  .training-hero-copy, .training-hero-caption { color: hsl(var(--hero-foreground)); }
+  .training-hero-description { color: hsl(var(--hero-foreground) / 0.85); }
+  @media (max-width: 639px) {
+    .training-hero-frame { height: min(610px, 72svh); min-height: 490px; }
+    .training-hero-image { object-position: 62% center; }
+    .training-hero-shade { background: linear-gradient(90deg, hsl(var(--hero-overlay) / 0.84), hsl(var(--hero-overlay) / 0.45)); }
+    .training-hero-copy { padding-bottom: 12px; }
+    .training-hero-copy h1 { font-size: 2.25rem; overflow-wrap: anywhere; }
+  }
+  .workspace-panel { box-shadow: var(--shadow-panel); }
+  .responsive-records { container-type: inline-size; }
+  .responsive-records > .record-cards { display: grid; gap: 1rem; }
+  .responsive-records > .record-table { display: none; }
+  @container (min-width: 700px) {
+    .responsive-records > .record-cards { display: none; }
+    .responsive-records > .record-table { display: block; }
+  }
+  /* Let text and chart/table regions shrink inside flex and grid tracks. */
+  .workspace-content .grid > *, .workspace-content .flex > * { min-width: 0; }
+  .workspace-content h1, .workspace-content h2, .workspace-content h3,
+  .workspace-content p, [role="dialog"] label { overflow-wrap: anywhere; }
+  [role="dialog"], [role="alertdialog"] { max-width: calc(100vw - 1.5rem); max-height: calc(100svh - 1.5rem); overflow-y: auto; }
+  [role="dialog"] > :first-child { padding-right: 1.5rem; }
+  @media (max-width: 639px) {
+    [role="dialog"], [role="alertdialog"] { padding: 1rem; }
+    [role="dialog"].p-0 { padding: 0; }
+    .workspace-content .flex.justify-between:not(.flex-col) { flex-wrap: wrap; gap: 0.75rem; }
+  }
+  .workspace-panel:hover { box-shadow: var(--shadow-raised); }
+  .dashboard-workspace [data-sidebar="menu-button"] { min-height: 2.5rem; }
+  .dashboard-workspace [data-sidebar="group-label"] { color: hsl(var(--sidebar-foreground) / 0.55); }
+  .workspace-content [class*="bg-gradient"][class*="from-primary/10"] {
+    background: none; border: 0; border-radius: 0; padding: 0 0 0.5rem;
+  }
+  .workspace-content [class*="bg-gradient"][class*="from-primary/10"] > .flex > div:first-child {
+    border-radius: var(--radius); width: 2.75rem; height: 2.75rem;
+  }
+  .workspace-content [data-ui="card"] > div.absolute.rounded-full { display: none; }
+  .workspace-content [data-ui="card"] .text-3xl {
+    font-family: var(--font-heading); font-size: 1.75rem; line-height: 2.25rem; overflow-wrap: anywhere;
+  }
+  .workspace-content [data-ui="card"] [class*="bg-gradient"] { background-image: none; }
+  .workspace-content .space-y-8 { gap: 0; }
+  .public-home-brand { max-width: 14rem; line-height: 1.2; }
+  @media (max-width: 639px) {
+    .public-home-brand { max-width: 9rem; font-size: 0.875rem; }
+    .workspace-content [data-ui="card"] .text-3xl { font-size: 1.5rem; line-height: 2rem; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -88,7 +89,7 @@ const TraineeDetail = () => {
     return (
       <DashboardLayout title="Loading..." subtitle="Please wait..." navItems={navItems} groupLabel={groupLabel}>
         <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <LoadingIndicator className="h-8 w-8 text-primary" />
         </div>
       </DashboardLayout>
     );

@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -431,14 +432,14 @@ const SuperAdminPackagesManagement = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-between items-center">
-          <div>
+        <div className="flex flex-col items-start justify-between gap-4 xl:flex-row xl:items-center">
+          <div className="min-w-0">
             <h2 className="text-2xl font-bold">Package Management</h2>
             <p className="text-muted-foreground">
               Create and manage subscription packages for training centers
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <Button variant="outline" onClick={handleInitializeStandardPackages}>
               <PackageIcon className="h-4 w-4 mr-2" />
               Initialize Standard Packages
@@ -454,7 +455,7 @@ const SuperAdminPackagesManagement = () => {
         {packagesLoading ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <LoadingIndicator className="h-8 w-8 text-primary" />
             </CardContent>
           </Card>
         ) : packages && packages.length > 0 ? (
@@ -465,7 +466,7 @@ const SuperAdminPackagesManagement = () => {
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
-                <Table>
+                <Table className="min-w-[760px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Package Name</TableHead>

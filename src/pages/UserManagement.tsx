@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
@@ -10,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Shield, Plus, Search, MoreHorizontal, Pencil, UserX, Trash2, Download, Loader2 } from "lucide-react";
+import { Shield, Plus, Search, MoreHorizontal, Pencil, UserX, Trash2, Download } from "lucide-react";
 import { useUsers, useCreateUser, useDeleteUser, useUpdateUser, useDeactivateUser, UserRoleData } from "@/hooks/useUsers";
 import { useOrganizations } from "@/hooks/useOrganizations";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
@@ -369,7 +370,7 @@ const UserManagement = () => {
           <CardContent>
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                <LoadingIndicator className="h-8 w-8 text-primary mb-2" />
                 <p className="text-sm text-muted-foreground">Loading users...</p>
               </div>
             ) : paginatedData?.length === 0 ? (

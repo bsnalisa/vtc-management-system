@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect } from "react";
 import { SuperAdminLayout } from "@/components/SuperAdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -17,23 +18,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Plus,
-  UserCog,
-  Save,
-  Trash2,
-  Users,
-  Search,
-  Filter,
-  Mail,
-  Phone,
-  Building2,
-  Shield,
-  Eye,
-  MoreHorizontal,
-  UserPlus,
-  Settings,
-} from "lucide-react";
+import { Plus, UserCog, Save, Trash2, Users, Search, Filter, Mail, Phone, Building2, Shield, Eye, MoreHorizontal, UserPlus, Settings } from "lucide-react";
 import { useOrganizations } from "@/hooks/useOrganizations";
 import {
   useUsers,
@@ -506,7 +491,7 @@ const SuperAdminUserManagement = () => {
                     <Button type="submit" disabled={createUser.isPending} className="bg-blue-600 hover:bg-blue-700">
                       {createUser.isPending ? (
                         <>
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                          <LoadingIndicator className="h-4 w-4 mr-2" />
                           Creating...
                         </>
                       ) : (
@@ -621,7 +606,7 @@ const SuperAdminUserManagement = () => {
           <CardContent>
             {isLoading ? (
               <div className="text-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                <LoadingIndicator className="h-8 w-8 mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground">Loading users...</p>
               </div>
             ) : filteredUsers?.length === 0 ? (
@@ -907,7 +892,7 @@ const SuperAdminUserManagement = () => {
                       >
                         {addUserRole.isPending ? (
                           <>
-                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                            <LoadingIndicator className="h-3 w-3 mr-2" />
                             Adding...
                           </>
                         ) : (
@@ -958,7 +943,7 @@ const SuperAdminUserManagement = () => {
               >
                 {deleteUser.isPending ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                    <LoadingIndicator className="h-4 w-4 mr-2" />
                     Deleting...
                   </>
                 ) : (

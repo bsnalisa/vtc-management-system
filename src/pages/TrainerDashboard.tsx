@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList, MessageSquare, FileText, Clock, Award } from "lucide-react";
+import { Users, BookOpen, Calendar, GraduationCap, ChevronRight, ClipboardList, MessageSquare, FileText, Clock, Award, DoorClosed } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { trainerNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
@@ -123,7 +123,7 @@ const TrainerDashboard = () => {
             {[
               { icon: BookOpen, label: "Gradebooks", desc: "Manage marks", url: "/gradebooks", color: "text-primary" },
               { icon: ClipboardList, label: "Attendance", desc: "Mark register", url: "/attendance", color: "text-primary" },
-              { icon: Users, label: "My Classes", desc: "View trainees", url: "/classes", color: "text-primary" },
+              { icon: DoorClosed, label: "My Classes", desc: "View trainees", url: "/classes", color: "text-primary" },
               { icon: Calendar, label: "Timetable", desc: "View schedule", url: "/timetable", color: "text-primary" },
               { icon: MessageSquare, label: "Messages", desc: "Inbox", url: "/messages", color: "text-primary" },
             ].map(({ icon: Icon, label, desc, url, color }) => (

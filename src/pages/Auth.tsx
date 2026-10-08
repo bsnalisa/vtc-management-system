@@ -11,6 +11,7 @@ import { getRoleDashboardPath } from "@/lib/roleUtils";
 import { UserRole, setRoleCache } from "@/hooks/useUserRole";
 import { setProfileUserId } from "@/hooks/useProfile";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { AppLogo } from "@/components/AppLogo";
 import { 
   validateEmail, 
   checkRateLimit, 
@@ -234,9 +235,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-lg bg-primary flex items-center justify-center mb-4">
-            <GraduationCap className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <AppLogo className="mx-auto mb-4 h-12 w-12" />
           <CardTitle>VTC Management System</CardTitle>
           <CardDescription>
             {forgotPassword 

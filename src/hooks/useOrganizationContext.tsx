@@ -223,20 +223,15 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
     if (organizationId && settings?.color_theme) {
       const theme = settings.color_theme;
       
-      root.style.setProperty('--primary', theme.primary || '222.2 47.4% 11.2%');
-      root.style.setProperty('--secondary', theme.secondary || '210 40% 96.1%');
-      root.style.setProperty('--accent', theme.accent || '210 40% 96.1%');
-      root.style.setProperty('--sidebar-background', theme.primary || '222.2 47.4% 11.2%');
-      root.style.setProperty('--sidebar-primary', theme.secondary || '210 40% 96.1%');
-      root.style.setProperty('--sidebar-accent', theme.accent || '210 40% 96.1%');
-    } else if (!organizationId) {
-      root.style.setProperty('--primary', '222.2 47.4% 11.2%');
-      root.style.setProperty('--secondary', '210 40% 96.1%');
-      root.style.setProperty('--accent', '210 40% 96.1%');
-      root.style.setProperty('--sidebar-background', '222.2 47.4% 11.2%');
-      root.style.setProperty('--sidebar-primary', '210 40% 96.1%');
-      root.style.setProperty('--sidebar-accent', '210 40% 96.1%');
+      for (const key of ['primary', 'secondary', 'accent'] as const) {
+        if (theme[key]) root.style.setProperty(`--${key}`, theme[key]);
+        else root.style.removeProperty(`--${key}`);
+      }
+    } else {
+      ['primary', 'secondary', 'accent'].forEach(key => root.style.removeProperty(`--${key}`));
     }
+    // Navigation uses the shared workspace palette, independent of centre branding.
+    ['sidebar-background', 'sidebar-primary', 'sidebar-accent'].forEach(key => root.style.removeProperty(`--${key}`));
 
     if (settings?.favicon) {
       const link = (document.querySelector("link[rel*='icon']") as HTMLLinkElement) || document.createElement('link');

@@ -4,6 +4,7 @@ import { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export interface DashboardStat {
@@ -84,13 +85,13 @@ export function DashboardShell({
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+      <div className="pb-2">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <HeroIcon className="h-7 w-7" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold">
               {salutation}{name ? `, ${name}` : ""}
             </h1>
             <p className="text-muted-foreground mt-0.5">{heroSubtitle}</p>
@@ -106,7 +107,6 @@ export function DashboardShell({
             const tone = s.tone ?? "primary";
             return (
               <Card key={s.label} className="relative overflow-hidden">
-                <div className={`absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full ${toneRing[tone]}`} />
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
                   <Icon className={`h-4 w-4 ${toneIcon[tone]}`} />
@@ -136,24 +136,25 @@ export function DashboardShell({
             {actions.map((a) => {
               const Icon = a.icon;
               return (
-                <button
+                <Button
+                  variant="workspace"
                   key={a.url + a.label}
                   onClick={() => navigate(a.url)}
-                  className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+                  className="gap-3 rounded-lg p-4"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm truncate">{a.label}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-sm">{a.label}</p>
                       {a.badge !== undefined && a.badge !== 0 && a.badge !== "" && (
                         <Badge variant="secondary" className="h-5 px-1.5 text-xs">{a.badge}</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">{a.desc}</p>
+                    <p className="text-xs text-muted-foreground">{a.desc}</p>
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>

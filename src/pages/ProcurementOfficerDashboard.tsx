@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ProcurementOfficerDashboard() {
   const { navItems, groupLabel } = useRoleNavigation();
@@ -97,7 +98,7 @@ export default function ProcurementOfficerDashboard() {
               </CardHeader>
               <CardContent>
                 {loadingRequisitions ? (
-                  <p className="text-muted-foreground">Loading...</p>
+                  <LoadingSpinner text="Loading..." className="py-4" />
                 ) : requisitions.length === 0 ? (
                   <p className="text-muted-foreground">No requisitions yet</p>
                 ) : (
@@ -125,7 +126,7 @@ export default function ProcurementOfficerDashboard() {
               </CardHeader>
               <CardContent>
                 {loadingOrders ? (
-                  <p className="text-muted-foreground">Loading...</p>
+                  <LoadingSpinner text="Loading..." className="py-4" />
                 ) : orders.length === 0 ? (
                   <p className="text-muted-foreground">No orders yet</p>
                 ) : (

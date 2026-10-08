@@ -1,10 +1,11 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Users, Loader2, Download, GraduationCap, Pencil, UserX, MoreHorizontal } from "lucide-react";
+import { Search, Users, Download, GraduationCap, Pencil, UserX, MoreHorizontal } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useQuery } from "@tanstack/react-query";
@@ -199,7 +200,7 @@ const TrainerManagement = () => {
               </div>
             ) : isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                <LoadingIndicator className="h-8 w-8 text-primary mb-2" />
                 <p className="text-sm text-muted-foreground">Loading trainers…</p>
               </div>
             ) : filtered.length === 0 ? (

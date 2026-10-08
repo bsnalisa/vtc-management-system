@@ -1,10 +1,11 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+
 import {
   CustomRole,
   AVAILABLE_MODULES,
@@ -87,22 +88,22 @@ export function PermissionsEditor({ role }: PermissionsEditorProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <LoadingIndicator className="h-8 w-8 text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
+    <div className="min-w-0 space-y-6">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
+        <div className="min-w-0 break-words">
           <h3 className="text-lg font-semibold">Module Permissions</h3>
           <p className="text-sm text-muted-foreground">
             Configure what {role.role_name} can access and do
           </p>
         </div>
         {hasChanges && (
-          <Button onClick={handleSaveAll} disabled={upsertPermission.isPending}>
+          <Button className="shrink-0" onClick={handleSaveAll} disabled={upsertPermission.isPending}>
             {upsertPermission.isPending ? "Saving..." : "Save All Changes"}
           </Button>
         )}
@@ -118,7 +119,7 @@ export function PermissionsEditor({ role }: PermissionsEditorProps) {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[650px] table-fixed">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[250px]">Module</TableHead>

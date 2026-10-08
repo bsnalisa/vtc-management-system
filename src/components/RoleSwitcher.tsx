@@ -31,9 +31,9 @@ export const RoleSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="max-w-48 gap-2" aria-label="Switch role">
           <div className={`w-2 h-2 rounded-full ${getRoleColor(currentRole)}`} />
-          <span className="hidden sm:inline">{getRoleDisplayName(currentRole)}</span>
+          <span className="hidden min-w-0 truncate sm:inline">{getRoleDisplayName(currentRole)}</span>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

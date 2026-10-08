@@ -72,15 +72,15 @@ export default function RoleManagement() {
   };
 
   const RolesTable = ({ roles: tableRoles, showActions = true }: { roles: CustomRole[]; showActions?: boolean }) => (
-    <Table>
+    <Table className="min-w-[1040px] table-fixed">
       <TableHeader>
         <TableRow>
-          <TableHead>Role Name</TableHead>
-          <TableHead>Role Code</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Type</TableHead>
-          {showActions && <TableHead className="text-right">Actions</TableHead>}
+          <TableHead className="w-[200px]">Role Name</TableHead>
+          <TableHead className="w-[220px]">Role Code</TableHead>
+          <TableHead className="w-[220px]">Description</TableHead>
+          <TableHead className="w-[90px]">Status</TableHead>
+          <TableHead className="w-[90px]">Type</TableHead>
+          {showActions && <TableHead className="w-[220px] text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -93,11 +93,11 @@ export default function RoleManagement() {
         ) : (
           tableRoles.map((tableRole) => (
             <TableRow key={tableRole.id}>
-              <TableCell className="font-medium">{tableRole.role_name}</TableCell>
+              <TableCell className="font-medium break-words">{tableRole.role_name}</TableCell>
               <TableCell>
-                <code className="text-sm bg-muted px-2 py-1 rounded">{tableRole.role_code}</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded break-all">{tableRole.role_code}</code>
               </TableCell>
-              <TableCell className="max-w-md truncate">
+              <TableCell className="break-words">
                 {tableRole.description || <span className="text-muted-foreground">No description</span>}
               </TableCell>
               <TableCell>
@@ -110,7 +110,7 @@ export default function RoleManagement() {
               </TableCell>
               {showActions && (
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2 [&>button]:shrink-0">
                     {role === "super_admin" && (
                       <Button variant="outline" size="sm" onClick={() => handleManagePermissions(tableRole)}>
                         <Settings className="h-4 w-4 mr-1" />
@@ -119,10 +119,10 @@ export default function RoleManagement() {
                     )}
                     {role === "super_admin" && !tableRole.is_system_role && (
                       <>
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(tableRole)}>
+                        <Button variant="outline" size="icon" aria-label={`Edit ${tableRole.role_name}`} title={`Edit ${tableRole.role_name}`} onClick={() => handleEdit(tableRole)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDelete(tableRole)}>
+                        <Button variant="outline" size="icon" aria-label={`Delete ${tableRole.role_name}`} title={`Delete ${tableRole.role_name}`} onClick={() => handleDelete(tableRole)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </>
@@ -140,16 +140,16 @@ export default function RoleManagement() {
   // If we're in permissions editor mode, render it separately
   if (permissionsRole) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold">{permissionsRole.role_name} Permissions</h1>
+      <div className="container mx-auto min-w-0 p-3 sm:p-6 space-y-6">
+        <div className="flex flex-col items-start gap-4 xl:flex-row xl:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <Shield className="h-8 w-8 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold break-words">{permissionsRole.role_name} Permissions</h1>
               <p className="text-muted-foreground mt-1">Configure module access for this role</p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => setPermissionsRole(null)}>
+          <Button className="shrink-0" variant="outline" onClick={() => setPermissionsRole(null)}>
             Back to Roles
           </Button>
         </div>
@@ -161,12 +161,12 @@ export default function RoleManagement() {
 
   // Main roles management content
   const rolesContent = (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Shield className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">Role Management</h1>
+    <div className="min-w-0 space-y-6">
+      <div className="flex flex-col items-start gap-4 xl:flex-row xl:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <Shield className="h-8 w-8 shrink-0 text-primary" />
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold break-words">Role Management</h1>
             <p className="text-muted-foreground mt-1">
               {role === "super_admin" 
                 ? "Create and manage custom roles with specific permissions" 
@@ -174,13 +174,13 @@ export default function RoleManagement() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setBulkAssignDialogOpen(true)}>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap xl:shrink-0">
+          <Button className="shrink-0" variant="outline" onClick={() => setBulkAssignDialogOpen(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
             Bulk Assign Roles
           </Button>
           {role === "super_admin" && (
-            <Button onClick={handleCreate}>
+            <Button className="shrink-0" onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Create Role
             </Button>

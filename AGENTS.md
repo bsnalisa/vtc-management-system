@@ -1,0 +1,14 @@
+# Architecture rules
+- Keep the system visual theme in global semantic HSL tokens and shared UI primitives so every role inherits consistent presentation without changing authorization or workflows.
+- DashboardLayout remains the common role-page shell with a fixed top header, collapsible sidebar and scrollable content; role colours identify roles without overriding the shared system palette.
+- Load locally packaged fonts through the global stylesheet so system typography does not depend on remote font requests.
+- Organization branding may customize content accent tokens, but sidebar tokens always inherit the shared workspace theme; removing branding restores stylesheet defaults.
+- Keep the public training hero in a dedicated component using the shared Embla carousel and UI controls, with pause-on-interaction and reduced-motion support to preserve accessibility independently of application workflows.
+- Use AppLogo and its shared favicon asset for application branding; keep uploaded organization logos separate as centre identity so tenant branding cannot replace the system mark.
+- Dashboard shells render AppLogo only in the persistent header and use a persistent SidebarProvider with one shared SidebarTrigger inside the sidebar; collapsed navigation remains a scrollable icon rail at every size so staff never lose navigation access.
+- All animated loading states use LoadingIndicator directly or through LoadingSpinner/ButtonSpinner so pages, permission checks and action buttons share accessible graduation-cap motion.
+- Shared UI primitives own narrow-screen containment for tabs, tables and dialogs; page action rows stack before expanding to preserve readable text without hiding workflows.
+- Shared tables retain intrinsic column widths and non-wrapping cells with local horizontal scrolling; descriptive cells can opt into wrapping so sidebar expansion never crushes table text.
+- Trainee and class lists switch to labelled record cards based on available content width, preserving existing actions and data so expanded navigation cannot force narrow-screen horizontal scrolling.
+- Attendance, timetable history, assessment and trainer-assignment read policies use authenticated centre-role membership and relevant trainee/trainer access; SECURITY DEFINER helpers avoid recursive related-table RLS checks, and write policies must not bypass read boundaries.
+- DashboardLayout derives sidebar items and group label from useRoleNavigation for the signed-in role, ignoring page-supplied menus, so navigation labels stay identical across every page a role visits.

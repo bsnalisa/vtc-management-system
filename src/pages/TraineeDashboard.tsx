@@ -52,9 +52,9 @@ const TraineeDashboard = () => {
     <DashboardLayout title="" subtitle="" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-8">
         {/* Hero Greeting */}
-        <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border p-6">
+        <div className="pb-2">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
               <GraduationCap className="h-7 w-7" />
             </div>
             <div>
@@ -71,7 +71,6 @@ const TraineeDashboard = () => {
         {/* Primary Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-primary/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Fees</CardTitle>
               <Wallet className="h-4 w-4 text-primary" />
@@ -85,21 +84,19 @@ const TraineeDashboard = () => {
           </Card>
 
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-emerald-500/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Amount Paid</CardTitle>
-              <CreditCard className="h-4 w-4 text-emerald-600" />
+              <CreditCard className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
               {isLoading ? <Skeleton className="h-8 w-24" /> : (
-                <div className="text-3xl font-bold text-emerald-600">{paidPercent}%</div>
+                <div className="text-3xl font-bold text-success">{paidPercent}%</div>
               )}
               <p className="text-xs text-muted-foreground mt-1">N$ {totalPaid.toLocaleString()} paid</p>
             </CardContent>
           </Card>
 
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-accent/30" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Competent Results</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
@@ -113,7 +110,6 @@ const TraineeDashboard = () => {
           </Card>
 
           <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 h-20 w-20 translate-x-4 -translate-y-4 rounded-full bg-destructive/10" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Outstanding</CardTitle>
               <AlertCircle className="h-4 w-4 text-destructive" />
@@ -181,10 +177,11 @@ const TraineeDashboard = () => {
               { icon: Home, label: "Hostel", desc: "Room details", url: "/trainee/hostel" },
               { icon: Calendar, label: "Timetable", desc: "Exam schedule", url: "/trainee/exams/timetable" },
             ].map(({ icon: Icon, label, desc, url }) => (
-              <button
+              <Button
+                  variant="workspace"
                 key={url}
                 onClick={() => navigate(url)}
-                className="flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-all hover:bg-accent hover:shadow-sm active:scale-[0.98]"
+                className="gap-3 rounded-lg p-4"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
@@ -193,7 +190,7 @@ const TraineeDashboard = () => {
                   <p className="font-medium text-sm">{label}</p>
                   <p className="text-xs text-muted-foreground">{desc}</p>
                 </div>
-              </button>
+              </Button>
             ))}
           </div>
         </div>

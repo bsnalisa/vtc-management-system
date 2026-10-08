@@ -25,14 +25,14 @@ export function DataTablePagination({
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div className="flex items-center justify-between px-2 py-4">
+    <div className="flex flex-col items-start justify-between gap-3 px-2 py-4 lg:flex-row lg:items-center">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <span>
           Showing {startItem} to {endItem} of {totalItems} results
         </span>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2">
+      <div className="flex max-w-full flex-wrap items-center gap-3 sm:gap-6">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">Rows per page</span>
           <Select
             value={String(pageSize)}

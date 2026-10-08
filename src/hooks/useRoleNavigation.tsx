@@ -22,6 +22,8 @@ import {
   librarianNavItems,
   smeNavItems,
   printingOfficerNavItems,
+  liaisonOfficerNavItems,
+  resourceCenterNavItems,
 } from "@/lib/navigationConfig";
 import { getRoleDashboardPath, getRoleDisplayName } from "@/lib/roleUtils";
 
@@ -76,8 +78,12 @@ export const useRoleNavigation = () => {
         return smeNavItems;
       case "printing_distribution_officer":
         return printingOfficerNavItems;
+      case "liaison_officer":
+        return liaisonOfficerNavItems;
+      case "resource_center_coordinator":
+        return resourceCenterNavItems;
       default:
-        return adminNavItems;
+        return [];
     }
   };
 
@@ -129,6 +135,10 @@ export const useRoleNavigation = () => {
         return "Assessment Development";
       case "printing_distribution_officer":
         return "Printing & Distribution";
+      case "liaison_officer":
+        return "Liaison Services";
+      case "resource_center_coordinator":
+        return "Resource Centre";
       default:
         return "Navigation";
     }

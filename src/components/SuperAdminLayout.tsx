@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { signOutAndClearCaches } from "@/lib/authUtils";
+import { AppLogo } from "@/components/AppLogo";
 
 interface SuperAdminLayoutProps {
   children: ReactNode;
@@ -65,17 +66,16 @@ function SuperAdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        {/* Role Badge in Sidebar Header */}
-        <div className="px-4 py-3 border-b">
-          <div 
-            className="w-full flex justify-center items-center gap-2 px-3 py-2 rounded-md text-white text-xs font-medium"
-            style={{
-              backgroundColor: `hsl(var(--role-super-admin))`
-            }}
-          >
-            <Shield className="h-3 w-3" />
-            <span>Super Admin</span>
-          </div>
+        {open && <div className="px-4 py-5 font-semibold text-sidebar-foreground">VTC System</div>}
+        {/* Role Badge + Toggle in Sidebar Header */}
+        <div className={`flex items-center border-b h-14 px-2 ${open ? "justify-between" : "justify-center"}`}>
+          {open && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-sidebar-accent text-sidebar-foreground text-xs font-medium">
+              <Shield className="h-3 w-3" />
+              <span>Super Admin</span>
+            </div>
+          )}
+          <SidebarTrigger className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" />
         </div>
 
         <SidebarGroup>
@@ -88,38 +88,17 @@ function SuperAdminSidebar() {
                 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={active}>
                       <NavLink
                         to={item.url}
+                        aria-label={item.title}
                         end={item.url === "/super-admin"}
-                        className="flex items-center gap-3 rounded-md px-3 py-2 transition-all duration-200"
-                        style={({ isActive }) => 
-                          isActive ? {
-                            backgroundColor: `hsl(var(--role-super-admin))`,
-                            color: 'white',
-                            fontWeight: '500',
-                            boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
-                          } : {
-                            color: 'hsl(var(--muted-foreground))'
-                          }
-                        }
-                        onMouseEnter={(e) => {
-                          if (!isActive(item.url)) {
-                            e.currentTarget.style.backgroundColor = `hsl(var(--role-super-admin) / 0.1)`;
-                            e.currentTarget.style.color = `hsl(var(--role-super-admin))`;
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isActive(item.url)) {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.color = 'hsl(var(--muted-foreground))';
-                          }
-                        }}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${active ? "bg-sidebar-primary/20 text-sidebar-primary-foreground font-semibold" : "text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}
                       >
                         <Icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                        {active && (
-                          <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'white' }} />
+                        {open && <span>{item.title}</span>}
+                        {active && open && (
+                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sidebar-primary" />
                         )}
                       </NavLink>
                     </SidebarMenuButton>
@@ -131,25 +110,25 @@ function SuperAdminSidebar() {
         </SidebarGroup>
 
         {/* Quick Stats Section */}
-        <SidebarGroup className="mt-8">
+        {open && <SidebarGroup className="mt-8">
           <SidebarGroupLabel>Platform Stats</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-3 px-2 py-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Active VTCs</span>
+                <span className="text-sidebar-foreground/65">Active VTCs</span>
                 <span className="font-medium text-green-600 dark:text-green-500">24</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Total Users</span>
+                <span className="text-sidebar-foreground/65">Total Users</span>
                 <span className="font-medium text-blue-600 dark:text-blue-500">1,234</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">System Health</span>
+                <span className="text-sidebar-foreground/65">System Health</span>
                 <span className="font-medium text-green-600 dark:text-green-500">99.8%</span>
               </div>
             </div>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>}
       </SidebarContent>
     </Sidebar>
   );
@@ -180,32 +159,30 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+    <SidebarProvider persistent style={{ "--sidebar-top": "0rem" } as React.CSSProperties}>
+      <div className="dashboard-workspace h-svh flex w-full overflow-hidden bg-background">
         <SuperAdminSidebar />
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50">
-            <div className="px-6 py-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <SidebarTrigger />
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                      <Shield className="h-4 w-4 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
+          <header className="shrink-0 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 z-40">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3">
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                  <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <AppLogo className="h-8 w-8" />
+                    <div className="min-w-0">
+                      <h1 className="break-words text-base sm:text-lg font-bold text-foreground">{getPageTitle()}</h1>
                       <p className="text-xs text-muted-foreground">Platform Management Dashboard</p>
                     </div>
                   </div>
                 </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => navigate("/profile")}
+                  aria-label="Profile"
                   className="flex items-center gap-2"
                 >
                   <UserCircle className="h-4 w-4" />
@@ -215,6 +192,7 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
                   variant="ghost" 
                   size="sm" 
                   onClick={handleSignOut}
+                  aria-label="Sign out"
                   className="flex items-center gap-2 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                 >
                   <LogOut className="h-4 w-4" />
@@ -229,8 +207,8 @@ export const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 bg-muted/20">
-            <div className="max-w-7xl mx-auto">
+          <main className="workspace-content min-h-0 min-w-0 overflow-auto flex-1 p-3 sm:p-5 lg:p-8 bg-background">
+            <div className="min-w-0 max-w-7xl mx-auto">
               {children}
             </div>
           </main>

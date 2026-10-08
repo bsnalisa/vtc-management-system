@@ -1,3 +1,4 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,17 +11,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { 
-  Search, 
-  FileText, 
-  Printer, 
-  Download, 
-  User, 
-  Loader2,
-  GraduationCap,
-  FileCheck,
-  ScrollText
-} from "lucide-react";
+import { Search, FileText, Printer, Download, User, GraduationCap, FileCheck, ScrollText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { useToast } from "@/hooks/use-toast";
@@ -383,7 +374,7 @@ This is an official academic record. Any alterations render it invalid.
               </div>
               <Button onClick={handleSearch} disabled={isSearching || !searchQuery.trim()}>
                 {isSearching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <LoadingIndicator className="h-4 w-4" />
                 ) : (
                   "Search"
                 )}
@@ -473,7 +464,7 @@ This is an official academic record. Any alterations render it invalid.
                 className="flex-1"
               >
                 {isGenerating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingIndicator className="mr-2 h-4 w-4" />
                 ) : (
                   <Download className="mr-2 h-4 w-4" />
                 )}

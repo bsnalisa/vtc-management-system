@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useUserRole } from "@/hooks/useUserRole";
 import { getRoleDisplayName, getRoleDashboardPath } from "@/lib/roleUtils";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 
 interface BreadcrumbRoute {
   path: string;
@@ -71,6 +72,7 @@ const routeLabels: Record<string, string> = {
 export const Breadcrumb = () => {
   const location = useLocation();
   const { role } = useUserRole();
+  const { navItems } = useRoleNavigation();
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
   const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
@@ -80,7 +82,7 @@ export const Breadcrumb = () => {
     .map((segment, index, filtered) => {
       const pathIndex = pathSegments.indexOf(segment);
       const path = "/" + pathSegments.slice(0, pathIndex + 1).join("/");
-      const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+      const label = navItems.find(item => item.url === path)?.title || ({ hr: "Human Resources", bdl: "Distance Learning", rpl: "RPL Management", "resource-center": "Resource Centre", liaison: "Liaison Services" } as Record<string, string>)[segment] || routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
       return { path, label };
     });
 

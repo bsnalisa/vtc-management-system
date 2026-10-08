@@ -1,6 +1,7 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet } from "lucide-react";
 import { ReportDefinition } from "@/lib/reportConfig";
 
 interface ReportCardProps {
@@ -54,7 +55,7 @@ export const ReportCard = ({
             disabled={isGenerating}
           >
             {isCurrentlyGenerating ? (
-              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              <LoadingIndicator className="mr-1.5 h-3.5 w-3.5" />
             ) : (
               <Download className="mr-1.5 h-3.5 w-3.5" />
             )}
@@ -67,7 +68,7 @@ export const ReportCard = ({
             disabled={isGenerating}
           >
             {isCurrentlyGenerating ? (
-              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              <LoadingIndicator className="mr-1.5 h-3.5 w-3.5" />
             ) : (
               <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" />
             )}

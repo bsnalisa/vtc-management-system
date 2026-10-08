@@ -1,9 +1,10 @@
+import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { DollarSign, Download, FileText, AlertCircle, CheckCircle, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { Loader2, DollarSign, Download, FileText, AlertCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Separator } from "@/components/ui/separator";
 import { useQuery } from "@tanstack/react-query";
@@ -139,7 +140,7 @@ const TraineeFinancePage = () => {
       <div className="space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <LoadingIndicator className="h-8 w-8 text-muted-foreground" />
           </div>
         ) : !account ? (
           <Card className="border-0 shadow-md">
