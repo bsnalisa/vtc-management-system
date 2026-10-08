@@ -4781,6 +4781,74 @@ export type Database = {
           },
         ]
       }
+      hostel_room_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          room_id: string
+          status: string
+          trainee_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          room_id: string
+          status?: string
+          trainee_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          room_id?: string
+          status?: string
+          trainee_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostel_room_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_room_requests_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "hostel_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_room_requests_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_room_requests_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hostel_rooms: {
         Row: {
           active: boolean
@@ -8881,6 +8949,47 @@ export type Database = {
           },
         ]
       }
+      registration_windows: {
+        Row: {
+          academic_year: string
+          closes_on: string
+          created_at: string
+          created_by: string | null
+          id: string
+          opens_on: string
+          organization_id: string
+          window_type: string
+        }
+        Insert: {
+          academic_year: string
+          closes_on: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          opens_on: string
+          organization_id: string
+          window_type: string
+        }
+        Update: {
+          academic_year?: string
+          closes_on?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          opens_on?: string
+          organization_id?: string
+          window_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_windows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registrations: {
         Row: {
           academic_year: string
@@ -10361,6 +10470,7 @@ export type Database = {
       trainee_affairs_records: {
         Row: {
           action_taken: string | null
+          category: string | null
           confidential: boolean
           created_at: string
           description: string
@@ -10378,6 +10488,7 @@ export type Database = {
         }
         Insert: {
           action_taken?: string | null
+          category?: string | null
           confidential?: boolean
           created_at?: string
           description: string
@@ -10395,6 +10506,7 @@ export type Database = {
         }
         Update: {
           action_taken?: string | null
+          category?: string | null
           confidential?: boolean
           created_at?: string
           description?: string
@@ -10485,6 +10597,8 @@ export type Database = {
           ict_access: Json | null
           id: string
           id_document_path: string | null
+          info_request_note: string | null
+          info_requested_at: string | null
           intake: string
           is_mature_age_entry: boolean | null
           last_name: string
@@ -10586,6 +10700,8 @@ export type Database = {
           ict_access?: Json | null
           id?: string
           id_document_path?: string | null
+          info_request_note?: string | null
+          info_requested_at?: string | null
           intake: string
           is_mature_age_entry?: boolean | null
           last_name: string
@@ -10687,6 +10803,8 @@ export type Database = {
           ict_access?: Json | null
           id?: string
           id_document_path?: string | null
+          info_request_note?: string | null
+          info_requested_at?: string | null
           intake?: string
           is_mature_age_entry?: boolean | null
           last_name?: string
@@ -12081,6 +12199,19 @@ export type Database = {
       }
     }
     Functions: {
+      application_window_status: { Args: { _org_slug: string }; Returns: Json }
+      assessment_certification_summary: {
+        Args: { _academic_year?: string }
+        Returns: {
+          academic_year: string
+          candidates: number
+          certification_rate: number
+          certified: number
+          not_yet_certified: number
+          qualification: string
+          qualification_code: string
+        }[]
+      }
       assignment_class: { Args: { _assignment: string }; Returns: string }
       bank_apply_line: {
         Args: { _fee_record?: string; _line: string }
@@ -12171,6 +12302,22 @@ export type Database = {
         Args: { _class: string; _user_id: string }
         Returns: boolean
       }
+      cancel_hostel_room_request: { Args: { _id: string }; Returns: undefined }
+      certified_trainees_report: {
+        Args: { _academic_year?: string }
+        Returns: {
+          academic_year: string
+          certified_on: string
+          first_name: string
+          last_name: string
+          level: number
+          nqf_level: number
+          qualification: string
+          qualification_code: string
+          trade: string
+          trainee_number: string
+        }[]
+      }
       check_organization_limit: {
         Args: { _current_count: number; _limit_type: string; _org_id: string }
         Returns: boolean
@@ -12243,6 +12390,10 @@ export type Database = {
         Returns: string
       }
       decide_deferral: {
+        Args: { _approve: boolean; _id: string; _notes?: string }
+        Returns: string
+      }
+      decide_hostel_room_request: {
         Args: { _approve: boolean; _id: string; _notes?: string }
         Returns: string
       }
@@ -12404,6 +12555,10 @@ export type Database = {
         Args: { _org: string; _user_id: string }
         Returns: boolean
       }
+      is_hostel_staff: {
+        Args: { _org: string; _user_id: string }
+        Returns: boolean
+      }
       is_job_runner: { Args: never; Returns: boolean }
       is_library_staff: {
         Args: { _org: string; _user_id: string }
@@ -12448,6 +12603,20 @@ export type Database = {
       library_send_announcement: {
         Args: { _message: string; _org: string; _title: string }
         Returns: number
+      }
+      list_available_hostel_rooms: {
+        Args: never
+        Returns: {
+          amenities: string[]
+          building_name: string
+          capacity: number
+          floor_number: number
+          free_beds: number
+          monthly_fee: number
+          room_id: string
+          room_number: string
+          room_type: string
+        }[]
       }
       list_public_qualifications: {
         Args: { _org_slug: string }
@@ -12610,6 +12779,14 @@ export type Database = {
       }
       quiz_class: { Args: { _quiz: string }; Returns: string }
       reinstate_deferred_trainee: { Args: { _id: string }; Returns: undefined }
+      request_application_info: {
+        Args: { _application: string; _note: string }
+        Returns: undefined
+      }
+      request_hostel_room: {
+        Args: { _note?: string; _room: string }
+        Returns: string
+      }
       respond_graduation_invitation: {
         Args: { _channel?: string; _code: number; _token: string }
         Returns: boolean
@@ -12631,6 +12808,10 @@ export type Database = {
       seed_symbol_points_for_organization: {
         Args: { org_id: string }
         Returns: undefined
+      }
+      self_register_returning: {
+        Args: { _academic_year: string; _hostel_required?: boolean }
+        Returns: Json
       }
       send_graduate_survey: {
         Args: { _base_url?: string; _survey: string }
