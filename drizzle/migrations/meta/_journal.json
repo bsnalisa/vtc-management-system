@@ -15,6 +15,27 @@
       "when": 1791405538447,
       "tag": "0001_scope_assessment_and_trainer_assignment_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791491845203,
+      "tag": "0002_harden_audit_backups_appnumber",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791492267738,
+      "tag": "0003_fix_applicant_document_upload_policy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791492401753,
+      "tag": "0004_server_generated_application_numbers",
+      "breakpoints": true
     }
   ]
 }
