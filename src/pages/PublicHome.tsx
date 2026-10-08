@@ -30,9 +30,9 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn, image: "/illustrations/step1.svg" },
-  { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText, image: "/illustrations/step2.svg" },
-  { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search, image: "/illustrations/step3.svg" },
+  { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn, image: "/illustrations/step1.png" },
+  { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText, image: "/illustrations/step2.png" },
+  { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search, image: "/illustrations/step3.png" },
 ];
 
 
