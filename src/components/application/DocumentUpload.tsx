@@ -18,7 +18,20 @@ interface DocumentUploadProps {
   currentPath?: string;
   bucket?: string;
   folder?: string;
+  /** Centre the files belong to; overrides the signed-in user's centre (used by online applicants). */
+  organizationId?: string | null;
 }
+
+/** Application files live under {org}/applications/{uid}/... so applicants can upload and read their own files. */
+const buildUploadPath = async (orgPrefix: string, folder: string, timestamp: number, name: string) => {
+  const safe = `${timestamp}_${name.replace(/\s+/g, "_")}`;
+  if (folder === "applications" || folder.startsWith("applications/")) {
+    const uid = (await supabase.auth.getUser()).data.user?.id ?? "anon";
+    const rest = folder.slice("applications".length).replace(/^\//, "");
+    return `${orgPrefix}applications/${uid}/${rest ? `${rest}/` : ""}${safe}`;
+  }
+  return `${orgPrefix}${folder}/${safe}`;
+};
 
 export const DocumentUpload = ({
   label,
@@ -30,13 +43,15 @@ export const DocumentUpload = ({
   currentPath,
   bucket = "documents",
   folder = "applications",
+  organizationId: orgOverride,
 }: DocumentUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { organizationId } = useOrganizationContext();
+  const { organizationId: ctxOrg } = useOrganizationContext();
+  const organizationId = orgOverride || ctxOrg;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,7 +79,7 @@ export const DocumentUpload = ({
       // Generate unique file name with organization prefix for RLS policy
       const timestamp = Date.now();
       const orgPrefix = organizationId ? `${organizationId}/` : "";
-      const uniqueName = `${orgPrefix}${folder}/${folder === "applications" ? `${(await supabase.auth.getUser()).data.user?.id ?? "anon"}/` : ""}${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+      const uniqueName = await buildUploadPath(orgPrefix, folder, timestamp, file.name);
 
       const { data, error: uploadError } = await supabase.storage
         .from(bucket)
@@ -199,6 +214,8 @@ interface MultipleDocumentUploadProps {
   maxFiles?: number;
   bucket?: string;
   folder?: string;
+  /** Centre the files belong to; overrides the signed-in user's centre (used by online applicants). */
+  organizationId?: string | null;
 }
 
 export const MultipleDocumentUpload = ({
@@ -209,12 +226,14 @@ export const MultipleDocumentUpload = ({
   maxFiles = 5,
   bucket = "documents",
   folder = "applications",
+  organizationId: orgOverride,
 }: MultipleDocumentUploadProps) => {
   const [paths, setPaths] = useState<string[]>(currentPaths);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { organizationId } = useOrganizationContext();
+  const { organizationId: ctxOrg } = useOrganizationContext();
+  const organizationId = orgOverride || ctxOrg;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -236,7 +255,7 @@ export const MultipleDocumentUpload = ({
       for (const file of Array.from(files)) {
         const timestamp = Date.now();
         const orgPrefix = organizationId ? `${organizationId}/` : "";
-        const uniqueName = `${orgPrefix}${folder}/${folder === "applications" ? `${(await supabase.auth.getUser()).data.user?.id ?? "anon"}/` : ""}${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+        const uniqueName = await buildUploadPath(orgPrefix, folder, timestamp, file.name);
 
         const { data, error: uploadError } = await supabase.storage
           .from(bucket)

@@ -1093,6 +1093,7 @@ export const ComprehensiveApplicationForm = ({
                         required
                         currentPath={formData.id_document_path}
                         onUpload={(path) => updateField("id_document_path", path)}
+                        organizationId={organizationIdOverride}
                         folder="applications/id-documents"
                       />
                       <DocumentUpload
@@ -1101,6 +1102,7 @@ export const ComprehensiveApplicationForm = ({
                         required
                         currentPath={formData.school_leaving_cert_path}
                         onUpload={(path) => updateField("school_leaving_cert_path", path)}
+                        organizationId={organizationIdOverride}
                         folder="applications/certificates"
                       />
                       <DocumentUpload
@@ -1109,6 +1111,7 @@ export const ComprehensiveApplicationForm = ({
                         required
                         currentPath={formData.academic_qualifications_path}
                         onUpload={(path) => updateField("academic_qualifications_path", path)}
+                        organizationId={organizationIdOverride}
                         folder="applications/qualifications"
                       />
                       <MultipleDocumentUpload
@@ -1117,6 +1120,7 @@ export const ComprehensiveApplicationForm = ({
                         currentPaths={formData.additional_documents_paths || []}
                         onUpload={(paths) => updateField("additional_documents_paths", paths)}
                         maxFiles={5}
+                        organizationId={organizationIdOverride}
                         folder="applications/additional"
                       />
                     </div>
