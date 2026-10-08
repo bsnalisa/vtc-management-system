@@ -24,12 +24,45 @@ ${APPLICATION_GUIDE}
 
 ${NAMIBIA_TVET_KNOWLEDGE}`;
 
-const buildInstructions = (centres: string) => `${BASE_INSTRUCTIONS}
+type Viewer = { roles: string[]; menu: string[]; page: string } | null;
+
+const PUBLIC_SCOPE = `# Who you are talking to
+A visitor who is NOT signed in (prospective trainee/public). Only help with the online application, centres, courses, fees and general TVET/NTA information. Do not describe staff or trainee internal features in detail; if asked, say they must sign in and that features depend on their role.`;
+
+const roleScope = (v: NonNullable<Viewer>) => `# Who you are talking to
+A signed-in platform user. Their verified role(s): ${v.roles.join(", ") || "none assigned"}.
+Menu sections available to them: ${v.menu.length ? v.menu.join("; ") : "none listed"}.
+They are currently on page: ${v.page || "unknown"}.
+Rules:
+- You may explain how to use the VTC Management System, but ONLY features available to their role(s) and the menu sections listed above. Refer to sections by these menu names.
+- If they ask about something outside their role (e.g. another role's approvals, finance, gradebook editing, admin settings), say politely that it isn't available to their role and suggest who to contact (their administrator or the relevant office).
+- You cannot see or change any records. Never claim to look up personal data, marks, balances or applications; tell them where in their menu to find it.`;
+
+const buildInstructions = (centres: string, viewer: Viewer) => `${BASE_INSTRUCTIONS}
+
+${viewer ? roleScope(viewer) : PUBLIC_SCOPE}
 
 # Live centre data from the VTC Management System (authoritative)
 Only state courses, fees and contact details that appear here. If a centre's item says "not yet published", say so plainly and do not guess or use general knowledge for it. Only centres listed here accept online applications through this system.
 
 ${centres}`;
+
+// Roles come only from the verified token + user_roles table; menu/page are descriptive hints.
+async function resolveViewer(req: Request, ctx: { menu?: unknown; page?: unknown }): Promise<Viewer> {
+  const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!token || !url || !key) return null;
+  const db = createClient(url, key);
+  const { data, error } = await db.auth.getUser(token);
+  if (error || !data?.user) return null;
+  const { data: roles } = await db.from("user_roles").select("role").eq("user_id", data.user.id);
+  const menu = Array.isArray(ctx.menu)
+    ? ctx.menu.filter((m): m is string => typeof m === "string").slice(0, 60).map((m) => m.slice(0, 80))
+    : [];
+  const page = typeof ctx.page === "string" ? ctx.page.slice(0, 120) : "";
+  return { roles: (roles ?? []).map((r) => String(r.role)), menu, page };
+}
 
 async function loadCentreData(): Promise<string> {
   const url = Deno.env.get("SUPABASE_URL");
@@ -66,13 +99,17 @@ Deno.serve(async (req) => {
   if (!apiKey) return json(500, { error: "The assistant is not configured yet." });
 
   let messages: UIMessage[];
+  let ctx: { menu?: unknown; page?: unknown } = {};
   try {
     const body = await req.json();
     messages = Array.isArray(body?.messages) ? body.messages.slice(-20) : [];
+    ctx = body?.context ?? {};
   } catch {
     return json(400, { error: "Invalid request." });
   }
   if (messages.length === 0) return json(400, { error: "Please ask a question." });
+
+  const viewer = await resolveViewer(req, ctx);
 
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(req));
   const provider = createOpenAI({
@@ -85,7 +122,7 @@ Deno.serve(async (req) => {
   try {
     const result = streamText({
       model: provider.responses("openai/gpt-6-astra"),
-      instructions: buildInstructions(await loadCentreData()),
+      instructions: buildInstructions(await loadCentreData(), viewer),
       messages: await convertToModelMessages(messages),
       abortSignal: req.signal,
       providerOptions: {
