@@ -3,6 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type UserRole = "super_admin" | "organization_admin" | "admin" | "head_of_training" | "trainer" | "registration_officer" | "debtor_officer" | "hod" | "assessment_coordinator" | "stock_control_officer" | "asset_maintenance_coordinator" | "procurement_officer" | "placement_officer" | "hostel_coordinator" | "head_of_trainee_support" | "liaison_officer" | "resource_center_coordinator" | "projects_coordinator" | "hr_officer" | "bdl_coordinator" | "rpl_coordinator" | "librarian" | "subject_matter_expert" | "printing_distribution_officer" | "trainee" | null;
 
+// "admin" is merged into Organization Admin and "hod" into Head of Training.
+// Anything still stored under an old name is read as the merged role.
+const MERGED_ROLES: Record<string, UserRole> = { admin: "organization_admin", hod: "head_of_training" };
+const mergeRole = (role: UserRole): UserRole => (role && MERGED_ROLES[role]) || role;
+
 // Cache for current user's role to avoid repeated calls
 let cachedRole: UserRole = null;
 let cachedUserId: string | null = null;
@@ -32,7 +37,7 @@ export const useUserRole = () => {
         return null;
       }
       
-      const userRole = (data?.role as UserRole) || null;
+      const userRole = mergeRole((data?.role as UserRole) || null);
       
       // Cache the result
       cachedUserId = user.id;
@@ -56,5 +61,5 @@ export const clearRoleCache = () => {
 // Pre-set role cache (call from auth to speed up initial load)
 export const setRoleCache = (userId: string, role: UserRole) => {
   cachedUserId = userId;
-  cachedRole = role;
+  cachedRole = mergeRole(role);
 };
