@@ -27,10 +27,10 @@ const MyHr = () => {
   const [open, setOpen] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
 
-  if (loading) return <DashboardLayout title="My HR" navItems={navItems} groupLabel={groupLabel}><LoadingSpinner text="Loading" /></DashboardLayout>;
+  if (loading) return <DashboardLayout title="My HR" subtitle="Leave, reviews and your staff record" navItems={navItems} groupLabel={groupLabel}><LoadingSpinner text="Loading" /></DashboardLayout>;
   if (role === "trainee") {
     return (
-      <DashboardLayout title="My HR" navItems={navItems} groupLabel={groupLabel}>
+      <DashboardLayout title="My HR" subtitle="Leave, reviews and your staff record" navItems={navItems} groupLabel={groupLabel}>
         <Card><CardContent className="py-10 text-center text-muted-foreground">This page is for staff members only. Thank you for visiting; trainees can use their own dashboard for their records.</CardContent></Card>
       </DashboardLayout>
     );
