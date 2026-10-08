@@ -180,7 +180,7 @@ const PublicHome = () => {
                   ].map((s) => (
                     <Card
                       key={s.step}
-                      className="group relative overflow-hidden border-border/70 transition-colors hover:border-primary/30"
+                      className="group relative overflow-hidden border-border/70 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
                     >
                       <div className="relative h-44 w-full overflow-hidden bg-muted/40 p-6">
                         <img
@@ -189,7 +189,7 @@ const PublicHome = () => {
                           className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                           loading="lazy"
                         />
-                        <span className="absolute right-4 top-2 text-5xl font-bold text-primary/10">
+                        <span className="absolute right-4 top-3 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
                           {s.step}
                         </span>
                       </div>
@@ -201,7 +201,7 @@ const PublicHome = () => {
                     </Card>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap justify-center gap-3">
                   <Button size="lg" onClick={() => setTab("apply")}>
                     Apply now <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -210,14 +210,18 @@ const PublicHome = () => {
                   </Button>
                 </div>
               </section>
-              <section className="border-t pt-10">
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold">Your training journey, connected</h2>
-                  <p className="mt-2 text-muted-foreground">Applications, learning and centre services in one place.</p>
+              <section className="rounded-2xl border bg-muted/30 px-6 py-12 sm:px-10">
+                <div className="mx-auto mb-10 max-w-2xl text-center">
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">One platform</p>
+                  <h2 className="text-3xl font-bold tracking-tight">Your training journey, connected</h2>
+                  <p className="mt-3 text-muted-foreground">Applications, learning and centre services in one place.</p>
                 </div>
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                   {FEATURES.map((f) => (
-                    <div key={f.title}>
+                    <div
+                      key={f.title}
+                      className="rounded-xl border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5"
+                    >
                       <IconBadge icon={f.icon} className="mb-4" />
                       <h3 className="mb-2 text-base font-semibold">{f.title}</h3>
                       <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
