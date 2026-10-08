@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { resolvePhotoUrl } from "@/hooks/usePhotoUrl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,10 +22,7 @@ export const TraineePhoto = ({ traineeNumber, firstName, lastName, className = "
       if (error) throw error;
       const path: string | null = data?.photo_path ?? null;
       if (!path) return null;
-      if (/^(https?:|data:|blob:)/.test(path)) return path;
-      const { data: signed, error: signError } = await supabase.storage.from("documents").createSignedUrl(path, 3600);
-      if (signError) throw signError;
-      return signed.signedUrl;
+      return resolvePhotoUrl(path);
     },
   });
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "?";

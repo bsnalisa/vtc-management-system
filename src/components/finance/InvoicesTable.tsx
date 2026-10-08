@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, FileText, Search, Download, Eye } from "lucide-react";
-import { useInvoices, useCreateInvoice, CreateInvoiceData } from "@/hooks/useInvoices";
+import { Plus, FileText, Search, Download, Eye, Send } from "lucide-react";
+import { useInvoices, useCreateInvoice, useIssueInvoice, CreateInvoiceData } from "@/hooks/useInvoices";
 import { useTrainees } from "@/hooks/useTrainees";
 import { format, addDays } from "date-fns";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
@@ -20,6 +20,7 @@ export const InvoicesTable = () => {
   const { data: invoices = [], isLoading } = useInvoices();
   const { data: trainees = [] } = useTrainees();
   const createInvoice = useCreateInvoice();
+  const issueInvoice = useIssueInvoice();
 
   const [formData, setFormData] = useState<CreateInvoiceData>({
     trainee_id: "",
@@ -75,6 +76,8 @@ export const InvoicesTable = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case "draft": return <Badge variant="outline" className="border-amber-500 text-amber-700 whitespace-normal">Draft – review before issuing</Badge>;
+      case "issued": return <Badge variant="secondary">Issued</Badge>;
       case "paid": return <Badge className="bg-green-500">Paid</Badge>;
       case "pending": return <Badge variant="secondary">Pending</Badge>;
       case "overdue": return <Badge variant="destructive">Overdue</Badge>;
@@ -104,6 +107,8 @@ export const InvoicesTable = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="issued">Issued</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="paid">Paid</SelectItem>
               <SelectItem value="overdue">Overdue</SelectItem>
@@ -267,6 +272,17 @@ export const InvoicesTable = () => {
                   <TableCell className="text-right text-orange-600">N${(invoice.balance || 0).toLocaleString()}</TableCell>
                   <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                   <TableCell className="text-right">
+                    {invoice.status === "draft" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mr-1"
+                        disabled={issueInvoice.isPending}
+                        onClick={() => issueInvoice.mutate(invoice.id)}
+                      >
+                        <Send className="h-4 w-4 mr-1" /> Issue
+                      </Button>
+                    )}
                     <Button size="sm" variant="ghost">
                       <Eye className="h-4 w-4" />
                     </Button>

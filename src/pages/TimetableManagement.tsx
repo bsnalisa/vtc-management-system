@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import TimetableGrid from "@/components/timetable/TimetableGrid";
+import PublishBar from "@/components/timetable/PublishBar";
 import ConflictPanel from "@/components/timetable/ConflictPanel";
 
 const TimetableManagement = () => {
@@ -313,6 +314,8 @@ const TimetableManagement = () => {
             )}
           </CardContent>
         </Card>
+
+        <PublishBar academicYear={academicYear} term={term} entries={entries || []} />
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>

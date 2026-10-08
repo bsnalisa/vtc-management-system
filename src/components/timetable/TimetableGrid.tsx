@@ -124,8 +124,13 @@ const TimetableGrid = ({
                             <td key={day} className="p-1">
                               <div className={`rounded-md p-1.5 text-xs border ${
                                 entry.is_locked ? 'bg-accent/60 border-primary/30' : 'bg-card border-border'
-                              }`}>
-                                <div className="font-medium truncate">{courseName}</div>
+                              } ${entry.published === false ? 'border-dashed opacity-70' : ''}`}>
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="font-medium truncate">{courseName}</span>
+                                  {entry.published === false && (
+                                    <Badge variant="outline" className="h-4 px-1 text-[10px] font-normal shrink-0">draft</Badge>
+                                  )}
+                                </div>
                                 <div className="text-muted-foreground truncate">{trainer}</div>
                                 <div className="flex items-center justify-between mt-0.5">
                                   <span className="min-w-0 text-muted-foreground truncate">{room}</span>

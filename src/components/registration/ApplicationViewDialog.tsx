@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Download, User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, Home } from "lucide-react";
 import { EXAM_LEVELS } from "@/types/application";
 import { supabase } from "@/integrations/supabase/client";
+import { DocumentVersions } from "@/components/documents/DocumentVersions";
 
 interface ApplicationViewDialogProps {
   open: boolean;
@@ -432,6 +433,14 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
               <Field label="School Leaving Certificate" value={application.school_leaving_cert_path ? "Uploaded" : "Not uploaded"} />
               <Field label="Academic Qualifications" value={application.academic_qualifications_path ? "Uploaded" : "Not uploaded"} />
               <Field label="Declaration Accepted" value={application.declaration_accepted} />
+            </SectionCard>
+            <SectionCard title="Document history" icon={FileText}>
+              <div className="col-span-full space-y-3">
+                <p className="text-xs text-muted-foreground">Versioned copies of the documents, kept in addition to the original uploads above. Uploading here does not replace the original files.</p>
+                <DocumentVersions entityType="application" entityId={application.id} slot="id_document" label="ID document" canUpload canRestore />
+                <DocumentVersions entityType="application" entityId={application.id} slot="school_leaving_cert" label="School leaving certificate" canUpload canRestore />
+                <DocumentVersions entityType="application" entityId={application.id} slot="academic_qualifications" label="Academic qualifications" canUpload canRestore />
+              </div>
             </SectionCard>
           </TabsContent>
         </Tabs>

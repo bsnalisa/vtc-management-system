@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 
@@ -160,6 +161,32 @@ export const useUpdateInvoiceStatus = () => {
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+};
+
+// Issue a draft invoice (draft -> issued). Only finance roles pass the RLS policy.
+export const useIssueInvoice = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("invoices")
+        .update({ status: "issued", updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .eq("status", "draft")
+        .select("id");
+
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("The invoice could not be issued. It may already be issued, or you may not have permission.");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Invoice issued");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 };

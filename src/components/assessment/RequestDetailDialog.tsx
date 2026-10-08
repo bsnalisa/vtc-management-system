@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText } from "lucide-react";
+import { DocumentVersions } from "@/components/documents/DocumentVersions";
 import { AssessmentRequest, REQUEST_LABELS, RequestStatus, openEvidence, useUpdateAssessmentRequest } from "@/hooks/useAssessmentRequests";
 
 const toLocalInput = (iso: string | null) => (iso ? new Date(new Date(iso).getTime() - new Date(iso).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "");
@@ -86,6 +87,7 @@ export function RequestDetailDialog({ request, onClose }: { request: AssessmentR
             </div>
           )}
           {closed && request.decision_notes && <div><div className="text-muted-foreground">Decision notes</div><p>{request.decision_notes}</p></div>}
+          <DocumentVersions entityType="assessment_request" entityId={request.id} slot="evidence" label="Supporting evidence" canUpload canRestore />
         </div>
       </DialogContent>
     </Dialog>
