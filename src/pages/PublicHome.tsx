@@ -105,11 +105,14 @@ const PublicHome = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header
-        className={`sticky top-0 z-40 border-b transition-all duration-300 ${
-          scrolled
-            ? "bg-background shadow-md shadow-primary/5"
-            : "bg-background/80 backdrop-blur-xl"
+        className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300 ${
+          scrolled ? "shadow-md shadow-primary/5" : ""
         }`}
+        style={{
+          backgroundColor: scrolled
+            ? "hsl(var(--background))"
+            : "hsl(var(--background) / 0.85)",
+        }}
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
