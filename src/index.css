@@ -194,7 +194,40 @@ All colors MUST be HSL.
   }
   .workspace-content [data-ui="card"] [class*="bg-gradient"] { background-image: none; }
   .workspace-content .space-y-8 { gap: 0; }
+  /* How it works — connected step flow: vertical rail on mobile, horizontal on desktop */
+  .step-flow { position: relative; }
+  .step-flow::before,
+  .step-flow::after { content: ""; position: absolute; pointer-events: none; }
+  .step-flow::before {
+    left: 1.375rem;
+    top: 0.9rem;
+    bottom: 0.9rem;
+    width: 2px;
+    background: linear-gradient(to bottom, hsl(var(--primary) / 0.4), hsl(var(--primary) / 0.06));
+  }
+  .step-flow::after { display: none; }
+  .step-item { position: relative; padding-left: 3.75rem; }
+  .step-node { position: absolute; left: 0; top: 0; z-index: 1; }
+  @media (min-width: 768px) {
+    .step-flow::before { display: none; }
+    .step-flow::after {
+      display: block;
+      top: 1.375rem;
+      height: 2px;
+      left: calc(16.667% - 0.667rem);
+      right: calc(16.667% - 0.667rem);
+      background: linear-gradient(to right, hsl(var(--primary) / 0.4), hsl(var(--primary) / 0.06));
+    }
+    .step-item { padding-left: 0; padding-top: 3.75rem; }
+  }
+  .step-flow-grid {
+    background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(115% 85% at 50% 0%, #000 25%, transparent 80%);
+    mask-image: radial-gradient(115% 85% at 50% 0%, #000 25%, transparent 80%);
+  }
   .public-home-brand { max-width: 14rem; line-height: 1.2; }
+
   @media (max-width: 639px) {
     .public-home-brand { max-width: 9rem; font-size: 0.875rem; }
     .workspace-content [data-ui="card"] .text-3xl { font-size: 1.5rem; line-height: 2rem; }

@@ -29,6 +29,13 @@ const FEATURES = [
   { icon: Building2, title: "Campus Operations", desc: "Hostels, assets, stock and procurement managed per centre." },
 ];
 
+const STEPS = [
+  { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn, image: "/illustrations/step1.svg" },
+  { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText, image: "/illustrations/step2.svg" },
+  { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search, image: "/illustrations/step3.svg" },
+];
+
+
 const statusLabel = (s?: string | null) =>
   (s || "pending").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -68,6 +75,13 @@ const PublicHome = () => {
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setRevealed(true), 80);
+    return () => window.clearTimeout(timer);
+  }, []);
+
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
