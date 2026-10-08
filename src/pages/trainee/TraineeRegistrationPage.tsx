@@ -4,15 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { CheckCircle, Clock, FileText, Download, Eye } from "lucide-react";
+import { Loader2, CheckCircle, Clock, FileText, Download, Eye } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { useTraineeUserId, useTraineeRecord, useTraineeApplication, useTraineeEnrollments } from "@/hooks/useTraineePortalData";
+import { useMyRegistrations, useTraineeDocumentActions } from "@/hooks/useTraineeDocuments";
 
 const TraineeRegistrationPage = () => {
   const userId = useTraineeUserId();
   const { data: trainee, isLoading: tLoading } = useTraineeRecord(userId);
   const { data: application, isLoading: aLoading } = useTraineeApplication(userId);
   const { data: enrollments } = useTraineeEnrollments(trainee?.id);
+  const { data: registrations } = useMyRegistrations(trainee?.id);
+  const docs = useTraineeDocumentActions();
 
   const isLoading = tLoading || aLoading;
 
@@ -44,6 +47,7 @@ const TraineeRegistrationPage = () => {
   };
 
   const status = statusConfig[regStatus] || statusConfig.applied;
+  const completedRegistration = registrations?.find((r) => r.registration_status === "registered");
 
   const timelineSteps = [
     { label: "Application Submitted", date: application?.created_at ? new Date(application.created_at).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" }) : "N/A", completed: !!application },
@@ -56,6 +60,20 @@ const TraineeRegistrationPage = () => {
   return (
     <DashboardLayout title="My Registration" subtitle="View your registration details and status" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-green-100"><FileText className="h-6 w-6 text-green-600" /></div>
+              <div>
+                <h3 className="font-semibold">Proof of Registration</h3>
+                <p className="text-sm text-muted-foreground">{completedRegistration ? `Print or save your proof of registration for ${completedRegistration.academic_year}.` : "Available once your registration fees are cleared and your registration is complete."}</p>
+              </div>
+            </div>
+            <Button disabled={!completedRegistration || docs.busy === "proof"} onClick={() => completedRegistration && docs.printProof(completedRegistration.id)}>
+              {docs.busy === "proof" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}Print proof
+            </Button>
+          </CardContent>
+        </Card>
         <Card className="border-0 shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">

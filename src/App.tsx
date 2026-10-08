@@ -63,6 +63,36 @@ import StaffOnboarding from "./pages/StaffOnboarding";
 import TrainingModules from "./pages/TrainingModules";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import SupportTickets from "./pages/SupportTickets";
+import TraineeAffairs from "./pages/TraineeAffairs";
+import Library from "./pages/Library";
+import AcademicCalendar from "./pages/AcademicCalendar";
+import DeferralRequests from "./pages/DeferralRequests";
+import TraineeDeferralPage from "./pages/trainee/TraineeDeferralPage";
+import CourseCatalogue from "./pages/CourseCatalogue";
+import SupervisorSignoff from "./pages/SupervisorSignoff";
+import PublicRplApplication from "./pages/PublicRplApplication";
+import TraineeTranscriptPage from "./pages/trainee/TraineeTranscriptPage";
+import Transcripts from "./pages/Transcripts";
+import BankReconciliation from "./pages/BankReconciliation";
+import AccountingExport from "./pages/AccountingExport";
+import LearningSpace from "./pages/LearningSpace";
+import MoodleIntegration from "./pages/MoodleIntegration";
+
+import AssessmentRequests from "./pages/AssessmentRequests";
+import AssessmentDevelopment from "./pages/AssessmentDevelopment";
+import AssessmentSittings from "./pages/AssessmentSittings";
+import DeliveryPlans from "./pages/DeliveryPlans";
+import Workflows from "./pages/Workflows";
+import MyApprovals from "./pages/MyApprovals";
+import WorkflowAction from "./pages/WorkflowAction";
+import LogbookReview from "./pages/LogbookReview";
+import TraineeLogbookPage from "./pages/trainee/TraineeLogbookPage";
+import TraineeEventsPage from "./pages/trainee/TraineeEventsPage";
+import SmeRegistration from "./pages/SmeRegistration";
+import TraineeRequestsPage from "./pages/trainee/TraineeRequestsPage";
+import GraduationSurveys from "./pages/GraduationSurveys";
+import SurveyResponse from "./pages/SurveyResponse";
+import GraduationRsvp from "./pages/GraduationRsvp";
 import RoleActivityDashboard from "./pages/RoleActivityDashboard";
 import ModulesManagement from "./pages/ModulesManagement";
 import NotFound from "./pages/NotFound";
@@ -94,6 +124,7 @@ import TraineeRegistrationPage from "./pages/trainee/TraineeRegistrationPage";
 import TraineeDocumentsPage from "./pages/trainee/TraineeDocumentsPage";
 import TraineeAdmissionStatusPage from "./pages/trainee/TraineeAdmissionStatusPage";
 import TraineeHostelPage from "./pages/trainee/TraineeHostelPage";
+import TraineeFeedbackPage from "./pages/trainee/TraineeFeedbackPage";
 import TraineeExamTimetablePage from "./pages/trainee/TraineeExamTimetablePage";
 import ExamTimetablePublishing from "./pages/ExamTimetablePublishing";
 import TraineeResultsPage from "./pages/trainee/TraineeResultsPage";
@@ -270,6 +301,27 @@ const ProtectedRoleActivityDashboard = withRoleAccess(RoleActivityDashboard, {
 const ProtectedAlumniManagement = withRoleAccess(AlumniManagement, {
   requiredRoles: ["admin", "super_admin", "placement_officer"],
 });
+const ProtectedGraduationSurveys = withRoleAccess(GraduationSurveys, {
+  requiredRoles: ["admin", "organization_admin", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
+});
+const ProtectedAssessmentRequests = withRoleAccess(AssessmentRequests, {
+  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer"],
+});
+const ProtectedAssessmentDevelopment = withRoleAccess(AssessmentDevelopment, {
+  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "subject_matter_expert"],
+});
+const ProtectedAssessmentSittings = withRoleAccess(AssessmentSittings, {
+  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "printing_distribution_officer"],
+});
+const ProtectedDeliveryPlans = withRoleAccess(DeliveryPlans, {
+  requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "assessment_coordinator", "trainer"],
+});
+const ProtectedLogbookReview = withRoleAccess(LogbookReview, {
+  requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "placement_officer", "trainer"],
+});
+const ProtectedWorkflows = withRoleAccess(Workflows, {
+  requiredRoles: ["admin", "organization_admin"],
+});
 const ProtectedHostelManagement = withRoleAccess(HostelManagement, {
   requiredRoles: ["hostel_coordinator", "admin"],
 });
@@ -284,6 +336,9 @@ const ProtectedTraineeDetail = withRoleAccess(TraineeDetail, {
 });
 const ProtectedPendingApprovals = withRoleAccess(PendingApprovals, {
   requiredRoles: ["head_of_trainee_support"],
+});
+const ProtectedTraineeAffairs = withRoleAccess(TraineeAffairs, {
+  requiredRoles: ["admin", "organization_admin", "head_of_trainee_support", "registration_officer"],
 });
 const ProtectedEntryRequirements = withRoleAccess(EntryRequirementsManagement, {
   requiredRoles: ["registration_officer", "admin", "head_of_trainee_support"],
@@ -301,6 +356,13 @@ const App = () => (
           <Route path="/" element={<PublicHome />} />
           <Route path="/apply" element={<PublicHome />} />
           <Route path="/apply/:slug" element={<PublicHome />} />
+
+          <Route path="/sme-registration/:slug" element={<SmeRegistration />} />
+          <Route path="/workflow/action/:token" element={<WorkflowAction />} />
+          <Route path="/survey/:token" element={<SurveyResponse />} />
+          <Route path="/graduation/rsvp/:token" element={<GraduationRsvp />} />
+          <Route path="/logbook/sign/:token" element={<SupervisorSignoff />} />
+          <Route path="/rpl-application/:slug" element={<PublicRplApplication />} />
 
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -401,6 +463,16 @@ const App = () => (
           <Route path="/role-activity" element={<ProtectedRoute><ProtectedRoleActivityDashboard /></ProtectedRoute>} />
           <Route path="/organization-settings" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
+          <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />
+          <Route path="/graduation" element={<ProtectedRoute><ProtectedGraduationSurveys /></ProtectedRoute>} />
+          <Route path="/assessment-requests" element={<ProtectedRoute><ProtectedAssessmentRequests /></ProtectedRoute>} />
+          <Route path="/assessment-development" element={<ProtectedRoute><ProtectedAssessmentDevelopment /></ProtectedRoute>} />
+          <Route path="/assessment-sittings" element={<ProtectedRoute><ProtectedAssessmentSittings /></ProtectedRoute>} />
+          <Route path="/delivery-plans" element={<ProtectedRoute><ProtectedDeliveryPlans /></ProtectedRoute>} />
+          <Route path="/logbook-review" element={<ProtectedRoute><ProtectedLogbookReview /></ProtectedRoute>} />
+          <Route path="/workflows" element={<ProtectedRoute><ProtectedWorkflows /></ProtectedRoute>} />
+          <Route path="/my-approvals" element={<ProtectedRoute><MyApprovals /></ProtectedRoute>} />
+          <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
@@ -419,6 +491,20 @@ const App = () => (
           <Route path="/trainee/registration" element={<ProtectedRoute><TraineeRegistrationPage /></ProtectedRoute>} />
           <Route path="/trainee/application/documents" element={<ProtectedRoute><TraineeDocumentsPage /></ProtectedRoute>} />
           <Route path="/trainee/application/status" element={<ProtectedRoute><TraineeAdmissionStatusPage /></ProtectedRoute>} />
+          <Route path="/trainee/requests" element={<ProtectedRoute><TraineeRequestsPage /></ProtectedRoute>} />
+          <Route path="/trainee/logbook" element={<ProtectedRoute><TraineeLogbookPage /></ProtectedRoute>} />
+          <Route path="/academic-calendar" element={<ProtectedRoute><AcademicCalendar /></ProtectedRoute>} />
+          <Route path="/deferral-requests" element={<ProtectedRoute><DeferralRequests /></ProtectedRoute>} />
+          <Route path="/trainee/deferral" element={<ProtectedRoute><TraineeDeferralPage /></ProtectedRoute>} />
+          <Route path="/course-catalogue" element={<ProtectedRoute><CourseCatalogue /></ProtectedRoute>} />
+          <Route path="/trainee/transcript" element={<ProtectedRoute><TraineeTranscriptPage /></ProtectedRoute>} />
+          <Route path="/transcripts" element={<ProtectedRoute><Transcripts /></ProtectedRoute>} />
+          <Route path="/bank-reconciliation" element={<ProtectedRoute><BankReconciliation /></ProtectedRoute>} />
+          <Route path="/accounting-export" element={<ProtectedRoute><AccountingExport /></ProtectedRoute>} />
+          <Route path="/learning" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} />
+          <Route path="/moodle" element={<ProtectedRoute><MoodleIntegration /></ProtectedRoute>} />
+          <Route path="/trainee/events" element={<ProtectedRoute><TraineeEventsPage /></ProtectedRoute>} />
+          <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />
           <Route path="/trainee/exams/timetable" element={<ProtectedRoute><TraineeExamTimetablePage /></ProtectedRoute>} />
           <Route path="/trainee/exams/results" element={<ProtectedRoute><TraineeResultsPage /></ProtectedRoute>} />

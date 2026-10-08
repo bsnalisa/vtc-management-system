@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { TrainingMode } from "@/lib/trainingModes";
 
 export interface Enrollment {
   id: string;
@@ -47,7 +48,7 @@ export const useCheckEnrollmentEligibility = () => {
       trainingMode,
     }: {
       traineeId: string;
-      trainingMode: "fulltime" | "bdl" | "shortcourse";
+      trainingMode: TrainingMode;
     }) => {
       const { data, error } = await supabase.rpc("can_trainee_enroll", {
         _trainee_id: traineeId,

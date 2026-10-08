@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { Award, HelpCircle, Send, GraduationCap, User, BookOpen, ChevronDown, ChevronRight } from "lucide-react";
+import { Award, Loader2, HelpCircle, Send, GraduationCap, User, BookOpen, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import {
   useTraineeGradebookMarks,
 } from "@/hooks/useTraineePortalData";
 import { useMyMarkQueries, useSubmitMarkQuery } from "@/hooks/useMarkQueries";
+import { useTraineeDocumentActions } from "@/hooks/useTraineeDocuments";
 
 // ─── Mark type label helper ───
 const markTypeLabel = (type: string) => {
@@ -193,6 +194,7 @@ const TraineeResultsPage = () => {
   const { data: gradebooks, isLoading: gLoading } = useTraineeGradebookEntries(trainee?.id);
   const { data: myQueries } = useMyMarkQueries(trainee?.id);
   const submitQuery = useSubmitMarkQuery();
+  const docs = useTraineeDocumentActions();
 
   const [queryDialog, setQueryDialog] = useState<{ gradebookId: string; componentId: string; componentName: string } | null>(null);
   const [queryForm, setQueryForm] = useState({ query_type: "marks_query", subject: "", description: "" });
@@ -248,9 +250,14 @@ const TraineeResultsPage = () => {
         {/* Student info banner */}
         <Card className="border-0 shadow-md overflow-hidden">
           <div className="bg-primary px-6 py-4">
-            <div className="flex items-center gap-3">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-              <h2 className="text-lg font-bold text-primary-foreground">Progress Report</h2>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <GraduationCap className="h-6 w-6 text-primary-foreground" />
+                <h2 className="text-lg font-bold text-primary-foreground">Progress Report</h2>
+              </div>
+              <Button size="sm" variant="secondary" disabled={docs.busy === "results"} onClick={() => docs.printResults()} title="Prints only results that have been approved">
+                {docs.busy === "results" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}Print statement of results
+              </Button>
             </div>
           </div>
           <CardContent className="p-5">

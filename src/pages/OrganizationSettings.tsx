@@ -402,7 +402,7 @@ export default function OrganizationSettings() {
                   className="font-mono uppercase"
                 />
                 <p className="text-xs text-muted-foreground">
-                  This prefix will be used for trainee IDs (e.g., {traineeIdPrefix}202500001)
+                  This prefix will be used for trainee IDs (e.g., {traineeIdPrefix}-25-48213: VTC code, intake year, five random digits)
                 </p>
               </div>
 
@@ -419,7 +419,7 @@ export default function OrganizationSettings() {
                   className="font-mono"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Used for auto-generated trainee emails (e.g., {traineeIdPrefix.toLowerCase()}202500001@{emailDomain || 'yourdomain.na'})
+                  Used for auto-generated trainee emails (e.g., {traineeIdPrefix.toLowerCase()}-25-48213@{emailDomain || 'yourdomain.na'})
                 </p>
               </div>
             </div>

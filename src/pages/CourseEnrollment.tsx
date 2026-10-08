@@ -13,6 +13,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import type { TrainingMode } from "@/lib/trainingModes";
 
 const CourseEnrollment = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const CourseEnrollment = () => {
     // Check eligibility
     const isEligible = await checkEligibility.mutateAsync({
       traineeId: selectedTrainee,
-      trainingMode: selectedTraineeData.training_mode as "fulltime" | "bdl" | "shortcourse",
+      trainingMode: selectedTraineeData.training_mode as TrainingMode,
     });
 
     if (!isEligible) {

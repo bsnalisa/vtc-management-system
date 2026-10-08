@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganizationContext } from "./useOrganizationContext";
 import { useToast } from "./use-toast";
 import { format } from "date-fns";
+import { exportBrandedExcel } from "@/lib/exportUtils";
 
 interface ReportOptions {
   reportId: string;
@@ -67,7 +68,7 @@ export const useReportGeneration = () => {
           const value = row[header];
           const cellValue = typeof value === 'object' && value !== null
             ? JSON.stringify(value).replace(/"/g, '""')
-            : String(value || '').replace(/"/g, '""');
+            : String(value ?? '').replace(/"/g, '""'); // ?? so a real 0 is kept
           return `"${cellValue}"`;
         }).join(",")
       )
@@ -400,9 +401,14 @@ export const useReportGeneration = () => {
       const flatData = prepareDataForExport(data);
       const csvContent = generateCSVWithBranding(flatData, branding, reportTitle);
       const timestamp = format(new Date(), "yyyy-MM-dd_HHmm");
-      const filename = `${options.reportId}_${timestamp}.${options.format === "excel" ? "xlsx" : "csv"}`;
+      const baseName = `${options.reportId}_${timestamp}`;
 
-      downloadFile(csvContent, filename, "text/csv;charset=utf-8;");
+      if (options.format === "excel") {
+        // a real workbook (the file was previously CSV text saved with an .xlsx extension, which Excel refuses to open)
+        await exportBrandedExcel(flatData, baseName, { title: reportTitle, organizationName: branding.name, logoUrl: branding.logo_url });
+      } else {
+        downloadFile(csvContent, `${baseName}.csv`, "text/csv;charset=utf-8;");
+      }
 
       toast({
         title: "Report Generated",

@@ -17,7 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAlumni, useAlumniEvents, useAlumniAnnouncements } from "@/hooks/useAlumni";
-import { exportToExcel } from "@/lib/exportUtils";
+import { ExportMenu } from "@/components/ExportMenu";
 import { withRoleAccess } from "@/components/withRoleAccess";
 
 const AlumniManagement = () => {
@@ -34,12 +34,8 @@ const AlumniManagement = () => {
       alum.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleExport = () => {
-    if (!filteredAlumni || filteredAlumni.length === 0) {
-      return;
-    }
-
-    const exportData = filteredAlumni.map((alum: any) => ({
+  const buildExportRows = () =>
+    (filteredAlumni ?? []).map((alum: any) => ({
       "Trainee ID": alum.trainees?.trainee_id,
       "Name": `${alum.trainees?.first_name} ${alum.trainees?.last_name}`,
       "Graduation Year": alum.graduation_year,
@@ -48,9 +44,6 @@ const AlumniManagement = () => {
       "Phone": alum.phone,
       "LinkedIn": alum.linkedin_profile,
     }));
-
-    exportToExcel(exportData, "alumni_records");
-  };
 
   const stats = {
     totalAlumni: alumni?.length || 0,
@@ -76,10 +69,7 @@ const AlumniManagement = () => {
     >
       <div className="space-y-6">
         <div className="flex justify-end">
-          <Button onClick={handleExport} disabled={!filteredAlumni || filteredAlumni.length === 0}>
-            <Download className="h-4 w-4 mr-2" />
-            Export Data
-          </Button>
+          <ExportMenu data={buildExportRows} filename="alumni_records" title="Alumni records" label="Export Data" variant="default" disabled={!filteredAlumni || filteredAlumni.length === 0} />
         </div>
 
         {/* Stats Cards */}

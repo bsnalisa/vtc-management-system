@@ -19,6 +19,9 @@ import {
   hrOfficerNavItems,
   bdlCoordinatorNavItems,
   rplCoordinatorNavItems,
+  librarianNavItems,
+  smeNavItems,
+  printingOfficerNavItems,
   liaisonOfficerNavItems,
   resourceCenterNavItems,
 } from "@/lib/navigationConfig";
@@ -69,6 +72,12 @@ export const useRoleNavigation = () => {
         return bdlCoordinatorNavItems;
       case "rpl_coordinator":
         return rplCoordinatorNavItems;
+      case "librarian":
+        return librarianNavItems;
+      case "subject_matter_expert":
+        return smeNavItems;
+      case "printing_distribution_officer":
+        return printingOfficerNavItems;
       case "liaison_officer":
         return liaisonOfficerNavItems;
       case "resource_center_coordinator":
@@ -120,6 +129,12 @@ export const useRoleNavigation = () => {
         return "Distance Learning";
       case "rpl_coordinator":
         return "RPL Management";
+      case "librarian":
+        return "Resource Centre";
+      case "subject_matter_expert":
+        return "Assessment Development";
+      case "printing_distribution_officer":
+        return "Printing & Distribution";
       case "liaison_officer":
         return "Liaison Services";
       case "resource_center_coordinator":

@@ -46,10 +46,163 @@ export function exportToCSV(data: any[], filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-export function exportToExcel(data: any[], filename: string): void {
-  // For now, use CSV export as a fallback
-  // A proper implementation would use a library like xlsx
-  exportToCSV(data, filename);
+function download(blob: Blob, filename: string): void {
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+const cellText = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
+/** Real .xlsx workbook (bold header row, frozen header, sized columns). */
+export async function exportToExcel(data: any[], filename: string, sheetName = "Export"): Promise<void> {
+  if (!data || data.length === 0) {
+    console.warn("No data to export");
+    return;
+  }
+  // Loaded on demand so exceljs stays out of the main bundle
+  const ExcelJS = (await import("exceljs")).default;
+  const workbook = new ExcelJS.Workbook();
+  // Excel limits sheet names to 31 characters and forbids : \ / ? * [ ]
+  const sheet = workbook.addWorksheet(sheetName.replace(/[:\\/?*[\]]/g, " ").slice(0, 31) || "Export");
+  const headers = Object.keys(data[0]);
+  sheet.columns = headers.map((h) => ({
+    header: h,
+    key: h,
+    width: Math.min(
+      50,
+      Math.max(h.length, ...data.slice(0, 200).map((row) => cellText(row[h]).length)) + 2,
+    ),
+  }));
+  data.forEach((row) =>
+    sheet.addRow(
+      Object.fromEntries(
+        headers.map((h) => {
+          const v = row[h];
+          return [h, v !== null && typeof v === "object" && !(v instanceof Date) ? JSON.stringify(v) : v ?? null];
+        }),
+      ),
+    ),
+  );
+  sheet.getRow(1).font = { bold: true };
+  sheet.views = [{ state: "frozen", ySplit: 1 }];
+  const buffer = await workbook.xlsx.writeBuffer();
+  download(
+    new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    `${filename}.xlsx`,
+  );
+}
+
+/**
+ * Report workbook with a header block: logo (when it can be fetched), organisation name, report title and date,
+ * followed by the data table. Used by the Reports page.
+ */
+export async function exportBrandedExcel(
+  data: any[],
+  filename: string,
+  opts: { title: string; organizationName: string; logoUrl?: string | null },
+): Promise<void> {
+  if (!data || data.length === 0) {
+    console.warn("No data to export");
+    return;
+  }
+  const ExcelJS = (await import("exceljs")).default;
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet(opts.title.replace(/[:\\/?*[\]]/g, " ").slice(0, 31) || "Report");
+  const headers = Object.keys(data[0]);
+
+  // The logo is decorative: if it cannot be fetched (CORS, offline) the report is still produced.
+  let logoRows = 0;
+  if (opts.logoUrl) {
+    try {
+      const res = await fetch(opts.logoUrl);
+      if (res.ok) {
+        const type = (res.headers.get("content-type") ?? "").toLowerCase();
+        const extension = type.includes("png") ? "png" : type.includes("jpeg") || type.includes("jpg") ? "jpeg" : null;
+        if (extension) {
+          const id = workbook.addImage({ buffer: await res.arrayBuffer(), extension });
+          sheet.addImage(id, { tl: { col: 0, row: 0 }, ext: { width: 120, height: 60 } });
+          logoRows = 4;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  const put = (row: number, text: string, bold = false, size = 11) => {
+    const cell = sheet.getCell(row, logoRows ? 3 : 1);
+    cell.value = text;
+    cell.font = { bold, size };
+  };
+  const top = 1;
+  put(top, opts.organizationName, true, 14);
+  put(top + 1, opts.title, true, 12);
+  put(top + 2, `Generated ${new Date().toLocaleString()}`);
+  const headerRow = Math.max(top + 4, logoRows + 2);
+
+  headers.forEach((h, i) => {
+    const cell = sheet.getCell(headerRow, i + 1);
+    cell.value = h;
+    cell.font = { bold: true };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEEEEEE" } };
+  });
+  data.forEach((row, r) => {
+    headers.forEach((h, c) => {
+      const v = row[h];
+      sheet.getCell(headerRow + 1 + r, c + 1).value =
+        v !== null && typeof v === "object" && !(v instanceof Date) ? JSON.stringify(v) : v ?? null;
+    });
+  });
+  headers.forEach((h, i) => {
+    sheet.getColumn(i + 1).width = Math.min(50, Math.max(h.length, ...data.slice(0, 200).map((row) => cellText(row[h]).length)) + 2);
+  });
+  sheet.views = [{ state: "frozen", ySplit: headerRow }];
+  const buffer = await workbook.xlsx.writeBuffer();
+  download(
+    new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    `${filename}.xlsx`,
+  );
+}
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** Word-compatible document (HTML table saved as .doc, which Word opens natively). */
+export function exportToWord(data: any[], filename: string, title?: string): void {
+  if (!data || data.length === 0) {
+    console.warn("No data to export");
+    return;
+  }
+  const headers = Object.keys(data[0]);
+  const head = headers.map((h) => `<th style="border:1px solid #999;padding:4px;background:#eee">${escapeHtml(h)}</th>`).join("");
+  const rows = data
+    .map((row) => `<tr>${headers.map((h) => `<td style="border:1px solid #999;padding:4px">${escapeHtml(cellText(row[h]))}</td>`).join("")}</tr>`)
+    .join("");
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${escapeHtml(title ?? filename)}</title></head><body>${title ? `<h2>${escapeHtml(title)}</h2>` : ""}<table style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:10pt"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></body></html>`;
+  download(new Blob(["\ufeff", html], { type: "application/msword" }), `${filename}.doc`);
+}
+
+/** Tab-separated plain text. */
+export function exportToText(data: any[], filename: string): void {
+  if (!data || data.length === 0) {
+    console.warn("No data to export");
+    return;
+  }
+  const headers = Object.keys(data[0]);
+  const clean = (v: unknown) => cellText(v).replace(/[\t\r\n]+/g, " ");
+  const text = [headers.join("\t"), ...data.map((row) => headers.map((h) => clean(row[h])).join("\t"))].join("\n");
+  download(new Blob([text], { type: "text/plain;charset=utf-8;" }), `${filename}.txt`);
 }
 
 /**

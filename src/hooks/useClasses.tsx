@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
+import type { TrainingMode } from "@/lib/trainingModes";
 
 export interface ClassData {
   trade_id: string;
@@ -59,7 +60,7 @@ export const useCreateClass = () => {
         trade_id: classData.trade_id,
         qualification_id: classData.qualification_id || null,
         level: classData.level,
-        training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
+        training_mode: classData.training_mode as TrainingMode,
         class_code: classData.class_code,
         class_name: classData.class_name,
         academic_year: classData.academic_year,
@@ -102,7 +103,7 @@ export const useUpdateClass = () => {
         trade_id: classData.trade_id,
         qualification_id: classData.qualification_id || null,
         level: classData.level,
-        training_mode: classData.training_mode as "fulltime" | "bdl" | "shortcourse",
+        training_mode: classData.training_mode as TrainingMode,
         class_code: classData.class_code,
         class_name: classData.class_name,
         academic_year: classData.academic_year,

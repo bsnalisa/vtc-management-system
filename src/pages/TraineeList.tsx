@@ -1,5 +1,6 @@
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useMemo } from "react";
+import { TRAINING_MODES, trainingModeLabel } from "@/lib/trainingModes";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +15,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { usePagination } from "@/hooks/usePagination";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { exportToCSV } from "@/lib/exportUtils";
+import { ExportMenu } from "@/components/ExportMenu";
 import { RecordCard } from "@/components/ui/record-card";
 
 const TraineeList = () => {
@@ -23,6 +24,7 @@ const TraineeList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterMode, setFilterMode] = useState("all");
 
   const { data: traineesData, isLoading, error } = useTrainees();
   const { data: trades } = useTrades();
@@ -39,9 +41,10 @@ const TraineeList = () => {
       const matchesTrade = filterTrade === "all" || trainee.trade_id === filterTrade;
       const matchesStatus = filterStatus === "all" || trainee.status === filterStatus;
       
-      return matchesSearch && matchesTrade && matchesStatus;
+      const matchesMode = filterMode === "all" || trainee.training_mode === filterMode;
+      return matchesSearch && matchesTrade && matchesStatus && matchesMode;
     });
-  }, [traineesData, searchTerm, filterTrade, filterStatus]);
+  }, [traineesData, searchTerm, filterTrade, filterStatus, filterMode]);
 
   const {
     paginatedData,
@@ -53,10 +56,8 @@ const TraineeList = () => {
     setPageSize,
   } = usePagination({ data: filteredTrainees, defaultPageSize: 20 });
 
-  const handleExport = () => {
-    if (!filteredTrainees.length) return;
-    
-    const exportData = filteredTrainees.map(trainee => ({
+  const buildExportRows = () =>
+    filteredTrainees.map(trainee => ({
       "Trainee ID": trainee.trainee_id,
       "First Name": trainee.first_name,
       "Last Name": trainee.last_name,
@@ -69,9 +70,6 @@ const TraineeList = () => {
       "Phone": trainee.phone || "",
       "Email": trainee.email || "",
     }));
-    
-    exportToCSV(exportData, `trainees-export-${new Date().toISOString().split('T')[0]}`);
-  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -163,15 +161,16 @@ const TraineeList = () => {
                   <SelectItem value="withdrawn">Withdrawn</SelectItem>
                 </SelectContent>
               </Select>
-              <Button 
-                variant="outline" 
-                className="w-full md:w-auto"
-                onClick={handleExport}
-                disabled={!filteredTrainees.length}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
+              <Select value={filterMode} onValueChange={setFilterMode}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue placeholder="Training mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Training Modes</SelectItem>
+                  {TRAINING_MODES.map((m) => <SelectItem key={m} value={m}>{trainingModeLabel(m)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <ExportMenu data={buildExportRows} filename={`trainees-export-${new Date().toISOString().split('T')[0]}`} title="Trainees" disabled={!filteredTrainees.length} />
             </div>
           </CardContent>
         </Card>
@@ -255,7 +254,7 @@ const TraineeList = () => {
                             <TableCell className="capitalize">{trainee.gender}</TableCell>
                             <TableCell>{trainee.trades?.name || "N/A"}</TableCell>
                             <TableCell>Level {trainee.level}</TableCell>
-                            <TableCell className="capitalize whitespace-nowrap">{trainee.training_mode.replace("_", " ")}</TableCell>
+                            <TableCell className="whitespace-nowrap">{trainingModeLabel(trainee.training_mode)}</TableCell>
                             <TableCell>
                               <Badge variant={getStatusBadgeVariant(trainee.status)}>
                                 {trainee.status}

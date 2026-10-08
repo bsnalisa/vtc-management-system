@@ -4,12 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
-import { DollarSign, Download, FileText, AlertCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
+import { Loader2, DollarSign, Download, FileText, AlertCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Separator } from "@/components/ui/separator";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useTraineeRecord, useTraineeApplication } from "@/hooks/useTraineePortalData";
+import { useTraineeDocumentActions } from "@/hooks/useTraineeDocuments";
 
 interface Transaction {
   id: string;
@@ -24,6 +26,9 @@ interface Transaction {
 
 const TraineeFinancePage = () => {
   const [userId, setUserId] = useState<string | null>(null);
+  const docs = useTraineeDocumentActions();
+  const { data: traineeRecord } = useTraineeRecord(userId);
+  const { data: applicationRecord } = useTraineeApplication(userId);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -225,9 +230,14 @@ const TraineeFinancePage = () => {
                     <CardTitle>Transaction History</CardTitle>
                     <CardDescription>Recent financial transactions on your account</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Statement
+                  <Button variant="outline" size="sm" disabled={!account || docs.busy === "statement"} onClick={() => account && docs.printStatement(
+                    { id: account.id, account_number: account.account_number, total_fees: account.total_fees, total_paid: account.total_paid, balance: account.balance },
+                    {
+                      name: traineeRecord ? `${traineeRecord.first_name} ${traineeRecord.last_name}` : applicationRecord ? `${applicationRecord.first_name} ${applicationRecord.last_name}` : "Account holder",
+                      traineeNumber: traineeRecord?.trainee_id ?? applicationRecord?.trainee_number,
+                    })}>
+                    {docs.busy === "statement" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                    Print statement
                   </Button>
                 </div>
               </CardHeader>
