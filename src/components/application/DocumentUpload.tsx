@@ -64,7 +64,7 @@ export const DocumentUpload = ({
       // Generate unique file name with organization prefix for RLS policy
       const timestamp = Date.now();
       const orgPrefix = organizationId ? `${organizationId}/` : "";
-      const uniqueName = `${orgPrefix}${folder}/${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+      const uniqueName = `${orgPrefix}${folder}/${folder === "applications" ? `${(await supabase.auth.getUser()).data.user?.id ?? "anon"}/` : ""}${timestamp}_${file.name.replace(/\s+/g, "_")}`;
 
       const { data, error: uploadError } = await supabase.storage
         .from(bucket)
@@ -236,7 +236,7 @@ export const MultipleDocumentUpload = ({
       for (const file of Array.from(files)) {
         const timestamp = Date.now();
         const orgPrefix = organizationId ? `${organizationId}/` : "";
-        const uniqueName = `${orgPrefix}${folder}/${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+        const uniqueName = `${orgPrefix}${folder}/${folder === "applications" ? `${(await supabase.auth.getUser()).data.user?.id ?? "anon"}/` : ""}${timestamp}_${file.name.replace(/\s+/g, "_")}`;
 
         const { data, error: uploadError } = await supabase.storage
           .from(bucket)

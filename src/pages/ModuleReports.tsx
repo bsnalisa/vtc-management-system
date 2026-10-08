@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   lastMonths, monthKey, useAffairsReport, useResourceCentreReport, useSurveyReport,
 } from "@/hooks/useModuleReports";
@@ -292,20 +293,35 @@ const AffairsTab = () => {
   );
 };
 
+// Tabs follow the row-level security on each dataset, so a role never opens a tab whose query would be denied.
+const LIBRARY_ROLES = ["admin", "organization_admin", "librarian"]; // is_library_staff
+const SURVEY_ROLES = ["admin", "organization_admin", "head_of_training", "head_of_trainee_support", "head_trainee_support", "registration_officer", "placement_officer"]; // is_graduation_staff
+const AFFAIRS_ROLES = ["admin", "organization_admin", "head_of_trainee_support", "head_trainee_support", "registration_officer"]; // is_trainee_affairs_staff
+
+const TABS = [
+  { value: "resource", label: "Resource centre", roles: LIBRARY_ROLES, Content: ResourceCentreTab },
+  { value: "surveys", label: "Graduate surveys", roles: SURVEY_ROLES, Content: SurveysTab },
+  { value: "affairs", label: "Trainee affairs", roles: AFFAIRS_ROLES, Content: AffairsTab },
+];
+
 const ModuleReports = () => {
   const { navItems, groupLabel } = useRoleNavigation();
+  const { role, loading } = useUserRole();
+  const visible = TABS.filter((t) => role && t.roles.includes(role));
   return (
     <DashboardLayout title="Module Reports" subtitle="Resource centre, graduate surveys and trainee affairs" navItems={navItems} groupLabel={groupLabel}>
-      <Tabs defaultValue="resource" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="resource">Resource centre</TabsTrigger>
-          <TabsTrigger value="surveys">Graduate surveys</TabsTrigger>
-          <TabsTrigger value="affairs">Trainee affairs</TabsTrigger>
-        </TabsList>
-        <TabsContent value="resource"><ResourceCentreTab /></TabsContent>
-        <TabsContent value="surveys"><SurveysTab /></TabsContent>
-        <TabsContent value="affairs"><AffairsTab /></TabsContent>
-      </Tabs>
+      {loading ? <Loading /> : visible.length === 0 ? (
+        <Card><CardContent className="py-8 text-center text-muted-foreground">
+          There are no module reports available for your role. Reports are limited to the staff who manage each module.
+        </CardContent></Card>
+      ) : (
+        <Tabs defaultValue={visible[0].value} className="space-y-4">
+          <TabsList>
+            {visible.map((t) => <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>)}
+          </TabsList>
+          {visible.map(({ value, Content }) => <TabsContent key={value} value={value}><Content /></TabsContent>)}
+        </Tabs>
+      )}
     </DashboardLayout>
   );
 };

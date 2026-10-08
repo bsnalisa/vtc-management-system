@@ -81,6 +81,7 @@ const RegistrationWindows = lazy(() => import("./pages/RegistrationWindows"));
 const CertificationReports = lazy(() => import("./pages/CertificationReports"));
 const ModuleReports = lazy(() => import("./pages/ModuleReports"));
 const TraineeTimetablePage = lazy(() => import("./pages/trainee/TraineeTimetablePage"));
+const DocumentSettings = lazy(() => import("./pages/DocumentSettings"));
 const MoodleIntegration = lazy(() => import("./pages/MoodleIntegration"));
 
 const AssessmentRequests = lazy(() => import("./pages/AssessmentRequests"));
@@ -513,6 +514,7 @@ const App = () => (
           <Route path="/reports/certification" element={<ProtectedRoute><CertificationReports /></ProtectedRoute>} />
           <Route path="/reports/modules" element={<ProtectedRoute><ModuleReports /></ProtectedRoute>} />
           <Route path="/trainee/timetable" element={<ProtectedRoute><TraineeTimetablePage /></ProtectedRoute>} />
+          <Route path="/document-settings" element={<ProtectedRoute><DocumentSettings /></ProtectedRoute>} />
           <Route path="/trainee/events" element={<ProtectedRoute><TraineeEventsPage /></ProtectedRoute>} />
           <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />

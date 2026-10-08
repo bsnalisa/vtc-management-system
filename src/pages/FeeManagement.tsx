@@ -19,6 +19,7 @@ import { exportToCSV, prepareDataForExport } from "@/lib/exportUtils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentPlansTable } from "@/components/finance/PaymentPlansTable";
+import { InvoiceSettingsCard } from "@/components/finance/InvoiceSettingsCard";
 import { InvoicesTable } from "@/components/finance/InvoicesTable";
 
 const FeeManagement = () => {
@@ -413,7 +414,8 @@ const FeeManagement = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="invoices">
+          <TabsContent value="invoices" className="space-y-4">
+            <InvoiceSettingsCard />
             <Card>
               <CardHeader>
                 <CardTitle>Invoices</CardTitle>

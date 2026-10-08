@@ -191,3 +191,19 @@ BEGIN
   UPDATE public.document_versions SET is_current = true WHERE id = v.id;
 END $$;
 GRANT EXECUTE ON FUNCTION public.restore_document_version(uuid) TO authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 4. Applicants without a staff role can upload their application documents (photo, ID, certificates)
+-- to their own folder: <centre id>/applications/<their user id>/...  and read them back.
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "Applicants upload their application documents" ON storage.objects;
+CREATE POLICY "Applicants upload their application documents" ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'documents'
+              AND (storage.foldername(name))[2] = 'applications'
+              AND (storage.foldername(name))[3] = auth.uid()::text
+              AND EXISTS (SELECT 1 FROM public.organizations o WHERE o.id::text = (storage.foldername(name))[1] AND o.active));
+DROP POLICY IF EXISTS "Applicants read their application documents" ON storage.objects;
+CREATE POLICY "Applicants read their application documents" ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'documents'
+         AND (storage.foldername(name))[2] = 'applications'
+         AND (storage.foldername(name))[3] = auth.uid()::text);

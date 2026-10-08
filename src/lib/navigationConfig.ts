@@ -65,6 +65,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
+  { title: "Document Settings", url: "/document-settings", icon: FileText },
 ];
 
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
@@ -96,6 +97,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
+  { title: "Document Settings", url: "/document-settings", icon: FileText },
 ];
 
 // Head of Training Navigation (Academic Command Center)

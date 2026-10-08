@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
 import { withRoleAccess } from "@/components/withRoleAccess";
+import { DocumentVersions } from "@/components/documents/DocumentVersions";
 import { DocumentUpload } from "@/components/application/DocumentUpload";
 import { useTraineeUserId, useTraineeRecord } from "@/hooks/useTraineePortalData";
 import {
@@ -102,6 +103,7 @@ function MyRequests() {
           {r.status === "more_info_needed" && (
             <Button size="sm" variant="outline" onClick={() => update.mutate({ id: r.id, status: "submitted" })}>I have added the information, resubmit</Button>
           )}
+          <DocumentVersions entityType="assessment_request" entityId={r.id} slot="evidence" label="Supporting evidence" canUpload />
         </div>
       ))}
     </div>

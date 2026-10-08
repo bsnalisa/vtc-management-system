@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, CheckCircle, Camera, Home, ChevronLeft, ChevronRight } from "lucide-react";
+import { User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, CheckCircle, Home, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTrades } from "@/hooks/useTrades";
 import { useNamibiaRegions } from "@/hooks/useNamibiaRegions";
 import { useCalculatePoints } from "@/hooks/useEntryRequirements";
@@ -18,6 +18,7 @@ import { useAutoSaveDraft } from "@/hooks/useApplicationDraft";
 import { SubjectEntry } from "./SubjectEntry";
 import { QualificationIndicator } from "./QualificationIndicator";
 import { DocumentUpload, MultipleDocumentUpload } from "./DocumentUpload";
+import { PhotoUpload } from "./PhotoUpload";
 import { AutoSaveIndicator } from "./AutoSaveIndicator";
 import { 
   ComprehensiveApplicationData, 
@@ -315,19 +316,11 @@ export const ComprehensiveApplicationForm = ({
                     <CardDescription>Upload a passport-sized photo</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                      <div className="w-32 h-40 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted">
-                        <Camera className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <div className="space-y-2">
-                        <Button type="button" variant="outline" size="sm">
-                          Upload Photo
-                        </Button>
-                        <p className="text-xs text-muted-foreground">
-                          Passport photo required. Max 2MB, JPG/PNG format.
-                        </p>
-                      </div>
-                    </div>
+                    <PhotoUpload
+                      value={formData.photo_path}
+                      onChange={(path) => updateField("photo_path", path)}
+                      organizationId={organizationIdOverride}
+                    />
                   </CardContent>
                 </Card>
 

@@ -40,11 +40,11 @@ export interface BorrowingRow {
 }
 export interface FineRow { id: string; fine_amount: number; amount_paid: number; status: "pending" | "paid" | "waived" }
 
-export const useResourceCentreReport = () => {
+export const useResourceCentreReport = (enabled = true) => {
   const { organizationId } = useOrganizationContext();
   return useQuery({
     queryKey: ["report-resource-centre", organizationId],
-    enabled: !!organizationId,
+    enabled: enabled && !!organizationId,
     queryFn: async () => {
       const [borrowing, fines] = await Promise.all([
         fetchAll<BorrowingRow>((from, to) => db.from("library_borrowing")
@@ -67,11 +67,11 @@ export interface SurveyReportData {
   responses: { survey_id: string; answers: Record<string, unknown> }[];
 }
 
-export const useSurveyReport = () => {
+export const useSurveyReport = (enabled = true) => {
   const { organizationId } = useOrganizationContext();
   return useQuery({
     queryKey: ["report-graduate-surveys", organizationId],
-    enabled: !!organizationId,
+    enabled: enabled && !!organizationId,
     queryFn: async (): Promise<SurveyReportData> => {
       const surveys = await fetchAll<SurveyReportData["surveys"][number]>((from, to) => db.from("graduate_surveys")
         .select("id, title, status, anonymous, created_at").eq("organization_id", organizationId).order("created_at", { ascending: false }).range(from, to));
@@ -95,11 +95,11 @@ export interface AffairsReportRow {
   created_at: string; updated_at: string;
 }
 
-export const useAffairsReport = () => {
+export const useAffairsReport = (enabled = true) => {
   const { organizationId } = useOrganizationContext();
   return useQuery({
     queryKey: ["report-trainee-affairs", organizationId],
-    enabled: !!organizationId,
+    enabled: enabled && !!organizationId,
     queryFn: () => fetchAll<AffairsReportRow>((from, to) => db.from("trainee_affairs_records")
       .select("id, record_type, record_date, status, created_at, updated_at")
       .eq("organization_id", organizationId).order("record_date", { ascending: false }).range(from, to)),
