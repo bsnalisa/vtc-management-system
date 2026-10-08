@@ -29,6 +29,13 @@ const FEATURES = [
   { icon: Building2, title: "Campus Operations", desc: "Hostels, assets, stock and procurement managed per centre." },
 ];
 
+const STEPS = [
+  { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn, image: "/illustrations/step1.png" },
+  { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText, image: "/illustrations/step2.png" },
+  { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search, image: "/illustrations/step3.png" },
+];
+
+
 const statusLabel = (s?: string | null) =>
   (s || "pending").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -68,6 +75,13 @@ const PublicHome = () => {
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setRevealed(true), 80);
+    return () => window.clearTimeout(timer);
+  }, []);
+
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -184,52 +198,69 @@ const PublicHome = () => {
           <div className="container mx-auto px-4 py-10">
             {/* Overview */}
             <TabsContent value="home" className="space-y-16">
-              <section className="space-y-8">
-                <div className="mx-auto max-w-2xl text-center">
-                  <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">How it works</p>
-                  <h2 className="text-3xl font-bold tracking-tight">Three steps to your place at a training centre</h2>
-                  <p className="mt-3 text-muted-foreground">
-                    From application to registration — pick your centre and trade inside the form.
-                  </p>
-                </div>
-                <div className="grid gap-5 md:grid-cols-3">
-                  {[
-                    { step: "01", title: "Create your account", desc: "Sign in or register as an applicant so you can save and track your submission.", icon: LogIn, image: "/illustrations/step1.svg" },
-                    { step: "02", title: "Complete the form", desc: "Select the training centre and trade from the dropdowns, then attach your documents.", icon: FileText, image: "/illustrations/step2.svg" },
-                    { step: "03", title: "Track your outcome", desc: "Follow screening, qualification and registration status from My Applications.", icon: Search, image: "/illustrations/step3.svg" },
-                  ].map((s) => (
-                    <Card
-                      key={s.step}
-                      className="group relative overflow-hidden border-border/70 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
-                    >
-                      <div className="relative h-44 w-full overflow-hidden bg-muted/40 p-6">
-                        <img
-                          src={s.image}
-                          alt={s.title}
-                          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                        <span className="absolute right-4 top-3 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
-                          {s.step}
-                        </span>
-                      </div>
-                      <CardHeader className="relative">
-                        <IconBadge icon={s.icon} className="mb-3" />
-                        <CardTitle className="text-base">{s.title}</CardTitle>
-                        <CardDescription className="leading-relaxed">{s.desc}</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  ))}
-                </div>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <Button size="lg" onClick={() => setTab("apply")}>
-                    Apply now <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={() => setTab("track")}>
-                    <Search className="mr-2 h-4 w-4" /> Track my application
-                  </Button>
+              <section className="relative overflow-hidden rounded-3xl border border-border/70 bg-card">
+                <span aria-hidden className="step-flow-grid pointer-events-none absolute inset-0" />
+                <div className="relative px-5 py-12 sm:px-8 sm:py-14">
+                  <div className="mx-auto max-w-2xl text-center">
+                    <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      How it works
+                    </p>
+                    <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                      Three steps to your place at a training centre
+                    </h2>
+                    <p className="mt-3 text-muted-foreground">
+                      From application to registration — pick your centre and trade inside the form.
+                    </p>
+                  </div>
+
+                  <ol className="step-flow mt-12 grid gap-8 md:grid-cols-3">
+                    {STEPS.map((s, i) => {
+                      const Icon = s.icon;
+                      const delay = { transitionDelay: `${i * 90}ms` };
+                      return (
+                        <li key={s.step} className="step-item group">
+                          <span
+                            aria-hidden
+                            style={delay}
+                            className={`step-node flex h-11 w-11 items-center justify-center rounded-full border border-primary/25 bg-card font-heading text-sm font-bold text-primary shadow-sm ring-4 ring-card transition-all duration-500 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground ${revealed ? "opacity-100" : "opacity-0"}`}
+                          >
+                            {s.step}
+                          </span>
+                          <div
+                            style={delay}
+                            className={`h-full rounded-2xl border border-border/70 bg-background p-5 transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 ${revealed ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+                          >
+                            <div className="mb-4 flex h-32 items-center justify-center overflow-hidden rounded-xl bg-card p-3">
+                              <img
+                                src={s.image}
+                                alt={s.title}
+                                className="max-h-full w-auto max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="mb-2 flex items-center gap-2">
+                              <Icon className="h-4 w-4 shrink-0 text-primary" />
+                              <h3 className="font-heading text-base font-semibold">{s.title}</h3>
+                            </div>
+                            <p className="text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+
+                  <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+                    <Button size="lg" onClick={() => setTab("apply")}>
+                      Apply now <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <Button size="lg" variant="outline" onClick={() => setTab("track")}>
+                      <Search className="mr-2 h-4 w-4" /> Track my application
+                    </Button>
+                  </div>
                 </div>
               </section>
+
               <section className="rounded-2xl border bg-muted/30 px-6 py-12 sm:px-10">
                 <div className="mx-auto mb-10 max-w-2xl text-center">
                   <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">One platform</p>
