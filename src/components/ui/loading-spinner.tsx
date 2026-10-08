@@ -1,10 +1,9 @@
 import { cn } from "@/lib/utils";
-import { GraduationCap } from "lucide-react";
 
 export function LoadingIndicator({ className }: { className?: string }) {
   return (
-    <span role="status" aria-label="Loading" className={cn("relative inline-flex h-4 w-4 shrink-0 items-center justify-center align-middle [&>svg]:size-full", className)}>
-      <GraduationCap aria-hidden="true" className="animate-graduation-bounce" />
+    <span role="status" aria-label="Loading" className={cn("relative inline-flex h-4 w-4 shrink-0 items-center justify-center align-middle [&>img]:size-full", className)}>
+      <img src="/favicon.svg" alt="" aria-hidden="true" className="animate-graduation-bounce" />
       <span aria-hidden="true" className="absolute -bottom-1 left-1/2 h-0.5 w-3/4 rounded-full bg-current opacity-20 animate-graduation-shadow" />
     </span>
   );
