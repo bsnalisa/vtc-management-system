@@ -37,3 +37,4 @@
 - [x] Align public homepage with the selected visual language.
 - [x] Verify public pages, application navigation, mobile layout and current build status.
 - [x] Verify signed-in Super Admin screens using the available preview session; other role-only workflows remain outside this account's access.
+- [x] Home page AI chatbot "Skilla": application help + Namibian VTC landscape, courses, NTA knowledge
