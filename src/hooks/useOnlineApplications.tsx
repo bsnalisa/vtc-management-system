@@ -87,3 +87,51 @@ export const useUpdateApplicationStatus = () => {
     },
   });
 };
+
+/** Approve or reject an application from the inbox. Approved applications move to registration. */
+export const useDecideApplication = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      decision,
+      reason,
+    }: {
+      applicationId: string;
+      decision: "approve" | "reject";
+      reason?: string;
+    }) => {
+      const { data: auth } = await supabase.auth.getUser();
+      const payload: Record<string, unknown> = {
+        registration_status: decision === "approve" ? "provisionally_admitted" : "rejected",
+        screened_by: auth.user?.id ?? null,
+        screened_at: new Date().toISOString(),
+      };
+      if (decision === "reject") payload.info_request_note = reason || null;
+      const { data, error } = await supabase
+        .from("trainee_applications")
+        .update(payload as any)
+        .eq("id", applicationId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_d, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["online_applications"] });
+      queryClient.invalidateQueries({ queryKey: ["trainee_applications"] });
+      toast({
+        title: vars.decision === "approve" ? "Application approved" : "Application rejected",
+        description:
+          vars.decision === "approve"
+            ? "It has moved to Registration for fee and enrolment processing."
+            : "The applicant will see the outcome in My Applications.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Decision failed", description: error.message, variant: "destructive" });
+    },
+  });
+};
