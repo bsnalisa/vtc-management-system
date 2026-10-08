@@ -67,6 +67,14 @@ const PublicHome = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const { data: organizations } = useActiveOrganizations();
   const { data: linkedOrg } = useOrganizationBySlug(slug);
@@ -113,7 +121,16 @@ const PublicHome = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
+      <header
+        className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300 ${
+          scrolled ? "shadow-md shadow-primary/5" : ""
+        }`}
+        style={{
+          backgroundColor: scrolled
+            ? "hsl(var(--background))"
+            : "hsl(var(--background) / 0.85)",
+        }}
+      >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
             <AppLogo />
@@ -134,35 +151,46 @@ const PublicHome = () => {
 
       <main>
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          {tab === "home" ? (
+          {tab === "home" && (
             <TrainingHeroCarousel centreName={linkedOrg?.name} onApply={() => setTab("apply")} onTrack={() => setTab("track")} />
-          ) : (
-            <section className="border-b bg-card">
-              <div className="container mx-auto px-4 py-8 md:py-10">
-                <p className="mb-2 text-sm font-medium text-primary">VTC Management System</p>
-                <h1 className="text-3xl font-bold">{tab === "apply" ? (linkedOrg ? `Apply to ${linkedOrg.name}` : "Online application") : "My applications"}</h1>
-              </div>
-            </section>
           )}
 
-          <div className="container mx-auto px-4 py-10">
-            <TabsList className="mb-10 grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-lg p-1 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
-              <TabsTrigger value="home" className="rounded-lg py-2 whitespace-normal">Overview</TabsTrigger>
-              <TabsTrigger value="apply" className="rounded-lg py-2 whitespace-normal">Online Application</TabsTrigger>
-              <TabsTrigger value="track" className="rounded-lg py-2 whitespace-normal">My Applications</TabsTrigger>
-            </TabsList>
+          {/* Tab strip directly beneath the carousel */}
+          <div className="sticky top-16 z-30 border-b bg-background/95 backdrop-blur-xl">
+            <div className="container mx-auto px-4">
+              <TabsList className="grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-none border-0 bg-transparent p-0 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
+                <TabsTrigger
+                  value="home"
+                  className="rounded-none border-b-2 border-transparent py-3.5 whitespace-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="apply"
+                  className="rounded-none border-b-2 border-transparent py-3.5 whitespace-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
+                  Online Application
+                </TabsTrigger>
+                <TabsTrigger
+                  value="track"
+                  className="rounded-none border-b-2 border-transparent py-3.5 whitespace-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
+                  My Applications
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
+          <div className="container mx-auto px-4 py-10">
             {/* Overview */}
-            <TabsContent value="home" className="space-y-14">
-              <section className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <IconBadge icon={ClipboardList} />
-                  <div>
-                    <h2 className="text-2xl font-bold tracking-tight">How applying works</h2>
-                    <p className="text-muted-foreground">
-                      Three steps from application to registration — pick your centre inside the form.
-                    </p>
-                  </div>
+            <TabsContent value="home" className="space-y-16">
+              <section className="space-y-8">
+                <div className="mx-auto max-w-2xl text-center">
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">How it works</p>
+                  <h2 className="text-3xl font-bold tracking-tight">Three steps to your place at a training centre</h2>
+                  <p className="mt-3 text-muted-foreground">
+                    From application to registration — pick your centre and trade inside the form.
+                  </p>
                 </div>
                 <div className="grid gap-5 md:grid-cols-3">
                   {[
@@ -172,7 +200,7 @@ const PublicHome = () => {
                   ].map((s) => (
                     <Card
                       key={s.step}
-                      className="group relative overflow-hidden border-border/70 transition-colors hover:border-primary/30"
+                      className="group relative overflow-hidden border-border/70 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
                     >
                       <div className="relative h-44 w-full overflow-hidden bg-muted/40 p-6">
                         <img
@@ -181,7 +209,7 @@ const PublicHome = () => {
                           className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                           loading="lazy"
                         />
-                        <span className="absolute right-4 top-2 text-5xl font-bold text-primary/10">
+                        <span className="absolute right-4 top-3 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
                           {s.step}
                         </span>
                       </div>
@@ -193,7 +221,7 @@ const PublicHome = () => {
                     </Card>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap justify-center gap-3">
                   <Button size="lg" onClick={() => setTab("apply")}>
                     Apply now <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -202,14 +230,18 @@ const PublicHome = () => {
                   </Button>
                 </div>
               </section>
-              <section className="border-t pt-10">
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold">Your training journey, connected</h2>
-                  <p className="mt-2 text-muted-foreground">Applications, learning and centre services in one place.</p>
+              <section className="rounded-2xl border bg-muted/30 px-6 py-12 sm:px-10">
+                <div className="mx-auto mb-10 max-w-2xl text-center">
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">One platform</p>
+                  <h2 className="text-3xl font-bold tracking-tight">Your training journey, connected</h2>
+                  <p className="mt-3 text-muted-foreground">Applications, learning and centre services in one place.</p>
                 </div>
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                   {FEATURES.map((f) => (
-                    <div key={f.title}>
+                    <div
+                      key={f.title}
+                      className="rounded-xl border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5"
+                    >
                       <IconBadge icon={f.icon} className="mb-4" />
                       <h3 className="mb-2 text-base font-semibold">{f.title}</h3>
                       <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
