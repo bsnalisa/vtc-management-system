@@ -173,7 +173,7 @@ const TraineeDashboard = () => {
             {[
               { icon: BarChart3, label: "Results", desc: "View assessments", url: "/trainee/exams/results" },
               { icon: CreditCard, label: "Finance", desc: "View statement", url: "/trainee/finance" },
-              { icon: FileText, label: "Documents", desc: "Your documents", url: "/trainee/documents" },
+              { icon: FileText, label: "Documents", desc: "Your documents", url: "/trainee/application/documents" },
               { icon: Home, label: "Hostel", desc: "Room details", url: "/trainee/hostel" },
               { icon: Calendar, label: "Timetable", desc: "Exam schedule", url: "/trainee/exams/timetable" },
             ].map(({ icon: Icon, label, desc, url }) => (
