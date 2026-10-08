@@ -55,12 +55,6 @@ export const NAMIBIA_TVET_KNOWLEDGE = `
 - Vocational qualifications are National Vocational Certificates (NVC) at NQF Levels 1–4 (some up to Level 5+), built from unit standards; training includes theory and practical/workplace components, with Continuous Assessment (CA) and Summative Assessment (SA).
 - Recognition of Prior Learning (RPL) lets experienced workers be assessed and certified for skills they already have.
 
-## Vocational Training Centres (public VTCs)
-Public VTCs include: Windhoek VTC (Windhoek), Okakarara VTC (Otjozondjupa), Rundu VTC (Kavango East), Zambezi VTC (Katima Mulilo), Valombola VTC (Ongwediva, Oshana), Nakayale VTC (Outapi area, Omusati), Eenhana VTC (Ohangwena) and Keetmanshoop VTC (//Kharas). The Namibian Institute of Mining and Technology (NIMT) operates campuses in Arandis, Tsumeb and Keetmanshoop. Community Skills Development Centres (COSDECs) offer community-based skills training. There are also many registered private and church-run providers.
-
-## Typical course offerings (trades)
-Electrical general, Electrical/solar installation, Automotive mechanics, Auto-electrical, Diesel mechanics, Welding & metal fabrication, Boiler making, Fitting & turning, Plumbing & pipefitting, Bricklaying & plastering, Carpentry & joinery, Cabinet making, Hospitality (food preparation, front office, housekeeping), Tourism, Clothing production/tailoring, Hairdressing & beauty, Office administration, ICT / computer networking, Web development, Refrigeration & air-conditioning, Upholstery, Agriculture and others. Offerings differ per centre.
-
 ## Entry and funding (general)
 - Entry is usually based on Grade 10/11/12 (NSSCO/NSSCAS) results; requirements vary by trade and level.
 - Eligible trainees may access NTF-funded training grants or the Namibia Students Financial Assistance Fund (NSFAF) where applicable; confirm with the centre.
