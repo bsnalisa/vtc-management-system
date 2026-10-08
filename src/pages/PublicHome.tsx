@@ -131,35 +131,46 @@ const PublicHome = () => {
 
       <main>
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          {tab === "home" ? (
+          {tab === "home" && (
             <TrainingHeroCarousel centreName={linkedOrg?.name} onApply={() => setTab("apply")} onTrack={() => setTab("track")} />
-          ) : (
-            <section className="border-b bg-card">
-              <div className="container mx-auto px-4 py-8 md:py-10">
-                <p className="mb-2 text-sm font-medium text-primary">VTC Management System</p>
-                <h1 className="text-3xl font-bold">{tab === "apply" ? (linkedOrg ? `Apply to ${linkedOrg.name}` : "Online application") : "My applications"}</h1>
-              </div>
-            </section>
           )}
 
-          <div className="container mx-auto px-4 py-10">
-            <TabsList className="mb-10 grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-lg p-1 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
-              <TabsTrigger value="home" className="rounded-lg py-2 whitespace-normal">Overview</TabsTrigger>
-              <TabsTrigger value="apply" className="rounded-lg py-2 whitespace-normal">Online Application</TabsTrigger>
-              <TabsTrigger value="track" className="rounded-lg py-2 whitespace-normal">My Applications</TabsTrigger>
-            </TabsList>
+          {/* Tab strip directly beneath the carousel */}
+          <div className="sticky top-16 z-30 border-b bg-background/95 backdrop-blur-xl">
+            <div className="container mx-auto px-4">
+              <TabsList className="grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-none border-0 bg-transparent p-0 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
+                <TabsTrigger
+                  value="home"
+                  className="rounded-none border-b-2 border-transparent py-3.5 whitespace-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="apply"
+                  className="rounded-none border-b-2 border-transparent py-3.5 whitespace-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
+                  Online Application
+                </TabsTrigger>
+                <TabsTrigger
+                  value="track"
+                  className="rounded-none border-b-2 border-transparent py-3.5 whitespace-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
+                  My Applications
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
+          <div className="container mx-auto px-4 py-10">
             {/* Overview */}
-            <TabsContent value="home" className="space-y-14">
-              <section className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <IconBadge icon={ClipboardList} />
-                  <div>
-                    <h2 className="text-2xl font-bold tracking-tight">How applying works</h2>
-                    <p className="text-muted-foreground">
-                      Three steps from application to registration — pick your centre inside the form.
-                    </p>
-                  </div>
+            <TabsContent value="home" className="space-y-16">
+              <section className="space-y-8">
+                <div className="mx-auto max-w-2xl text-center">
+                  <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">How it works</p>
+                  <h2 className="text-3xl font-bold tracking-tight">Three steps to your place at a training centre</h2>
+                  <p className="mt-3 text-muted-foreground">
+                    From application to registration — pick your centre and trade inside the form.
+                  </p>
                 </div>
                 <div className="grid gap-5 md:grid-cols-3">
                   {[
