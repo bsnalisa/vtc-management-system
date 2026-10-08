@@ -99,7 +99,8 @@ export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreN
             {slides.map((slide, index) => (
               <button key={slide.title} type="button" role="tab" aria-selected={active === index} aria-label={`Show ${slide.title}`}
                 onClick={() => api?.scrollTo(index)}
-                className={`h-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active === index ? "w-6 bg-primary" : "w-2.5 bg-primary/25 hover:bg-primary/45"}`} />
+                style={{ backgroundColor: active === index ? "hsl(var(--primary))" : "hsl(var(--primary) / 0.3)" }}
+                className={`h-2.5 rounded-full transition-all hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active === index ? "w-6" : "w-2.5"}`} />
             ))}
             <span className="ml-2 hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">{current.title}</span>
           </div>
