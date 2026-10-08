@@ -1,6 +1,7 @@
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { AppLogo } from "@/components/AppLogo";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,21 @@ const PublicHome = () => {
 
   const submitApplication = useSubmitOnlineApplication(activeOrgId);
 
+  // Application window: null = the centre has set none (not restricted)
+  const activeSlug = linkedOrg?.subdomain || organizations?.find((o) => o.id === selectedOrg)?.subdomain || null;
+  const { data: windowStatus, error: windowError } = useQuery({
+    queryKey: ["application-window-status", activeSlug],
+    enabled: !!activeSlug,
+    queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc("application_window_status", { _org_slug: activeSlug });
+      if (error) throw error;
+      return data as { open: boolean; next_opens: string | null; closes_on: string | null } | null;
+    },
+  });
+  const applicationsClosed = windowStatus?.open === false;
+  const fmtDate = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -88,6 +104,7 @@ const PublicHome = () => {
   }, []);
 
   const handleSubmit = async (data: ComprehensiveApplicationData) => {
+    if (applicationsClosed) throw new Error("Applications are closed");
     await submitApplication.mutateAsync(data);
     setFormOpen(false);
     setTab("track");
@@ -252,10 +269,29 @@ const PublicHome = () => {
                       </Alert>
                     )}
 
+                    {applicationsClosed && (
+                      <Alert variant="destructive">
+                        <AlertDescription>
+                          <strong>Applications are closed.</strong>{" "}
+                          {windowStatus?.next_opens ? `Applications open again on ${fmtDate(windowStatus.next_opens)}.` : "Please check back later."}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    {windowStatus?.open && windowStatus.closes_on && (
+                      <Alert>
+                        <AlertDescription>Applications close on {fmtDate(windowStatus.closes_on)}.</AlertDescription>
+                      </Alert>
+                    )}
+                    {windowError && (
+                      <Alert variant="destructive">
+                        <AlertDescription>Could not check whether applications are open: {(windowError as Error).message}</AlertDescription>
+                      </Alert>
+                    )}
+
                     <Button
                       className="min-h-12 h-auto py-3 w-full whitespace-normal"
                       size="lg"
-                      disabled={!activeOrgId || !session}
+                      disabled={!activeOrgId || !session || applicationsClosed}
                       onClick={() => setFormOpen(true)}
                     >
                       {activeOrgId ? `Start application${activeOrgName ? ` — ${activeOrgName}` : ""}` : "Select a centre to continue"}
@@ -397,7 +433,7 @@ const PublicHome = () => {
       </footer>
 
       <ComprehensiveApplicationForm
-        open={formOpen}
+        open={formOpen && !applicationsClosed}
         onOpenChange={setFormOpen}
         onSubmit={handleSubmit}
         isSubmitting={submitApplication.isPending}

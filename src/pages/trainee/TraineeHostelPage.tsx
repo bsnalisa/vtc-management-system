@@ -6,6 +6,7 @@ import { traineeNavItems } from "@/lib/navigationConfig";
 import { Building, Bed, Calendar, DollarSign, AlertCircle, CheckCircle, Phone } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Separator } from "@/components/ui/separator";
+import { RoomPicker } from "@/components/hostel/RoomPicker";
 import { useTraineeUserId, useTraineeRecord, useTraineeHostelAllocation, useTraineeRoommates, useTraineeHostelFees } from "@/hooks/useTraineePortalData";
 
 const TraineeHostelPage = () => {
@@ -28,6 +29,8 @@ const TraineeHostelPage = () => {
   if (!allocation) {
     return (
       <DashboardLayout title="Hostel Accommodation" subtitle="View your hostel allocation and details" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
+        <div className="space-y-6">
+        {trainee && <RoomPicker traineeId={trainee.id} hasAllocation={false} />}
         <Card className="border-0 shadow-md">
           <CardContent className="p-12 text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -37,6 +40,7 @@ const TraineeHostelPage = () => {
             <p className="text-muted-foreground">You have not been allocated hostel accommodation. If you require accommodation, please contact the Hostel Coordinator.</p>
           </CardContent>
         </Card>
+        </div>
       </DashboardLayout>
     );
   }
@@ -51,6 +55,7 @@ const TraineeHostelPage = () => {
   return (
     <DashboardLayout title="Hostel Accommodation" subtitle="View your hostel allocation and details" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
+        {trainee && <RoomPicker traineeId={trainee.id} hasAllocation />}
         <Card className="border-0 shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">

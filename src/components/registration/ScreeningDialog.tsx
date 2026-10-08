@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useScreenApplication } from "@/hooks/useTraineeApplications";
+import { RequestInfoSection } from "./RequestInfoSection";
 
 interface ScreeningDialogProps {
   open: boolean;
@@ -72,6 +73,8 @@ export const ScreeningDialog = ({ open, onOpenChange, application }: ScreeningDi
               </div>
             </div>
           </div>
+
+          <RequestInfoSection application={application} />
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

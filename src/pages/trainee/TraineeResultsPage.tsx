@@ -21,6 +21,7 @@ import {
 } from "@/hooks/useTraineePortalData";
 import { useMyMarkQueries, useSubmitMarkQuery } from "@/hooks/useMarkQueries";
 import { useTraineeDocumentActions } from "@/hooks/useTraineeDocuments";
+import { GradebookFeedback } from "@/components/trainee/GradebookFeedback";
 
 // ─── Mark type label helper ───
 const markTypeLabel = (type: string) => {
@@ -180,6 +181,7 @@ const SubjectCard = ({
             ) : (
               <div className="px-4 py-4 text-sm text-muted-foreground">No marks recorded yet.</div>
             )}
+            {data && <GradebookFeedback feedback={data.feedback} components={data.components} />}
           </CardContent>
         </CollapsibleContent>
       </Card>
