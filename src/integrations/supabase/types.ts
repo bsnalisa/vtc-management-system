@@ -2684,6 +2684,103 @@ export type Database = {
         }
         Relationships: []
       }
+      document_metadata_fields: {
+        Row: {
+          entity_type: string
+          field_key: string
+          id: string
+          label: string
+          organization_id: string
+          required: boolean
+        }
+        Insert: {
+          entity_type: string
+          field_key: string
+          id?: string
+          label: string
+          organization_id: string
+          required?: boolean
+        }
+        Update: {
+          entity_type?: string
+          field_key?: string
+          id?: string
+          label?: string
+          organization_id?: string
+          required?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_metadata_fields_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          file_name: string
+          id: string
+          is_current: boolean
+          metadata: Json
+          mime_type: string | null
+          note: string | null
+          organization_id: string
+          size_bytes: number | null
+          slot: string
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+          version_no: number
+        }
+        Insert: {
+          entity_id: string
+          entity_type: string
+          file_name: string
+          id?: string
+          is_current?: boolean
+          metadata?: Json
+          mime_type?: string | null
+          note?: string | null
+          organization_id: string
+          size_bytes?: number | null
+          slot: string
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          version_no: number
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          file_name?: string
+          id?: string
+          is_current?: boolean
+          metadata?: Json
+          mime_type?: string | null
+          note?: string | null
+          organization_id?: string
+          size_bytes?: number | null
+          slot?: string
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           academic_year: string | null
@@ -3385,6 +3482,35 @@ export type Database = {
             foreignKeyName: "fee_types_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_settings: {
+        Row: {
+          auto_draft_invoices: boolean
+          invoice_due_days: number
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_draft_invoices?: boolean
+          invoice_due_days?: number
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_draft_invoices?: boolean
+          invoice_due_days?: number
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -10130,6 +10256,8 @@ export type Database = {
           lock_type: string | null
           organization_id: string | null
           period_number: number
+          published: boolean
+          published_at: string | null
           room_id: string | null
           soft_penalty_score: number | null
           term: number
@@ -10148,6 +10276,8 @@ export type Database = {
           lock_type?: string | null
           organization_id?: string | null
           period_number: number
+          published?: boolean
+          published_at?: string | null
           room_id?: string | null
           soft_penalty_score?: number | null
           term?: number
@@ -10166,6 +10296,8 @@ export type Database = {
           lock_type?: string | null
           organization_id?: string | null
           period_number?: number
+          published?: boolean
+          published_at?: string | null
           room_id?: string | null
           soft_penalty_score?: number | null
           term?: number
@@ -12199,6 +12331,20 @@ export type Database = {
       }
     }
     Functions: {
+      add_document_version: {
+        Args: {
+          _entity: string
+          _entity_type: string
+          _file_name: string
+          _metadata?: Json
+          _mime: string
+          _note?: string
+          _path: string
+          _size: number
+          _slot: string
+        }
+        Returns: number
+      }
       application_window_status: { Args: { _org_slug: string }; Returns: Json }
       assessment_certification_summary: {
         Args: { _academic_year?: string }
@@ -12251,6 +12397,10 @@ export type Database = {
         Returns: undefined
       }
       calculate_trainee_gpa: { Args: { _trainee_id: string }; Returns: number }
+      can_access_document_entity: {
+        Args: { _entity: string; _org: string; _type: string; _user_id: string }
+        Returns: boolean
+      }
       can_approve_qualifications: {
         Args: { _user_id: string }
         Returns: boolean
@@ -12766,6 +12916,10 @@ export type Database = {
         Args: { _module_code: string; _org_id: string }
         Returns: boolean
       }
+      publish_timetable: {
+        Args: { _academic_year: string; _publish?: boolean; _term: number }
+        Returns: number
+      }
       queue_graduate_message: {
         Args: {
           _alumni: Database["public"]["Tables"]["alumni"]["Row"]
@@ -12794,6 +12948,10 @@ export type Database = {
       respond_graduation_invitation_by_phone: {
         Args: { _code: number; _phone: string }
         Returns: string
+      }
+      restore_document_version: {
+        Args: { _version: string }
+        Returns: undefined
       }
       review_sme_application: {
         Args: {

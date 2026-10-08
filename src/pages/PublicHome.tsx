@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
 import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
+import { ApplicationAssistant } from "@/components/home/ApplicationAssistant";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
   useActiveOrganizations,
@@ -142,7 +143,7 @@ const PublicHome = () => {
               <Button size="sm" onClick={() => navigate("/dashboard")}>My Portal</Button>
             ) : (
               <Button size="sm" onClick={() => navigate("/auth")}>
-                <LogIn className="mr-2 h-4 w-4" /> Staff Sign in
+                <LogIn className="mr-2 h-4 w-4" /> Sign in
               </Button>
             )}
           </div>
@@ -156,7 +157,7 @@ const PublicHome = () => {
           )}
 
           {/* Tab strip directly beneath the carousel */}
-          <div className="sticky top-16 z-30 border-b bg-background/95 backdrop-blur-xl">
+          <div className="sticky top-16 z-30 border-b backdrop-blur-xl" style={{ backgroundColor: `hsl(var(--background))` }}>
             <div className="container mx-auto px-4">
               <TabsList className="grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-none border-0 bg-transparent p-0 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
                 <TabsTrigger
@@ -253,6 +254,7 @@ const PublicHome = () => {
 
             {/* Apply */}
             <TabsContent value="apply" className="space-y-6">
+              <ApplicationAssistant />
               <div className="mx-auto max-w-2xl space-y-6">
                 <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
                   <CardHeader className="border-b bg-muted/30">
@@ -446,9 +448,9 @@ const PublicHome = () => {
             </Button>
           </div>
           <div className="space-y-2 text-sm">
-            <div className="font-medium">Centre staff</div>
+            <div className="font-medium">Sign in</div>
             <Button variant="link" className="flex h-auto p-0 text-muted-foreground hover:text-foreground" onClick={() => navigate("/auth")}>
-              Staff sign in
+              Sign in to your account
             </Button>
             <Button variant="link" className="flex h-auto p-0 text-muted-foreground hover:text-foreground" onClick={() => navigate("/online-applications")}>
               Online applications inbox

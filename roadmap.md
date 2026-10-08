@@ -37,3 +37,7 @@
 - [x] Align public homepage with the selected visual language.
 - [x] Verify public pages, application navigation, mobile layout and current build status.
 - [x] Verify signed-in Super Admin screens using the available preview session; other role-only workflows remain outside this account's access.
+- [x] Home page AI chatbot "Skilla": application help + Namibian VTC landscape, courses, NTA knowledge
+- [ ] Skilla uses real per-centre courses, fees, contacts from the system
+- [ ] Move Skilla to the Online Application tab
+- [ ] Publish and test Skilla with real NTA/centre questions

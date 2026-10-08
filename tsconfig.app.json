@@ -3,7 +3,7 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": [
+    "lib": ["ES2022", 
       "ES2020",
       "DOM",
       "DOM.Iterable"
