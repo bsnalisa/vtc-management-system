@@ -36,6 +36,13 @@
       "when": 1791492401753,
       "tag": "0004_server_generated_application_numbers",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791494730890,
+      "tag": "0005_allow_rejected_application_status",
+      "breakpoints": true
     }
   ]
 }
