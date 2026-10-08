@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 
 const REGISTRATION_STATUSES = [
   "pending",
+  "applied",
   "provisionally_admitted",
   "registration_fee_pending",
   "fully_registered",
@@ -247,7 +248,7 @@ const OnlineApplicationsInbox = () => {
                             >
                               <ClipboardCheck className="mr-1 h-3.5 w-3.5" /> Screen
                             </Button>
-                            {(app.registration_status || "pending") === "pending" ? (
+                            {["pending", "applied"].includes(app.registration_status || "pending") ? (
                               <>
                                 <Button
                                   size="sm"
