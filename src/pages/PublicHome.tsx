@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
 import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
-import { ApplicationAssistant } from "@/components/home/ApplicationAssistant";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
   useActiveOrganizations,
@@ -254,7 +253,6 @@ const PublicHome = () => {
 
             {/* Apply */}
             <TabsContent value="apply" className="space-y-6">
-              <ApplicationAssistant />
               <div className="mx-auto max-w-2xl space-y-6">
                 <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
                   <CardHeader className="border-b bg-muted/30">
