@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.moodle-sync]
 verify_jwt = false
+
+[functions.application-assistant]
+verify_jwt = false
