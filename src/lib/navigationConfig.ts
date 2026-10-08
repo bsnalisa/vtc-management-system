@@ -62,6 +62,9 @@ export const adminNavItems: NavItem[] = [
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
   { title: "Moodle", url: "/moodle", icon: GraduationCap },
+  { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
 ];
 
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
@@ -90,6 +93,9 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
   { title: "Moodle", url: "/moodle", icon: GraduationCap },
+  { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
 ];
 
 // Head of Training Navigation (Academic Command Center)
@@ -117,6 +123,9 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
   { title: "Transcripts", url: "/transcripts", icon: FileText },
   { title: "Moodle", url: "/moodle", icon: GraduationCap },
+  { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
 ];
 
 // Trainer Navigation
@@ -158,6 +167,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Learning Space", url: "/learning", icon: BookOpen },
   { title: "Deferral", url: "/trainee/deferral", icon: ClipboardList },
   { title: "Transcript", url: "/trainee/transcript", icon: FileText },
+  { title: "Class Timetable", url: "/trainee/timetable", icon: Calendar },
 ];
 
 // HOD Navigation
@@ -187,6 +197,7 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Course Enrollment", url: "/enrollments", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText },
 ];
 
 // Debtor Officer Navigation (Financial Operations Only - Separate Routes)
@@ -219,6 +230,8 @@ export const registrationOfficerNavItems: NavItem[] = [
   { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
   { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
   { title: "Transcripts", url: "/transcripts", icon: FileText },
+  { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText },
 ];
 
 // Stock Control Officer Navigation
@@ -327,6 +340,7 @@ export const librarianNavItems: NavItem[] = [
   { title: "Announcements", url: "/announcements", icon: MessageSquare },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
 ];
 
 // Head of Trainee Support Navigation
@@ -339,6 +353,7 @@ export const headOfTraineeSupportNavItems: NavItem[] = [
   { title: "Officer Activity", url: "/trainee-support/officer-activity", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
 ];
 
 // BDL (Blended Distance Learning) Coordinator Navigation

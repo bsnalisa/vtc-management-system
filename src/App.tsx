@@ -77,6 +77,10 @@ const Transcripts = lazy(() => import("./pages/Transcripts"));
 const BankReconciliation = lazy(() => import("./pages/BankReconciliation"));
 const AccountingExport = lazy(() => import("./pages/AccountingExport"));
 const LearningSpace = lazy(() => import("./pages/LearningSpace"));
+const RegistrationWindows = lazy(() => import("./pages/RegistrationWindows"));
+const CertificationReports = lazy(() => import("./pages/CertificationReports"));
+const ModuleReports = lazy(() => import("./pages/ModuleReports"));
+const TraineeTimetablePage = lazy(() => import("./pages/trainee/TraineeTimetablePage"));
 const MoodleIntegration = lazy(() => import("./pages/MoodleIntegration"));
 
 const AssessmentRequests = lazy(() => import("./pages/AssessmentRequests"));
@@ -505,6 +509,10 @@ const App = () => (
           <Route path="/accounting-export" element={<ProtectedRoute><AccountingExport /></ProtectedRoute>} />
           <Route path="/learning" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} />
           <Route path="/moodle" element={<ProtectedRoute><MoodleIntegration /></ProtectedRoute>} />
+          <Route path="/registration-windows" element={<ProtectedRoute><RegistrationWindows /></ProtectedRoute>} />
+          <Route path="/reports/certification" element={<ProtectedRoute><CertificationReports /></ProtectedRoute>} />
+          <Route path="/reports/modules" element={<ProtectedRoute><ModuleReports /></ProtectedRoute>} />
+          <Route path="/trainee/timetable" element={<ProtectedRoute><TraineeTimetablePage /></ProtectedRoute>} />
           <Route path="/trainee/events" element={<ProtectedRoute><TraineeEventsPage /></ProtectedRoute>} />
           <Route path="/trainee/feedback" element={<ProtectedRoute><TraineeFeedbackPage /></ProtectedRoute>} />
           <Route path="/trainee/hostel" element={<ProtectedRoute><TraineeHostelPage /></ProtectedRoute>} />

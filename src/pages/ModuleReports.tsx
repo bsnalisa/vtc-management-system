@@ -67,7 +67,7 @@ const ResourceCentreTab = () => {
   if (isLoading) return <Loading />;
   if (error || !report) return <ErrorCard what="resource centre data" error={error ?? new Error("No data")} />;
 
-  const rows = () => [
+  const rows = (): Record<string, unknown>[] => [
     ...report.monthly.map((m) => ({ Section: "Loans per month", Item: m.month, Value: m.Loans })),
     { Section: "Summary", Item: "Overdue loans", Value: report.overdue },
     { Section: "Summary", Item: "Fines billed", Value: report.billed },
@@ -145,7 +145,7 @@ const SurveysTab = () => {
   if (isLoading) return <Loading />;
   if (error || !report) return <ErrorCard what="survey data" error={error ?? new Error("No data")} />;
 
-  const rows = () => report.flatMap((r) => r.summaries.length
+  const rows = (): Record<string, unknown>[] => report.flatMap<Record<string, unknown>>((r) => r.summaries.length
     ? r.summaries.map((q) => ({
       Survey: r.survey.title, Recipients: r.sent, Responses: r.responded, "Response rate (%)": r.rate ?? "", Question: q.question, Type: q.type,
       Answered: q.answered, Average: q.average == null ? "" : q.average.toFixed(2), Choices: q.counts.map(([k, n]) => `${k}: ${n}`).join("; "),
@@ -235,7 +235,7 @@ const AffairsTab = () => {
   if (isLoading) return <Loading />;
   if (error || !report) return <ErrorCard what="trainee affairs data" error={error ?? new Error("No data")} />;
 
-  const rows = () => [
+  const rows = (): Record<string, unknown>[] => [
     ...report.types.map((t) => ({ Section: "By type", Item: t.type, Total: t.total, Open: t.open, Resolved: t.resolved })),
     ...report.monthly.map((m) => ({ Section: "By month", Item: m.month, Total: m.Records, Open: "", Resolved: "" })),
     { Section: "Summary", Item: "Average days to resolve", Total: report.avgDays == null ? "" : report.avgDays.toFixed(1), Open: report.open, Resolved: report.resolved },
