@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -104,7 +105,6 @@ const HrLeave = () => {
   );
 };
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 function ReadOnlyDetail({ request, name, onClose }: { request: LeaveRequest | null; name: string; onClose: () => void }) {
   return (
     <Dialog open={!!request} onOpenChange={(o) => !o && onClose()}>

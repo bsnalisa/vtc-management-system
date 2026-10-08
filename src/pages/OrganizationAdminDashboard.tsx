@@ -1,208 +1,108 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Shield, Settings, MessageSquare, Activity, BookOpen } from "lucide-react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { SidebarGroupLabel, SidebarGroupContent } from "@/components/ui/sidebar";
+import { toast } from "sonner";
+import { AlertCircle, ClipboardCheck, FileText, FileBarChart, History, LifeBuoy, Settings, Shield, UserCheck, Users, CalendarClock, GraduationCap, Boxes } from "lucide-react";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useUsers } from "@/hooks/useUsers";
-import { useOrganizationContext } from "@/hooks/useOrganizationContext";
-import { useSupportTickets } from "@/hooks/useSupportTickets";
-import { useOrganizationModules } from "@/hooks/useModules";
-import { organizationAdminNavItems } from "@/lib/navigationConfig";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
-import { EnrollmentTrendChart, ModuleUsageChart } from "@/components/dashboard/DashboardCharts";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
+import { useOrganizationModules } from "@/hooks/useModules";
+import { useMyTasks } from "@/hooks/useWorkflows";
+import { useOrgAdminStats } from "@/hooks/useOrgAdminStats";
+import { SetupChecklist } from "@/components/org-admin/SetupChecklist";
+
+const label = (v: string) => v.replace(/_/g, " ");
 
 const OrganizationAdminDashboard = () => {
   const navigate = useNavigate();
+  const { navItems, groupLabel } = useRoleNavigation();
   const { organizationId } = useOrganizationContext();
-  const { data: users } = useUsers(organizationId);
-  const { data: tickets } = useSupportTickets();
-  const { data: organizationModules } = useOrganizationModules(organizationId);
   const { data: profile } = useProfile();
+  const { data: s, isLoading, error } = useOrgAdminStats();
+  const { data: modules, error: modulesError } = useOrganizationModules(organizationId);
+  const { data: tasks, error: tasksError } = useMyTasks();
 
-  const activeUsers = users?.length || 0;
-  const openTickets = tickets?.filter(t => t.status === 'open').length || 0;
-  const activeModules = organizationModules?.filter(m => m.enabled).length || 0;
+  useEffect(() => {
+    const e = error ?? modulesError ?? tasksError;
+    if (e) toast.error(`Could not load some dashboard figures: ${(e as Error).message}`);
+  }, [error, modulesError, tasksError]);
 
-  // Sample trend data - in production this would come from analytics
-  const enrollmentTrends = [
-    { month: "Jan", enrollments: 45, completions: 12 },
-    { month: "Feb", enrollments: 52, completions: 18 },
-    { month: "Mar", enrollments: 48, completions: 22 },
-    { month: "Apr", enrollments: 61, completions: 28 },
-    { month: "May", enrollments: 55, completions: 35 },
-    { month: "Jun", enrollments: 67, completions: 40 },
-  ];
-
-  const moduleUsageData = [
-    { name: "Trainees", value: 156 },
-    { name: "Finance", value: 89 },
-    { name: "Reports", value: 67 },
-    { name: "Classes", value: 45 },
-    { name: "Settings", value: 23 },
-  ];
-
-  const statsContent = (
-    <>
-      <SidebarGroupLabel>Quick Stats</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <div className="space-y-3 px-2 py-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Active Users</span>
-            <span className="font-medium text-primary">{activeUsers}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Open Tickets</span>
-            <span className="font-medium text-orange-600">{openTickets}</span>
-          </div>
-        </div>
-      </SidebarGroupContent>
-    </>
-  );
+  const trainees = s?.traineesByStatus.reduce((n, t) => n + t.count, 0) ?? 0;
+  const pending = tasks?.length ?? 0;
 
   return (
-    <DashboardLayout
-      title={`Welcome back, ${profile?.firstname || 'User'}`}
-      subtitle="Technical & Administrative Management"
-      navItems={organizationAdminNavItems}
-      groupLabel="Navigation"
-      statsContent={statsContent}
-    >
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">System Role</p>
-            <p className="text-lg font-semibold text-foreground">Organization Administrator</p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{users?.length || 0}</div>
-              <p className="text-xs text-muted-foreground">{activeUsers} active</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{openTickets}</div>
-              <p className="text-xs text-muted-foreground">Support requests</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">System Status</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">Healthy</div>
-              <p className="text-xs text-muted-foreground">All systems operational</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Modules</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeModules}</div>
-              <p className="text-xs text-muted-foreground">
-                Modules available under subscription
-              </p>
-              <Button 
-                variant="link" 
-                size="sm" 
-                className="px-0 mt-2 h-auto"
-                onClick={() => navigate('/modules-management')}
-              >
-                Manage Modules →
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <EnrollmentTrendChart data={enrollmentTrends} />
-          <ModuleUsageChart data={moduleUsageData} />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                User Management
-              </CardTitle>
-              <CardDescription>Manage system users and access</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button className="w-full" onClick={() => navigate('/users')}>
-                View All Users
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/roles')}>
-                Manage Roles
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Organization Settings
-              </CardTitle>
-              <CardDescription>Configure organization preferences</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button className="w-full" onClick={() => navigate('/organization-settings')}>
-                Organization Settings
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/system-logs')}>
-                View System Logs
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Administrative tasks and controls</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/users')}>
-                <Users className="h-5 w-5" />
-                <span>User Registration</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/roles')}>
-                <Shield className="h-5 w-5" />
-                <span>Role Assignment</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/support-tickets')}>
-                <MessageSquare className="h-5 w-5" />
-                <span>Support Tickets</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate('/organization-settings')}>
-                <Settings className="h-5 w-5" />
-                <span>Settings</span>
-              </Button>
+    <DashboardLayout title={`Welcome back, ${profile?.firstname || "User"}`} subtitle="Centre administration" navItems={navItems} groupLabel={groupLabel}>
+      <DashboardShell
+        name={profile?.firstname || undefined}
+        heroIcon={Settings}
+        heroSubtitle="Users, setup, approvals and modules for your centre."
+        stats={[
+          { label: "Users", value: s?.totalUsers ?? 0, icon: Users, loading: isLoading, hint: "With a role in this centre" },
+          { label: "Trainees", value: trainees, icon: GraduationCap, loading: isLoading, hint: "All statuses" },
+          { label: "Applications this month", value: s?.applicationsThisMonth ?? 0, icon: FileText, loading: isLoading, tone: "secondary" },
+          { label: "Open tickets", value: s?.openTickets ?? 0, icon: LifeBuoy, loading: isLoading, tone: (s?.openTickets ?? 0) > 0 ? "destructive" : "secondary", hint: "Open or in progress" },
+          { label: "Pending approvals", value: pending, icon: ClipboardCheck, hint: "Waiting for you", tone: pending > 0 ? "destructive" : "secondary" },
+          { label: "Enabled modules", value: modules?.length ?? 0, icon: Boxes, hint: "Under your subscription", tone: "accent" },
+        ]}
+        actions={[
+          { icon: Users, label: "Users", desc: "Accounts and roles", url: "/users" },
+          { icon: Settings, label: "Organization Settings", desc: "Logo and identity", url: "/organization-settings" },
+          { icon: Shield, label: "Roles", desc: "Role management", url: "/roles" },
+          { icon: CalendarClock, label: "Registration Windows", desc: "Application periods", url: "/registration-windows" },
+          { icon: FileText, label: "Document Settings", desc: "Templates and numbering", url: "/document-settings" },
+          { icon: FileBarChart, label: "Reports", desc: "Centre reports", url: "/reports" },
+          { icon: History, label: "System Logs", desc: "Audit trail", url: "/system-logs" },
+          { icon: UserCheck, label: "My Approvals", desc: "Pending tasks", url: "/my-approvals", badge: pending },
+        ]}
+        actionCols={4}
+      >
+        {isLoading && <div className="flex justify-center py-6"><LoadingSpinner text="Loading centre figures" /></div>}
+        {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>Centre figures could not be loaded: {(error as Error).message}</AlertDescription></Alert>}
+        {s && (
+          <>
+            <SetupChecklist setup={s.setup} />
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader><CardTitle>Users by role</CardTitle><CardDescription>Distinct users per role</CardDescription></CardHeader>
+                <CardContent className="space-y-2">
+                  {s.usersByRole.length === 0 && <p className="text-sm text-muted-foreground">No users have roles yet.</p>}
+                  {s.usersByRole.map((r) => (
+                    <div key={r.role} className="flex items-center justify-between border-b pb-2 last:border-0">
+                      <span className="text-sm capitalize">{label(r.role)}</span><Badge variant="secondary">{r.count}</Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle>Trainees by status</CardTitle><CardDescription>Everyone registered in this centre</CardDescription></CardHeader>
+                <CardContent className="space-y-2">
+                  {s.traineesByStatus.length === 0 && <p className="text-sm text-muted-foreground">No trainees have been registered yet.</p>}
+                  {s.traineesByStatus.map((t) => (
+                    <div key={t.status} className="flex items-center justify-between border-b pb-2 last:border-0">
+                      <span className="text-sm capitalize">{label(t.status)}</span><Badge variant="secondary">{t.count}</Badge>
+                    </div>
+                  ))}
+                  <Button variant="link" className="px-0" onClick={() => navigate("/trainees")}>Open trainee list</Button>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader><CardTitle>Enabled modules</CardTitle><CardDescription>Features available to your centre</CardDescription></CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {(modules ?? []).length === 0 && <p className="text-sm text-muted-foreground">No modules are enabled.</p>}
+                {(modules ?? []).map((m) => <Badge key={m.id} variant="outline">{m.modules?.name ?? "Module"}</Badge>)}
+                <Button variant="link" className="px-0 w-full justify-start" onClick={() => navigate("/modules-management")}>Manage modules</Button>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </DashboardShell>
     </DashboardLayout>
   );
 };

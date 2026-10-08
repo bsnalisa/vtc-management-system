@@ -22,7 +22,7 @@ const BDLCoordinatorDashboard = () => {
 
   const now = Date.now();
   const next = useMemo(() => sessions.filter((s) => s.status === "scheduled" && new Date(s.starts_at).getTime() >= now).slice(0, 5), [sessions, now]);
-  const inWeek = next.length && sessions.filter((s) => s.status === "scheduled" && new Date(s.starts_at).getTime() >= now && new Date(s.starts_at).getTime() <= now + 7 * 86400000).length;
+  const inWeek = sessions.filter((s) => s.status === "scheduled" && new Date(s.starts_at).getTime() >= now && new Date(s.starts_at).getTime() <= now + 7 * 86400000).length;
   const classNames = new Map(classes.map((c) => [c.id, c.class_name]));
 
   const allRows = progress.byClass.flatMap((c) => c.rows.map((r) => ({ ...r, classId: c.classId })));
@@ -43,7 +43,7 @@ const BDLCoordinatorDashboard = () => {
         stats={[
           { label: "Blended classes", value: classes.length, icon: BookOpen, loading: isLoading, hint: "Training mode: blended / distance" },
           { label: "Enrolled trainees", value: enrolled, icon: Users, loading: isLoading, hint: "Active enrolments", tone: "secondary" },
-          { label: "Sessions in 7 days", value: inWeek || 0, icon: CalendarClock, hint: "Scheduled virtual sessions", tone: "accent" },
+          { label: "Sessions in 7 days", value: inWeek, icon: CalendarClock, hint: "Scheduled virtual sessions", tone: "accent" },
           { label: "Content completion", value: `${avgContent}%`, icon: TrendingUp, loading, progress: avgContent, hint: "Average across trainees" },
         ]}
         actions={[
