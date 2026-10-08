@@ -96,7 +96,7 @@ export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreN
               <Tooltip key={slide.title}><TooltipTrigger asChild>
                 <Button size="icon" variant="ghost" onClick={() => api?.scrollTo(index)} aria-label={`Show ${slide.title}`} aria-pressed={active === index}
                   className="h-7 w-7 shrink-0 rounded-full p-0">
-                  <span aria-hidden="true" className={`h-1.5 rounded-full transition-[width] motion-reduce:transition-none ${active === index ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/40"}`} />
+                  <span aria-hidden="true" className={`h-1.5 rounded-full transition-[width] motion-reduce:transition-none ${active === index ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground opacity-50"}`} />
                 </Button>
               </TooltipTrigger><TooltipContent>{slide.title}</TooltipContent></Tooltip>
             ))}
