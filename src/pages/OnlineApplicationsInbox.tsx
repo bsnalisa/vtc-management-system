@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Globe, FileText, Eye, ClipboardCheck, Inbox, Clock } from "lucide-react";
+import { Search, Globe, FileText, Eye, ClipboardCheck, Inbox, Clock, Check, X, ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { useTrades } from "@/hooks/useTrades";
-import { useOnlineApplications, useUpdateApplicationStatus } from "@/hooks/useOnlineApplications";
+import { useOnlineApplications, useUpdateApplicationStatus, useDecideApplication } from "@/hooks/useOnlineApplications";
 import { ScreeningDialog } from "@/components/registration/ScreeningDialog";
 import { ApplicationViewDialog } from "@/components/registration/ApplicationViewDialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "react-router-dom";
 
 const REGISTRATION_STATUSES = [
   "pending",
@@ -54,6 +57,10 @@ const OnlineApplicationsInbox = () => {
     intake,
   });
   const updateStatus = useUpdateApplicationStatus();
+  const decide = useDecideApplication();
+  const navigate = useNavigate();
+  const [rejecting, setRejecting] = useState<any>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -234,11 +241,34 @@ const OnlineApplicationsInbox = () => {
                               <Eye className="mr-1 h-3.5 w-3.5" /> View
                             </Button>
                             <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => { setSelected(app); setScreenOpen(true); }}
                             >
                               <ClipboardCheck className="mr-1 h-3.5 w-3.5" /> Screen
                             </Button>
+                            {(app.registration_status || "pending") === "pending" ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  disabled={decide.isPending}
+                                  onClick={() => decide.mutate({ applicationId: app.id, decision: "approve" })}
+                                >
+                                  <Check className="mr-1 h-3.5 w-3.5" /> Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => { setRejecting(app); setRejectReason(""); }}
+                                >
+                                  <X className="mr-1 h-3.5 w-3.5" /> Reject
+                                </Button>
+                              </>
+                            ) : app.registration_status !== "rejected" ? (
+                              <Button size="sm" variant="secondary" onClick={() => navigate("/applications")}>
+                                <ArrowRight className="mr-1 h-3.5 w-3.5" /> Registration
+                              </Button>
+                            ) : null}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -256,6 +286,37 @@ const OnlineApplicationsInbox = () => {
             <ScreeningDialog open={screenOpen} onOpenChange={setScreenOpen} application={selected} />
           </>
         )}
+
+        <Dialog open={!!rejecting} onOpenChange={(o) => !o && setRejecting(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject application {rejecting?.application_number}</DialogTitle>
+              <DialogDescription>
+                Give a short reason. The applicant sees the outcome in My Applications.
+              </DialogDescription>
+            </DialogHeader>
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Does not meet the minimum entry requirements for this trade"
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRejecting(null)}>Cancel</Button>
+              <Button
+                variant="destructive"
+                disabled={!rejectReason.trim() || decide.isPending}
+                onClick={() =>
+                  decide.mutate(
+                    { applicationId: rejecting.id, decision: "reject", reason: rejectReason.trim() },
+                    { onSuccess: () => setRejecting(null) }
+                  )
+                }
+              >
+                Reject application
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
