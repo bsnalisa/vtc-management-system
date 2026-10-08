@@ -25,8 +25,9 @@ const STORAGE_KEY = "vtc-application-assistant-messages";
 const CHAT_ID = "application-assistant";
 
 const SUGGESTIONS = [
-  "What documents do I need to attach?",
-  "How do I choose a centre and trade?",
+  "What documents do I need to apply?",
+  "What does the NTA do?",
+  "Which VTCs are in Namibia?",
   "How do I track my application?",
   "What happens after I submit?",
 ];
@@ -105,10 +106,10 @@ export function ApplicationAssistant() {
         onClick={() => setOpen(true)}
         size="lg"
         className="fixed bottom-5 right-5 z-40 h-12 rounded-full px-5 shadow-lg shadow-primary/30"
-        aria-label="Ask about the online application"
+        aria-label="Chat with Skilla, the VTC assistant"
       >
         <MessageCircleQuestion className="mr-2 h-5 w-5" />
-        Application help
+        Ask Skilla
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -117,9 +118,9 @@ export function ApplicationAssistant() {
             <div className="flex items-center gap-3 pr-8">
               <img src={guideIcon} alt="" className="h-10 w-10 shrink-0" />
               <div className="min-w-0 flex-1">
-                <SheetTitle className="text-base">Application Guide</SheetTitle>
+                <SheetTitle className="text-base">Skilla · VTC Assistant</SheetTitle>
                 <SheetDescription className="text-xs">
-                  AI-powered answers from the published application instructions.
+                  AI-powered help on applying, courses, VTCs and the NTA.
                 </SheetDescription>
               </div>
               {messages.length > 0 && (
@@ -135,15 +136,15 @@ export function ApplicationAssistant() {
               {messages.length === 0 ? (
                 <ConversationEmptyState
                   icon={<img src={guideIcon} alt="" className="h-16 w-16" />}
-                  title="Questions about applying?"
-                  description="Ask anything about the online application — steps, documents, centres or tracking."
+                  title="Hi, I'm Skilla!"
+                  description="Ask me about applying, courses, VTCs in Namibia or the NTA."
                 >
                   <div className="flex flex-col items-center gap-3">
                     <img src={guideIcon} alt="" className="h-16 w-16" />
                     <div className="space-y-1 text-center">
-                      <h3 className="font-semibold">Questions about applying?</h3>
+                      <h3 className="font-semibold">Hi, I'm Skilla!</h3>
                       <p className="text-sm text-muted-foreground">
-                        Ask anything about the online application — steps, documents, centres or tracking.
+                        Ask me about applying, courses, VTCs in Namibia or the NTA.
                       </p>
                     </div>
                     <div className="mt-2 flex flex-wrap justify-center gap-2">
@@ -175,7 +176,7 @@ export function ApplicationAssistant() {
               {status === "submitted" && (
                 <Message from="assistant">
                   <MessageContent>
-                    <Shimmer>Checking the application instructions...</Shimmer>
+                    <Shimmer>Skilla is thinking...</Shimmer>
                   </MessageContent>
                 </Message>
               )}
@@ -185,7 +186,7 @@ export function ApplicationAssistant() {
 
           <div className="border-t p-3">
             <PromptInput onSubmit={(msg) => ask(msg.text ?? "")}>
-              <PromptInputTextarea ref={textareaRef} placeholder="Ask about the online application..." />
+              <PromptInputTextarea ref={textareaRef} placeholder="Ask Skilla anything about VTCs..." />
               <PromptInputFooter className="justify-end">
                 <PromptInputSubmit status={status} onStop={stop} />
               </PromptInputFooter>

@@ -42,3 +42,26 @@ export const APPLICATION_GUIDE = `
 ## Getting help
 - For centre-specific questions (exact fees, dates, entry requirements per trade, results of screening), contact the registration office of the centre you applied to.
 `;
+
+// General background knowledge about TVET in Namibia (well-established public facts).
+export const NAMIBIA_TVET_KNOWLEDGE = `
+# Namibia TVET landscape – background knowledge
+
+## Namibia Training Authority (NTA)
+- Established under the Vocational Education and Training (VET) Act, No. 1 of 2008, to regulate and fund vocational education and training in Namibia.
+- Functions: registering and accrediting VET providers, developing occupational standards and qualifications with industry, quality assurance and assessment of VET, registering assessors, and managing the National Training Fund (NTF).
+- National Training Fund: funded mainly by a VET levy of 1% of payroll paid by employers whose annual payroll exceeds a set threshold (N$1 million). It funds key priority training, employer reimbursements for training, and trainee support/grants.
+- NTA works with the Namibia Qualifications Authority (NQA), which maintains the National Qualifications Framework (NQF), and falls under the ministry responsible for higher education, technology and innovation.
+- Vocational qualifications are National Vocational Certificates (NVC) at NQF Levels 1–4 (some up to Level 5+), built from unit standards; training includes theory and practical/workplace components, with Continuous Assessment (CA) and Summative Assessment (SA).
+- Recognition of Prior Learning (RPL) lets experienced workers be assessed and certified for skills they already have.
+
+## Vocational Training Centres (public VTCs)
+Public VTCs include: Windhoek VTC (Windhoek), Okakarara VTC (Otjozondjupa), Rundu VTC (Kavango East), Zambezi VTC (Katima Mulilo), Valombola VTC (Ongwediva, Oshana), Nakayale VTC (Outapi area, Omusati), Eenhana VTC (Ohangwena) and Keetmanshoop VTC (//Kharas). The Namibian Institute of Mining and Technology (NIMT) operates campuses in Arandis, Tsumeb and Keetmanshoop. Community Skills Development Centres (COSDECs) offer community-based skills training. There are also many registered private and church-run providers.
+
+## Typical course offerings (trades)
+Electrical general, Electrical/solar installation, Automotive mechanics, Auto-electrical, Diesel mechanics, Welding & metal fabrication, Boiler making, Fitting & turning, Plumbing & pipefitting, Bricklaying & plastering, Carpentry & joinery, Cabinet making, Hospitality (food preparation, front office, housekeeping), Tourism, Clothing production/tailoring, Hairdressing & beauty, Office administration, ICT / computer networking, Web development, Refrigeration & air-conditioning, Upholstery, Agriculture and others. Offerings differ per centre.
+
+## Entry and funding (general)
+- Entry is usually based on Grade 10/11/12 (NSSCO/NSSCAS) results; requirements vary by trade and level.
+- Eligible trainees may access NTF-funded training grants or the Namibia Students Financial Assistance Fund (NSFAF) where applicable; confirm with the centre.
+`;

@@ -5,7 +5,7 @@ import {
   getLovableAiGatewayRunId,
   withLovableAiGatewayRunIdHeader,
 } from "../_shared/run-id.ts";
-import { APPLICATION_GUIDE } from "./guide.ts";
+import { APPLICATION_GUIDE, NAMIBIA_TVET_KNOWLEDGE } from "./guide.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,12 +14,14 @@ const corsHeaders = {
   "Access-Control-Expose-Headers": "X-Lovable-AIG-Run-ID",
 };
 
-const INSTRUCTIONS = `You are the VTC Application Guide, a friendly helper for prospective trainees applying online to a Vocational Training Centre in Namibia.
-Answer ONLY using the published instructions below. Use clear, simple language, short paragraphs and numbered steps where helpful. Always say "trainee", never "student".
+const INSTRUCTIONS = `You are Skilla, the friendly AI assistant of the VTC Management System in Namibia. You help prospective trainees, trainees and staff with: the online application, the Namibian vocational education and training (TVET) landscape, Vocational Training Centres, course offerings, the Namibia Training Authority (NTA), NTF, NQF and how the system works.
+For application questions, base answers on the published application instructions. For TVET questions, use the background knowledge and your general knowledge of Namibia, flagging when details may have changed and should be confirmed with NTA or the centre. Use clear, simple language, short paragraphs and numbered steps where helpful. Always say "trainee", never "student".
 If the answer is not in the instructions (e.g. exact fees, dates, specific entry requirements, or the outcome of someone's application), say so honestly and advise contacting the registration office of the chosen centre. Never invent fees, dates or requirements.
-Politely decline questions unrelated to applying to a training centre.
+Politely decline questions unrelated to vocational training, the centres or this system.
 
-${APPLICATION_GUIDE}`;
+${APPLICATION_GUIDE}
+
+${NAMIBIA_TVET_KNOWLEDGE}`;
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
