@@ -142,7 +142,7 @@ const PublicHome = () => {
               <Button size="sm" onClick={() => navigate("/dashboard")}>My Portal</Button>
             ) : (
               <Button size="sm" onClick={() => navigate("/auth")}>
-                <LogIn className="mr-2 h-4 w-4" /> Staff Sign in
+                <LogIn className="mr-2 h-4 w-4" /> Sign in
               </Button>
             )}
           </div>
@@ -446,9 +446,9 @@ const PublicHome = () => {
             </Button>
           </div>
           <div className="space-y-2 text-sm">
-            <div className="font-medium">Centre staff</div>
+            <div className="font-medium">Sign in</div>
             <Button variant="link" className="flex h-auto p-0 text-muted-foreground hover:text-foreground" onClick={() => navigate("/auth")}>
-              Staff sign in
+              Sign in to your account
             </Button>
             <Button variant="link" className="flex h-auto p-0 text-muted-foreground hover:text-foreground" onClick={() => navigate("/online-applications")}>
               Online applications inbox
