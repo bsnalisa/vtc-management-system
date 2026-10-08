@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { traineeNavItems } from "@/lib/navigationConfig";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
@@ -11,17 +12,22 @@ import { useLearningClasses } from "@/hooks/useLearningSpace";
 import { ContentTab } from "@/components/learning/ContentTab";
 import { AssignmentsTab } from "@/components/learning/AssignmentsTab";
 import { QuizzesTab } from "@/components/learning/QuizzesTab";
+import { SessionsTab } from "@/components/learning/SessionsTab";
 import { ForumTab } from "@/components/learning/ForumTab";
 
 export default function LearningSpace() {
   const { role, navItems, groupLabel } = useRoleNavigation();
   const isTrainee = role === "trainee";
   const { data: classes = [], isLoading, error } = useLearningClasses();
+  const [searchParams] = useSearchParams();
+  const requested = searchParams.get("class");
   const [classId, setClassId] = useState<string>("");
 
   useEffect(() => {
-    if (!classId && classes.length) setClassId(classes[0].class_id);
-  }, [classes, classId]);
+    if (!classId && classes.length) {
+      setClassId(classes.some((c) => c.class_id === requested) ? (requested as string) : classes[0].class_id);
+    }
+  }, [classes, classId, requested]);
 
   const current = classes.find((c) => c.class_id === classId);
   const canManage = !!current?.can_manage;
@@ -59,11 +65,13 @@ export default function LearningSpace() {
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="assignments">Assignments</TabsTrigger>
               <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
+              <TabsTrigger value="sessions">Sessions</TabsTrigger>
               <TabsTrigger value="forum">Forum</TabsTrigger>
             </TabsList>
             <TabsContent value="content"><ContentTab classId={current.class_id} canManage={canManage} /></TabsContent>
             <TabsContent value="assignments"><AssignmentsTab classId={current.class_id} canManage={canManage} /></TabsContent>
             <TabsContent value="quizzes"><QuizzesTab classId={current.class_id} canManage={canManage} /></TabsContent>
+            <TabsContent value="sessions"><SessionsTab classId={current.class_id} canManage={canManage} /></TabsContent>
             <TabsContent value="forum"><ForumTab classId={current.class_id} canManage={canManage} /></TabsContent>
           </Tabs>
         )}

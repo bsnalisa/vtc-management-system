@@ -49,11 +49,11 @@ export const EnrollmentChart = ({ data }: { data: ChartData[] }) => (
   </Card>
 );
 
-export const FeeCollectionChart = ({ data }: { data: ChartData[] }) => (
+export const FeeCollectionChart = ({ data, title = "Fee Collection Status", description = "Breakdown of fee payment status" }: { data: ChartData[]; title?: string; description?: string }) => (
   <Card>
     <CardHeader>
-      <CardTitle className="text-base">Fee Collection Status</CardTitle>
-      <CardDescription>Breakdown of fee payment status</CardDescription>
+      <CardTitle className="text-base">{title}</CardTitle>
+      <CardDescription>{description}</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-[250px]">
