@@ -142,7 +142,7 @@ const PublicHome = () => {
               <Button size="sm" onClick={() => navigate("/dashboard")}>My Portal</Button>
             ) : (
               <Button size="sm" onClick={() => navigate("/auth")}>
-                <LogIn className="mr-2 h-4 w-4" /> Staff Sign in
+                <LogIn className="mr-2 h-4 w-4" /> Sign in
               </Button>
             )}
           </div>
