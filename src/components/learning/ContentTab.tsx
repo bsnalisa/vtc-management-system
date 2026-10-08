@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ArrowDown, ArrowUp, ExternalLink, FileText, Link as LinkIcon, Pencil, Plus, Trash2, Video, File } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useMyCompletions, useSetItemCompleted } from "@/hooks/useBdl";
 import { LearningItem, useDeleteLearningItem, useLearningItems, useReorderLearningItems, useSaveLearningItem } from "@/hooks/useLearningSpace";
 
 const TYPE_LABEL: Record<LearningItem["item_type"], string> = { page: "Page", link: "Link", document: "Document", recording: "Recording" };
@@ -28,6 +31,10 @@ export function ContentTab({ classId, canManage }: { classId: string; canManage:
   const [toDelete, setToDelete] = useState<LearningItem | null>(null);
 
   const visible = canManage ? items : items.filter((i) => i.published);
+  const { data: doneIds = [] } = useMyCompletions(classId, !canManage);
+  const setDone = useSetItemCompleted();
+  const doneCount = visible.filter((i) => doneIds.includes(i.id)).length;
+  const donePct = visible.length ? Math.round((doneCount / visible.length) * 100) : 0;
 
   const move = (index: number, dir: -1 | 1) => {
     const next = [...items];
@@ -63,6 +70,12 @@ export function ContentTab({ classId, canManage }: { classId: string; canManage:
         {canManage && <Button size="sm" onClick={() => setDraft(emptyDraft)}><Plus className="h-4 w-4 mr-2" />Add content</Button>}
       </CardHeader>
       <CardContent className="space-y-3">
+        {!canManage && visible.length > 0 && (
+          <div className="space-y-1" aria-label="Your progress">
+            <div className="flex justify-between text-sm"><span>Your progress</span><span className="text-muted-foreground">{doneCount} of {visible.length} done ({donePct}%)</span></div>
+            <Progress value={donePct} className="h-2" />
+          </div>
+        )}
         {visible.map((item, index) => (
           <div key={item.id} className="border rounded-md p-3 text-sm space-y-2">
             <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -87,6 +100,13 @@ export function ContentTab({ classId, canManage }: { classId: string; canManage:
                   Open {TYPE_LABEL[item.item_type].toLowerCase()} <ExternalLink className="h-3 w-3" />
                 </a>
               )}
+            {!canManage && (
+              <div className="flex items-center gap-2 pt-1">
+                <Checkbox id={`done-${item.id}`} checked={doneIds.includes(item.id)} disabled={setDone.isPending}
+                  onCheckedChange={(v) => setDone.mutate({ item: item.id, done: v === true })} />
+                <Label htmlFor={`done-${item.id}`} className="text-sm font-normal cursor-pointer">Mark as done</Label>
+              </div>
+            )}
           </div>
         ))}
         {!isLoading && !visible.length && (

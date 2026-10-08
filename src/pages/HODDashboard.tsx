@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { hodNavItems } from "@/lib/navigationConfig";
 import { useProfile } from "@/hooks/useProfile";
 import { useHODStats } from "@/hooks/useHODStats";
+import { useEnrollmentByTrade } from "@/hooks/useEnrollmentByTrade";
 import { EnrollmentChart, FeeCollectionChart } from "@/components/dashboard/DashboardCharts";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
@@ -10,12 +11,7 @@ const HODDashboard = () => {
   const { data: profile } = useProfile();
   const { data: stats, isLoading } = useHODStats();
 
-  const enrollmentData = [
-    { name: "Electrical", value: 45 },
-    { name: "Plumbing", value: 32 },
-    { name: "Carpentry", value: 28 },
-    { name: "Welding", value: 38 },
-  ];
+  const { data: enrollmentData } = useEnrollmentByTrade();
   const competencyData = [
     { name: "Competent", value: stats?.competencyRate || 0 },
     { name: "Not Yet", value: 100 - (stats?.competencyRate || 0) },
@@ -47,8 +43,8 @@ const HODDashboard = () => {
         actionCols={4}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <EnrollmentChart data={enrollmentData} />
-          <FeeCollectionChart data={competencyData} />
+          <EnrollmentChart data={enrollmentData ?? []} />
+          <FeeCollectionChart data={competencyData} title="Competency" description="Share of assessments marked competent" />
         </div>
       </DashboardShell>
     </DashboardLayout>

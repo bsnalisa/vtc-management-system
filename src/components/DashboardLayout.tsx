@@ -61,7 +61,10 @@ function DashboardSidebar({
    const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (url: string) => {
+    const [path, query] = url.split("?");
+    return location.pathname === path && (!query || location.search.includes(query));
+  };
 
   const { role } = useUserRole();
   const roleDisplayName = getRoleDisplayName(role);

@@ -66,6 +66,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
   { title: "Document Settings", url: "/document-settings", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
@@ -98,6 +99,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
   { title: "Document Settings", url: "/document-settings", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Head of Training Navigation (Academic Command Center)
@@ -128,6 +130,7 @@ export const headOfTrainingNavItems: NavItem[] = [
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Trainer Navigation
@@ -145,6 +148,7 @@ export const trainerNavItems: NavItem[] = [
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
   { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
   { title: "Learning Space", url: "/learning", icon: BookOpen },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // --------------------- Trainee Navigation ---------------------
@@ -181,6 +185,7 @@ export const hodNavItems: NavItem[] = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Performance", url: "/assessment-results", icon: BarChart3 },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Assessment Coordinator Navigation
@@ -200,6 +205,7 @@ export const assessmentCoordinatorNavItems: NavItem[] = [
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Debtor Officer Navigation (Financial Operations Only - Separate Routes)
@@ -213,6 +219,7 @@ export const debtorOfficerNavItems: NavItem[] = [
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Registration Officer Navigation
@@ -234,6 +241,7 @@ export const registrationOfficerNavItems: NavItem[] = [
   { title: "Transcripts", url: "/transcripts", icon: FileText },
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
   { title: "Certification Reports", url: "/reports/certification", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Stock Control Officer Navigation
@@ -244,6 +252,7 @@ export const stockControlNavItems: NavItem[] = [
   { title: "Categories", url: "/stock", icon: Package },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Asset Maintenance Coordinator Navigation
@@ -254,6 +263,7 @@ export const assetMaintenanceNavItems: NavItem[] = [
   { title: "Depreciation", url: "/assets", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Procurement Officer Navigation
@@ -264,6 +274,7 @@ export const procurementNavItems: NavItem[] = [
   { title: "Receiving Reports", url: "/receiving-reports", icon: FileText },
   { title: "Suppliers", url: "/suppliers", icon: Users },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Placement Officer Navigation
@@ -273,6 +284,7 @@ export const placementOfficerNavItems: NavItem[] = [
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 export const liaisonOfficerNavItems: NavItem[] = [
@@ -282,16 +294,18 @@ export const liaisonOfficerNavItems: NavItem[] = [
   { title: "Staff Training", url: "/onboarding", icon: BookOpen },
   { title: "Support Tickets", url: "/support-tickets", icon: FileText },
   { title: "My Profile", url: "/profile", icon: UserCircle },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 export const resourceCenterNavItems: NavItem[] = [
   { title: "Dashboard", url: "/resource-center-coordinator-dashboard", icon: LayoutDashboard },
-  { title: "Resource Catalogue", url: "/resource-center/catalogue", icon: BookOpen },
-  { title: "Resource Loans", url: "/resource-center/loans", icon: ClipboardList },
+  { title: "Resource Catalogue", url: "/library?tab=catalogue", icon: BookOpen },
+  { title: "Resource Loans", url: "/library?tab=circulation", icon: ClipboardList },
   { title: "Staff Training", url: "/onboarding", icon: BookOpen },
   { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "Support Tickets", url: "/support-tickets", icon: FileText },
   { title: "My Profile", url: "/profile", icon: UserCircle },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Hostel Coordinator Navigation
@@ -302,6 +316,7 @@ export const hostelCoordinatorNavItems: NavItem[] = [
   { title: "Fees", url: "/hostel", icon: DollarSign },
   { title: "Maintenance", url: "/hostel", icon: Wrench },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Projects Coordinator Navigation
@@ -311,6 +326,7 @@ export const projectsCoordinatorNavItems: NavItem[] = [
   { title: "Milestones", url: "/projects/milestones", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // HR Officer Navigation
@@ -322,18 +338,21 @@ export const hrOfficerNavItems: NavItem[] = [
   { title: "Performance", url: "/hr/performance", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Subject Matter Expert Navigation
 export const smeNavItems: NavItem[] = [
   { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Printing & Distribution Officer Navigation
 export const printingOfficerNavItems: NavItem[] = [
   { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Librarian Navigation
@@ -343,6 +362,7 @@ export const librarianNavItems: NavItem[] = [
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // Head of Trainee Support Navigation
@@ -356,6 +376,7 @@ export const headOfTraineeSupportNavItems: NavItem[] = [
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // BDL (Blended Distance Learning) Coordinator Navigation
@@ -367,12 +388,18 @@ export const bdlCoordinatorNavItems: NavItem[] = [
   { title: "Trainee Progress", url: "/bdl/progress", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
 // RPL (Recognition of Prior Learning) Coordinator Navigation
 export const rplCoordinatorNavItems: NavItem[] = [
   { title: "Dashboard", url: "/rpl-coordinator-dashboard", icon: LayoutDashboard },
+  { title: "Applications", url: "/rpl/applications", icon: FileText },
+  { title: "Portfolio Assessment", url: "/rpl/portfolio", icon: ClipboardCheck },
+  { title: "Assessment Schedule", url: "/rpl/schedule", icon: Calendar },
+  { title: "Credit Mapping", url: "/rpl/credits", icon: GraduationCap },
   { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];

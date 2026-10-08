@@ -25,21 +25,21 @@ const hostelSteps: Omit<OnboardingStep, "completed">[] = [
     title: "Add Hostel Buildings",
     description: "Create buildings to organize your hostel accommodation",
     icon: Building,
-    path: "/hostel-management",
+    path: "/hostel",
   },
   {
     id: "rooms",
     title: "Configure Rooms",
     description: "Set up rooms with capacity and fee information",
     icon: Package,
-    path: "/hostel-management",
+    path: "/hostel",
   },
   {
     id: "allocations",
     title: "Allocate Trainees",
     description: "Assign trainees to available rooms and beds",
     icon: Users,
-    path: "/hostel-management",
+    path: "/hostel",
   },
 ];
 
@@ -49,21 +49,21 @@ const stockSteps: Omit<OnboardingStep, "completed">[] = [
     title: "Create Stock Categories",
     description: "Organize your inventory with categories",
     icon: Package,
-    path: "/stock-management",
+    path: "/stock",
   },
   {
     id: "items",
     title: "Add Stock Items",
     description: "Add items to your inventory with quantities",
     icon: Briefcase,
-    path: "/stock-management",
+    path: "/stock",
   },
   {
     id: "alerts",
     title: "Set Up Alerts",
     description: "Configure low stock alerts for important items",
     icon: Building,
-    path: "/stock-management",
+    path: "/stock",
   },
 ];
 
@@ -73,21 +73,21 @@ const assetSteps: Omit<OnboardingStep, "completed">[] = [
     title: "Define Asset Categories",
     description: "Create categories like Equipment, Furniture, Vehicles",
     icon: Package,
-    path: "/asset-management",
+    path: "/assets",
   },
   {
     id: "assets",
     title: "Register Assets",
     description: "Add assets with purchase info and location",
     icon: Briefcase,
-    path: "/asset-management",
+    path: "/assets",
   },
   {
     id: "maintenance",
     title: "Schedule Maintenance",
     description: "Set up maintenance schedules for assets",
     icon: Building,
-    path: "/asset-management",
+    path: "/assets",
   },
 ];
 

@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLibraryMembers } from "@/hooks/useLibraryCentre";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { CatalogueTab } from "@/components/library/CatalogueTab";
 import { CirculationTab } from "@/components/library/CirculationTab";
 import { MembersTab } from "@/components/library/MembersTab";
@@ -13,11 +14,16 @@ import { FinesTab } from "@/components/library/FinesTab";
 import { InterlibraryTab } from "@/components/library/InterlibraryTab";
 import { ReportsSettingsTab } from "@/components/library/ReportsSettingsTab";
 
-const STAFF_ROLES = ["super_admin", "organization_admin", "admin", "librarian"];
+const STAFF_ROLES = ["super_admin", "organization_admin", "admin", "librarian", "resource_center_coordinator"];
+const TABS = ["catalogue", "circulation", "members", "reservations", "fines", "interlibrary", "reports"];
+const STAFF_TABS = ["circulation", "members", "fines", "interlibrary", "reports"];
 
 export default function Library() {
   const { role, navItems, groupLabel } = useRoleNavigation();
   const isStaff = !!role && STAFF_ROLES.includes(role);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requested = searchParams.get("tab") ?? "catalogue";
+  const tab = TABS.includes(requested) && (isStaff || !STAFF_TABS.includes(requested)) ? requested : "catalogue";
   const { data: members } = useLibraryMembers();
   const { data: userId } = useQuery({
     queryKey: ["auth-user-id"],
@@ -36,7 +42,7 @@ export default function Library() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="catalogue">
+          <Tabs value={tab} onValueChange={(v) => setSearchParams({ tab: v }, { replace: true })}>
             <TabsList className="flex flex-wrap h-auto">
               <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
               {isStaff && <TabsTrigger value="circulation">Circulation</TabsTrigger>}

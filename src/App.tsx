@@ -109,11 +109,28 @@ import { OrganizationProvider } from "./hooks/useOrganizationContext";
 import { withRoleAccess } from "./components/withRoleAccess";
 const TraineeDetail = lazy(() => import("./pages/TraineeDetail"));
 const HeadOfTraineeSupportDashboard = lazy(() => import("./pages/HeadOfTraineeSupportDashboard"));
+const ProjectsRegister = lazy(() => import("./pages/ProjectsRegister"));
+const ProjectMilestones = lazy(() => import("./pages/ProjectMilestones"));
+const HrEmployees = lazy(() => import("./pages/HrEmployees"));
+const HrLeave = lazy(() => import("./pages/HrLeave"));
+const HrRecruitment = lazy(() => import("./pages/HrRecruitment"));
+const HrPerformance = lazy(() => import("./pages/HrPerformance"));
+const MyHr = lazy(() => import("./pages/MyHr"));
+const BdlCourses = lazy(() => import("./pages/BdlCourses"));
+const BdlMaterials = lazy(() => import("./pages/BdlMaterials"));
+const BdlSessions = lazy(() => import("./pages/BdlSessions"));
+const BdlProgress = lazy(() => import("./pages/BdlProgress"));
+const RplApplications = lazy(() => import("./pages/RplApplications"));
+const RplPortfolio = lazy(() => import("./pages/RplPortfolio"));
+const RplSchedule = lazy(() => import("./pages/RplSchedule"));
+const RplCredits = lazy(() => import("./pages/RplCredits"));
+const LiaisonPartners = lazy(() => import("./pages/LiaisonPartners"));
+const LiaisonOfficerDashboard = lazy(() => import("./pages/LiaisonOfficerDashboard"));
+const ResourceCentreDashboard = lazy(() => import("./pages/ResourceCentreDashboard"));
 const ProjectsCoordinatorDashboard = lazy(() => import("./pages/ProjectsCoordinatorDashboard"));
 const HROfficerDashboard = lazy(() => import("./pages/HROfficerDashboard"));
 const BDLCoordinatorDashboard = lazy(() => import("./pages/BDLCoordinatorDashboard"));
 const RPLCoordinatorDashboard = lazy(() => import("./pages/RPLCoordinatorDashboard"));
-import RoleWorkspace, { ServicesDashboard, roleWorkspaces } from "./pages/RoleWorkspace";
 const PendingApprovals = lazy(() => import("./pages/PendingApprovals"));
 const EntryRequirementsManagement = lazy(() => import("./pages/EntryRequirementsManagement"));
 
@@ -206,23 +223,18 @@ const ProtectedHeadOfTraineeSupportDashboard = withRoleAccess(HeadOfTraineeSuppo
   requiredRoles: ["head_of_trainee_support"],
 });
 const ProtectedProjectsCoordinatorDashboard = withRoleAccess(ProjectsCoordinatorDashboard, {
-  requiredRoles: ["projects_coordinator"],
+  requiredRoles: ["projects_coordinator", "admin", "organization_admin"],
 });
 const ProtectedHROfficerDashboard = withRoleAccess(HROfficerDashboard, {
-  requiredRoles: ["hr_officer"],
+  requiredRoles: ["hr_officer", "admin", "organization_admin"],
 });
 const ProtectedBDLCoordinatorDashboard = withRoleAccess(BDLCoordinatorDashboard, {
-  requiredRoles: ["bdl_coordinator"],
+  requiredRoles: ["bdl_coordinator", "admin", "organization_admin", "head_of_training"],
 });
 const ProtectedRPLCoordinatorDashboard = withRoleAccess(RPLCoordinatorDashboard, {
-  requiredRoles: ["rpl_coordinator"],
+  requiredRoles: ["rpl_coordinator", "assessment_coordinator", "admin", "organization_admin", "head_of_training"],
 });
-const ProtectedLiaisonDashboard = withRoleAccess(() => <ServicesDashboard service="liaison" />, { requiredRoles: ["liaison_officer"] });
-const ProtectedResourceDashboard = withRoleAccess(() => <ServicesDashboard service="resources" />, { requiredRoles: ["resource_center_coordinator"] });
-const workspaceRoutes = Object.keys(roleWorkspaces).map(path => {
-  const requiredRoles = path.startsWith("/hr/") ? ["hr_officer" as const] : path.startsWith("/bdl/") ? ["bdl_coordinator" as const] : path.startsWith("/rpl/") ? ["rpl_coordinator" as const] : path.startsWith("/liaison/") ? ["liaison_officer" as const] : path.startsWith("/resource-center/") ? ["resource_center_coordinator" as const] : ["projects_coordinator" as const];
-  return { path, Component: withRoleAccess(RoleWorkspace, { requiredRoles }) };
-});
+const ProtectedLiaisonDashboard = withRoleAccess(LiaisonOfficerDashboard, { requiredRoles: ["liaison_officer", "placement_officer", "admin", "organization_admin"] });
 
 // Wrap functional pages with role access control
 const ProtectedUserManagement = withRoleAccess(UserManagement, {
@@ -405,13 +417,28 @@ const App = () => (
           <Route path="/bdl-coordinator-dashboard" element={<ProtectedRoute><ProtectedBDLCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/rpl-coordinator-dashboard" element={<ProtectedRoute><ProtectedRPLCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/liaison-officer-dashboard" element={<ProtectedRoute><ProtectedLiaisonDashboard /></ProtectedRoute>} />
-          <Route path="/resource-center-coordinator-dashboard" element={<ProtectedRoute><ProtectedResourceDashboard /></ProtectedRoute>} />
-          {workspaceRoutes.map(({ path, Component }) => <Route key={path} path={path} element={<ProtectedRoute><Component key={path} /></ProtectedRoute>} />)}
+          <Route path="/resource-center-coordinator-dashboard" element={<ProtectedRoute><ResourceCentreDashboard /></ProtectedRoute>} />
+          <Route path="/projects" element={<ProtectedRoute><ProjectsRegister /></ProtectedRoute>} />
+          <Route path="/projects/milestones" element={<ProtectedRoute><ProjectMilestones /></ProtectedRoute>} />
+          <Route path="/hr/employees" element={<ProtectedRoute><HrEmployees /></ProtectedRoute>} />
+          <Route path="/hr/leave" element={<ProtectedRoute><HrLeave /></ProtectedRoute>} />
+          <Route path="/hr/recruitment" element={<ProtectedRoute><HrRecruitment /></ProtectedRoute>} />
+          <Route path="/hr/performance" element={<ProtectedRoute><HrPerformance /></ProtectedRoute>} />
+          <Route path="/my-hr" element={<ProtectedRoute><MyHr /></ProtectedRoute>} />
+          <Route path="/bdl/courses" element={<ProtectedRoute><BdlCourses /></ProtectedRoute>} />
+          <Route path="/bdl/materials" element={<ProtectedRoute><BdlMaterials /></ProtectedRoute>} />
+          <Route path="/bdl/sessions" element={<ProtectedRoute><BdlSessions /></ProtectedRoute>} />
+          <Route path="/bdl/progress" element={<ProtectedRoute><BdlProgress /></ProtectedRoute>} />
+          <Route path="/rpl/applications" element={<ProtectedRoute><RplApplications /></ProtectedRoute>} />
+          <Route path="/rpl/portfolio" element={<ProtectedRoute><RplPortfolio /></ProtectedRoute>} />
+          <Route path="/rpl/schedule" element={<ProtectedRoute><RplSchedule /></ProtectedRoute>} />
+          <Route path="/rpl/credits" element={<ProtectedRoute><RplCredits /></ProtectedRoute>} />
+          <Route path="/liaison/partners" element={<ProtectedRoute><LiaisonPartners /></ProtectedRoute>} />
           <Route path="/hr" element={<ProtectedRoute><ProtectedHROfficerDashboard /></ProtectedRoute>} />
           <Route path="/bdl" element={<ProtectedRoute><ProtectedBDLCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/rpl" element={<ProtectedRoute><ProtectedRPLCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/liaison" element={<ProtectedRoute><ProtectedLiaisonDashboard /></ProtectedRoute>} />
-          <Route path="/resource-center" element={<ProtectedRoute><ProtectedResourceDashboard /></ProtectedRoute>} />
+          <Route path="/resource-center" element={<ProtectedRoute><ResourceCentreDashboard /></ProtectedRoute>} />
           <Route path="/trainee-support-dashboard" element={<ProtectedRoute><ProtectedHeadOfTraineeSupportDashboard /></ProtectedRoute>} />
           <Route path="/trainee-support/pending-approvals" element={<ProtectedRoute><ProtectedPendingApprovals /></ProtectedRoute>} />
           <Route path="/trainee-support/officer-activity" element={<ProtectedRoute><ProtectedHeadOfTraineeSupportDashboard /></ProtectedRoute>} />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, GraduationCap, ClipboardCheck, DollarSign, Shield, BarChart3, FileText, Settings, LayoutDashboard, Plus, UserPlus } from "lucide-react";
 import { EnrollmentChart, FeeCollectionChart } from "@/components/dashboard/DashboardCharts";
+import { useEnrollmentByTrade } from "@/hooks/useEnrollmentByTrade";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -25,6 +26,7 @@ const AdminDashboard = () => {
   const { organizationId } = useOrganizationContext();
   const { role } = useUserRole();
   const { data: stats, isLoading } = useDashboardStats();
+  const { data: enrollmentByTrade } = useEnrollmentByTrade();
   const { data: profile } = useProfile();
   const { data: users } = useUsers(organizationId);
   const { data: usersWithRoles } = useUsersWithRoles(organizationId);
@@ -172,12 +174,7 @@ const AdminDashboard = () => {
 
         {/* Charts Section */}
         <div className="grid gap-4 md:grid-cols-2">
-          <EnrollmentChart data={[
-            { name: "Electrical", value: stats?.totalTrainees ? Math.round(stats.totalTrainees * 0.3) : 45 },
-            { name: "Plumbing", value: stats?.totalTrainees ? Math.round(stats.totalTrainees * 0.2) : 32 },
-            { name: "Carpentry", value: stats?.totalTrainees ? Math.round(stats.totalTrainees * 0.25) : 28 },
-            { name: "Welding", value: stats?.totalTrainees ? Math.round(stats.totalTrainees * 0.25) : 38 },
-          ]} />
+          <EnrollmentChart data={enrollmentByTrade ?? []} />
           <FeeCollectionChart data={[
             { name: "Collected", value: stats?.totalCollected || 0 },
             { name: "Outstanding", value: stats?.totalOutstanding || 0 },
