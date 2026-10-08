@@ -156,7 +156,7 @@ const PublicHome = () => {
           )}
 
           {/* Tab strip directly beneath the carousel */}
-          <div className="sticky top-16 z-30 border-b bg-background/95 backdrop-blur-xl">
+          <div className="sticky top-16 z-30 border-b backdrop-blur-xl" style={{ backgroundColor: `hsl(var(--background))` }}>
             <div className="container mx-auto px-4">
               <TabsList className="grid h-auto w-full max-w-xl grid-cols-3 items-stretch rounded-none border-0 bg-transparent p-0 [&>button]:min-w-0 [&>button]:px-1 sm:[&>button]:px-3">
                 <TabsTrigger
