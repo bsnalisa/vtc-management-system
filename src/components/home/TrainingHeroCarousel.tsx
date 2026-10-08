@@ -6,11 +6,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import electrical from "@/assets/training-electrical.jpg";
 import automotive from "@/assets/training-automotive.jpg";
 import hospitality from "@/assets/training-hospitality.jpg";
+import networking from "@/assets/training-networking.jpg";
+import welding from "@/assets/training-welding.jpg";
+import webDevelopment from "@/assets/training-web-development.jpg";
 
 const slides = [
   { image: electrical, title: "Electrical training", caption: "Precision. Practice. Possibility.", alt: "Trainees and an instructor working at an electrical training bench" },
   { image: automotive, title: "Automotive training", caption: "Practical skills. Real-world confidence.", alt: "Trainees inspecting an engine with their automotive instructor" },
   { image: hospitality, title: "Hospitality & culinary", caption: "Craft. Creativity. Care.", alt: "Culinary trainees learning to plate food in a teaching kitchen" },
+  { image: networking, title: "Networking", caption: "Connect systems. Build possibilities.", alt: "Networking trainees connecting cables to switches with their instructor" },
+  { image: welding, title: "Welding", caption: "Strong skills. Lasting craftsmanship.", alt: "A trainee wearing protective equipment learning welding in a training workshop" },
+  { image: webDevelopment, title: "Web Development", caption: "Create. Code. Bring ideas to life.", alt: "Web development trainees creating websites in a computer classroom" },
 ];
 
 export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreName?: string; onApply: () => void; onTrack: () => void }) {
@@ -80,21 +86,27 @@ export function TrainingHeroCarousel({ centreName, onApply, onTrack }: { centreN
         </div>
       </Carousel>
       <div className="border-b bg-card">
-        <div className="container mx-auto flex items-center justify-between gap-3 px-4 md:px-10">
-          <div className="grid min-w-0 flex-1 grid-cols-3 md:max-w-2xl">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 md:px-10">
+          <div className="min-w-0 basis-full sm:flex-1 sm:basis-auto" aria-live="polite" aria-atomic="true">
+            <p className="text-sm font-semibold text-foreground">{current.title} <span className="ml-2 text-xs font-normal tabular-nums text-muted-foreground">{active + 1} / {slides.length}</span></p>
+          </div>
+          <div className="flex max-w-full flex-wrap items-center gap-x-2 gap-y-1">
+          <div className="flex flex-wrap items-center" role="group" aria-label="Choose a course">
             {slides.map((slide, index) => (
-              <Button key={slide.title} variant="ghost" onClick={() => api?.scrollTo(index)} aria-label={`Show ${slide.title}`} aria-pressed={active === index}
-                className={`hero-slide-selector h-auto min-h-20 justify-start gap-3 whitespace-normal rounded-none border-b-2 px-2 py-4 text-left md:px-5 ${active === index ? "border-primary bg-accent text-primary" : "border-transparent text-muted-foreground"}`}>
-                <span className="hidden text-xs md:inline">0{index + 1}</span>
-                <span className="text-xs font-semibold md:text-sm">{slide.title}</span>
-              </Button>
+              <Tooltip key={slide.title}><TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => api?.scrollTo(index)} aria-label={`Show ${slide.title}`} aria-pressed={active === index}
+                  className="h-7 w-7 shrink-0 rounded-full p-0">
+                  <span aria-hidden="true" className={`h-1.5 rounded-full transition-[width] motion-reduce:transition-none ${active === index ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/40"}`} />
+                </Button>
+              </TooltipTrigger><TooltipContent>{slide.title}</TooltipContent></Tooltip>
             ))}
           </div>
-          <div className="flex shrink-0 items-center gap-1 md:gap-2">
+          <div className="flex shrink-0 items-center">
             {[{ label: "Previous image", icon: ArrowLeft, action: () => api?.scrollPrev() }, { label: "Next image", icon: ArrowRight, action: () => api?.scrollNext() },
               ...(!reducedMotion ? [{ label: playing ? "Pause slideshow" : "Play slideshow", icon: playing ? Pause : Play, action: () => setPlaying(!playing) }] : [])].map(({ label, icon: Icon, action }) => (
-                <Tooltip key={label}><TooltipTrigger asChild><Button size="icon" variant="ghost" aria-label={label} onClick={action} className="h-9 w-9"><Icon /></Button></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip>
+                <Tooltip key={label}><TooltipTrigger asChild><Button size="icon" variant="ghost" aria-label={label} onClick={action} className="h-8 w-8"><Icon className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip>
               ))}
+          </div>
           </div>
         </div>
       </div>

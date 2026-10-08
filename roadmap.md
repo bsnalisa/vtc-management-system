@@ -26,6 +26,8 @@
 - [x] Standardize loading indicators and verify public screens.
 
 # Homepage carousel
+- [ ] Add Networking, Welding and Web Development images and compact pagination for up to ten courses; verify images and controls.
+- [ ] Review the workflow process-type security finding and preserve legitimate reference-data access.
 - [x] Add vocational-training imagery and an interactive homepage carousel.
 - [x] Rearrange homepage sections and verify carousel controls and application navigation.
 
