@@ -195,7 +195,7 @@ All colors MUST be HSL.
   .workspace-content [data-ui="card"] [class*="bg-gradient"] { background-image: none; }
   .workspace-content .space-y-8 { gap: 0; }
   /* How it works — connected step flow: vertical rail on mobile, horizontal on desktop */
-  .step-flow { position: relative; }
+  .step-flow { position: relative; scroll-margin-top: 8rem; }
   .step-flow::before,
   .step-flow::after { content: ""; position: absolute; pointer-events: none; }
   .step-flow::before {
