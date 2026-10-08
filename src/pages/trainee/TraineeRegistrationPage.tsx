@@ -7,6 +7,7 @@ import { traineeNavItems } from "@/lib/navigationConfig";
 import { Loader2, CheckCircle, Clock, FileText, Download, Eye } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { useTraineeUserId, useTraineeRecord, useTraineeApplication, useTraineeEnrollments } from "@/hooks/useTraineePortalData";
+import { ReturningRegistrationCard } from "@/components/registration/ReturningRegistrationCard";
 import { useMyRegistrations, useTraineeDocumentActions } from "@/hooks/useTraineeDocuments";
 
 const TraineeRegistrationPage = () => {
@@ -60,6 +61,7 @@ const TraineeRegistrationPage = () => {
   return (
     <DashboardLayout title="My Registration" subtitle="View your registration details and status" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
+        {trainee && trainee.status === "active" && <ReturningRegistrationCard organizationId={trainee.organization_id} />}
         <Card className="border-0 shadow-md">
           <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">

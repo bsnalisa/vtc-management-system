@@ -6,6 +6,7 @@ import { traineeNavItems } from "@/lib/navigationConfig";
 import { CheckCircle, Clock, AlertCircle, FileCheck, GraduationCap, CreditCard, Home } from "lucide-react";
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTraineeUserId, useTraineeRecord, useTraineeApplication } from "@/hooks/useTraineePortalData";
 
 const TraineeAdmissionStatusPage = () => {
@@ -66,6 +67,15 @@ const TraineeAdmissionStatusPage = () => {
   return (
     <DashboardLayout title="Admission Status" subtitle="Track your application progress" navItems={traineeNavItems} groupLabel="Trainee iEnabler">
       <div className="space-y-6">
+        {(application as { info_request_note?: string | null } | null)?.info_request_note && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>The centre needs more information from you</AlertTitle>
+            <AlertDescription className="whitespace-pre-wrap">
+              {(application as { info_request_note?: string | null }).info_request_note} Please contact the registration office with the details.
+            </AlertDescription>
+          </Alert>
+        )}
         {/* Summary Card */}
         <Card className="border-0 shadow-md bg-gradient-to-r from-primary/5 to-primary/10">
           <CardContent className="p-6">

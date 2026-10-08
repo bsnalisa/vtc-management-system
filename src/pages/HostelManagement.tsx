@@ -11,6 +11,8 @@ import { HostelFeesTable } from "@/components/hostel/HostelFeesTable";
 import { MaintenanceIssuesTable } from "@/components/hostel/MaintenanceIssuesTable";
 import { VisitorManagementTable } from "@/components/hostel/VisitorManagementTable";
 import { RoomInspectionsTable } from "@/components/hostel/RoomInspectionsTable";
+import { RoomRequestsTab } from "@/components/hostel/RoomRequestsTab";
+import { HostelComplaintsTab } from "@/components/hostel/HostelComplaintsTab";
 import { useHostelBuildings, useHostelRooms, useHostelAllocations } from "@/hooks/useHostel";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
@@ -85,6 +87,8 @@ export default function HostelManagement() {
             <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
             <TabsTrigger value="visitors">Visitors</TabsTrigger>
             <TabsTrigger value="inspections">Inspections</TabsTrigger>
+            <TabsTrigger value="requests">Room requests</TabsTrigger>
+            <TabsTrigger value="complaints">Complaints</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -200,6 +204,30 @@ export default function HostelManagement() {
               </CardHeader>
               <CardContent>
                 <RoomInspectionsTable />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="requests">
+            <Card>
+              <CardHeader>
+                <CardTitle>Room requests</CardTitle>
+                <CardDescription>Trainees' online requests for a hostel room</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RoomRequestsTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="complaints">
+            <Card>
+              <CardHeader>
+                <CardTitle>Hostel complaints</CardTitle>
+                <CardDescription>Grievances trainees have tagged as hostel related</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HostelComplaintsTab />
               </CardContent>
             </Card>
           </TabsContent>

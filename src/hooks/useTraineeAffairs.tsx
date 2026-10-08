@@ -21,6 +21,7 @@ export interface AffairsRecord {
   severity: "low" | "medium" | "high" | "critical" | null;
   status: "open" | "in_progress" | "resolved" | "closed";
   action_taken: string | null;
+  category?: string | null;
   follow_up_date: string | null;
   created_at: string;
   trainees?: { first_name: string; last_name: string; trainee_id: string } | null;

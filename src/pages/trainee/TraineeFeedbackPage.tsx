@@ -86,18 +86,33 @@ function GrievanceForm() {
   const create = useCreateAffairsRecord();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("general");
   return (
     <form
       className="space-y-4"
       onSubmit={async (e) => {
         e.preventDefault();
         if (!trainee) return;
-        await create.mutateAsync({ record_type: "grievance", trainee_id: trainee.id, title, description });
+        await create.mutateAsync({
+          record_type: "grievance", trainee_id: trainee.id, title, description,
+          ...(category === "hostel" ? { category: "hostel" } : {}),
+        });
         setTitle("");
         setDescription("");
+        setCategory("general");
       }}
     >
       <p className="text-sm text-muted-foreground">Raise a grievance or give feedback. Trainee Affairs staff will follow up with you.</p>
+      <div className="space-y-2">
+        <Label>Category</Label>
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">General</SelectItem>
+            <SelectItem value="hostel">Hostel</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <Input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Subject" />
       <Textarea required rows={5} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your grievance or feedback" />
       <Button type="submit" disabled={create.isPending || !trainee}>Submit</Button>
