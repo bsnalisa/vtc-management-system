@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { GraduationCap, Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
+import { Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
 import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {

@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LogOut, UserCircle, LucideIcon, Shield, GraduationCap } from "lucide-react";
+import { LogOut, UserCircle, LucideIcon, Shield } from "lucide-react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { useUserRole } from "@/hooks/useUserRole";
 import { getRoleDisplayName } from "@/lib/roleUtils";

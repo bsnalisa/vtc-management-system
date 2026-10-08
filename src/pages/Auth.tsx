@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { GraduationCap, ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { getRoleDashboardPath } from "@/lib/roleUtils";
 import { UserRole, setRoleCache } from "@/hooks/useUserRole";
 import { setProfileUserId } from "@/hooks/useProfile";
