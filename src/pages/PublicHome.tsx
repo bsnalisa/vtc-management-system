@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Building2, FileText, Search, ArrowRight, CheckCircle2, ClipboardList, Wallet, BookOpen, LogIn } from "lucide-react";
 import { TrainingHeroCarousel } from "@/components/home/TrainingHeroCarousel";
+import { ApplicationAssistant } from "@/components/home/ApplicationAssistant";
 import { ComprehensiveApplicationForm } from "@/components/application/ComprehensiveApplicationForm";
 import {
   useActiveOrganizations,
@@ -472,6 +473,7 @@ const PublicHome = () => {
         organizationIdOverride={activeOrgId}
         enableAutoSave={false}
       />
+      <ApplicationAssistant />
     </div>
   );
 };
