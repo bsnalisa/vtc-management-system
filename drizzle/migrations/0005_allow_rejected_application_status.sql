@@ -1,0 +1,2 @@
+ALTER TABLE public.trainee_applications DROP CONSTRAINT trainee_applications_registration_status_check;
+ALTER TABLE public.trainee_applications ADD CONSTRAINT trainee_applications_registration_status_check CHECK (registration_status = ANY (ARRAY['applied','pending_payment','provisionally_admitted','registration_fee_pending','payment_verified','payment_cleared','fully_registered','registered','rejected']));

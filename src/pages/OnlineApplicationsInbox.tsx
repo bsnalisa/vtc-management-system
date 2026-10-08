@@ -19,7 +19,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 
 const REGISTRATION_STATUSES = [
-  "pending",
   "applied",
   "provisionally_admitted",
   "registration_fee_pending",
@@ -217,7 +216,7 @@ const OnlineApplicationsInbox = () => {
                         <TableCell>{qualBadge(app.qualification_status)}</TableCell>
                         <TableCell>
                           <Select
-                            value={app.registration_status || "pending"}
+                            value={app.registration_status || "applied"}
                             onValueChange={(v) =>
                               updateStatus.mutate({ applicationId: app.id, registration_status: v })
                             }
@@ -266,7 +265,7 @@ const OnlineApplicationsInbox = () => {
                                 </Button>
                               </>
                             ) : app.registration_status !== "rejected" ? (
-                              <Button size="sm" variant="secondary" onClick={() => navigate("/applications")}>
+                              <Button size="sm" variant="outline" onClick={() => navigate("/applications")}>
                                 <ArrowRight className="mr-1 h-3.5 w-3.5" /> Registration
                               </Button>
                             ) : null}
