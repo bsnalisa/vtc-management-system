@@ -66,6 +66,14 @@ const PublicHome = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const { data: organizations } = useActiveOrganizations();
   const { data: linkedOrg } = useOrganizationBySlug(slug);
@@ -96,7 +104,13 @@ const PublicHome = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
+      <header
+        className={`sticky top-0 z-40 border-b transition-all duration-300 ${
+          scrolled
+            ? "bg-background shadow-md shadow-primary/5"
+            : "bg-background/80 backdrop-blur-xl"
+        }`}
+      >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
             <AppLogo />
