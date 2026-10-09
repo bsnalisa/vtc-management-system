@@ -11,6 +11,8 @@ import { FileText, LogOut, Plus, CheckCircle2, Clock, XCircle } from "lucide-rea
 import { resolveApplicantDestination } from "./ApplicantAuth";
 import { signOutAndClearCaches } from "@/lib/authUtils";
 import { useActiveOrganizations } from "@/hooks/usePublicApplication";
+import { useApplicationDraft } from "@/hooks/useApplicationDraft";
+import { Progress } from "@/components/ui/progress";
 
 const label = (s?: string | null) => (s || "pending").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -53,6 +55,7 @@ const ApplicantDashboard = () => {
   });
 
   const { data: orgs } = useActiveOrganizations();
+  const { data: draft } = useApplicationDraft();
   const orgName = (id: string) => orgs?.find((o: any) => o.id === id)?.name || "Training centre";
 
   if (checking) {
@@ -81,6 +84,22 @@ const ApplicantDashboard = () => {
           </div>
           <Button onClick={() => navigate("/apply")}><Plus className="mr-1 h-4 w-4" /> Start or continue application</Button>
         </div>
+
+        {draft && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">Unfinished application{draft.organization_id ? ` — ${orgName(draft.organization_id)}` : ""}</p>
+                <p className="text-xs text-muted-foreground">Saved automatically {new Date(draft.last_updated_at).toLocaleString("en-ZA")}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <Progress value={draft.progress_percentage} className="h-2 max-w-xs flex-1" />
+                  <span className="text-xs font-medium">{draft.progress_percentage}% complete</span>
+                </div>
+              </div>
+              <Button onClick={() => navigate("/apply")}>Continue application</Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
