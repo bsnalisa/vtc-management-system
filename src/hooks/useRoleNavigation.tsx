@@ -54,6 +54,7 @@ export const useRoleNavigation = () => {
         return registrationOfficerNavItems;
       case "stock_control_officer":
         return stockControlNavItems;
+      case "maintenance_coordinator":
       case "asset_maintenance_coordinator":
         return assetMaintenanceNavItems;
       case "procurement_officer":
@@ -111,6 +112,7 @@ export const useRoleNavigation = () => {
         return "Registration";
       case "stock_control_officer":
         return "Stock Control";
+      case "maintenance_coordinator":
       case "asset_maintenance_coordinator":
         return "Asset Management";
       case "procurement_officer":
