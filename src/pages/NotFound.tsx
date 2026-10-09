@@ -57,6 +57,7 @@ const NotFound = () => {
       case "registration_officer": return "/registration-officer-dashboard";
       case "assessment_coordinator": return "/assessment-coordinator-dashboard";
       case "stock_control_officer": return "/stock-control-officer-dashboard";
+      case "maintenance_coordinator":
       case "asset_maintenance_coordinator": return "/asset-maintenance-coordinator-dashboard";
       case "procurement_officer": return "/procurement-officer-dashboard";
       case "placement_officer": return "/placement-officer-dashboard";

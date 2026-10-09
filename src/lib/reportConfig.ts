@@ -136,7 +136,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Complete register of organizational assets and their status",
     category: "operations",
     icon: Package,
-    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "maintenance_coordinator"],
     dataTable: "assets",
   },
   {
@@ -145,7 +145,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Asset depreciation schedules and current values",
     category: "operations",
     icon: TrendingUp,
-    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "maintenance_coordinator"],
     dataTable: "asset_depreciation",
   },
   {
@@ -154,7 +154,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Upcoming and completed maintenance activities",
     category: "operations",
     icon: Wrench,
-    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "hostel_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "maintenance_coordinator", "hostel_coordinator"],
     dataTable: "asset_maintenance",
   },
   {

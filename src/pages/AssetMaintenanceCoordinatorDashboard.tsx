@@ -84,5 +84,5 @@ function AssetMaintenanceCoordinatorDashboard() {
 }
 
 export default withRoleAccess(AssetMaintenanceCoordinatorDashboard, {
-  requiredRoles: ["asset_maintenance_coordinator", "admin", "super_admin"],
+  requiredRoles: ["asset_maintenance_coordinator", "maintenance_coordinator", "admin", "super_admin"],
 });

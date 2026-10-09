@@ -208,7 +208,7 @@ const ProtectedStockControlOfficerDashboard = withRoleAccess(StockControlOfficer
   requiredRoles: ["stock_control_officer"],
 });
 const ProtectedAssetMaintenanceCoordinatorDashboard = withRoleAccess(AssetMaintenanceCoordinatorDashboard, {
-  requiredRoles: ["asset_maintenance_coordinator"],
+  requiredRoles: ["asset_maintenance_coordinator", "maintenance_coordinator"],
 });
 const ProtectedTraineeDashboard = withRoleAccess(TraineeDashboard, {
   requiredRoles: ["trainee"],
@@ -265,7 +265,7 @@ const ProtectedAnalytics = withRoleAccess(Analytics, {
   requiredRoles: ["admin", "head_of_training", "hod"],
 });
 const ProtectedAssetManagement = withRoleAccess(AssetManagement, {
-  requiredRoles: ["asset_maintenance_coordinator", "admin"],
+  requiredRoles: ["asset_maintenance_coordinator", "maintenance_coordinator", "admin"],
 });
 const ProtectedStockManagement = withRoleAccess(StockManagement, {
   requiredRoles: ["stock_control_officer", "admin"],
