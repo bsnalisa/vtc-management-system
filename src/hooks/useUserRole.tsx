@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type UserRole = "super_admin" | "organization_admin" | "admin" | "head_of_training" | "trainer" | "registration_officer" | "debtor_officer" | "hod" | "assessment_coordinator" | "stock_control_officer" | "asset_maintenance_coordinator" | "maintenance_coordinator" | "procurement_officer" | "placement_officer" | "hostel_coordinator" | "head_of_trainee_support" | "liaison_officer" | "resource_center_coordinator" | "projects_coordinator" | "hr_officer" | "bdl_coordinator" | "rpl_coordinator" | "librarian" | "subject_matter_expert" | "printing_distribution_officer" | "trainee" | null;
@@ -13,6 +14,20 @@ let cachedRole: UserRole = null;
 let cachedUserId: string | null = null;
 
 export const useUserRole = () => {
+  const queryClient = useQueryClient();
+
+  // The role is fetched once when the app opens, before anyone has signed in. Without this the
+  // empty answer would be reused after sign-in and role-protected pages would render nothing.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_OUT") clearRoleCache();
+      // defer so no Supabase call runs inside the auth callback
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ["user_role"] }), 0);
+    });
+    return () => subscription.unsubscribe();
+  }, [queryClient]);
+
   const { data: role = null, isLoading: loading } = useQuery({
     queryKey: ["user_role"],
     queryFn: async () => {
