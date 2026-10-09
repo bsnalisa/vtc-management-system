@@ -7,6 +7,8 @@ import { ApplicationAssistant } from "@/components/home/ApplicationAssistant";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 const PublicHome = lazy(() => import("./pages/PublicHome"));
 import Auth from "./pages/Auth";
+import ApplicantAuth from "./pages/ApplicantAuth";
+import ApplicantDashboard from "./pages/ApplicantDashboard";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -385,6 +387,8 @@ const App = () => (
           <Route path="/rpl-application/:slug" element={<PublicRplApplication />} />
 
           <Route path="/auth" element={<Auth />} />
+          <Route path="/applicant" element={<ApplicantAuth />} />
+          <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/first-login" element={<FirstLoginPasswordChange />} />
           <Route path="/admin-dashboard" element={<ProtectedRoute><ProtectedAdminDashboard /></ProtectedRoute>} />

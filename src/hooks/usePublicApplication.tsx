@@ -70,10 +70,13 @@ export const useSubmitOnlineApplication = (organizationId?: string) => {
         }
         throw error;
       }
+      // The saved draft is no longer needed once the application is submitted
+      await supabase.from("application_drafts").delete().eq("user_id", user.id);
       return data;
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["my_applications"] });
+      queryClient.invalidateQueries({ queryKey: ["application_draft"] });
       toast({
         title: "Application submitted",
         description: `Your reference number is ${data.application_number}. Track it under "My Applications".`,

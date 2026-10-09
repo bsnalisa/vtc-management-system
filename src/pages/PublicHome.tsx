@@ -21,6 +21,8 @@ import {
   useMyApplications,
 } from "@/hooks/usePublicApplication";
 import { ComprehensiveApplicationData } from "@/types/application";
+import { useApplicationDraft, useDeleteApplicationDraft } from "@/hooks/useApplicationDraft";
+import { ResumeDraftBanner } from "@/components/application/ResumeDraftBanner";
 
 const FEATURES = [
   { icon: ClipboardList, title: "Online Applications", desc: "Apply to any registered training centre and track your progress in real time." },
@@ -100,6 +102,14 @@ const PublicHome = () => {
     linkedOrg?.name || organizations?.find((o) => o.id === selectedOrg)?.name || "";
 
   const submitApplication = useSubmitOnlineApplication(activeOrgId);
+  const { data: draft } = useApplicationDraft();
+  const discardDraft = useDeleteApplicationDraft();
+  const activeDraft = session ? draft : null;
+
+  // Bring back the centre the applicant chose when they last saved
+  useEffect(() => {
+    if (activeDraft?.organization_id && !selectedOrg && !linkedOrg) setSelectedOrg(activeDraft.organization_id);
+  }, [activeDraft?.organization_id, selectedOrg, linkedOrg]);
 
   // Application window: null = the centre has set none (not restricted)
   const activeSlug = linkedOrg?.subdomain || organizations?.find((o) => o.id === selectedOrg)?.subdomain || null;
@@ -320,12 +330,21 @@ const PublicHome = () => {
                       )}
                     </div>
 
+                    {activeDraft && (
+                      <ResumeDraftBanner
+                        draft={activeDraft as any}
+                        onResume={() => setFormOpen(true)}
+                        onDiscard={() => discardDraft.mutate(activeDraft.id)}
+                        isDiscarding={discardDraft.isPending}
+                      />
+                    )}
+
                     {!authLoading && !session && (
                       <Alert>
                         <AlertDescription>
                           You need an applicant account to apply and track your application.{" "}
-                          <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/auth")}>
-                            Sign in or create an account
+                          <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/applicant")}>
+                            Create an applicant account or sign in
                           </Button>
                           .
                         </AlertDescription>
@@ -357,7 +376,7 @@ const PublicHome = () => {
                       disabled={!activeOrgId || !session || applicationsClosed}
                       onClick={() => setFormOpen(true)}
                     >
-                      {activeOrgId ? `Start application${activeOrgName ? ` — ${activeOrgName}` : ""}` : "Select a centre to continue"}
+                      {activeOrgId ? `${activeDraft ? "Continue" : "Start"} application${activeOrgName ? ` — ${activeOrgName}` : ""}` : "Select a centre to continue"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -398,7 +417,7 @@ const PublicHome = () => {
                   <Alert>
                     <AlertDescription>
                       Sign in to see the applications you have submitted.{" "}
-                      <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/auth")}>
+                      <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/applicant")}>
                         Sign in
                       </Button>
                     </AlertDescription>
@@ -501,7 +520,10 @@ const PublicHome = () => {
         onSubmit={handleSubmit}
         isSubmitting={submitApplication.isPending}
         organizationIdOverride={activeOrgId}
-        enableAutoSave={false}
+        enableAutoSave={!!session}
+        initialData={activeDraft?.form_data}
+        initialTab={activeDraft?.current_tab}
+        draftId={activeDraft?.id}
       />
     </div>
   );

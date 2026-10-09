@@ -16,7 +16,7 @@ const Dashboard = () => {
       }
     } else if (!loading && !role) {
       // No role assigned, redirect to auth
-      navigate("/auth", { replace: true });
+      navigate("/applicant/dashboard", { replace: true });
     }
   }, [role, loading, navigate]);
 
