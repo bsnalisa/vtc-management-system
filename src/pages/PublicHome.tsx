@@ -324,8 +324,8 @@ const PublicHome = () => {
                       <Alert>
                         <AlertDescription>
                           You need an applicant account to apply and track your application.{" "}
-                          <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/auth")}>
-                            Sign in or create an account
+                          <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/applicant")}>
+                            Create an applicant account or sign in
                           </Button>
                           .
                         </AlertDescription>

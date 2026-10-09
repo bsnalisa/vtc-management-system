@@ -92,7 +92,7 @@ const Auth = () => {
       if (session?.user) {
         const role = await fetchUserRole(session.user.id);
         const dashboardPath = getRoleDashboardPath(role);
-        navigate(dashboardPath || "/dashboard", { replace: true });
+        navigate(role ? (dashboardPath || "/dashboard") : "/applicant/dashboard", { replace: true });
       } else {
         setCheckingSession(false);
       }
@@ -179,7 +179,7 @@ const Auth = () => {
       
       const dashboardPath = getRoleDashboardPath(role);
       setLoading(false);
-      navigate(dashboardPath || "/dashboard", { replace: true });
+      navigate(role ? (dashboardPath || "/dashboard") : "/applicant/dashboard", { replace: true });
     }
   };
 
@@ -367,7 +367,7 @@ const Auth = () => {
                 </Button>
               </form>
               <p className="text-sm text-muted-foreground text-center mt-4">
-                Contact your administrator to create an account
+                Contact your administrator to create a staff account. Applying to a centre? <a href="/applicant" className="text-primary underline">Create an applicant account</a>
               </p>
             </>
           )}
