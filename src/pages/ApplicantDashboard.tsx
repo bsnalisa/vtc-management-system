@@ -10,6 +10,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { FileText, LogOut, Plus, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { resolveApplicantDestination } from "./ApplicantAuth";
 import { signOutAndClearCaches } from "@/lib/authUtils";
+import { useActiveOrganizations } from "@/hooks/usePublicApplication";
 
 const label = (s?: string | null) => (s || "pending").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -43,13 +44,16 @@ const ApplicantDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trainee_applications")
-        .select("id, application_number, intake, academic_year, qualification_status, registration_status, info_request_note, created_at, organizations(name), trades:trades!trainee_applications_trade_id_fkey(name)")
+        .select("id, application_number, intake, academic_year, qualification_status, registration_status, info_request_note, created_at, organization_id, trades:trades!trainee_applications_trade_id_fkey(name)")
         .eq("created_by", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      return (data || []) as any[];
     },
   });
+
+  const { data: orgs } = useActiveOrganizations();
+  const orgName = (id: string) => orgs?.find((o: any) => o.id === id)?.name || "Training centre";
 
   if (checking) {
     return <div className="flex min-h-screen items-center justify-center"><LoadingSpinner size="lg" text="Loading..." /></div>;
@@ -102,7 +106,7 @@ const ApplicantDashboard = () => {
                       <div className="min-w-0">
                         <div className="font-semibold">{a.trades?.name || "Application"}</div>
                         <div className="text-sm text-muted-foreground">
-                          {a.organizations?.name} · <span className="capitalize">{a.intake}</span> {a.academic_year}
+                          {orgName(a.organization_id)} · <span className="capitalize">{a.intake}</span> {a.academic_year}
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
                           Reference <span className="font-mono font-medium text-foreground">{a.application_number}</span> · Submitted {new Date(a.created_at).toLocaleDateString("en-ZA")}
