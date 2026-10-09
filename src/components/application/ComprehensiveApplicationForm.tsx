@@ -14,7 +14,8 @@ import { useTrades } from "@/hooks/useTrades";
 import { useNamibiaRegions } from "@/hooks/useNamibiaRegions";
 import { useCalculatePoints } from "@/hooks/useEntryRequirements";
 import { useQualificationCheck } from "@/hooks/useQualificationCheck";
-import { useAutoSaveDraft } from "@/hooks/useApplicationDraft";
+import { useAutoSaveDraft, calculateProgress, missingMandatoryFields } from "@/hooks/useApplicationDraft";
+import { Progress } from "@/components/ui/progress";
 import { SubjectEntry } from "./SubjectEntry";
 import { QualificationIndicator } from "./QualificationIndicator";
 import { DocumentUpload, MultipleDocumentUpload } from "./DocumentUpload";
@@ -108,12 +109,15 @@ export const ComprehensiveApplicationForm = ({
   const { calculatePoints } = useCalculatePoints();
 
   // Auto-save functionality
-  const { isSaving, lastSaved, saveNow } = useAutoSaveDraft(
+  const { isSaving, lastSaved, error: saveError, saveNow } = useAutoSaveDraft(
     formData,
     activeTab,
     currentDraftId,
-    open && enableAutoSave // Only save when dialog is open
+    open && enableAutoSave, // Only save when dialog is open
+    organizationIdOverride
   );
+  const progress = calculateProgress(formData);
+  const missingFields = missingMandatoryFields(formData);
 
 
   const calculatedPoints = calculatePoints(formData.school_subjects);
@@ -258,7 +262,11 @@ export const ComprehensiveApplicationForm = ({
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0 shrink-0">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <DialogTitle className="text-lg sm:text-xl">Trainee Application Form</DialogTitle>
-            <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
+            {enableAutoSave && <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} error={saveError} />}
+          </div>
+          <div className="mt-3 flex items-center gap-3" aria-label={`Application ${progress}% complete`}>
+            <Progress value={progress} className="h-2 flex-1" />
+            <span className="w-24 shrink-0 text-right text-xs font-medium text-muted-foreground">{progress}% complete</span>
           </div>
         </DialogHeader>
 
@@ -1126,6 +1134,15 @@ export const ComprehensiveApplicationForm = ({
                     </div>
                   </CardContent>
                 </Card>
+
+                {missingFields.length > 0 && (
+                  <Card className="border-warning/40 bg-warning/5">
+                    <CardContent className="p-4 text-sm">
+                      <p className="font-medium">Still required before your application is 100% complete:</p>
+                      <p className="mt-1 text-muted-foreground">{missingFields.map((f) => f.label).join(", ")}</p>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <Card className={validationErrors.declaration_accepted ? "border-destructive" : ""}>
                   <CardHeader>

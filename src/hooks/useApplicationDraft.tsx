@@ -198,16 +198,14 @@ export const useAutoSaveDraft = (
   };
 };
 
-/** Mandatory fields an applicant must complete; progress reaches 100% only when all are done. */
+/** Mandatory fields an applicant must fill in themselves (pre-filled defaults like intake are excluded so progress starts at 0%); progress reaches 100% only when all are done. */
 export const MANDATORY_FIELDS: { key: keyof ComprehensiveApplicationData; label: string }[] = [
   { key: "photo_path", label: "Passport photo" },
   { key: "last_name", label: "Surname" },
   { key: "first_name", label: "First name" },
   { key: "date_of_birth", label: "Date of birth" },
-  { key: "gender", label: "Gender" },
   { key: "national_id", label: "Identity number" },
   { key: "phone", label: "Contact number" },
-  { key: "nationality", label: "Nationality" },
   { key: "region", label: "Region" },
   { key: "address", label: "Residential address" },
   { key: "emergency_contact_name", label: "Emergency contact name" },
@@ -215,11 +213,6 @@ export const MANDATORY_FIELDS: { key: keyof ComprehensiveApplicationData; label:
   { key: "emergency_contact_relationship", label: "Emergency contact relationship" },
   { key: "emergency_contact_town", label: "Emergency contact town" },
   { key: "trade_id", label: "Trade (choice 1)" },
-  { key: "preferred_training_mode", label: "Training mode" },
-  { key: "preferred_level", label: "Level" },
-  { key: "intake", label: "Intake" },
-  { key: "academic_year", label: "Academic year" },
-  { key: "highest_grade_passed", label: "Highest grade passed" },
   { key: "id_document_path", label: "ID / birth certificate" },
   { key: "school_leaving_cert_path", label: "School leaving certificate" },
   { key: "academic_qualifications_path", label: "Academic qualifications" },
