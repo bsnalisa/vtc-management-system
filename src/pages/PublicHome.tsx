@@ -398,7 +398,7 @@ const PublicHome = () => {
                   <Alert>
                     <AlertDescription>
                       Sign in to see the applications you have submitted.{" "}
-                      <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/auth")}>
+                      <Button variant="link" className="h-auto p-0 font-medium underline whitespace-normal" onClick={() => navigate("/applicant")}>
                         Sign in
                       </Button>
                     </AlertDescription>
