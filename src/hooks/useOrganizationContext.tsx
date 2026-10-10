@@ -1,3 +1,4 @@
+import { foregroundFor } from "@/lib/themeContrast";
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "./useUserRole";
@@ -224,11 +225,16 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
       const theme = settings.color_theme;
       
       for (const key of ['primary', 'secondary', 'accent'] as const) {
-        if (theme[key]) root.style.setProperty(`--${key}`, theme[key]);
-        else root.style.removeProperty(`--${key}`);
+        if (theme[key]) {
+          root.style.setProperty(`--${key}`, theme[key]);
+          root.style.setProperty(`--${key}-foreground`, foregroundFor(theme[key]));
+        } else {
+          root.style.removeProperty(`--${key}`);
+          root.style.removeProperty(`--${key}-foreground`);
+        }
       }
     } else {
-      ['primary', 'secondary', 'accent'].forEach(key => root.style.removeProperty(`--${key}`));
+      ['primary', 'secondary', 'accent'].forEach(key => { root.style.removeProperty(`--${key}`); root.style.removeProperty(`--${key}-foreground`); });
     }
     // Navigation uses the shared workspace palette, independent of centre branding.
     ['sidebar-background', 'sidebar-primary', 'sidebar-accent'].forEach(key => root.style.removeProperty(`--${key}`));

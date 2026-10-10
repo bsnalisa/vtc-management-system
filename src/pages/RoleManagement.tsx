@@ -71,7 +71,10 @@ export default function RoleManagement() {
     setPermissionsRole(role);
   };
 
-  const RolesTable = ({ roles: tableRoles, showActions = true }: { roles: CustomRole[]; showActions?: boolean }) => (
+  const RolesTable = ({ roles: tableRoles, showActions: wantActions = true }: { roles: CustomRole[]; showActions?: boolean }) => {
+    // only super admins have row actions; hide the empty column for everyone else
+    const showActions = wantActions && role === "super_admin";
+    return (
     <Table className="min-w-[1040px]">
       <TableHeader>
         <TableRow>
@@ -135,7 +138,8 @@ export default function RoleManagement() {
         )}
       </TableBody>
     </Table>
-  );
+    );
+  };
 
   // If we're in permissions editor mode, render it separately
   if (permissionsRole) {
