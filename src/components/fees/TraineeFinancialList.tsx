@@ -362,7 +362,7 @@ export const TraineeFinancialList = () => {
               </div>
 
               <Tabs defaultValue="transactions">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="w-full justify-start sm:grid sm:grid-cols-2">
                   <TabsTrigger value="transactions">
                     <History className="h-4 w-4 mr-2" />
                     Transactions

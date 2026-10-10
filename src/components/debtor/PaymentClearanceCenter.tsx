@@ -241,7 +241,7 @@ export const PaymentClearanceCenter = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="w-full justify-start sm:grid sm:grid-cols-4">
           <TabsTrigger value="pending" className="relative">
             Pending
             {clearances?.filter((c) => c.status === "pending").length ? (

@@ -298,7 +298,7 @@
  
        {/* Status Tabs */}
        <Tabs value={activeTab} onValueChange={setActiveTab}>
-         <TabsList className="grid w-full grid-cols-4">
+         <TabsList className="w-full justify-start sm:grid sm:grid-cols-4">
            <TabsTrigger value="pending" className="relative">
              Pending
              {queueEntries?.filter((e) => e.status === "pending").length ? (

@@ -28,6 +28,8 @@ const buttonVariants = cva(
         "icon-lg": "h-11 w-11",
       },
     },
+    // the workspace variant holds multi-line content, so it must grow past the fixed size heights
+    compoundVariants: [{ variant: "workspace", className: "h-auto min-h-10" }],
     defaultVariants: {
       variant: "default",
       size: "default",
