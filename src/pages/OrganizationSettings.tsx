@@ -1,3 +1,4 @@
+import { foregroundFor } from "@/lib/themeContrast";
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -276,8 +277,11 @@ export default function OrganizationSettings() {
       // Apply theme immediately after saving
       const root = document.documentElement;
       root.style.setProperty('--primary', primaryHSL);
+      root.style.setProperty('--primary-foreground', foregroundFor(primaryHSL));
       root.style.setProperty('--secondary', secondaryHSL);
+      root.style.setProperty('--secondary-foreground', foregroundFor(secondaryHSL));
       root.style.setProperty('--accent', accentHSL);
+      root.style.setProperty('--accent-foreground', foregroundFor(accentHSL));
       root.style.setProperty('--sidebar-primary', primaryHSL);
       root.style.setProperty('--sidebar-accent', accentHSL);
 

@@ -71,16 +71,19 @@ export default function RoleManagement() {
     setPermissionsRole(role);
   };
 
-  const RolesTable = ({ roles: tableRoles, showActions = true }: { roles: CustomRole[]; showActions?: boolean }) => (
-    <Table className="min-w-[1040px] table-fixed">
+  const RolesTable = ({ roles: tableRoles, showActions: wantActions = true }: { roles: CustomRole[]; showActions?: boolean }) => {
+    // only super admins have row actions; hide the empty column for everyone else
+    const showActions = wantActions && role === "super_admin";
+    return (
+    <Table className="min-w-[1040px]">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[200px]">Role Name</TableHead>
-          <TableHead className="w-[220px]">Role Code</TableHead>
-          <TableHead className="w-[220px]">Description</TableHead>
+          <TableHead className="min-w-[180px]">Role Name</TableHead>
+          <TableHead className="min-w-[220px]">Role Code</TableHead>
+          <TableHead className="min-w-[280px]">Description</TableHead>
           <TableHead className="w-[90px]">Status</TableHead>
           <TableHead className="w-[90px]">Type</TableHead>
-          {showActions && <TableHead className="w-[220px] text-right">Actions</TableHead>}
+          {showActions && <TableHead className="min-w-[160px] text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -93,17 +96,17 @@ export default function RoleManagement() {
         ) : (
           tableRoles.map((tableRole) => (
             <TableRow key={tableRole.id}>
-              <TableCell className="font-medium break-words">{tableRole.role_name}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium whitespace-normal break-words align-top">{tableRole.role_name}</TableCell>
+              <TableCell className="align-top">
                 <code className="text-sm bg-muted px-2 py-1 rounded break-all">{tableRole.role_code}</code>
               </TableCell>
-              <TableCell className="break-words">
+              <TableCell className="whitespace-normal break-words align-top">
                 {tableRole.description || <span className="text-muted-foreground">No description</span>}
               </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <Badge variant={tableRole.active ? "default" : "secondary"}>{tableRole.active ? "Active" : "Inactive"}</Badge>
               </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <Badge variant={tableRole.is_system_role ? "outline" : "secondary"}>
                   {tableRole.is_system_role ? "System" : "Custom"}
                 </Badge>
@@ -135,7 +138,8 @@ export default function RoleManagement() {
         )}
       </TableBody>
     </Table>
-  );
+    );
+  };
 
   // If we're in permissions editor mode, render it separately
   if (permissionsRole) {
