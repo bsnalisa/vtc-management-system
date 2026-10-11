@@ -108,6 +108,78 @@ export type Database = {
           },
         ]
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_name: string | null
+          actor_role: string | null
+          created_at: string
+          details: Json
+          entity: string
+          entity_id: string | null
+          id: string
+          organization_id: string | null
+          summary: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          entity: string
+          entity_id?: string | null
+          id?: string
+          organization_id?: string | null
+          summary?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          organization_id?: string | null
+          summary?: string | null
+        }
+        Relationships: []
+      }
+      admin_overrides: {
+        Row: {
+          ended_at: string | null
+          expires_at: string
+          id: string
+          organization_id: string | null
+          reason: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          ended_at?: string | null
+          expires_at: string
+          id?: string
+          organization_id?: string | null
+          reason: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          organization_id?: string | null
+          reason?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       alumni: {
         Row: {
           active: boolean
@@ -13036,7 +13108,14 @@ export type Database = {
         }
         Returns: number
       }
+      admin_centre_ok: {
+        Args: { _org: string; _write?: boolean }
+        Returns: boolean
+      }
+      admin_write_allowed: { Args: never; Returns: boolean }
       application_window_status: { Args: { _org_slug: string }; Returns: Json }
+      assert_centre_access: { Args: { _org: string }; Returns: undefined }
+      assert_trainee_access: { Args: { _trainee: string }; Returns: undefined }
       assessment_certification_summary: {
         Args: { _academic_year?: string }
         Returns: {
@@ -13145,6 +13224,7 @@ export type Database = {
       }
       cancel_hostel_room_request: { Args: { _id: string }; Returns: undefined }
       cancel_leave: { Args: { _id: string }; Returns: undefined }
+      centre_access_ok: { Args: { _org: string }; Returns: boolean }
       certified_trainees_report: {
         Args: { _academic_year?: string }
         Returns: {
@@ -13259,6 +13339,7 @@ export type Database = {
         Args: { _approve: boolean; _id: string; _notes?: string }
         Returns: string
       }
+      end_admin_override: { Args: never; Returns: undefined }
       expire_trial_packages: {
         Args: never
         Returns: {
@@ -13368,6 +13449,10 @@ export type Database = {
           result_type: string
         }[]
       }
+      has_active_admin_override: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       has_centre_role: {
         Args: { _organization_id: string; _roles: string[] }
         Returns: boolean
@@ -13417,6 +13502,7 @@ export type Database = {
         Args: { _org: string; _user_id: string }
         Returns: boolean
       }
+      is_centre_scoped_user: { Args: never; Returns: boolean }
       is_deferral_staff: {
         Args: { _org: string; _user_id: string }
         Returns: boolean
@@ -13450,6 +13536,7 @@ export type Database = {
         Args: { _org: string; _user_id: string }
         Returns: boolean
       }
+      is_org_admin_only: { Args: { _user_id: string }; Returns: boolean }
       is_org_staff: {
         Args: { _org: string; _user_id: string }
         Returns: boolean
@@ -13460,6 +13547,7 @@ export type Database = {
       }
       is_own_application: { Args: { _application: string }; Returns: boolean }
       is_own_trainee: { Args: { _trainee: string }; Returns: boolean }
+      is_platform_user: { Args: never; Returns: boolean }
       is_project_staff: {
         Args: { _org: string; _user_id: string }
         Returns: boolean
@@ -13545,6 +13633,17 @@ export type Database = {
         }
         Returns: string
       }
+      log_admin_action: {
+        Args: {
+          _action: string
+          _details?: Json
+          _entity: string
+          _entity_id: string
+          _org: string
+          _summary: string
+        }
+        Returns: undefined
+      }
       log_assessment_audit: {
         Args: {
           _action: string
@@ -13625,6 +13724,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      my_centre_ids: { Args: never; Returns: string[] }
       my_learning_classes: {
         Args: never
         Returns: {
@@ -13743,6 +13843,10 @@ export type Database = {
         Args: { _done?: boolean; _item: string }
         Returns: undefined
       }
+      start_admin_override: {
+        Args: { _minutes?: number; _reason: string }
+        Returns: string
+      }
       start_quiz_attempt: { Args: { _quiz: string }; Returns: Json }
       submit_public_rpl_application: {
         Args: {
@@ -13789,6 +13893,7 @@ export type Database = {
         }
         Returns: number
       }
+      trainee_access_ok: { Args: { _trainee: string }; Returns: boolean }
       trainee_has_outstanding_fees: {
         Args: { _academic_year: string; _trainee_id: string }
         Returns: boolean
@@ -13796,6 +13901,10 @@ export type Database = {
       transcript_data: {
         Args: { _academic_year?: string; _trainee: string }
         Returns: Json
+      }
+      user_visible_to_my_centres: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       workflow_act: {
         Args: { _action: string; _comment?: string; _task: string }
