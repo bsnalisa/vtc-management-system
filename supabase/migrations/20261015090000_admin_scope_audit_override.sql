@@ -246,7 +246,7 @@ BEGIN
     EXECUTE format('DROP POLICY IF EXISTS "Centre admins stay in their centre (delete)" ON public.%I', t);
     EXECUTE format('CREATE POLICY "Centre admins stay in their centre (read)" ON public.%I AS RESTRICTIVE FOR SELECT USING (NOT (SELECT public.is_org_admin_only(auth.uid())) OR public.admin_centre_ok(%s, false))', t, replace(r.org_expr, '{t}', t));
     EXECUTE format('CREATE POLICY "Centre admins stay in their centre (insert)" ON public.%I AS RESTRICTIVE FOR INSERT WITH CHECK (NOT (SELECT public.is_org_admin_only(auth.uid())) OR public.admin_centre_ok(%s, true))', t, replace(r.org_expr, '{t}', t));
-    EXECUTE format('CREATE POLICY "Centre admins stay in their centre (update)" ON public.%I AS RESTRICTIVE FOR UPDATE USING (public.admin_centre_ok(%s, true)) WITH CHECK (NOT (SELECT public.is_org_admin_only(auth.uid())) OR public.admin_centre_ok(%s, true))', t, replace(r.org_expr, '{t}', t), replace(r.org_expr, '{t}', t));
+    EXECUTE format('CREATE POLICY "Centre admins stay in their centre (update)" ON public.%I AS RESTRICTIVE FOR UPDATE USING (NOT (SELECT public.is_org_admin_only(auth.uid())) OR public.admin_centre_ok(%s, true)) WITH CHECK (NOT (SELECT public.is_org_admin_only(auth.uid())) OR public.admin_centre_ok(%s, true))', t, replace(r.org_expr, '{t}', t), replace(r.org_expr, '{t}', t));
     EXECUTE format('CREATE POLICY "Centre admins stay in their centre (delete)" ON public.%I AS RESTRICTIVE FOR DELETE USING (NOT (SELECT public.is_org_admin_only(auth.uid())) OR public.admin_centre_ok(%s, true))', t, replace(r.org_expr, '{t}', t));
   END LOOP;
 
@@ -284,7 +284,7 @@ BEGIN
     EXECUTE format('DROP POLICY IF EXISTS "Admin writes need an override (update)" ON public.%I', t);
     EXECUTE format('DROP POLICY IF EXISTS "Admin writes need an override (delete)" ON public.%I', t);
     EXECUTE format('CREATE POLICY "Admin writes need an override (insert)" ON public.%I AS RESTRICTIVE FOR INSERT WITH CHECK ((SELECT public.admin_write_allowed()))', t);
-    EXECUTE format('CREATE POLICY "Admin writes need an override (update)" ON public.%I AS RESTRICTIVE FOR UPDATE USING (public.admin_write_allowed()) WITH CHECK ((SELECT public.admin_write_allowed()))', t);
+    EXECUTE format('CREATE POLICY "Admin writes need an override (update)" ON public.%I AS RESTRICTIVE FOR UPDATE USING ((SELECT public.admin_write_allowed())) WITH CHECK ((SELECT public.admin_write_allowed()))', t);
     EXECUTE format('CREATE POLICY "Admin writes need an override (delete)" ON public.%I AS RESTRICTIVE FOR DELETE USING ((SELECT public.admin_write_allowed()))', t);
   END LOOP;
 

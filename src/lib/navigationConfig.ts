@@ -29,6 +29,8 @@ export interface NavItem {
   url: string;
   icon: LucideIcon;
   children?: NavItem[];
+  /** Optional sidebar heading. Consecutive items with the same section are grouped under it. */
+  section?: string;
 }
 
 // Admin Navigation (system configuration and support)
@@ -71,35 +73,35 @@ export const adminNavItems: NavItem[] = [
 
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
 export const organizationAdminNavItems: NavItem[] = [
-  { title: "Dashboard", url: "/organization-admin-dashboard", icon: LayoutDashboard },
-  { title: "User Management", url: "/users", icon: Users },
-  { title: "Role Management", url: "/roles", icon: Shield },
-  { title: "Organization Settings", url: "/organization-settings", icon: Settings },
-  { title: "Modules", url: "/modules-management", icon: BookOpen },
-  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
-  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
-  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
-  { title: "Resource Centre", url: "/library", icon: BookOpen },
-  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
-  { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
-  { title: "System Logs", url: "/system-logs", icon: FileText },
-  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar },
-  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck },
-  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
-  { title: "Workflows", url: "/workflows", icon: Settings },
-  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
-  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
-  { title: "Learning Space", url: "/learning", icon: BookOpen },
-  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList },
-  { title: "Transcripts", url: "/transcripts", icon: FileText },
-  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
-  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
-  { title: "Moodle", url: "/moodle", icon: GraduationCap },
-  { title: "Registration Windows", url: "/registration-windows", icon: Calendar },
-  { title: "Certification Reports", url: "/reports/certification", icon: FileText },
-  { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },
-  { title: "Document Settings", url: "/document-settings", icon: FileText },
-  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+  { title: "Dashboard", url: "/organization-admin-dashboard", icon: LayoutDashboard, section: "Overview" },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
+  { title: "User Management", url: "/users", icon: Users, section: "People & Access" },
+  { title: "Role Management", url: "/roles", icon: Shield, section: "People & Access" },
+  { title: "Organization Settings", url: "/organization-settings", icon: Settings, section: "Centre Setup" },
+  { title: "Modules", url: "/modules-management", icon: BookOpen, section: "Centre Setup" },
+  { title: "Registration Windows", url: "/registration-windows", icon: Calendar, section: "Centre Setup" },
+  { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar, section: "Centre Setup" },
+  { title: "Document Settings", url: "/document-settings", icon: FileText, section: "Centre Setup" },
+  { title: "Workflows", url: "/workflows", icon: Settings, section: "Centre Setup" },
+  { title: "Moodle", url: "/moodle", icon: GraduationCap, section: "Centre Setup" },
+  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText, section: "Oversight" },
+  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList, section: "Oversight" },
+  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck, section: "Oversight" },
+  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar, section: "Oversight" },
+  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck, section: "Oversight" },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap, section: "Oversight" },
+  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList, section: "Oversight" },
+  { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Oversight" },
+  { title: "Learning Space", url: "/learning", icon: BookOpen, section: "Oversight" },
+  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen, section: "Oversight" },
+  { title: "Resource Centre", url: "/library", icon: BookOpen, section: "Oversight" },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText, section: "Oversight" },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3, section: "Oversight" },
+  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard, section: "Finance (read-only)" },
+  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign, section: "Finance (read-only)" },
+  { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Support & Records" },
+  { title: "System Logs", url: "/system-logs", icon: FileText, section: "Support & Records" },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Support & Records" },
 ];
 
 // Head of Training Navigation (Academic Command Center)

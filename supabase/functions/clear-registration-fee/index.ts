@@ -62,6 +62,29 @@ Deno.serve(async (req) => {
     const body: ClearFeeRequest = await req.json()
     const { queue_id, amount, payment_method, notes } = body
 
+    // Organization Admins are read-only on finance unless they have started an admin override (reason + time limit, audited)
+    if (['organization_admin', 'admin'].includes(userRole.role)) {
+      const { data: overridden } = await supabaseAdmin.rpc('has_active_admin_override', { _user_id: user.id })
+      if (!overridden) {
+        return new Response(JSON.stringify({ success: false, error: 'Clearing a fee as an Organization Admin needs an active admin override. Start one with a reason first.' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+    if (['organization_admin', 'admin', 'super_admin'].includes(userRole.role)) {
+      await supabaseAdmin.from('admin_audit_log').insert({
+        organization_id: userRole.organization_id ?? null,
+        actor_id: user.id,
+        actor_role: userRole.role,
+        action: 'fee.clear_requested',
+        entity: 'financial_queue',
+        entity_id: queue_id ?? null,
+        summary: 'Cleared a registration fee',
+        details: { amount, payment_method, notes: notes ?? null },
+      })
+    }
+
     if (!queue_id || amount === undefined || !payment_method) {
       return new Response(JSON.stringify({ success: false, error: 'Missing required fields' }), {
         status: 400,

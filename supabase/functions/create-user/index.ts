@@ -5,6 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Only a super admin may create admin-level accounts
+const PRIVILEGED_ROLES = ['organization_admin', 'admin', 'super_admin', 'vms_developer', 'vms_support']
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -72,8 +75,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    if (role === 'super_admin' && userOrg?.role !== 'super_admin') {
-      return new Response(JSON.stringify({ error: 'Only super admins can create super admin users' }), {
+    if (PRIVILEGED_ROLES.includes(role) && userOrg?.role !== 'super_admin') {
+      return new Response(JSON.stringify({ error: 'Only a super admin can create an administrator account' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -118,6 +121,17 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    await supabaseAdmin.from('admin_audit_log').insert({
+      organization_id: targetOrgId || null,
+      actor_id: user.id,
+      actor_role: userOrg?.role ?? null,
+      action: 'user.created',
+      entity: 'users',
+      entity_id: newUser.user.id,
+      summary: `Created a ${role} account`,
+      details: { email, role },
+    })
 
     // If role is trainer, auto-create a record in the trainers table
     if (role === 'trainer') {

@@ -39,7 +39,7 @@ interface UserEditDialogProps {
     phone: string;
     role: string;
     resetPassword?: boolean;
-  }) => Promise<void>;
+  }) => Promise<{ temporaryPassword?: string | null } | void>;
   isLoading?: boolean;
 }
 
@@ -58,6 +58,7 @@ export const UserEditDialog = ({
   const [role, setRole] = useState("");
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
   const [resettingPassword, setResettingPassword] = useState(false);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -98,7 +99,7 @@ export const UserEditDialog = ({
     if (!user) return;
     setResettingPassword(true);
     try {
-      await onSave({
+      const result = await onSave({
         userId: user.user_id,
         firstname,
         surname,
@@ -106,9 +107,10 @@ export const UserEditDialog = ({
         role,
         resetPassword: true,
       });
+      setTemporaryPassword((result as { temporaryPassword?: string | null } | undefined)?.temporaryPassword ?? null);
       toast({
         title: "Password Reset",
-        description: `Password has been reset to default. User will be required to change it on next login.`,
+        description: "A temporary password was created. Give it to the user; they must change it on next login.",
       });
     } catch (error) {
       // Error handled by parent
@@ -116,6 +118,10 @@ export const UserEditDialog = ({
       setResettingPassword(false);
     }
   };
+
+  useEffect(() => {
+    if (!open) setTemporaryPassword(null);
+  }, [open]);
 
   if (!user) return null;
 
@@ -214,7 +220,7 @@ export const UserEditDialog = ({
               <div>
                 <p className="text-sm font-medium">Reset Password</p>
                 <p className="text-xs text-muted-foreground">
-                  Reset to default password (Password1). User must change on next login.
+                  Creates a one-time temporary password. User must change it on next login.
                 </p>
               </div>
               <Button 
@@ -232,6 +238,26 @@ export const UserEditDialog = ({
                 Reset
               </Button>
             </div>
+            {temporaryPassword && (
+              <div className="mt-3 rounded-md border border-amber-500/50 bg-amber-500/10 p-3">
+                <p className="text-xs font-medium">Temporary password (shown once)</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <code className="rounded bg-background px-2 py-1 text-sm font-mono select-all">{temporaryPassword}</code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(temporaryPassword);
+                      toast({ title: "Copied", description: "Temporary password copied." });
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Give this to the user in person or by phone. It is not stored anywhere you can look it up later.</p>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
