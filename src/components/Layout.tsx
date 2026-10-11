@@ -65,7 +65,7 @@ const Layout = ({ children }: LayoutProps) => {
   const navItems = [
     ...(!isTrainee ? [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }] : []),
     ...(canAccessUserManagement ? [{ title: "Users", url: "/users", icon: Shield }] : []),
-    ...(canAccessTrainees && hasModuleAccess(MODULE_CODES.TRAINEE_MANAGEMENT) ? [{ title: "Trainees", url: "/trainees", icon: Users }, { title: "Register", url: "/trainees/register", icon: UserPlus }] : []),
+    ...(canAccessTrainees && hasModuleAccess(MODULE_CODES.TRAINEE_MANAGEMENT) ? [{ title: "Trainees", url: "/trainees", icon: Users }, ...(role === "registration_officer" ? [{ title: "Register", url: "/trainees/register", icon: UserPlus }] : [])] : []),
     ...(canAccessTrainers && hasModuleAccess(MODULE_CODES.TRAINER_MANAGEMENT) ? [{ title: "Trainers", url: "/trainers", icon: GraduationCap }] : []),
     ...(canAccessAttendance && hasModuleAccess(MODULE_CODES.ATTENDANCE_TRACKING) ? [{ title: "Attendance", url: "/attendance", icon: ClipboardList }] : []),
     ...(canAccessFees && hasModuleAccess(MODULE_CODES.FEE_MANAGEMENT) ? [{ title: "Fees", url: "/fees", icon: DollarSign }] : []),

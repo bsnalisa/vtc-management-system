@@ -89,4 +89,13 @@ set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', fa
 insert into trainees select * from newt;
 reset role;
 select public.assert((select count(*) from trainees where trainee_id = 'A-NEW2') = 1, 'an admin who is also a registration officer can register');
+
+-- ===== reports =====
+set role authenticated; select set_config('request.jwt.claim.sub', :'cmA', false);
+select * from public.certified_trainees_report();
+select * from public.assessment_certification_summary();
+select public.assert((select count(*) from assessment_results ar join trainees t on t.id = ar.trainee_id where t.organization_id = :'orgB') = 0, 'report tables show no other centre rows');
+select set_config('request.jwt.claim.sub', :'trainerA', false);
+select public.expect_error($$select * from public.certified_trainees_report()$$, 'Not authorised', 'other staff still cannot run the certification report');
+reset role;
 select 'OK centre manager';

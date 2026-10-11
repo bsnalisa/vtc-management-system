@@ -113,12 +113,14 @@ const TraineeList = () => {
       groupLabel={groupLabel}
     >
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <Button onClick={() => navigate("/trainees/register")} className="w-full sm:w-auto">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add New Trainee
-          </Button>
-        </div>
+        {canRegister && (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <Button onClick={() => navigate("/trainees/register")} className="w-full sm:w-auto">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add New Trainee
+            </Button>
+          </div>
+        )}
 
         {/* Filters and Search */}
         <Card>
