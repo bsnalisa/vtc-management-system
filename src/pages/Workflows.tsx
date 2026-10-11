@@ -34,7 +34,7 @@ function DefinitionsTab() {
     <div className="space-y-4">
       <div className="flex justify-between gap-3 items-start">
         <p className="text-sm text-muted-foreground max-w-2xl">A process only goes through a workflow once you activate one for it. Until then it keeps working exactly as before. Only one workflow can be active per process.</p>
-        <Button onClick={() => setEditing("new")}><Plus className="h-4 w-4 mr-2" />New workflow</Button>
+        <Button className="shrink-0" onClick={() => setEditing("new")}><Plus className="h-4 w-4 mr-2" />New workflow</Button>
       </div>
       {defs?.map((d) => (
         <Card key={d.id}>
@@ -135,7 +135,7 @@ function SettingsTab() {
           </div>
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button disabled={save.isPending} onClick={() => save.mutate({ app_base_url: url, alerts: ALERT_EVENTS.map(({ event }) => ({ event, ...alerts[event] })) })}>Save settings</Button>
         <Button variant="outline" disabled={escalate.isPending} onClick={() => escalate.mutate()}>Check for overdue approvals now</Button>
       </div>

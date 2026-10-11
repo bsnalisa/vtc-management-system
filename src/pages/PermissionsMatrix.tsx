@@ -375,7 +375,7 @@ export default function PermissionsMatrix() {
       </Card>
 
       <Tabs defaultValue="dashboards" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="w-full justify-start sm:grid sm:grid-cols-3">
           <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
           <TabsTrigger value="functional">Functional Modules</TabsTrigger>
           <TabsTrigger value="super-admin">Super Admin</TabsTrigger>

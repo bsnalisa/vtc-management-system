@@ -27,7 +27,7 @@ export function HostelFeesTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <OverdueFeeChecker />
         <FeeGenerationButton />
         <Button onClick={() => setFeeDialogOpen(true)} size="sm">

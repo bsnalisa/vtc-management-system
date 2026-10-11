@@ -140,7 +140,7 @@ const ApplicationManagement = () => {
           </CardHeader>
           <CardContent className="p-4 pt-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="w-full justify-start sm:grid sm:grid-cols-4">
                 <TabsTrigger value="all">All Screened</TabsTrigger>
                 <TabsTrigger value="qualified">Qualified</TabsTrigger>
                 <TabsTrigger value="not_qualified">Not Qualified</TabsTrigger>

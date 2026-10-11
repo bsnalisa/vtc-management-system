@@ -351,8 +351,8 @@ const HeadOfTrainingDashboard = () => {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-sm truncate">{q.qualification_title}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <Badge variant="outline" className="text-xs font-mono">{q.qualification_code}</Badge>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                              <Badge variant="outline" className="shrink-0 text-xs font-mono">{q.qualification_code}</Badge>
                               <span className="text-xs text-muted-foreground">NQF {q.nqf_level}</span>
                             </div>
                           </div>
@@ -564,7 +564,7 @@ const HeadOfTrainingDashboard = () => {
                 ) : (
                   <div className="space-y-3">
                     {trainerQualifications.map((tq: any) => (
-                      <div key={tq.id} className="flex items-center justify-between rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50">
+                      <div key={tq.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-4 transition-all hover:border-primary/30 hover:bg-accent/50">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
                             {(tq.trainer_profile?.firstname || "?").charAt(0).toUpperCase()}
@@ -575,7 +575,7 @@ const HeadOfTrainingDashboard = () => {
                             </p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <Badge variant="outline" className="text-xs font-mono">{tq.qualifications?.qualification_code}</Badge>
-                              <span className="text-xs text-muted-foreground truncate">{tq.qualifications?.qualification_title}</span>
+                              <span className="min-w-0 max-w-full break-words text-xs text-muted-foreground">{tq.qualifications?.qualification_title}</span>
                             </div>
                           </div>
                         </div>

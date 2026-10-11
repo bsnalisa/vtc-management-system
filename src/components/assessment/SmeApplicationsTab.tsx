@@ -24,7 +24,7 @@ export function SmeApplicationsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <span>Experts register at the public link below. Approving grants the Subject Matter Expert role when they already have an account.</span>
         <Button variant="outline" size="sm" onClick={async () => {
           // the registration page is keyed by the centre's link name (subdomain)

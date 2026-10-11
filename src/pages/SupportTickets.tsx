@@ -54,7 +54,7 @@ export default function SupportTickets() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="open" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="w-full justify-start sm:grid sm:grid-cols-3">
               <TabsTrigger value="open">
                 Open ({openTickets.length})
               </TabsTrigger>

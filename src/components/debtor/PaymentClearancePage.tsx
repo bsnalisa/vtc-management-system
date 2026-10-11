@@ -230,7 +230,7 @@ export const PaymentClearancePage = () => {
 
       {/* Fee Type Tabs */}
       <Tabs value={entityFilter} onValueChange={setEntityFilter}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="w-full justify-start sm:grid sm:grid-cols-3">
           <TabsTrigger value="APPLICATION" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Application Fees
