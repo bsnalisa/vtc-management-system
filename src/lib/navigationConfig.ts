@@ -114,7 +114,6 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "Classes", url: "/classes", icon: DoorClosed, section: "People" },
   { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList, section: "People" },
   { title: "Certification Reports", url: "/reports/certification", icon: FileText, section: "Results" },
-  { title: "Module Reports", url: "/reports/modules", icon: BarChart3, section: "Results" },
   { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Results" },
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap, section: "Results" },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Support & Records" },
