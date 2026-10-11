@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { identifyCaller, canActOnCentre, hasRoleAt, centresWithRole, onlyServerOrPlatform, jsonResponse } from "../_shared/caller.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
@@ -37,6 +38,11 @@ serve(async (req) => {
     }
 
     const { documentType, templateName, data, organizationId }: DocumentRequest = await req.json();
+
+    const caller = await identifyCaller(req, supabase);
+    if (!caller || !canActOnCentre(caller, organizationId)) {
+      throw new Error("Not authorised for this centre");
+    }
 
     console.log(`Generating ${documentType} document for organization ${organizationId}`);
 

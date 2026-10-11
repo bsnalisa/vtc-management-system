@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
+import { identifyCaller, canActOnCentre, hasRoleAt, centresWithRole, onlyServerOrPlatform, jsonResponse } from '../_shared/caller.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,6 +38,10 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { type, organization_id, data }: NotificationRequest = await req.json();
+
+    const caller = await identifyCaller(req, supabase);
+    if (!caller) return jsonResponse({ success: false, error: 'Sign in first' }, 401, corsHeaders);
+    if (!canActOnCentre(caller, organization_id)) return jsonResponse({ success: false, error: 'Not authorised for this centre' }, 403, corsHeaders);
 
     console.log(`Sending ${type} notification for organization ${organization_id}`);
 

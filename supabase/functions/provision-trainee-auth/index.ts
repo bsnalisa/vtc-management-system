@@ -101,11 +101,13 @@ Deno.serve(async (req) => {
     }
 
     // Get user's role and organization
-    const { data: userRole, error: roleError } = await supabaseAdmin
+    const allowedRoles = ['super_admin', 'organization_admin', 'registration_officer', 'admin']
+    const { data: roleRows, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('organization_id, role')
       .eq('user_id', user.id)
-      .single()
+    // A person can hold several roles; use the one that allows provisioning
+    const userRole = (roleRows ?? []).find((r) => allowedRoles.includes(r.role)) ?? (roleRows ?? [])[0]
 
     if (roleError) {
       return new Response(JSON.stringify({ 
@@ -119,7 +121,6 @@ Deno.serve(async (req) => {
     }
 
     // Check if user has permission to provision trainees
-    const allowedRoles = ['super_admin', 'organization_admin', 'registration_officer', 'admin']
     if (!allowedRoles.includes(userRole?.role)) {
       return new Response(JSON.stringify({ 
         success: false,
@@ -220,6 +221,18 @@ Deno.serve(async (req) => {
       registrationStatus = data.registration_status
       currentProvisioningStatus = data.account_provisioning_status
       existingUserId = data.user_id
+    }
+
+    // A centre's staff can only provision accounts for their own centre (the service key below bypasses row security)
+    if (userRole.role !== 'super_admin' && organizationId !== userRole.organization_id) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Not authorised for this centre',
+        provisioning_status: 'failed'
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     // ========================================

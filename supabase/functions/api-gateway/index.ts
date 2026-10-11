@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
+import { identifyCaller, canActOnCentre } from "../_shared/caller.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,6 +38,18 @@ serve(async (req) => {
       );
     }
 
+    const caller = await identifyCaller(req, supabase);
+    if (!caller) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const forbidden = () => new Response(
+      JSON.stringify({ error: "Not authorised for this centre" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
     // Route handling
     switch (path) {
       case "analytics/organization": {
@@ -47,6 +60,9 @@ serve(async (req) => {
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
+
+        // The service key below bypasses row security, so the caller must belong to this centre
+        if (!canActOnCentre(caller, orgId)) return forbidden();
 
         // Fetch comprehensive analytics
         const [traineesRes, trainersRes, classesRes, feesRes] = await Promise.all([
@@ -121,9 +137,17 @@ serve(async (req) => {
           );
         }
 
+        // A centre user is always searched inside their own centre; only platform staff may search across centres
+        let searchOrg: string | null = orgId || null;
+        if (caller.kind === "user" && !caller.platform) {
+          if (searchOrg && !caller.orgIds.includes(searchOrg)) return forbidden();
+          searchOrg = searchOrg ?? caller.orgIds[0] ?? null;
+          if (!searchOrg) return forbidden();
+        }
+
         const { data, error } = await supabase.rpc("global_search", {
           search_query: query,
-          org_id: orgId || null,
+          org_id: searchOrg,
           search_limit: limit,
         });
 
