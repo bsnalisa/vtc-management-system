@@ -11,7 +11,7 @@
 insert into auth.users (id,email) values (:'hot','hot@a.test'),(:'coord','coord@a.test'),(:'deleg','deleg@a.test');
 update profiles p set full_name = split_part(u.email,'@',1), email = u.email from auth.users u where u.id = p.user_id and u.id in (:'hot',:'coord',:'deleg');
 insert into user_roles (user_id, role, organization_id) values
- (:'hot','head_of_training',:'orgA'), (:'coord','assessment_coordinator',:'orgA'), (:'deleg','hod',:'orgA');
+ (:'hot','head_of_training',:'orgA'), (:'coord','assessment_coordinator',:'orgA'), (:'deleg','head_of_trainee_support',:'orgA');
 insert into workflow_settings (organization_id, app_base_url) values (:'orgA','https://app.test');
 
 \set Q 'e0000000-0000-0000-0000-000000000001'
