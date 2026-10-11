@@ -13225,6 +13225,7 @@ export type Database = {
       cancel_hostel_room_request: { Args: { _id: string }; Returns: undefined }
       cancel_leave: { Args: { _id: string }; Returns: undefined }
       centre_access_ok: { Args: { _org: string }; Returns: boolean }
+      centre_manager_overview: { Args: { _org?: string }; Returns: Json }
       certified_trainees_report: {
         Args: { _academic_year?: string }
         Returns: {
@@ -14091,6 +14092,7 @@ export type Database = {
         | "head_trainee_support"
         | "subject_matter_expert"
         | "printing_distribution_officer"
+        | "centre_manager"
       approval_action: "submitted" | "approved" | "rejected" | "returned"
       asset_condition: "excellent" | "good" | "fair" | "poor" | "needs_repair"
       asset_status:
@@ -14313,6 +14315,7 @@ export const Constants = {
         "head_trainee_support",
         "subject_matter_expert",
         "printing_distribution_officer",
+        "centre_manager",
       ],
       approval_action: ["submitted", "approved", "rejected", "returned"],
       asset_condition: ["excellent", "good", "fair", "poor", "needs_repair"],
