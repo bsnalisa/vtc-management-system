@@ -287,5 +287,5 @@ const CertificationReports = () => {
 };
 
 export default withRoleAccess(CertificationReports, {
-  requiredRoles: ["admin", "organization_admin", "registration_officer", "head_of_training", "assessment_coordinator", "hod"],
+  requiredRoles: ["admin", "organization_admin", "centre_manager", "registration_officer", "head_of_training", "assessment_coordinator", "hod"],
 });

@@ -4,6 +4,7 @@ export const getRoleThemeClass = (role: UserRole): string => {
   const themeMap: Record<string, string> = {
     super_admin: "role-super-admin",
     organization_admin: "role-admin",
+    centre_manager: "role-hod",
     admin: "role-admin",
     registration_officer: "role-registration",
     debtor_officer: "role-debtor",
@@ -25,6 +26,7 @@ export const getRoleColor = (role: UserRole): string => {
   const colorMap: Record<string, string> = {
     super_admin: "bg-role-super-admin",
     organization_admin: "bg-role-admin",
+    centre_manager: "bg-role-hod",
     admin: "bg-role-admin",
     registration_officer: "bg-role-registration",
     debtor_officer: "bg-role-debtor",

@@ -6,7 +6,7 @@ const corsHeaders = {
 }
 
 // Only a super admin may create, change, deactivate or reset the password of an admin-level account
-const PRIVILEGED_ROLES = ['organization_admin', 'admin', 'super_admin', 'vms_developer', 'vms_support']
+const PRIVILEGED_ROLES = ['organization_admin', 'admin', 'centre_manager', 'super_admin', 'vms_developer', 'vms_support']
 
 const generateTemporaryPassword = () => {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'

@@ -2,6 +2,7 @@ import { useUserRole, UserRole } from "@/hooks/useUserRole";
 import {
   adminNavItems,
   organizationAdminNavItems,
+  centreManagerNavItems,
   headOfTrainingNavItems,
   trainerNavItems,
   traineeNavItems,
@@ -38,6 +39,8 @@ export const useRoleNavigation = () => {
         return organizationAdminNavItems;
       case "admin":
         return adminNavItems;
+      case "centre_manager":
+        return centreManagerNavItems;
       case "head_of_training":
         return headOfTrainingNavItems;
       case "trainer":
@@ -96,6 +99,8 @@ export const useRoleNavigation = () => {
         return "Organization";
       case "admin":
         return "Administration";
+      case "centre_manager":
+        return "Centre Management";
       case "head_of_training":
         return "Training Management";
       case "trainer":

@@ -4,6 +4,7 @@ export const getRoleDisplayName = (role: UserRole): string => {
   const roleMap: Record<string, string> = {
     super_admin: "Super Admin",
     organization_admin: "Organization Admin",
+    centre_manager: "Centre Manager",
     admin: "Admin",
     head_of_training: "Head of Training",
     trainer: "Trainer",
@@ -37,6 +38,7 @@ export const getRoleDashboardPath = (role: UserRole): string => {
   const pathMap: Record<string, string> = {
     super_admin: "/super-admin",
     organization_admin: "/organization-admin-dashboard",
+    centre_manager: "/centre-manager-dashboard",
     admin: "/admin-dashboard",
     head_of_training: "/head-of-training-dashboard",
     trainer: "/trainer-dashboard",

@@ -104,6 +104,23 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Support & Records" },
 ];
 
+// Centre Manager Navigation: oversight of the whole centre; everything here is read-only except approvals
+export const centreManagerNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/centre-manager-dashboard", icon: LayoutDashboard, section: "Overview" },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
+  { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
+  { title: "Trainees", url: "/trainees", icon: Users, section: "People" },
+  { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "People" },
+  { title: "Classes", url: "/classes", icon: DoorClosed, section: "People" },
+  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList, section: "People" },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText, section: "Results" },
+  { title: "Module Reports", url: "/reports/modules", icon: BarChart3, section: "Results" },
+  { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Results" },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap, section: "Results" },
+  { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Support & Records" },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Support & Records" },
+];
+
 // Head of Training Navigation (Academic Command Center)
 export const headOfTrainingNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-training-dashboard", icon: LayoutDashboard },

@@ -224,6 +224,19 @@ Deno.serve(async (req) => {
     }
 
     // A centre's staff can only provision accounts for their own centre (the service key below bypasses row security)
+    // Organization Admins support the accounts of trainees who are already registered; creating accounts from
+    // applications is part of registration, which belongs to the registration officer
+    if (userRole.role !== 'super_admin' && userRole.role !== 'registration_officer' && !trainee_id) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Only a registration officer can provision accounts from applications',
+        provisioning_status: 'failed'
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     if (userRole.role !== 'super_admin' && organizationId !== userRole.organization_id) {
       return new Response(JSON.stringify({
         success: false,
