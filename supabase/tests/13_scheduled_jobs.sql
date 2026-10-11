@@ -19,9 +19,9 @@ select public.expect_error($$select public.run_scheduled_job('drop_everything')$
 set session authorization authenticator;
 set role anon;
 select public.assert(not public.is_job_runner(), 'anonymous API caller is not a job runner');
-select public.expect_error($$select public.workflow_escalate_overdue('a0000000-0000-0000-0000-00000000000a')$$, 'Not authorised', 'anonymous caller cannot escalate approvals');
-select public.expect_error($$select public.library_process_overdue('a0000000-0000-0000-0000-00000000000a')$$, 'Not authorised', 'anonymous caller cannot run the library sweep');
-select public.expect_error($$select public.extracurricular_send_reminders('a0000000-0000-0000-0000-00000000000a')$$, 'Not authorised', 'anonymous caller cannot send reminders');
+select public.expect_error($$select public.workflow_escalate_overdue('a0000000-0000-0000-0000-00000000000a')$$, 'Not authorised|permission denied', 'anonymous caller cannot escalate approvals');
+select public.expect_error($$select public.library_process_overdue('a0000000-0000-0000-0000-00000000000a')$$, 'Not authorised|permission denied', 'anonymous caller cannot run the library sweep');
+select public.expect_error($$select public.extracurricular_send_reminders('a0000000-0000-0000-0000-00000000000a')$$, 'Not authorised|permission denied', 'anonymous caller cannot send reminders');
 select public.expect_error($$select public.run_scheduled_job('library_overdue')$$, 'permission denied', 'run_scheduled_job is not callable by the public');
 reset role;
 set role authenticated; select set_config('request.jwt.claim.sub', :'tr1', false);

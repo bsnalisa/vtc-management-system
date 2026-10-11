@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
+import { identifyCaller, canActOnCentre, hasRoleAt, centresWithRole, onlyServerOrPlatform, jsonResponse } from '../_shared/caller.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,17 +17,24 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    const caller = await identifyCaller(req, supabase);
+    if (!caller) return jsonResponse({ success: false, error: 'Sign in first' }, 401, corsHeaders);
+    const scope = centresWithRole(caller, ['hostel_coordinator', 'debtor_officer']);
+    if (scope !== null && scope.length === 0) return jsonResponse({ success: false, error: 'Not authorised' }, 403, corsHeaders);
+
     console.log('Checking for overdue hostel fees...');
 
     const today = new Date().toISOString().split('T')[0];
 
     // Fetch all overdue hostel fees (unpaid or partially paid, past due date)
-    const { data: overdueFees, error: feesError } = await supabase
+    let feeQuery = supabase
       .from('hostel_fees')
       .select('*, trainees(trainee_id, first_name, last_name)')
       .lt('due_date', today)
       .in('payment_status', ['pending', 'partial'])
       .order('due_date', { ascending: true });
+    if (scope !== null) feeQuery = feeQuery.in('organization_id', scope);
+    const { data: overdueFees, error: feesError } = await feeQuery;
 
     if (feesError) {
       console.error('Error fetching overdue fees:', feesError);

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
+import { identifyCaller, canActOnCentre, hasRoleAt, centresWithRole, hasRoleOrOverride, onlyServerOrPlatform, jsonResponse } from '../_shared/caller.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +25,17 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    const caller = await identifyCaller(req, supabase);
+    if (!caller) return jsonResponse({ success: false, error: 'Sign in first' }, 401, corsHeaders);
+    // Staff generate fees for their own centre only; an Organization Admin needs an active override (fees are finance data)
+    let scope: string[] | null = centresWithRole(caller, ['hostel_coordinator', 'debtor_officer'], false);
+    if (scope !== null && caller.kind === 'user') {
+      for (const o of caller.orgIds) {
+        if (!scope.includes(o) && (await hasRoleOrOverride(supabase, caller, o, []))) scope.push(o);
+      }
+      if (scope.length === 0) return jsonResponse({ success: false, error: 'Not authorised' }, 403, corsHeaders);
+    }
+
     console.log('Starting monthly hostel fee generation...');
 
     // Get current date and calculate fee month (first day of current month)
@@ -38,10 +50,12 @@ Deno.serve(async (req) => {
     console.log(`Generating fees for month: ${feeMonthStr}, due date: ${dueDateStr}`);
 
     // Fetch all active hostel allocations
-    const { data: allocations, error: allocationsError } = await supabase
+    let allocationQuery = supabase
       .from('hostel_allocations')
       .select('id, organization_id, trainee_id, monthly_fee, status, allocation_id')
       .eq('status', 'active');
+    if (scope !== null) allocationQuery = allocationQuery.in('organization_id', scope);
+    const { data: allocations, error: allocationsError } = await allocationQuery;
 
     if (allocationsError) {
       console.error('Error fetching allocations:', allocationsError);

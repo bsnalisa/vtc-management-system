@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
+import { identifyCaller, canActOnCentre, hasRoleAt, centresWithRole, onlyServerOrPlatform, jsonResponse } from '../_shared/caller.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,6 +43,17 @@ Deno.serve(async (req) => {
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
+    }
+
+    // The service key below bypasses row security, so the caller must belong to the centre they are notifying
+    const caller = await identifyCaller(req, supabase);
+    if (!caller) return jsonResponse({ success: false, error: 'Sign in first' }, 401, corsHeaders);
+    if (!canActOnCentre(caller, notification.organization_id)) {
+      return jsonResponse({ success: false, error: 'Not authorised for this centre' }, 403, corsHeaders);
+    }
+    if (notification.user_id && caller.kind === 'user' && !caller.platform) {
+      const { data: target } = await supabase.from('user_roles').select('user_id').eq('user_id', notification.user_id).eq('organization_id', notification.organization_id).limit(1);
+      if (!target?.length) return jsonResponse({ success: false, error: 'That person is not at this centre' }, 403, corsHeaders);
     }
 
     // If role is specified, get all users with that role in the organization

@@ -30,12 +30,14 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { toast as showToast } from "sonner";
 import { signOutAndClearCaches } from "@/lib/authUtils";
 import { AppLogo } from "@/components/AppLogo";
+import { AdminOverrideBar } from "@/components/admin/AdminOverrideBar";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 
 interface NavItem {
   title: string;
   url: string;
   icon: LucideIcon;
+  section?: string;
 }
 
 interface DashboardLayoutProps {
@@ -60,6 +62,15 @@ function DashboardSidebar({
   const { mutate: logActivity } = useLogActivity();
    const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  // Roles whose menu is long can mark items with a section; consecutive items with the same section share a heading.
+  const sections = navItems.reduce<{ label: string; items: NavItem[] }[]>((acc, item) => {
+    const label = item.section ?? groupLabel;
+    const last = acc[acc.length - 1];
+    if (last && last.label === label) last.items.push(item);
+    else acc.push({ label, items: [item] });
+    return acc;
+  }, []);
 
   const isActive = (url: string) => {
     const [path, query] = url.split("?");
@@ -129,11 +140,12 @@ function DashboardSidebar({
           </div>
         )}
 
-        <SidebarGroup>
-          {!isCollapsed && <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>}
+        {sections.map((section) => (
+        <SidebarGroup key={section.label}>
+          {!isCollapsed && <SidebarGroupLabel>{section.label}</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.url);
                 const hasAccess = true;
@@ -178,6 +190,7 @@ function DashboardSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        ))}
 
         {statsContent && !isCollapsed && (
           <SidebarGroup className="mt-8">
@@ -216,6 +229,7 @@ function TopHeader({
 
       {/* User Actions */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <AdminOverrideBar />
         <RoleSwitcher />
         <Button 
           variant="ghost" 

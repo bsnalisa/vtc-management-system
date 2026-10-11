@@ -5,6 +5,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Only a super admin may create, change, deactivate or reset the password of an admin-level account
+const PRIVILEGED_ROLES = ['organization_admin', 'admin', 'super_admin', 'vms_developer', 'vms_support']
+
+const generateTemporaryPassword = () => {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
+  const bytes = crypto.getRandomValues(new Uint8Array(12))
+  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('') + '!7'
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -112,6 +121,46 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Admin-level accounts and roles are managed by super admins only
+    if (userOrg?.role !== 'super_admin') {
+      const targetIsPrivileged = PRIVILEGED_ROLES.includes(targetUserRole?.role ?? '')
+      const roleChanged = role !== undefined && role !== targetUserRole?.role
+      const touchesAccount = roleChanged || active !== undefined || resetPassword === true
+      if (targetIsPrivileged && touchesAccount) {
+        return new Response(JSON.stringify({ error: 'Only a super admin can change the role, status or password of an administrator account' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (targetIsPrivileged && userId !== user.id) {
+        return new Response(JSON.stringify({ error: 'Only a super admin can edit another administrator account' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (role !== undefined && role !== targetUserRole?.role && PRIVILEGED_ROLES.includes(role)) {
+        return new Response(JSON.stringify({ error: 'Only a super admin can grant an administrator role' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
+    const auditOrg = targetUserRole?.organization_id ?? userOrg?.organization_id ?? null
+    const audit = async (action: string, summary: string, details: Record<string, unknown> = {}) => {
+      const { error: auditError } = await supabaseAdmin.from('admin_audit_log').insert({
+        organization_id: auditOrg,
+        actor_id: user.id,
+        actor_role: userOrg?.role ?? null,
+        action,
+        entity: 'users',
+        entity_id: userId,
+        summary,
+        details,
+      })
+      if (auditError) console.warn('Failed to write audit entry:', auditError.message)
+    }
+
     // Update profile if name/phone provided
     if (firstname !== undefined || surname !== undefined || phone !== undefined) {
       const profileUpdate: Record<string, any> = {}
@@ -135,6 +184,7 @@ Deno.serve(async (req) => {
         })
       }
       console.log('Profile updated successfully')
+      await audit('user.profile_updated', 'Changed a user\'s name or phone', { firstname, surname, phone })
     }
 
     // Update user auth metadata
@@ -158,7 +208,7 @@ Deno.serve(async (req) => {
     }
 
     // Update role if provided
-    if (role !== undefined) {
+    if (role !== undefined && role !== targetUserRole?.role) {
       // Prevent non-super_admins from assigning super_admin role
       if (role === 'super_admin' && userOrg?.role !== 'super_admin') {
         return new Response(JSON.stringify({ error: 'Only super admins can assign super admin role' }), {
@@ -186,6 +236,7 @@ Deno.serve(async (req) => {
         })
       }
       console.log('Role updated successfully')
+      await audit('user.role_changed', 'Changed a user\'s role', { from: targetUserRole?.role ?? null, to: role })
     }
 
     // Handle user deactivation (soft delete)
@@ -203,6 +254,7 @@ Deno.serve(async (req) => {
         })
       }
       console.log('User deactivated successfully')
+      await audit('user.deactivated', 'Deactivated a user account')
     } else if (active === true) {
       // Unban the user
       const { error: unbanError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
@@ -217,13 +269,15 @@ Deno.serve(async (req) => {
         })
       }
       console.log('User reactivated successfully')
+      await audit('user.reactivated', 'Reactivated a user account')
     }
 
     // Handle password reset
+    let resetResult: string | null = null
     if (resetPassword === true) {
-      const defaultPassword = 'Password1'
+      const temporaryPassword = generateTemporaryPassword()
       const { error: resetError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        password: defaultPassword,
+        password: temporaryPassword,
         user_metadata: { password_reset_required: true }
       })
 
@@ -241,7 +295,9 @@ Deno.serve(async (req) => {
         .update({ password_reset_required: true })
         .eq('user_id', userId)
 
-      console.log('Password reset to default successfully')
+      console.log('Password reset successfully')
+      await audit('user.password_reset', 'Reset a user\'s password')
+      resetResult = temporaryPassword
     }
 
     // Log audit event
@@ -257,7 +313,7 @@ Deno.serve(async (req) => {
       console.warn('Failed to log audit event:', auditError)
     }
 
-    return new Response(JSON.stringify({ success: true, passwordReset: resetPassword === true }), {
+    return new Response(JSON.stringify({ success: true, passwordReset: resetPassword === true, temporaryPassword: resetResult }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {

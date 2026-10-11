@@ -38,6 +38,8 @@ type UserWithRoles = {
   }>;
 };
 
+const ADMIN_LEVEL_ROLES = ["organization_admin", "admin", "super_admin", "vms_developer", "vms_support"];
+
 const UserManagement = () => {
   const [open, setOpen] = useState(false);
   const { organizationId } = useOrganizationContext();
@@ -72,7 +74,8 @@ const UserManagement = () => {
   // Get organization name for display
   const userOrganizationName = organizations?.find(org => org.id === organizationId)?.name;
 
-  const activeRoles = roles.filter((r) => r.active);
+  // Only a super admin can grant administrator roles; everyone else is not offered them
+  const activeRoles = roles.filter((r) => r.active && (isSuperAdmin || !ADMIN_LEVEL_ROLES.includes(r.role_code)));
 
   const filteredRoles = useMemo(() => {
     const validRoles = activeRoles.filter((role) => role.role_code && role.role_code.trim() !== '');
@@ -161,10 +164,15 @@ const UserManagement = () => {
     surname: string;
     phone: string;
     role: string;
+    resetPassword?: boolean;
   }) => {
-    await updateUser.mutateAsync(data);
-    setEditDialogOpen(false);
-    setSelectedUser(null);
+    const result = await updateUser.mutateAsync(data);
+    // after a password reset the dialog stays open so the temporary password can be shown once
+    if (!data.resetPassword) {
+      setEditDialogOpen(false);
+      setSelectedUser(null);
+    }
+    return result as { temporaryPassword?: string | null };
   };
 
   const handleConfirmDelete = async () => {
