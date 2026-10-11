@@ -33,7 +33,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Detailed report of all trainee enrollments by trade, level, and training mode",
     category: "academic",
     icon: Users,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "registration_officer", "hod", "head_of_trainee_support"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "registration_officer", "hod", "head_of_trainee_support"],
     dataTable: "trainees",
   },
   {
@@ -42,7 +42,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Attendance statistics by class, trade, and individual trainees",
     category: "academic",
     icon: ClipboardList,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "trainer", "hod", "assessment_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "trainer", "hod", "assessment_coordinator"],
     dataTable: "attendance_records",
   },
   {
@@ -51,7 +51,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Comprehensive assessment and grading report for trainees",
     category: "academic",
     icon: FileText,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "hod", "assessment_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "hod", "assessment_coordinator"],
     dataTable: "assessment_results",
   },
   {
@@ -60,7 +60,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Summarizes trainees who have completed, withdrawn, or deferred",
     category: "academic",
     icon: TrendingUp,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "registration_officer", "head_of_trainee_support"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "registration_officer", "head_of_trainee_support"],
     dataTable: "trainees",
   },
   {
@@ -69,7 +69,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Performance metrics for each class and cohort",
     category: "academic",
     icon: BarChart3,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "trainer", "hod"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "trainer", "hod"],
     dataTable: "classes",
   },
   {
@@ -78,7 +78,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Trainer assignments, class loads, and schedules",
     category: "academic",
     icon: GraduationCap,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "hod"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "hod"],
     dataTable: "trainers",
   },
 
@@ -89,7 +89,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Summary of fee payments, outstanding balances, and collection rates",
     category: "financial",
     icon: DollarSign,
-    allowedRoles: ["admin", "organization_admin", "debtor_officer", "head_of_trainee_support"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "debtor_officer", "head_of_trainee_support"],
     dataTable: "fee_records",
   },
   {
@@ -98,7 +98,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "List of trainees with outstanding fee balances",
     category: "financial",
     icon: DollarSign,
-    allowedRoles: ["admin", "organization_admin", "debtor_officer", "head_of_trainee_support"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "debtor_officer", "head_of_trainee_support"],
     dataTable: "fee_records",
   },
   {
@@ -107,7 +107,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Hostel accommodation fee collection and status",
     category: "financial",
     icon: Building,
-    allowedRoles: ["admin", "organization_admin", "hostel_coordinator", "debtor_officer"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "hostel_coordinator", "debtor_officer"],
     dataTable: "hostel_fees",
   },
 
@@ -118,7 +118,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Current stock levels, movements, and valuations",
     category: "operations",
     icon: Package,
-    allowedRoles: ["admin", "organization_admin", "stock_control_officer"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "stock_control_officer"],
     dataTable: "stock_items",
   },
   {
@@ -127,7 +127,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Detailed log of all stock inflows and outflows",
     category: "operations",
     icon: Package,
-    allowedRoles: ["admin", "organization_admin", "stock_control_officer"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "stock_control_officer"],
     dataTable: "stock_movements",
   },
   {
@@ -136,7 +136,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Complete register of organizational assets and their status",
     category: "operations",
     icon: Package,
-    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "maintenance_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "asset_maintenance_coordinator", "maintenance_coordinator"],
     dataTable: "assets",
   },
   {
@@ -145,7 +145,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Asset depreciation schedules and current values",
     category: "operations",
     icon: TrendingUp,
-    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "maintenance_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "asset_maintenance_coordinator", "maintenance_coordinator"],
     dataTable: "asset_depreciation",
   },
   {
@@ -154,7 +154,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Upcoming and completed maintenance activities",
     category: "operations",
     icon: Wrench,
-    allowedRoles: ["admin", "organization_admin", "asset_maintenance_coordinator", "maintenance_coordinator", "hostel_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "asset_maintenance_coordinator", "maintenance_coordinator", "hostel_coordinator"],
     dataTable: "asset_maintenance",
   },
   {
@@ -163,7 +163,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Room allocation, occupancy rates, and availability",
     category: "operations",
     icon: Building,
-    allowedRoles: ["admin", "organization_admin", "hostel_coordinator"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "hostel_coordinator"],
     dataTable: "hostel_allocations",
   },
 
@@ -174,7 +174,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Trainee application processing status and statistics",
     category: "administrative",
     icon: FileText,
-    allowedRoles: ["admin", "organization_admin", "registration_officer", "head_of_trainee_support"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "registration_officer", "head_of_trainee_support"],
     dataTable: "trainee_applications",
   },
   {
@@ -183,7 +183,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Gender breakdown by trade, class, and program",
     category: "administrative",
     icon: Users,
-    allowedRoles: ["admin", "organization_admin", "head_of_training", "registration_officer"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "registration_officer"],
     dataTable: "trainees",
   },
 
@@ -194,7 +194,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Trainee placements, internships, and employer partnerships",
     category: "hr",
     icon: Briefcase,
-    allowedRoles: ["admin", "organization_admin", "placement_officer"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "placement_officer"],
     dataTable: "internship_placements",
   },
   {
@@ -203,7 +203,7 @@ export const reportDefinitions: ReportDefinition[] = [
     description: "Alumni employment status and career progression",
     category: "hr",
     icon: Users,
-    allowedRoles: ["admin", "organization_admin", "placement_officer"],
+    allowedRoles: ["admin", "organization_admin", "centre_manager", "placement_officer"],
     dataTable: "alumni",
   },
 ];

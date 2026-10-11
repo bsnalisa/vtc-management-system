@@ -49,6 +49,7 @@ const NotFound = () => {
       case "super_admin": return "/super-admin";
       case "admin": return "/admin-dashboard";
       case "organization_admin": return "/organization-admin-dashboard";
+      case "centre_manager": return "/centre-manager-dashboard";
       case "head_of_training": return "/head-of-training-dashboard";
       case "trainer": return "/trainer-dashboard";
       case "trainee": return "/trainee-dashboard";

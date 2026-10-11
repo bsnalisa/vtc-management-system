@@ -118,4 +118,4 @@ const Transcripts = () => {
   );
 };
 
-export default withRoleAccess(Transcripts, { requiredRoles: ["admin", "organization_admin", "registration_officer", "head_of_training"] });
+export default withRoleAccess(Transcripts, { requiredRoles: ["admin", "organization_admin", "centre_manager", "registration_officer", "head_of_training"] });

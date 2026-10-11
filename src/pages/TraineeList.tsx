@@ -21,6 +21,8 @@ import { RecordCard } from "@/components/ui/record-card";
 const TraineeList = () => {
   const navigate = useNavigate();
   const { role, navItems, groupLabel } = useRoleNavigation();
+  // Registering trainees belongs to the registration officer; others can only look and support accounts
+  const canRegister = role === "registration_officer" || role === "head_of_training" || role === "super_admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTrade, setFilterTrade] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -196,7 +198,7 @@ const TraineeList = () => {
               <>
                 <div className="responsive-records">
                   <div className="record-cards">
-                    {paginatedData.length === 0 ? <div className="py-8 text-center text-muted-foreground"><p>{searchTerm || filterTrade !== "all" || filterStatus !== "all" ? "No trainees match your search criteria" : "No trainees registered yet"}</p>{!searchTerm && filterTrade === "all" && filterStatus === "all" && <Button variant="outline" className="mt-4 h-auto whitespace-normal" onClick={() => navigate("/trainees/register")}>Register First Trainee</Button>}</div> : paginatedData.map(trainee => <RecordCard
+                    {paginatedData.length === 0 ? <div className="py-8 text-center text-muted-foreground"><p>{searchTerm || filterTrade !== "all" || filterStatus !== "all" ? "No trainees match your search criteria" : "No trainees registered yet"}</p>{!searchTerm && filterTrade === "all" && filterStatus === "all" && canRegister && <Button variant="outline" className="mt-4 h-auto whitespace-normal" onClick={() => navigate("/trainees/register")}>Register First Trainee</Button>}</div> : paginatedData.map(trainee => <RecordCard
                       key={trainee.id}
                       title={`${trainee.first_name} ${trainee.last_name}`}
                       subtitle={trainee.trainee_id}
@@ -234,7 +236,7 @@ const TraineeList = () => {
                                 : "No trainees registered yet"
                               }
                             </div>
-                            {!searchTerm && filterTrade === "all" && filterStatus === "all" && (
+                            {!searchTerm && filterTrade === "all" && filterStatus === "all" && canRegister && (
                               <Button 
                                 variant="outline" 
                                 className="mt-4"

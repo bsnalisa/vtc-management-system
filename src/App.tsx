@@ -12,6 +12,7 @@ import ApplicantDashboard from "./pages/ApplicantDashboard";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const CentreManagerDashboard = lazy(() => import("./pages/CentreManagerDashboard"));
 const OrganizationAdminDashboard = lazy(() => import("./pages/OrganizationAdminDashboard"));
 const HeadOfTrainingDashboard = lazy(() => import("./pages/HeadOfTrainingDashboard"));
 const TrainerDashboard = lazy(() => import("./pages/TrainerDashboard"));
@@ -242,20 +243,26 @@ const ProtectedLiaisonDashboard = withRoleAccess(LiaisonOfficerDashboard, { requ
 const ProtectedUserManagement = withRoleAccess(UserManagement, {
   requiredRoles: ["admin", "organization_admin"],
 });
+const ProtectedCentreManagerDashboard = withRoleAccess(CentreManagerDashboard, {
+  requiredRoles: ["centre_manager"],
+});
+const ProtectedHistoricalTrainees = withRoleAccess(HistoricalTrainees, {
+  requiredRoles: ["registration_officer", "head_of_training"],
+});
 const ProtectedTraineeRegistration = withRoleAccess(TraineeRegistration, {
-  requiredRoles: ["registration_officer", "admin", "head_of_training"],
+  requiredRoles: ["registration_officer", "head_of_training"],
 });
 const ProtectedApplicationManagement = withRoleAccess(ApplicationManagement, {
-  requiredRoles: ["registration_officer", "admin", "head_of_training"],
+  requiredRoles: ["registration_officer", "head_of_training"],
 });
 const ProtectedTrainerManagement = withRoleAccess(TrainerManagement, {
-  requiredRoles: ["admin", "head_of_training", "hod"],
+  requiredRoles: ["admin", "head_of_training", "hod", "centre_manager"],
 });
 const ProtectedFeeManagement = withRoleAccess(FeeManagement, {
   requiredRoles: ["debtor_officer", "admin"],
 });
 const ProtectedClassManagement = withRoleAccess(ClassManagement, {
-  requiredRoles: ["admin", "head_of_training", "hod", "trainer"],
+  requiredRoles: ["admin", "head_of_training", "hod", "trainer", "centre_manager"],
 });
 const ProtectedTimetableManagement = withRoleAccess(TimetableManagement, {
   requiredRoles: ["admin", "head_of_training", "assessment_coordinator", "hod", "trainer"],
@@ -323,7 +330,7 @@ const ProtectedAlumniManagement = withRoleAccess(AlumniManagement, {
   requiredRoles: ["admin", "super_admin", "placement_officer"],
 });
 const ProtectedGraduationSurveys = withRoleAccess(GraduationSurveys, {
-  requiredRoles: ["admin", "organization_admin", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
+  requiredRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
 });
 const ProtectedAssessmentRequests = withRoleAccess(AssessmentRequests, {
   requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer"],
@@ -399,6 +406,7 @@ const App = () => (
           <Route path="/hod-dashboard" element={<ProtectedRoute><ProtectedHODDashboard /></ProtectedRoute>} />
           <Route path="/assessment-coordinator-dashboard" element={<ProtectedRoute><ProtectedAssessmentCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/debtor-officer-dashboard" element={<ProtectedRoute><ProtectedDebtorOfficerDashboard /></ProtectedRoute>} />
+          <Route path="/centre-manager-dashboard" element={<ProtectedRoute><ProtectedCentreManagerDashboard /></ProtectedRoute>} />
           <Route path="/registration-officer-dashboard" element={<ProtectedRoute><ProtectedRegistrationOfficerDashboard /></ProtectedRoute>} />
           <Route path="/stock-control-officer-dashboard" element={<ProtectedRoute><ProtectedStockControlOfficerDashboard /></ProtectedRoute>} />
           <Route path="/asset-maintenance-coordinator-dashboard" element={<ProtectedRoute><ProtectedAssetMaintenanceCoordinatorDashboard /></ProtectedRoute>} />
@@ -521,7 +529,7 @@ const App = () => (
           <Route path="/assessment-template-approvals" element={<ProtectedRoute><AssessmentTemplateApprovals /></ProtectedRoute>} />
           <Route path="/trainer-workload" element={<ProtectedRoute><TrainerWorkload /></ProtectedRoute>} />
           <Route path="/timetable-approvals" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
-          <Route path="/historical-trainees" element={<ProtectedRoute><HistoricalTrainees /></ProtectedRoute>} />
+          <Route path="/historical-trainees" element={<ProtectedRoute><ProtectedHistoricalTrainees /></ProtectedRoute>} />
           <Route path="/applications-inbox" element={<ProtectedRoute><ApplicationsInbox /></ProtectedRoute>} />
           <Route path="/online-applications" element={<ProtectedRoute><OnlineApplicationsInbox /></ProtectedRoute>} />
           <Route path="/grading-scale" element={<ProtectedRoute><GradingScale /></ProtectedRoute>} />

@@ -50,7 +50,8 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id)
       .single()
 
-    const allowedRoles = ['super_admin', 'organization_admin', 'registration_officer', 'admin']
+    // Registering trainees is the registration officer's job; Organization Admins support accounts afterwards
+    const allowedRoles = ['super_admin', 'registration_officer']
     if (!userRole || !allowedRoles.includes(userRole.role)) {
       return new Response(JSON.stringify({ success: false, error: 'Insufficient permissions' }), {
         status: 403,

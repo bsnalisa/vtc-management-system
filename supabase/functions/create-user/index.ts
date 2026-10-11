@@ -6,7 +6,7 @@ const corsHeaders = {
 }
 
 // Only a super admin may create admin-level accounts
-const PRIVILEGED_ROLES = ['organization_admin', 'admin', 'super_admin', 'vms_developer', 'vms_support']
+const PRIVILEGED_ROLES = ['organization_admin', 'admin', 'centre_manager', 'super_admin', 'vms_developer', 'vms_support']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {

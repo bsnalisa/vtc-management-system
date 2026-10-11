@@ -327,5 +327,5 @@ const ModuleReports = () => {
 };
 
 export default withRoleAccess(ModuleReports, {
-  requiredRoles: ["admin", "organization_admin", "head_of_training", "head_of_trainee_support", "librarian", "registration_officer"],
+  requiredRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "head_of_trainee_support", "librarian", "registration_officer"],
 });

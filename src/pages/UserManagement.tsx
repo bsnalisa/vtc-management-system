@@ -38,7 +38,7 @@ type UserWithRoles = {
   }>;
 };
 
-const ADMIN_LEVEL_ROLES = ["organization_admin", "admin", "super_admin", "vms_developer", "vms_support"];
+const ADMIN_LEVEL_ROLES = ["organization_admin", "centre_manager", "admin", "super_admin", "vms_developer", "vms_support"];
 
 const UserManagement = () => {
   const [open, setOpen] = useState(false);
