@@ -64,6 +64,8 @@ const NotFound = () => {
       case "placement_officer": return "/placement-officer-dashboard";
       case "hostel_coordinator": return "/hostel-coordinator-dashboard";
       case "head_of_trainee_support": return "/trainee-support-dashboard";
+      case "subject_matter_expert": return "/sme-dashboard";
+      case "printing_distribution_officer": return "/printing-dashboard";
       default: return "/";
     }
   };

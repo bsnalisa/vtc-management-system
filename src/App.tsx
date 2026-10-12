@@ -12,6 +12,8 @@ import ApplicantDashboard from "./pages/ApplicantDashboard";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const SmeDashboard = lazy(() => import("./pages/SmeDashboard"));
+const PrintingOfficerDashboard = lazy(() => import("./pages/PrintingOfficerDashboard"));
 const CentreManagerDashboard = lazy(() => import("./pages/CentreManagerDashboard"));
 const OrganizationAdminDashboard = lazy(() => import("./pages/OrganizationAdminDashboard"));
 const HeadOfTrainingDashboard = lazy(() => import("./pages/HeadOfTrainingDashboard"));
@@ -250,6 +252,12 @@ const ProtectedCentreManagerDashboard = withRoleAccess(CentreManagerDashboard, {
 const ProtectedRegistrationPage = withRoleAccess(RegistrationPage, {
   requiredRoles: ["registration_officer", "head_of_training"],
 });
+const ProtectedSmeDashboard = withRoleAccess(SmeDashboard, {
+  requiredRoles: ["subject_matter_expert"],
+});
+const ProtectedPrintingDashboard = withRoleAccess(PrintingOfficerDashboard, {
+  requiredRoles: ["printing_distribution_officer"],
+});
 const ProtectedHistoricalTrainees = withRoleAccess(HistoricalTrainees, {
   requiredRoles: ["registration_officer", "head_of_training"],
 });
@@ -410,6 +418,8 @@ const App = () => (
           <Route path="/hod-dashboard" element={<ProtectedRoute><ProtectedHODDashboard /></ProtectedRoute>} />
           <Route path="/assessment-coordinator-dashboard" element={<ProtectedRoute><ProtectedAssessmentCoordinatorDashboard /></ProtectedRoute>} />
           <Route path="/debtor-officer-dashboard" element={<ProtectedRoute><ProtectedDebtorOfficerDashboard /></ProtectedRoute>} />
+          <Route path="/sme-dashboard" element={<ProtectedRoute><ProtectedSmeDashboard /></ProtectedRoute>} />
+          <Route path="/printing-dashboard" element={<ProtectedRoute><ProtectedPrintingDashboard /></ProtectedRoute>} />
           <Route path="/centre-manager-dashboard" element={<ProtectedRoute><ProtectedCentreManagerDashboard /></ProtectedRoute>} />
           <Route path="/registration-officer-dashboard" element={<ProtectedRoute><ProtectedRegistrationOfficerDashboard /></ProtectedRoute>} />
           <Route path="/stock-control-officer-dashboard" element={<ProtectedRoute><ProtectedStockControlOfficerDashboard /></ProtectedRoute>} />

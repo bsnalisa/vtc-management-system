@@ -361,6 +361,7 @@ export const hrOfficerNavItems: NavItem[] = [
 
 // Subject Matter Expert Navigation
 export const smeNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/sme-dashboard", icon: LayoutDashboard },
   { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
@@ -368,6 +369,7 @@ export const smeNavItems: NavItem[] = [
 
 // Printing & Distribution Officer Navigation
 export const printingOfficerNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/printing-dashboard", icon: LayoutDashboard },
   { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
