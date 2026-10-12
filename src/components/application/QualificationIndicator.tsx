@@ -39,7 +39,7 @@ export const QualificationIndicator = ({
         </CardHeader>
         <CardContent className="pb-4">
           <p className="text-sm text-muted-foreground">
-            Complete the educational history section to see qualification status.
+            Your qualification status will appear here once it has been worked out from your school subjects.
           </p>
           <div className="mt-2 flex items-center gap-2">
             <Badge variant="outline">Points: {calculatedPoints}</Badge>
