@@ -144,20 +144,26 @@ export const ApplicationsTable = ({
         case "registration_fee_pending":
           // Awaiting registration fee - Debtor Officer handles this
           return (
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-              <Clock className="h-3 w-3 mr-1" />
-              Awaiting Reg Fee
-            </Badge>
+            <div className="flex items-center gap-1">
+              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                <Clock className="h-3 w-3 mr-1" />
+                Awaiting Reg Fee
+              </Badge>
+              <Button size="sm" variant="ghost" onClick={() => onRegister(application)}>View</Button>
+            </div>
           );
         
         case "registered":
         case "fully_registered":
           // Completed
           return (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Complete
-            </Badge>
+            <div className="flex items-center gap-1">
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Complete
+              </Badge>
+              <Button size="sm" variant="ghost" onClick={() => onRegister(application)}>View</Button>
+            </div>
           );
       }
     }
