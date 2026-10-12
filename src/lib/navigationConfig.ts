@@ -80,6 +80,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Organization Settings", url: "/organization-settings", icon: Settings, section: "Centre Setup" },
   { title: "Modules", url: "/modules-management", icon: BookOpen, section: "Centre Setup" },
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar, section: "Centre Setup" },
+  { title: "Entry Requirements", url: "/entry-requirements", icon: ClipboardList, section: "Centre Setup" },
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar, section: "Centre Setup" },
   { title: "Document Settings", url: "/document-settings", icon: FileText, section: "Centre Setup" },
   { title: "Workflows", url: "/workflows", icon: Settings, section: "Centre Setup" },

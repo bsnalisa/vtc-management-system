@@ -373,7 +373,7 @@ const ProtectedTraineeAffairs = withRoleAccess(TraineeAffairs, {
   requiredRoles: ["admin", "organization_admin", "head_of_trainee_support", "registration_officer"],
 });
 const ProtectedEntryRequirements = withRoleAccess(EntryRequirementsManagement, {
-  requiredRoles: ["registration_officer", "admin", "head_of_trainee_support"],
+  requiredRoles: ["registration_officer", "admin", "organization_admin", "head_of_trainee_support"],
 });
 
 const App = () => (
