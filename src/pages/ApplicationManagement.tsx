@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { ApplicationsTable } from "@/components/registration/ApplicationsTable";
 import { ScreeningDialog } from "@/components/registration/ScreeningDialog";
-import { RegistrationDialog } from "@/components/registration/RegistrationDialog";
 import { ApplicationViewDialog } from "@/components/registration/ApplicationViewDialog";
 import { useTraineeApplications, useApplicationStats } from "@/hooks/useTraineeApplications";
 import { useTrades } from "@/hooks/useTrades";
@@ -17,12 +17,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const ApplicationManagement = () => {
+  const navigate = useNavigate();
   const { navItems, groupLabel } = useRoleNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("qualified");
   const [screeningDialogOpen, setScreeningDialogOpen] = useState(false);
-  const [registrationDialogOpen, setRegistrationDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
 
@@ -72,8 +72,7 @@ const ApplicationManagement = () => {
   };
 
   const handleRegister = (application: any) => {
-    setSelectedApplication(application);
-    setRegistrationDialogOpen(true);
+    navigate(`/registration/${application.id}`);
   };
 
   const handleViewDetails = (application: any) => {
@@ -198,11 +197,6 @@ const ApplicationManagement = () => {
             <ScreeningDialog
               open={screeningDialogOpen}
               onOpenChange={setScreeningDialogOpen}
-              application={selectedApplication}
-            />
-            <RegistrationDialog
-              open={registrationDialogOpen}
-              onOpenChange={setRegistrationDialogOpen}
               application={selectedApplication}
             />
             <ApplicationViewDialog
