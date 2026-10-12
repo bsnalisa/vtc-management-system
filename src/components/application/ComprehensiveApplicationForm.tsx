@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, CheckCircle, Home, ChevronLeft, ChevronRight } from "lucide-react";
@@ -121,6 +122,7 @@ export const ComprehensiveApplicationForm = ({
 
 
   const calculatedPoints = calculatePoints(formData.school_subjects);
+  const hasSchoolSubjects = (formData.school_subjects ?? []).some((subject) => subject.subject_name?.trim() && subject.symbol);
 
   // Auto-qualification check
   const qualificationResult = useQualificationCheck({
@@ -667,10 +669,6 @@ export const ComprehensiveApplicationForm = ({
                   </CardContent>
                 </Card>
 
-                <QualificationIndicator 
-                  result={formData.trade_id ? qualificationResult : null}
-                  calculatedPoints={calculatedPoints} 
-                />
               </TabsContent>
 
               {/* EDUCATION */}
@@ -759,6 +757,23 @@ export const ComprehensiveApplicationForm = ({
                     />
                   </CardContent>
                 </Card>
+
+                {/* Shown only once school subjects have been added, because the result is worked out from them */}
+                {hasSchoolSubjects && (
+                  formData.trade_id ? (
+                    <QualificationIndicator
+                      result={qualificationResult}
+                      calculatedPoints={calculatedPoints}
+                    />
+                  ) : (
+                    <Card className="border-muted bg-muted/30">
+                      <CardContent className="py-4 text-sm text-muted-foreground">
+                        Choose the trade you are applying for on the Training tab to see whether you qualify.
+                        <div className="mt-2"><Badge variant="outline">Points: {calculatedPoints}</Badge></div>
+                      </CardContent>
+                    </Card>
+                  )
+                )}
               </TabsContent>
 
               {/* EMPLOYMENT */}
