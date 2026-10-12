@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useEntryRequirements, useCalculatePoints } from "./useEntryRequirements";
+import { useAdmissionRules, useCalculatePoints, AdmissionRule } from "./useEntryRequirements";
 import { SchoolSubject, QualificationResult } from "@/types/application";
 
 interface UseQualificationCheckProps {
@@ -10,7 +10,63 @@ interface UseQualificationCheckProps {
   highestGradePassed: number;
   hasWorkExperience?: boolean;
   yearsOfExperience?: number;
+  /** The centre being applied to (applicants have no centre of their own) */
+  organizationId?: string;
 }
+
+// Lower is better: A* > A > B > C > D > E > F > G > U
+const SYMBOL_ORDER = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
+const meets = (required: string, actual: string) => {
+  const r = SYMBOL_ORDER.indexOf(required);
+  const a = SYMBOL_ORDER.indexOf(actual);
+  return r !== -1 && a !== -1 && a <= r;
+};
+
+const SUBJECT_NAMES = {
+  English: ["english", "english language", "english first", "english second"],
+  Mathematics: ["mathematics", "maths", "math", "core mathematics"],
+  Science: ["physical science", "science", "physics", "chemistry", "biology"],
+  "Pre-vocational": ["prevocational", "pre-vocational", "technical"],
+} as const;
+
+// Works out whether one rule is met. Returns what is missing (empty when the rule is met) and any notes.
+const checkRule = (rule: AdmissionRule, subjects: SchoolSubject[], points: number, grade: number) => {
+  const missing: string[] = [];
+  const notes: string[] = [];
+
+  const symbolOf = (names: readonly string[]) => {
+    const found = subjects.find((s) => names.some((n) => s.subject_name.toLowerCase().includes(n.toLowerCase())));
+    return found ? found.symbol : null;
+  };
+
+  if (rule.min_grade && grade < rule.min_grade) missing.push(`Minimum Grade ${rule.min_grade} required (you have Grade ${grade || "–"})`);
+  if (rule.min_points && points < rule.min_points) missing.push(`Minimum ${rule.min_points} points required (you have ${points})`);
+
+  const bySymbol: [string, string | null, readonly string[]][] = [
+    ["English", rule.english_symbol, SUBJECT_NAMES.English],
+    ["Mathematics", rule.maths_symbol, SUBJECT_NAMES.Mathematics],
+    ["Science", rule.science_symbol, SUBJECT_NAMES.Science],
+  ];
+  for (const [label, required, names] of bySymbol) {
+    if (!required) continue;
+    const actual = symbolOf(names);
+    if (!actual) missing.push(`${label} required with at least ${required}`);
+    else if (!meets(required, actual)) missing.push(`${label}: ${required} or better required (you have ${actual})`);
+  }
+  if (rule.prevocational_symbol) {
+    const actual = symbolOf(SUBJECT_NAMES["Pre-vocational"]);
+    if (actual && !meets(rule.prevocational_symbol, actual)) missing.push(`Pre-vocational: ${rule.prevocational_symbol} or better required (you have ${actual})`);
+  }
+  for (const need of rule.required_subjects ?? []) {
+    const found = subjects.find((s) => s.subject_name.toLowerCase().includes(need.subject.toLowerCase()));
+    if (!found) missing.push(`${need.subject} required with at least ${need.symbol}`);
+    else if (!meets(need.symbol, found.symbol)) missing.push(`${need.subject}: ${need.symbol} or better required (you have ${found.symbol})`);
+  }
+  if (rule.requires_previous_level && rule.previous_level_required) {
+    notes.push(`Bring your Level ${rule.previous_level_required} trade certificate or relevant results; the registration officer will check them.`);
+  }
+  return { missing, notes };
+};
 
 export const useQualificationCheck = ({
   tradeId,
@@ -20,143 +76,58 @@ export const useQualificationCheck = ({
   highestGradePassed,
   hasWorkExperience = false,
   yearsOfExperience = 0,
+  organizationId,
 }: UseQualificationCheckProps): QualificationResult => {
-  const { data: requirements } = useEntryRequirements(tradeId, level);
-  const { calculatePoints, symbolPoints } = useCalculatePoints();
+  const { data: rules } = useAdmissionRules(tradeId, level, organizationId);
+  const { calculatePoints } = useCalculatePoints(organizationId);
 
   return useMemo(() => {
-    const result: QualificationResult = {
-      qualified: false,
-      calculated_points: 0,
-      reasons: [],
-      age_years: 0,
-      is_mature_age: false,
-    };
+    const result: QualificationResult = { qualified: false, calculated_points: 0, reasons: [], age_years: 0, is_mature_age: false };
 
-    // Calculate age
     if (dateOfBirth) {
       const birthDate = new Date(dateOfBirth);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
       result.age_years = age;
       result.is_mature_age = age >= 23;
     }
-
-    // Calculate points
     result.calculated_points = calculatePoints(subjects);
 
-    // If no requirements found, can't determine qualification
-    if (!requirements || requirements.length === 0) {
+    if (!rules || rules.length === 0) {
       result.reasons.push("No entry requirements found for this trade and level");
       return result;
     }
 
-    const requirement = requirements[0];
-
-    // Check if mature age entry applies
-    if (result.is_mature_age && requirement.mature_age_entry) {
-      const matureMinAge = requirement.mature_min_age || 23;
-      const matureMinExp = requirement.mature_min_experience_years || 3;
-
-      if (result.age_years >= matureMinAge) {
-        if (hasWorkExperience && yearsOfExperience >= matureMinExp) {
+    // Mature age entry, where a rule allows it
+    for (const rule of rules) {
+      if (result.is_mature_age && rule.mature_age_entry && result.age_years >= (rule.mature_min_age || 23)) {
+        const minExp = rule.mature_min_experience_years || 3;
+        if (hasWorkExperience && yearsOfExperience >= minExp) {
           result.qualified = true;
           result.reasons.push(`Qualified via Mature Age Entry (${result.age_years} years old, ${yearsOfExperience} years experience)`);
           return result;
-        } else if (!hasWorkExperience || yearsOfExperience < matureMinExp) {
-          result.reasons.push(`Mature age entry requires ${matureMinExp}+ years of relevant work experience`);
         }
       }
     }
 
-    // Check previous level requirement
-    if (requirement.requires_previous_level) {
-      result.reasons.push(`Requires completion of Level ${requirement.previous_level_required}`);
-      // This would need to check previous enrollment data
-    }
-
-    // Check grade requirement
-    if (requirement.min_grade) {
-      if (highestGradePassed < requirement.min_grade) {
-        result.reasons.push(`Minimum Grade ${requirement.min_grade} required (you have Grade ${highestGradePassed})`);
-      }
-    }
-
-    // Check points requirement
-    if (requirement.min_points) {
-      if (result.calculated_points < requirement.min_points) {
-        result.reasons.push(`Minimum ${requirement.min_points} points required (you have ${result.calculated_points})`);
-      }
-    }
-
-    // Helper function to compare symbols (lower is better: A* > A > B > C > D > E > F > G > U)
-    const symbolOrder = ['A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U'];
-    const compareSymbols = (required: string, actual: string): boolean => {
-      const reqIndex = symbolOrder.indexOf(required);
-      const actIndex = symbolOrder.indexOf(actual);
-      if (reqIndex === -1 || actIndex === -1) return false;
-      return actIndex <= reqIndex; // Actual must be equal or better (lower index)
-    };
-
-    // Find subject symbols
-    const getSubjectSymbol = (subjectNames: string[]): string | null => {
-      for (const name of subjectNames) {
-        const subject = subjects.find(s => 
-          s.subject_name.toLowerCase().includes(name.toLowerCase())
-        );
-        if (subject) return subject.symbol;
-      }
-      return null;
-    };
-
-    // Check English symbol
-    if (requirement.english_symbol) {
-      const englishSymbol = getSubjectSymbol(['english', 'english language', 'english first', 'english second']);
-      if (!englishSymbol) {
-        result.reasons.push(`English subject required with minimum symbol ${requirement.english_symbol}`);
-      } else if (!compareSymbols(requirement.english_symbol, englishSymbol)) {
-        result.reasons.push(`English: ${requirement.english_symbol} or better required (you have ${englishSymbol})`);
-      }
-    }
-
-    // Check Maths symbol
-    if (requirement.maths_symbol) {
-      const mathsSymbol = getSubjectSymbol(['mathematics', 'maths', 'math', 'core mathematics']);
-      if (!mathsSymbol) {
-        result.reasons.push(`Mathematics subject required with minimum symbol ${requirement.maths_symbol}`);
-      } else if (!compareSymbols(requirement.maths_symbol, mathsSymbol)) {
-        result.reasons.push(`Mathematics: ${requirement.maths_symbol} or better required (you have ${mathsSymbol})`);
-      }
-    }
-
-    // Check Science symbol
-    if (requirement.science_symbol) {
-      const scienceSymbol = getSubjectSymbol(['physical science', 'science', 'physics', 'chemistry', 'biology']);
-      if (!scienceSymbol) {
-        result.reasons.push(`Science subject required with minimum symbol ${requirement.science_symbol}`);
-      } else if (!compareSymbols(requirement.science_symbol, scienceSymbol)) {
-        result.reasons.push(`Science: ${requirement.science_symbol} or better required (you have ${scienceSymbol})`);
-      }
-    }
-
-    // Check Pre-vocational symbol
-    if (requirement.prevocational_symbol) {
-      const prevoSymbol = getSubjectSymbol(['prevocational', 'pre-vocational', 'technical']);
-      if (prevoSymbol && !compareSymbols(requirement.prevocational_symbol, prevoSymbol)) {
-        result.reasons.push(`Pre-vocational: ${requirement.prevocational_symbol} or better required (you have ${prevoSymbol})`);
-      }
-    }
-
-    // Determine final qualification status
-    if (result.reasons.length === 0) {
+    // Several rules are alternatives: meeting any one is enough
+    const checked = rules.map((rule) => ({ rule, ...checkRule(rule, subjects, result.calculated_points, highestGradePassed) }));
+    const met = checked.find((c) => c.missing.length === 0);
+    if (met) {
       result.qualified = true;
-      result.reasons.push("Meets all entry requirements");
+      result.reasons.push(`Meets the entry requirements: ${met.rule.requirement_name}`);
+      result.reasons.push(...met.notes);
+      return result;
     }
 
+    const closest = checked.reduce((a, b) => (b.missing.length < a.missing.length ? b : a));
+    if (checked.length > 1) result.reasons.push(`Closest requirement: ${closest.rule.requirement_name}`);
+    result.reasons.push(...closest.missing);
+    if (result.is_mature_age && rules.some((r) => r.mature_age_entry)) {
+      result.reasons.push("Mature age entry needs relevant work experience (see the Employment tab)");
+    }
     return result;
-  }, [requirements, subjects, dateOfBirth, highestGradePassed, hasWorkExperience, yearsOfExperience, calculatePoints]);
+  }, [rules, subjects, dateOfBirth, highestGradePassed, hasWorkExperience, yearsOfExperience, calculatePoints]);
 };

@@ -107,7 +107,7 @@ export const ComprehensiveApplicationForm = ({
 
   const { data: trades } = useTrades(organizationIdOverride);
   const { data: regions } = useNamibiaRegions();
-  const { calculatePoints } = useCalculatePoints();
+  const { calculatePoints } = useCalculatePoints(organizationIdOverride);
 
   // Auto-save functionality
   const { isSaving, lastSaved, error: saveError, saveNow } = useAutoSaveDraft(
@@ -133,6 +133,7 @@ export const ComprehensiveApplicationForm = ({
     highestGradePassed: formData.highest_grade_passed,
     hasWorkExperience: !!formData.employer_name,
     yearsOfExperience: formData.employer_duration ? parseInt(formData.employer_duration) || 0 : 0,
+    organizationId: organizationIdOverride,
   });
 
   // Reset form when dialog opens with new data
@@ -752,6 +753,7 @@ export const ComprehensiveApplicationForm = ({
                     </div>
 
                     <SubjectEntry
+                      organizationId={organizationIdOverride}
                       subjects={formData.school_subjects}
                       onSubjectsChange={(subjects) => updateField("school_subjects", subjects)}
                     />

@@ -13,13 +13,16 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, AlertCircle, CheckCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
-import { useEntryRequirements, useCreateEntryRequirement, useUpdateEntryRequirement, EntryRequirementData } from "@/hooks/useEntryRequirements";
+import { useEntryRequirements, useSaveEntryRequirement, EntryRequirementData } from "@/hooks/useEntryRequirements";
+import { RequirementChangeRequests } from "@/components/registration/RequirementChangeRequests";
 import { useTrades } from "@/hooks/useTrades";
 import { useToast } from "@/hooks/use-toast";
 import { SYMBOLS } from "@/types/application";
 
 const EntryRequirementsManagement = () => {
-  const { navItems, groupLabel } = useRoleNavigation();
+  const { navItems, groupLabel, role } = useRoleNavigation();
+  // Approvers change rules at once; registration officers send changes for approval
+  const canApprove = role === "head_of_trainee_support" || role === "organization_admin" || role === "super_admin";
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRequirement, setEditingRequirement] = useState<any>(null);
   const [formData, setFormData] = useState<EntryRequirementData>({
@@ -28,13 +31,13 @@ const EntryRequirementsManagement = () => {
     requirement_name: "",
     min_grade: 10,
     min_points: 20,
-    english_symbol: "F",
-    maths_symbol: "F",
+    english_symbol: "",
+    maths_symbol: "",
     science_symbol: "",
     prevocational_symbol: "",
     requires_previous_level: false,
     previous_level_required: undefined,
-    mature_age_entry: true,
+    mature_age_entry: false,
     mature_min_age: 23,
     mature_min_experience_years: 3,
     additional_requirements: "",
@@ -42,26 +45,25 @@ const EntryRequirementsManagement = () => {
 
   const { data: requirements, isLoading } = useEntryRequirements();
   const { data: trades } = useTrades();
-  const createRequirement = useCreateEntryRequirement();
-  const updateRequirement = useUpdateEntryRequirement();
+  const saveRequirement = useSaveEntryRequirement();
   const { toast } = useToast();
 
   const handleOpenDialog = (requirement?: any) => {
     if (requirement) {
       setEditingRequirement(requirement);
       setFormData({
-        trade_id: requirement.trade_id,
-        level: requirement.level,
+        trade_id: requirement.trade_id ?? "",
+        level: requirement.level ?? null,
         requirement_name: requirement.requirement_name,
-        min_grade: requirement.min_grade || 10,
-        min_points: requirement.min_points || 20,
-        english_symbol: requirement.english_symbol || "F",
-        maths_symbol: requirement.maths_symbol || "F",
+        min_grade: requirement.min_grade ?? undefined,
+        min_points: requirement.min_points ?? undefined,
+        english_symbol: requirement.english_symbol || "",
+        maths_symbol: requirement.maths_symbol || "",
         science_symbol: requirement.science_symbol || "",
         prevocational_symbol: requirement.prevocational_symbol || "",
         requires_previous_level: requirement.requires_previous_level || false,
         previous_level_required: requirement.previous_level_required,
-        mature_age_entry: requirement.mature_age_entry ?? true,
+        mature_age_entry: requirement.mature_age_entry ?? false,
         mature_min_age: requirement.mature_min_age || 23,
         mature_min_experience_years: requirement.mature_min_experience_years || 3,
         additional_requirements: requirement.additional_requirements || "",
@@ -74,13 +76,13 @@ const EntryRequirementsManagement = () => {
         requirement_name: "",
         min_grade: 10,
         min_points: 20,
-        english_symbol: "F",
-        maths_symbol: "F",
+        english_symbol: "",
+        maths_symbol: "",
         science_symbol: "",
         prevocational_symbol: "",
         requires_previous_level: false,
         previous_level_required: undefined,
-        mature_age_entry: true,
+        mature_age_entry: false,
         mature_min_age: 23,
         mature_min_experience_years: 3,
         additional_requirements: "",
@@ -90,25 +92,29 @@ const EntryRequirementsManagement = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.trade_id || !formData.requirement_name) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+    if (!formData.requirement_name.trim()) {
+      toast({ title: "Validation Error", description: "Give the requirement a name", variant: "destructive" });
       return;
     }
-
+    // Empty trade or level means the rule applies to all of them; empty symbols mean "not required"
+    const changes = {
+      ...formData,
+      trade_id: formData.trade_id || null,
+      level: formData.level || null,
+      english_symbol: formData.english_symbol || undefined,
+      maths_symbol: formData.maths_symbol || undefined,
+    };
     try {
-      if (editingRequirement) {
-        await updateRequirement.mutateAsync({ id: editingRequirement.id, data: formData });
-      } else {
-        await createRequirement.mutateAsync(formData);
-      }
+      await saveRequirement.mutateAsync({ type: editingRequirement ? "update" : "create", id: editingRequirement?.id, changes });
       setDialogOpen(false);
     } catch (error) {
       // Error handled in mutation
     }
+  };
+
+  const handleRemove = async (req: { id: string; requirement_name: string }) => {
+    if (!window.confirm(`Remove "${req.requirement_name}"? Applicants will no longer be checked against it.`)) return;
+    await saveRequirement.mutateAsync({ type: "deactivate", id: req.id }).catch(() => undefined);
   };
 
   const getTradeName = (tradeId: string) => {
@@ -127,7 +133,7 @@ const EntryRequirementsManagement = () => {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm text-muted-foreground">
-              Configure entry requirements for each trade and level. Changes require approval from Head of Trainee Support.
+              Configure entry requirements for each trade and level. Several rules for the same trade and level are alternatives: an applicant who meets any one of them qualifies. Rules with no trade are the general minimums, used for trades that have no rule of their own. {canApprove ? "Your changes take effect at once." : "Your changes are sent to the Head of Trainee Support for approval."}
             </p>
           </div>
           <Button onClick={() => handleOpenDialog()}>
@@ -135,6 +141,8 @@ const EntryRequirementsManagement = () => {
             Add Requirement
           </Button>
         </div>
+
+        <RequirementChangeRequests canReview={canApprove} title={canApprove ? "Changes awaiting your approval" : "Your changes awaiting approval"} />
 
         <Card>
           <CardHeader>
@@ -154,6 +162,7 @@ const EntryRequirementsManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Requirement</TableHead>
                     <TableHead>Trade</TableHead>
                     <TableHead>Level</TableHead>
                     <TableHead>Min Grade</TableHead>
@@ -168,13 +177,14 @@ const EntryRequirementsManagement = () => {
                 <TableBody>
                   {requirements.map((req: any) => (
                     <TableRow key={req.id}>
-                      <TableCell className="font-medium">
-                        {req.trades?.name || getTradeName(req.trade_id)}
+                      <TableCell className="whitespace-normal font-medium min-w-[14rem]">{req.requirement_name}</TableCell>
+                      <TableCell>
+                        {req.trade_id ? (req.trades?.name || getTradeName(req.trade_id)) : <Badge variant="secondary">All trades</Badge>}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">Level {req.level}</Badge>
+                        <Badge variant="outline">{req.level ? `Level ${req.level}` : "All levels"}</Badge>
                       </TableCell>
-                      <TableCell>Grade {req.min_grade || "-"}</TableCell>
+                      <TableCell>{req.min_grade ? `Grade ${req.min_grade}+` : "-"}</TableCell>
                       <TableCell>{req.min_points || "-"} pts</TableCell>
                       <TableCell>{req.english_symbol || "-"}</TableCell>
                       <TableCell>{req.maths_symbol || "-"}</TableCell>
@@ -196,9 +206,18 @@ const EntryRequirementsManagement = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          aria-label={`Edit ${req.requirement_name}`}
                           onClick={() => handleOpenDialog(req)}
                         >
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={`Remove ${req.requirement_name}`}
+                          onClick={() => handleRemove(req)}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -220,24 +239,36 @@ const EntryRequirementsManagement = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Business Services (Level 1)</h4>
-                <p>Grade 11/12, 20 points in 6 subjects, F in English & Maths</p>
+                <h4 className="font-semibold mb-2">General minimum: old curriculum (Grade 10 / JSC)</h4>
+                <p>At least 23 points, with an E or better in English, Mathematics and Physical Science.</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Electrical General CBET (Level 2)</h4>
-                <p>Grade 11/12, 20 points in 6 subjects, F in English, Maths, Science</p>
+                <h4 className="font-semibold mb-2">General minimum: new curriculum (Grade 11/12 / NSSCO)</h4>
+                <p>At least 20 points. The subject symbols depend on the level and trade.</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Hospitality & Tourism (Level 2)</h4>
-                <p>Grade 10 with 23 points, E in English OR Grade 11/12 with 20 points, F in English</p>
+                <h4 className="font-semibold mb-2">Office Administration (Level 1)</h4>
+                <p>Grade 11/12 with 20 points, E in English and Mathematics.</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Pre-Vocational Candidates</h4>
-                <p>18 points in 6 subjects, F in English, Maths, Science, D in pre-vocational subject</p>
+                <h4 className="font-semibold mb-2">Electrical General (Level 1)</h4>
+                <p>Grade 11/12 with 20 points, E in English, Mathematics and Physical Science (D in Mathematics and Science for higher levels).</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Mature Age Entry</h4>
-                <p>23+ years, Grade 10 JSC, 3 years relevant experience</p>
+                <h4 className="font-semibold mb-2">ICT Foundation (Level 2)</h4>
+                <p>Grade 12 with 20 points (E in Mathematics and English) or Grade 11 with 20 points (F in English, Mathematics and Science).</p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold mb-2">Wholesale and Retail Operations (Level 2)</h4>
+                <p>Grade 11/12 with 20 points, E in English and Mathematics or Accounting.</p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold mb-2">Hospitality &amp; Tourism (Level 2)</h4>
+                <p>Grade 10 with 23 points (E in English) or Grade 11 with 20 points (F in English, Mathematics and Science).</p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold mb-2">Hospitality &amp; Tourism (Level 3 and 4)</h4>
+                <p>The preceding Level 2 or Level 3 trade certificate or relevant results.</p>
               </div>
             </div>
           </CardContent>
@@ -256,15 +287,16 @@ const EntryRequirementsManagement = () => {
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Trade *</Label>
+                <Label>Trade</Label>
                 <Select
-                  value={formData.trade_id}
-                  onValueChange={(value) => setFormData({ ...formData, trade_id: value })}
+                  value={formData.trade_id || "all"}
+                  onValueChange={(value) => setFormData({ ...formData, trade_id: value === "all" ? "" : value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select trade" />
+                    <SelectValue placeholder="All trades (general rule)" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">All trades (general rule)</SelectItem>
                     {trades?.map((trade) => (
                       <SelectItem key={trade.id} value={trade.id}>
                         {trade.name} ({trade.code})
@@ -275,15 +307,16 @@ const EntryRequirementsManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Level *</Label>
+                <Label>Level</Label>
                 <Select
-                  value={formData.level.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })}
+                  value={(formData.level ?? 0).toString()}
+                  onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) || null })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="0">All levels</SelectItem>
                     <SelectItem value="1">Level 1</SelectItem>
                     <SelectItem value="2">Level 2</SelectItem>
                     <SelectItem value="3">Level 3</SelectItem>
@@ -333,15 +366,16 @@ const EntryRequirementsManagement = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>English Symbol (Minimum)</Label>
+                <Label>English Symbol (Minimum, optional)</Label>
                 <Select
-                  value={formData.english_symbol || ""}
-                  onValueChange={(value) => setFormData({ ...formData, english_symbol: value })}
+                  value={formData.english_symbol || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, english_symbol: value === "none" ? "" : value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select symbol" />
+                    <SelectValue placeholder="Not required" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Not required</SelectItem>
                     {SYMBOLS.map((symbol) => (
                       <SelectItem key={symbol} value={symbol}>{symbol}</SelectItem>
                     ))}
@@ -350,15 +384,16 @@ const EntryRequirementsManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Maths Symbol (Minimum)</Label>
+                <Label>Maths Symbol (Minimum, optional)</Label>
                 <Select
-                  value={formData.maths_symbol || ""}
-                  onValueChange={(value) => setFormData({ ...formData, maths_symbol: value })}
+                  value={formData.maths_symbol || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, maths_symbol: value === "none" ? "" : value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select symbol" />
+                    <SelectValue placeholder="Not required" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Not required</SelectItem>
                     {SYMBOLS.map((symbol) => (
                       <SelectItem key={symbol} value={symbol}>{symbol}</SelectItem>
                     ))}
@@ -415,7 +450,7 @@ const EntryRequirementsManagement = () => {
                 onCheckedChange={(checked) => setFormData({ 
                   ...formData, 
                   requires_previous_level: checked,
-                  previous_level_required: checked ? formData.level - 1 : undefined
+                  previous_level_required: checked && formData.level ? formData.level - 1 : undefined
                 })}
               />
             </div>
@@ -490,9 +525,9 @@ const EntryRequirementsManagement = () => {
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={createRequirement.isPending || updateRequirement.isPending}
+              disabled={saveRequirement.isPending}
             >
-              {(createRequirement.isPending || updateRequirement.isPending) ? "Saving..." : "Save Requirement"}
+              {saveRequirement.isPending ? "Saving..." : canApprove ? "Save Requirement" : "Send for approval"}
             </Button>
           </DialogFooter>
         </DialogContent>

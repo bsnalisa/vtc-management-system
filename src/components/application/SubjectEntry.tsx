@@ -11,6 +11,8 @@ import { useCalculatePoints } from "@/hooks/useEntryRequirements";
 interface SubjectEntryProps {
   subjects: SchoolSubject[];
   onSubjectsChange: (subjects: SchoolSubject[]) => void;
+  /** The centre applied to (applicants have no centre of their own) */
+  organizationId?: string;
 }
 
 const COMMON_SUBJECTS = [
@@ -43,8 +45,8 @@ const COMMON_SUBJECTS = [
   "French",
 ];
 
-export const SubjectEntry = ({ subjects, onSubjectsChange }: SubjectEntryProps) => {
-  const { calculatePoints } = useCalculatePoints();
+export const SubjectEntry = ({ subjects, onSubjectsChange, organizationId }: SubjectEntryProps) => {
+  const { calculatePoints } = useCalculatePoints(organizationId);
   const totalPoints = calculatePoints(subjects);
 
   const addSubject = () => {

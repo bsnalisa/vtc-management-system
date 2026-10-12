@@ -6,6 +6,7 @@ import { headOfTraineeSupportNavItems } from "@/lib/navigationConfig";
 import { useTraineeUpdateRequests } from "@/hooks/useTraineeUpdateRequests";
 import { useTrainees } from "@/hooks/useTrainees";
 import { useNavigate } from "react-router-dom";
+import { RequirementChangeRequests } from "@/components/registration/RequirementChangeRequests";
 
 const HeadOfTraineeSupportDashboard = () => {
   const navigate = useNavigate();
@@ -130,6 +131,9 @@ const HeadOfTraineeSupportDashboard = () => {
             </CardHeader>
           </Card>
         )}
+
+        {/* Entry requirement changes proposed by registration officers */}
+        <RequirementChangeRequests canReview />
 
         {/* Officer Activity Overview */}
         <Card>

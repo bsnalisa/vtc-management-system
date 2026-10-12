@@ -388,6 +388,7 @@ export const headOfTraineeSupportNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainee-support-dashboard", icon: LayoutDashboard },
   { title: "Pending Approvals", url: "/trainee-support/pending-approvals", icon: ClipboardCheck },
   { title: "Trainee List", url: "/trainees", icon: Users },
+  { title: "Entry Requirements", url: "/entry-requirements", icon: ClipboardList },
   { title: "Trainee Affairs", url: "/trainee-affairs", icon: ClipboardList },
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Officer Activity", url: "/trainee-support/officer-activity", icon: BarChart3 },
