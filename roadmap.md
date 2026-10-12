@@ -42,3 +42,4 @@
 - [x] Move Skilla to the Online Application tab
 - [x] Publish and test Skilla with real NTA/centre questions
 - [x] Skilla available on every page, answers limited to signed-in role
+- [ ] Build staff registration page: inbox Registration button opens it, staff collect fees and confirm enrolment, Provisionally Admitted application becomes a real trainee record.
