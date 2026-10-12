@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus } from "lucide-react";
+import { RequirementChangeRequests } from "@/components/registration/RequirementChangeRequests";
+import { useRequirementChangeRequests } from "@/hooks/useEntryRequirements";
 import { InstanceDialog, statusVariant } from "@/components/workflow/InstanceDialog";
 import {
   MyTask, WorkflowInstance, useActOnTask, useDelegations, useEndDelegation, useMyTasks, useOrgUsers, useProcessTypes,
@@ -51,12 +53,17 @@ function TaskDialog({ task, onClose }: { task: MyTask; onClose: () => void }) {
   );
 }
 
+const REQUIREMENT_APPROVER_ROLES = ["head_of_trainee_support", "super_admin"];
+
 function ToApproveTab() {
+  const { role } = useRoleNavigation();
+  const canApproveRequirements = !!role && REQUIREMENT_APPROVER_ROLES.includes(role);
   const { data } = useMyTasks();
   const { data: types } = useProcessTypes();
   const [selected, setSelected] = useState<MyTask | null>(null);
   return (
     <div className="space-y-4">
+      {canApproveRequirements && <RequirementChangeRequests canReview hideWhenEmpty title="Entry requirement changes to approve" />}
       <Table>
         <TableHeader><TableRow><TableHead>Request</TableHead><TableHead>Type</TableHead><TableHead>Step</TableHead><TableHead>Respond by</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
@@ -71,7 +78,8 @@ function ToApproveTab() {
           ))}
         </TableBody>
       </Table>
-      {!data?.length && <p className="text-sm text-muted-foreground text-center py-6">Nothing is waiting for your approval.</p>}
+      {!data?.length && !canApproveRequirements && <p className="text-sm text-muted-foreground text-center py-6">Nothing is waiting for your approval.</p>}
+      {!data?.length && canApproveRequirements && <p className="text-sm text-muted-foreground text-center py-2">No workflow requests are waiting for your approval.</p>}
       {selected && <TaskDialog key={selected.task_id} task={selected} onClose={() => setSelected(null)} />}
     </div>
   );
@@ -197,6 +205,10 @@ function DelegationTab() {
 export default function MyApprovals() {
   const { navItems, groupLabel } = useRoleNavigation();
   const { data: tasks } = useMyTasks();
+  const { role } = useRoleNavigation();
+  const { data: pendingRequirements } = useRequirementChangeRequests("pending");
+  const approver = !!role && REQUIREMENT_APPROVER_ROLES.includes(role);
+  const toApprove = (tasks?.length ?? 0) + (approver ? pendingRequirements?.length ?? 0 : 0);
   return (
     <DashboardLayout title="My Approvals" subtitle="Requests waiting for you, and requests you have made" navItems={navItems} groupLabel={groupLabel}>
       <Card>
@@ -204,12 +216,15 @@ export default function MyApprovals() {
         <CardContent>
           <Tabs defaultValue="approve">
             <TabsList>
-              <TabsTrigger value="approve">To approve{tasks?.length ? ` (${tasks.length})` : ""}</TabsTrigger>
+              <TabsTrigger value="approve">To approve{toApprove ? ` (${toApprove})` : ""}</TabsTrigger>
               <TabsTrigger value="mine">My requests</TabsTrigger>
               <TabsTrigger value="delegation">Delegation</TabsTrigger>
             </TabsList>
             <TabsContent value="approve"><ToApproveTab /></TabsContent>
-            <TabsContent value="mine"><MyRequestsTab /></TabsContent>
+            <TabsContent value="mine">
+              {!approver && <div className="mb-4"><RequirementChangeRequests canReview={false} hideWhenEmpty title="Your entry requirement changes awaiting approval" /></div>}
+              <MyRequestsTab />
+            </TabsContent>
             <TabsContent value="delegation"><DelegationTab /></TabsContent>
           </Tabs>
         </CardContent>

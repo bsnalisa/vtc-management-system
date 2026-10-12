@@ -13,10 +13,12 @@ interface Props {
   /** Approvers can approve and decline; everyone else only sees what is waiting */
   canReview: boolean;
   title?: string;
+  /** Show nothing when no change is waiting (used inside pages that have other content) */
+  hideWhenEmpty?: boolean;
 }
 
 // Entry-requirement changes proposed by registration officers, waiting for the Head of Trainee Support
-export const RequirementChangeRequests = ({ canReview, title = "Entry requirement changes awaiting approval" }: Props) => {
+export const RequirementChangeRequests = ({ canReview, title = "Entry requirement changes awaiting approval", hideWhenEmpty = false }: Props) => {
   const { data: requests, isLoading } = useRequirementChangeRequests("pending");
   const { data: trades } = useTrades();
   const review = useReviewRequirementChange();
@@ -37,6 +39,8 @@ export const RequirementChangeRequests = ({ canReview, title = "Entry requiremen
     ].filter(Boolean);
     return parts.join(" · ") || "No details";
   };
+
+  if (hideWhenEmpty && !isLoading && (requests?.length ?? 0) === 0) return null;
 
   return (
     <Card>

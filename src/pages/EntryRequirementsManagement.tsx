@@ -22,7 +22,7 @@ import { SYMBOLS } from "@/types/application";
 const EntryRequirementsManagement = () => {
   const { navItems, groupLabel, role } = useRoleNavigation();
   // Approvers change rules at once; registration officers send changes for approval
-  const canApprove = role === "head_of_trainee_support" || role === "organization_admin" || role === "super_admin";
+  const canApprove = role === "head_of_trainee_support" || role === "super_admin";
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRequirement, setEditingRequirement] = useState<any>(null);
   const [formData, setFormData] = useState<EntryRequirementData>({
