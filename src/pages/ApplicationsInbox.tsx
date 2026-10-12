@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -16,6 +17,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const ApplicationsInbox = () => {
+  const navigate = useNavigate();
   const { navItems, groupLabel } = useRoleNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -150,7 +152,7 @@ const ApplicationsInbox = () => {
               <ApplicationsTable
                 applications={filteredApplications || []}
                 onScreen={handleScreen}
-                onRegister={() => {}}
+                onRegister={(application) => navigate(`/registration/${application.id}`)}
                 onViewDetails={handleViewDetails}
               />
             )}

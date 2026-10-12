@@ -68,6 +68,19 @@ export const useSaveApplicationDraft = () => {
       // Calculate progress percentage
       const progress = calculateProgress(formData);
 
+      // A form that opened before the saved draft had loaded has no draft id; reuse the applicant's draft
+      // instead of creating a second one.
+      if (!draftId) {
+        const { data: existing } = await supabase
+          .from("application_drafts")
+          .select("id")
+          .eq("user_id", user.id)
+          .order("last_updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (existing?.id) draftId = existing.id;
+      }
+
       if (draftId) {
         // Update existing draft
         const { data, error } = await supabase

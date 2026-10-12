@@ -72,6 +72,13 @@ export const DocumentUpload = ({
       return;
     }
 
+    if (!organizationId) {
+      const msg = "Select the training centre you are applying to before uploading documents.";
+      setError(msg);
+      toast({ title: "Choose a centre first", description: msg, variant: "destructive" });
+      return;
+    }
+
     setError(null);
     setUploading(true);
 
@@ -245,6 +252,11 @@ export const MultipleDocumentUpload = ({
         description: `Maximum ${maxFiles} files allowed`,
         variant: "destructive",
       });
+      return;
+    }
+
+    if (!organizationId) {
+      toast({ title: "Choose a centre first", description: "Select the training centre you are applying to before uploading documents.", variant: "destructive" });
       return;
     }
 

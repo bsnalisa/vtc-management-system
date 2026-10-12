@@ -144,6 +144,7 @@ const AssessmentTemplateManagement = lazy(() => import("./pages/AssessmentTempla
 const AssessmentTemplateApprovals = lazy(() => import("./pages/AssessmentTemplateApprovals"));
 const TrainerWorkload = lazy(() => import("./pages/TrainerWorkload"));
 const HistoricalTrainees = lazy(() => import("./pages/HistoricalTrainees"));
+const RegistrationPage = lazy(() => import("./pages/RegistrationPage"));
 const ApplicationsInbox = lazy(() => import("./pages/ApplicationsInbox"));
 const OnlineApplicationsInbox = lazy(() => import("./pages/OnlineApplicationsInbox"));
 const GradingScale = lazy(() => import("./pages/GradingScale"));
@@ -245,6 +246,9 @@ const ProtectedUserManagement = withRoleAccess(UserManagement, {
 });
 const ProtectedCentreManagerDashboard = withRoleAccess(CentreManagerDashboard, {
   requiredRoles: ["centre_manager"],
+});
+const ProtectedRegistrationPage = withRoleAccess(RegistrationPage, {
+  requiredRoles: ["registration_officer", "head_of_training"],
 });
 const ProtectedHistoricalTrainees = withRoleAccess(HistoricalTrainees, {
   requiredRoles: ["registration_officer", "head_of_training"],
@@ -530,6 +534,7 @@ const App = () => (
           <Route path="/trainer-workload" element={<ProtectedRoute><TrainerWorkload /></ProtectedRoute>} />
           <Route path="/timetable-approvals" element={<ProtectedRoute><ProtectedTimetableManagement /></ProtectedRoute>} />
           <Route path="/historical-trainees" element={<ProtectedRoute><ProtectedHistoricalTrainees /></ProtectedRoute>} />
+          <Route path="/registration/:applicationId" element={<ProtectedRoute><ProtectedRegistrationPage /></ProtectedRoute>} />
           <Route path="/applications-inbox" element={<ProtectedRoute><ApplicationsInbox /></ProtectedRoute>} />
           <Route path="/online-applications" element={<ProtectedRoute><OnlineApplicationsInbox /></ProtectedRoute>} />
           <Route path="/grading-scale" element={<ProtectedRoute><GradingScale /></ProtectedRoute>} />

@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { AppLogo } from "@/components/AppLogo";
 import { useEffect, useState } from "react";
@@ -333,7 +334,10 @@ const PublicHome = () => {
                     {activeDraft && (
                       <ResumeDraftBanner
                         draft={activeDraft as any}
-                        onResume={() => setFormOpen(true)}
+                        onResume={() => {
+                          if (!activeOrgId) { toast.error("Select the centre you are applying to first, then continue your application."); return; }
+                          setFormOpen(true);
+                        }}
                         onDiscard={() => discardDraft.mutate(activeDraft.id)}
                         isDiscarding={discardDraft.isPending}
                       />
