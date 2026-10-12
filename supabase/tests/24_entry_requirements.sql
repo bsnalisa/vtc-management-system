@@ -20,6 +20,7 @@ insert into symbol_points (organization_id, exam_level, symbol, points) values (
 -- ===== the standard rules (the migration is run again now that the trades exist; it must not duplicate anything) =====
 \ir ../migrations/20261019090000_entry_requirements_seed_and_approval.sql
 \ir ../migrations/20261019090000_entry_requirements_seed_and_approval.sql
+\ir ../migrations/20261020090000_entry_requirements_approver_only.sql
 select public.assert((select count(*) from entry_requirements where organization_id = :'orgA' and trade_id is null) = 2, 'two general minimum rules per centre');
 select public.assert((select count(*) from entry_requirements where organization_id = :'orgB' and trade_id is null) = 2, 'the other centre gets them too');
 select public.assert((select count(*) from entry_requirements e join trades t on t.id = e.trade_id where e.organization_id = :'orgA' and t.code = 'ICT' and e.level = 2) = 2, 'ICT Level 2 has two alternative rules');
@@ -72,7 +73,9 @@ set role authenticated; select set_config('request.jwt.claim.sub', :'hotsA', fal
 select public.assert((public.save_entry_requirement('update', (select id from entry_requirements where requirement_name = 'Test rule'), jsonb_build_object('min_points', 21)))->>'status' = 'applied', 'the Head of Trainee Support''s change applies at once');
 select public.assert((public.save_entry_requirement('deactivate', (select id from entry_requirements where requirement_name = 'Test rule'), '{}'))->>'status' = 'applied', 'removing a rule applies at once');
 select set_config('request.jwt.claim.sub', :'adminA', false);
-select public.assert((public.save_entry_requirement('create', null, jsonb_build_object('requirement_name', 'Admin rule', 'min_points', 20)))->>'status' = 'applied', 'an Organization Admin''s change applies at once');
+select public.expect_error($$select public.save_entry_requirement('create', null, '{"requirement_name":"Admin rule"}')$$, 'Not authorised', 'an Organization Admin cannot change entry requirements');
+select public.expect_error($$select public.review_requirement_change((select id from requirement_change_requests limit 1), true)$$, 'Not authorised|Request not found|null value', 'nor approve them');
+select public.assert((select count(*) from requirement_change_requests) = 0, 'nor see the requests');
 select set_config('request.jwt.claim.sub', :'applicant', false);
 select public.expect_error($$select public.save_entry_requirement('create', null, '{"requirement_name":"x"}')$$, 'Not authorised', 'an applicant cannot change rules');
 reset role;

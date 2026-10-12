@@ -53,7 +53,7 @@ function TaskDialog({ task, onClose }: { task: MyTask; onClose: () => void }) {
   );
 }
 
-const REQUIREMENT_APPROVER_ROLES = ["head_of_trainee_support", "organization_admin", "super_admin"];
+const REQUIREMENT_APPROVER_ROLES = ["head_of_trainee_support", "super_admin"];
 
 function ToApproveTab() {
   const { role } = useRoleNavigation();
