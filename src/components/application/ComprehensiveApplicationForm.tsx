@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, CheckCircle, Home, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTrades } from "@/hooks/useTrades";
 import { useNamibiaRegions } from "@/hooks/useNamibiaRegions";
+import { toast } from "sonner";
 import { useCalculatePoints } from "@/hooks/useEntryRequirements";
 import { useQualificationCheck } from "@/hooks/useQualificationCheck";
 import { useAutoSaveDraft, calculateProgress, missingMandatoryFields } from "@/hooks/useApplicationDraft";
@@ -188,7 +189,7 @@ export const ComprehensiveApplicationForm = ({
     }
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = (): Record<string, string> => {
     const errors: Record<string, string> = {};
 
     // Required personal fields
@@ -209,25 +210,37 @@ export const ComprehensiveApplicationForm = ({
     // Training details
     if (!formData.trade_id) errors.trade_id = "Trade selection is required";
 
+    // Photo and documents are marked required, so an application cannot be sent without them
+    if (!formData.photo_path) errors.photo_path = "Upload your passport photo (Personal tab)";
+    if (!formData.id_document_path) errors.id_document_path = "Upload your ID or birth certificate (Declaration tab)";
+    if (!formData.school_leaving_cert_path) errors.school_leaving_cert_path = "Upload your school leaving certificate (Declaration tab)";
+    if (!formData.academic_qualifications_path) errors.academic_qualifications_path = "Upload your academic qualifications (Declaration tab)";
+    // Some trades need the previous level's certificate, which the system cannot check, so the applicant must attach it
+    if (qualificationResult.previous_level_proof_needed && (formData.additional_documents_paths ?? []).length === 0) {
+      errors.additional_documents_paths = `Attach your Level ${qualificationResult.previous_level_proof_needed} trade certificate under Additional Supporting Documents (Declaration tab)`;
+    }
+
     // Declaration
     if (!formData.declaration_accepted) errors.declaration_accepted = "You must accept the declaration";
 
     setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    return errors;
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      // Find first tab with error
-      if (validationErrors.first_name || validationErrors.last_name || validationErrors.date_of_birth || validationErrors.national_id || validationErrors.phone || validationErrors.address || validationErrors.region) {
-        setActiveTab("personal");
-      } else if (validationErrors.emergency_contact_name || validationErrors.emergency_contact_phone || validationErrors.emergency_contact_relationship || validationErrors.emergency_contact_town) {
-        setActiveTab("emergency");
-      } else if (validationErrors.trade_id) {
-        setActiveTab("training");
-      } else if (validationErrors.declaration_accepted) {
-        setActiveTab("declaration");
-      }
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      // Open the first tab with a problem and say what is missing
+      const tabOf = (key: string) =>
+        ["first_name", "last_name", "date_of_birth", "national_id", "phone", "address", "region", "photo_path"].includes(key) ? "personal"
+        : key.startsWith("emergency_contact") ? "emergency"
+        : key === "trade_id" ? "training"
+        : "declaration";
+      const order = ["personal", "emergency", "training", "declaration"];
+      const first = Object.keys(errors).map(tabOf).sort((x, y) => order.indexOf(x) - order.indexOf(y))[0];
+      setActiveTab(first);
+      const missing = Object.values(errors);
+      toast.error(missing.length === 1 ? missing[0] : `${missing.length} things are missing: ${missing.slice(0, 3).join("; ")}${missing.length > 3 ? "…" : ""}`);
       return;
     }
 

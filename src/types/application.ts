@@ -143,6 +143,8 @@ export interface QualificationResult {
   reasons: string[];
   age_years: number;
   is_mature_age: boolean;
+  /** Set when the matched rule needs an earlier level's trade certificate that the system cannot check itself */
+  previous_level_proof_needed?: number;
 }
 
 export const EXAM_LEVELS = [

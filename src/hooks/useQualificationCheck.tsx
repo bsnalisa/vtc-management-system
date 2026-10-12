@@ -119,6 +119,7 @@ export const useQualificationCheck = ({
       result.qualified = true;
       result.reasons.push(`Meets the entry requirements: ${met.rule.requirement_name}`);
       result.reasons.push(...met.notes);
+      if (met.rule.requires_previous_level && met.rule.previous_level_required) result.previous_level_proof_needed = met.rule.previous_level_required;
       return result;
     }
 
