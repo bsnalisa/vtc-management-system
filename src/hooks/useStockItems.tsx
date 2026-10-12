@@ -71,11 +71,11 @@ export const useLowStockItems = () => {
         `)
         .eq("organization_id", organizationId)
         .eq("active", true)
-        .filter("current_quantity", "lte", "reorder_level")
         .order("item_name");
 
       if (error) throw error;
-      return data as StockItem[];
+      // The database cannot compare two columns in this filter, so items at or below their reorder level are picked here
+      return (data as StockItem[]).filter((item) => Number(item.current_quantity) <= Number(item.reorder_level));
     },
     enabled: !!organizationId,
   });
