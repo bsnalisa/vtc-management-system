@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Phone, GraduationCap, Briefcase, Heart, Shield, FileText, CheckCircle, Home, ChevronLeft, ChevronRight } from "lucide-react";
-import { useTrades } from "@/hooks/useTrades";
+import { useTradesOpenForApplication } from "@/hooks/useTrades";
 import { useNamibiaRegions } from "@/hooks/useNamibiaRegions";
 import { toast } from "sonner";
 import { useCalculatePoints } from "@/hooks/useEntryRequirements";
@@ -106,7 +106,7 @@ export const ComprehensiveApplicationForm = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(draftId);
 
-  const { data: trades } = useTrades(organizationIdOverride);
+  const { data: trades, noneOpen: noTradesOpen } = useTradesOpenForApplication(organizationIdOverride);
   const { data: regions } = useNamibiaRegions();
   const { calculatePoints } = useCalculatePoints(organizationIdOverride);
 
@@ -608,6 +608,11 @@ export const ComprehensiveApplicationForm = ({
                             ))}
                           </SelectContent>
                         </Select>
+                        {noTradesOpen && (
+                          <p className="text-xs text-destructive">
+                            This centre has no trade open for applications yet. Its Head of Training must approve a qualification first.
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Choice 2 - Trade (Alternative)</Label>
