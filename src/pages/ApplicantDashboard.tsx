@@ -47,7 +47,7 @@ const ApplicantDashboard = () => {
       const { data, error } = await supabase
         .from("trainee_applications")
         .select("id, application_number, intake, academic_year, qualification_status, registration_status, info_request_note, created_at, organization_id, trades:trades!trainee_applications_trade_id_fkey(name)")
-        .eq("created_by", user.id)
+        .or(`created_by.eq.${user.id},applicant_user_id.eq.${user.id}`)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as any[];

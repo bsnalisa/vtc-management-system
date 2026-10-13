@@ -51,6 +51,8 @@ export const useOnlineApplications = (filters?: OnlineApplicationFilters) => {
       return data as any[];
     },
     enabled: !!organizationId,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 };
 

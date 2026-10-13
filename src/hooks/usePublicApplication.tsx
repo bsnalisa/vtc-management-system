@@ -99,7 +99,7 @@ export const useMyApplications = () => {
       const { data, error } = await supabase
         .from("trainee_applications")
         .select("id, application_number, first_name, last_name, intake, academic_year, qualification_status, registration_status, created_at, organization_id, trades:trades!trainee_applications_trade_id_fkey(name, code)")
-        .eq("created_by", user.id)
+        .or(`created_by.eq.${user.id},applicant_user_id.eq.${user.id}`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
