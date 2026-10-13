@@ -49,7 +49,7 @@ const TraineeRegistration = () => {
   const handleBlur = (field: string) => {
     setTouched(prev => ({ ...prev, [field]: true }));
     // Validate on blur
-    const validation = validateTraineeRegistration(formData);
+    const validation = validateTraineeRegistration({ ...formData, trade: formData.qualification });
     if (validation.errors[field]) {
       setErrors(prev => ({ ...prev, [field]: validation.errors[field] }));
     } else {
@@ -65,14 +65,27 @@ const TraineeRegistration = () => {
     e.preventDefault();
     
     // Validate all fields
-    const validation = validateTraineeRegistration(formData);
+    // The form picks a qualification where the validator calls it a trade
+    const validation = validateTraineeRegistration({ ...formData, trade: formData.qualification });
     setErrors(validation.errors);
-    setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+    setTouched({ ...Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}), trade: true });
 
     if (!validation.isValid) {
+      const problems = Object.values(validation.errors);
       toast({
         title: "Validation Error",
-        description: "Please correct the highlighted fields",
+        description: `Please correct: ${problems.slice(0, 3).join("; ")}${problems.length > 3 ? ` (and ${problems.length - 3} more)` : ""}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Trainees belong to a trade, which the qualification supplies
+    const tradeId = selectedQualification?.trade_id;
+    if (!tradeId) {
+      toast({
+        title: "Qualification has no trade",
+        description: "This qualification is not linked to a trade. Ask the Head of Training to link it to one, then try again.",
         variant: "destructive",
       });
       return;
@@ -88,7 +101,7 @@ const TraineeRegistration = () => {
         phone: formData.phone,
         email: formData.email || undefined,
         address: formData.address,
-        trade_id: formData.qualification, // Use qualification ID
+        trade_id: tradeId,
         training_mode: formData.trainingMode,
         level: parseInt(formData.level),
         academic_year: formData.academicYear,
