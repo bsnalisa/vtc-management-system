@@ -63,7 +63,7 @@ select set_config('request.jwt.claim.sub', :'cm', false);
 select public.assert((select count(*) from public.workflow_my_tasks() where instance_id = :'inst') = 1, 'it is in the Centre Manager''s queue');
 select public.workflow_act((select id from workflow_tasks where instance_id = :'inst' and status = 'pending'), 'approve', 'Approved') = 'approved' as ok \gset
 select public.assert((select status = 'approved' and not escalated from workflow_instances where id = :'inst'), 'higher-level approval finishes the request');
-select public.assert((select count(*) from workflow_events where instance_id = :'inst' and event in ('returned_for_correction','resubmitted','escalated_by_approver','approved')) = 4, 'every decision is in the history');
+select public.assert((select count(*) from workflow_events where instance_id = :'inst' and event in ('info_requested','info_provided','escalated_by_approver','approved')) = 4, 'every decision is in the history');
 
 -- approved is not completed until processing is recorded
 select set_config('request.jwt.claim.sub', :'tr', false);
@@ -96,7 +96,7 @@ select public.assert(exists (select 1 from workflow_task_assignees a join workfl
 
 -- no reporting line: falls back to the Centre Manager
 select set_config('request.jwt.claim.sub', :'adminA', false);
-select public.workflow_create_request('general', 'Admin request', 'x') as i6 \gset
+select public.workflow_create_request('finance_submission', 'Admin request', 'x') as i6 \gset
 select public.assert(exists (select 1 from workflow_task_assignees a join workflow_tasks t on t.id = a.task_id where t.instance_id = :'i6' and a.user_id = :'cm'), 'with no reporting line the Centre Manager decides');
 
 -- ===== drafts =====
@@ -106,4 +106,5 @@ select public.assert((select status from workflow_instances where id = :'d1') = 
 select public.workflow_submit(:'d1');
 select public.assert((select status from workflow_instances where id = :'d1') = 'in_progress' and exists (select 1 from workflow_tasks where instance_id = :'d1' and status = 'pending'), 'submitting a draft opens the approval');
 select public.expect_error($$select public.workflow_submit('$$ || :'d1' || $$')$$, 'already been submitted', 'a submitted request cannot be submitted again');
+select public.assert(not exists (select 1 from workflow_definitions where organization_id = :'orgA' and process_type = 'general' and active) and (select count(*) from public.workflow_available_processes()) >= 6, 'general stays opt-in while the new kinds are available');
 select 'OK reporting hierarchy and supervisor routing' as result;

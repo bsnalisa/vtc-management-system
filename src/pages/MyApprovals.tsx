@@ -20,7 +20,7 @@ import { InstanceDialog } from "@/components/workflow/InstanceDialog";
 import { statusBadgeVariant, statusLabel } from "@/components/workflow/status";
 import { getRoleDisplayName } from "@/lib/roleUtils";
 import {
-  MyTask, WorkflowInstance, useActOnTask, useDelegations, useEndDelegation, useMyTasks, useOrgUsers, useProcessTypes,
+  MyTask, useAvailableProcesses, WorkflowInstance, useActOnTask, useDelegations, useEndDelegation, useMyTasks, useOrgUsers, useProcessTypes,
   useProvideInfo, useSaveDelegation, useStartRequest, useSubmitDraft, useWorkflowInstances,
 } from "@/hooks/useWorkflows";
 
@@ -90,18 +90,16 @@ function ToApproveTab() {
   );
 }
 
-const REQUEST_TYPES = ["general", "finance_submission", "payment_request", "debtor_adjustment", "loan_request", "asset_request", "training_submission", "trainee_support_submission", "executive_matter"];
-
 function StartRequestDialog() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [process, setProcess] = useState("general");
-  const { data: types } = useProcessTypes();
+  const [process, setProcess] = useState("");
+  const { data: types } = useAvailableProcesses();
   const start = useStartRequest();
   const send = async (submit: boolean) => {
     await start.mutateAsync({ title, description, process, submit });
-    setTitle(""); setDescription(""); setProcess("general"); setOpen(false);
+    setTitle(""); setDescription(""); setProcess(""); setOpen(false);
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -110,14 +108,14 @@ function StartRequestDialog() {
         <DialogHeader><DialogTitle>Request approval</DialogTitle></DialogHeader>
         <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); await send(true); }}>
           <div className="space-y-1"><Label>Kind of request</Label>
-            <Select value={process} onValueChange={setProcess}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{types?.filter((t) => REQUEST_TYPES.includes(t.code)).map((t) => <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>)}</SelectContent></Select>
+            <Select value={process} onValueChange={setProcess}><SelectTrigger><SelectValue placeholder="Choose the kind of request" /></SelectTrigger>
+              <SelectContent>{types?.map((t) => <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>)}</SelectContent></Select>
             <p className="text-xs text-muted-foreground">It goes to your direct supervisor.</p></div>
           <div className="space-y-1"><Label>What do you need approved?</Label><Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="space-y-1"><Label>Details</Label><Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <div className="flex gap-2">
-            <Button type="submit" className="flex-1" disabled={start.isPending || !title.trim()}>Send for approval</Button>
-            <Button type="button" variant="outline" disabled={start.isPending || !title.trim()} onClick={() => send(false)}>Save as draft</Button>
+            <Button type="submit" className="flex-1" disabled={start.isPending || !title.trim() || !process}>Send for approval</Button>
+            <Button type="button" variant="outline" disabled={start.isPending || !title.trim() || !process} onClick={() => send(false)}>Save as draft</Button>
           </div>
         </form>
       </DialogContent>

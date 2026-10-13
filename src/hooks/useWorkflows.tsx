@@ -69,6 +69,17 @@ export const useProcessTypes = () =>
     },
   });
 
+/** Kinds of request the signed-in user can send now (those with an active workflow at their centre). */
+export const useAvailableProcesses = () =>
+  useQuery({
+    queryKey: ["workflow-available-processes"],
+    queryFn: async () => {
+      const { data, error } = await db.rpc("workflow_available_processes");
+      if (error) throw error;
+      return data as ProcessType[];
+    },
+  });
+
 export const useRoleOptions = () =>
   useQuery({
     queryKey: ["workflow-role-options"],

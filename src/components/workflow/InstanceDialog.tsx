@@ -9,11 +9,10 @@ import { getRoleDisplayName } from "@/lib/roleUtils";
 
 const EVENT_LABELS: Record<string, string> = {
   started: "Request started", step_opened: "Step opened", approved: "Approved", rejected: "Rejected",
-  info_requested: "More information requested", info_provided: "Information provided", escalated: "Escalated",
+  info_requested: "Returned for correction", info_provided: "Corrected and resubmitted", escalated: "Escalated",
   overdue: "Overdue", no_assignees: "No approver available", completed_approved: "Completed: approved",
   completed_rejected: "Completed: rejected", completed_cancelled: "Cancelled",
-  draft_saved: "Draft saved", submitted: "Submitted for approval", returned_for_correction: "Returned for correction",
-  resubmitted: "Corrected and resubmitted", escalated_by_approver: "Escalated for higher-level approval", completed: "Marked completed",
+  draft_saved: "Draft saved", submitted: "Submitted for approval", escalated_by_approver: "Escalated for higher-level approval", completed: "Marked completed",
 };
 
 export const statusVariant = (s: string): "default" | "destructive" | "secondary" | "outline" =>

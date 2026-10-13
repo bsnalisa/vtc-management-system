@@ -259,7 +259,7 @@ BEGIN
   SELECT array_agg(user_id) INTO _ids FROM public.workflow_task_assignees WHERE task_id = t.id;
   UPDATE public.workflow_instances SET status = 'in_progress', resubmitted = true, resubmissions = resubmissions + 1,
          next_action = t.step_name || ': waiting for ' || public.workflow_people_names(_ids) WHERE id = _instance;
-  PERFORM public.workflow_log(_instance, t.id, 'resubmitted', _actor, _via, _comment);
+  PERFORM public.workflow_log(_instance, t.id, 'info_provided', _actor, _via, _comment);
   FOR a IN SELECT user_id FROM public.workflow_task_assignees WHERE task_id = t.id LOOP
     PERFORM public.workflow_announce_task(t.id, a.user_id, 'task_assigned', 'Corrected and resubmitted, approval needed');
   END LOOP;
@@ -291,7 +291,7 @@ BEGIN
     UPDATE public.workflow_tasks SET status = 'info_requested', acted_by = _actor, acted_at = now(), comment = _comment WHERE id = t.id;
     UPDATE public.workflow_instances SET status = 'awaiting_info', resubmitted = false, next_action = 'Returned for correction: the submitter must update and resubmit' WHERE id = i.id;
     UPDATE public.workflow_action_tokens SET used_at = now() WHERE task_id = t.id AND used_at IS NULL;
-    PERFORM public.workflow_log(i.id, t.id, 'returned_for_correction', _actor, _via, _comment);
+    PERFORM public.workflow_log(i.id, t.id, 'info_requested', _actor, _via, _comment);
     PERFORM public.workflow_notify(i.organization_id, i.started_by, 'info_requested', 'Returned for correction: ' || i.reference || ' ' || i.title,
       _comment, '/my-approvals', i.reference || ' ' || i.title || E'\nReturned for correction:\n' || _comment || E'\n\nOpen My Approvals to correct and resubmit.');
     RETURN 'awaiting_info';
@@ -474,6 +474,7 @@ GRANT EXECUTE ON FUNCTION public.workflow_my_tasks() TO authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 7. Process types and a default "supervisor approval" workflow for each centre
+--    (the older processes, including 'general', stay opt-in: nothing changes for them until an admin activates a workflow)
 -- ---------------------------------------------------------------------------
 INSERT INTO public.workflow_process_types (code, label, description) VALUES
   ('finance_submission', 'Financial submission or report', 'Accountant submissions and reports needing authorisation'),
@@ -490,7 +491,7 @@ CREATE OR REPLACE FUNCTION public.seed_default_workflows(_org uuid)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE p text; _def uuid;
 BEGIN
-  FOREACH p IN ARRAY ARRAY['general','finance_submission','payment_request','debtor_adjustment','loan_request','asset_request',
+  FOREACH p IN ARRAY ARRAY['finance_submission','payment_request','debtor_adjustment','loan_request','asset_request',
                            'training_submission','trainee_support_submission','executive_matter'] LOOP
     IF EXISTS (SELECT 1 FROM public.workflow_definitions WHERE organization_id = _org AND process_type = p) THEN CONTINUE; END IF;
     INSERT INTO public.workflow_definitions (organization_id, process_type, name, active, created_by)
@@ -505,3 +506,16 @@ CREATE OR REPLACE FUNCTION public.org_seed_default_workflows() RETURNS trigger L
 BEGIN PERFORM public.seed_default_workflows(NEW.id); RETURN NEW; END $$;
 CREATE TRIGGER trg_org_seed_default_workflows AFTER INSERT ON public.organizations FOR EACH ROW EXECUTE FUNCTION public.org_seed_default_workflows();
 SELECT public.seed_default_workflows(id) FROM public.organizations;
+
+-- Which kinds of request can the caller send right now? (those with an active workflow at their centre)
+CREATE OR REPLACE FUNCTION public.workflow_available_processes()
+RETURNS TABLE (code text, label text, description text)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT p.code, p.label, p.description FROM public.workflow_process_types p
+  WHERE auth.uid() IS NOT NULL
+    AND p.code NOT IN ('assessment_request', 'delivery_plan')
+    AND EXISTS (SELECT 1 FROM public.workflow_definitions d
+                WHERE d.organization_id = public.get_user_organization(auth.uid()) AND d.process_type = p.code AND d.active)
+  ORDER BY p.label;
+$$;
+GRANT EXECUTE ON FUNCTION public.workflow_available_processes() TO authenticated;
