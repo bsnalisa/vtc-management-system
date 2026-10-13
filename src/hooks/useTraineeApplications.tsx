@@ -59,6 +59,9 @@ export const useTraineeApplications = (filters?: {
       return data;
     },
     enabled: !!organizationId,
+    // New online applications appear without the officer reloading the page
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -358,6 +361,8 @@ export const useApplicationStats = () => {
       };
     },
     enabled: !!organizationId,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 };
 

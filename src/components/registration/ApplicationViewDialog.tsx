@@ -9,11 +9,16 @@ import { Download, User, Phone, GraduationCap, Briefcase, Heart, Shield, FileTex
 import { EXAM_LEVELS } from "@/types/application";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentVersions } from "@/components/documents/DocumentVersions";
+import { ApplicationDocumentLinks } from "./ApplicationDocumentLinks";
 
 interface ApplicationViewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   application: any;
+  /** Opens on this tab (screening starts on the documents so nothing is missed). */
+  defaultTab?: string;
+  /** Rendered below the application, e.g. the screening decision. */
+  children?: React.ReactNode;
 }
 
 const Field = ({ label, value }: { label: string; value: any }) => {
@@ -46,7 +51,7 @@ const getExamLevelLabel = (value: string) => {
   return EXAM_LEVELS.find((l) => l.value === value)?.label || value;
 };
 
-export const ApplicationViewDialog = ({ open, onOpenChange, application }: ApplicationViewDialogProps) => {
+export const ApplicationViewDialog = ({ open, onOpenChange, application, defaultTab = "personal", children }: ApplicationViewDialogProps) => {
   const [symbolPointsMap, setSymbolPointsMap] = useState<Record<string, number>>({});
   const [orgName, setOrgName] = useState("");
   const [orgLogo, setOrgLogo] = useState("");
@@ -278,7 +283,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="personal" className="mt-2">
+        <Tabs defaultValue={defaultTab} className="mt-2">
           <TabsList className="flex flex-wrap h-auto gap-1">
             <TabsTrigger value="personal" className="text-xs">Personal</TabsTrigger>
             <TabsTrigger value="emergency" className="text-xs">Emergency</TabsTrigger>
@@ -429,9 +434,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
 
           <TabsContent value="documents" className="space-y-3 mt-3">
             <SectionCard title="Supporting Documents & Declaration" icon={FileText}>
-              <Field label="ID Document" value={application.id_document_path ? "Uploaded" : "Not uploaded"} />
-              <Field label="School Leaving Certificate" value={application.school_leaving_cert_path ? "Uploaded" : "Not uploaded"} />
-              <Field label="Academic Qualifications" value={application.academic_qualifications_path ? "Uploaded" : "Not uploaded"} />
+              <ApplicationDocumentLinks application={application} />
               <Field label="Declaration Accepted" value={application.declaration_accepted} />
             </SectionCard>
             <SectionCard title="Document history" icon={FileText}>
@@ -444,6 +447,7 @@ export const ApplicationViewDialog = ({ open, onOpenChange, application }: Appli
             </SectionCard>
           </TabsContent>
         </Tabs>
+        {children}
       </DialogContent>
     </Dialog>
   );

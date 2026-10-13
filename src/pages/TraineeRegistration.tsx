@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRegisterTrainee } from "@/hooks/useTrainees";
 import { useApprovedQualifications } from "@/hooks/useQualifications";
+import { useTrades } from "@/hooks/useTrades";
 import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
@@ -42,6 +43,12 @@ const TraineeRegistration = () => {
 
   // Get selected qualification details
   const selectedQualification = qualifications?.find(q => q.id === formData.qualification);
+
+  // Trade comes first; only the qualifications under that trade are offered
+  const { data: trades, isLoading: tradesLoading } = useTrades();
+  const [tradeId, setTradeId] = useState("");
+  const tradeQualifications = (qualifications ?? []).filter(q => q.trade_id === tradeId);
+  const tradesWithQualifications = (trades ?? []).filter(t => (qualifications ?? []).some(q => q.trade_id === t.id));
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -80,17 +87,12 @@ const TraineeRegistration = () => {
       return;
     }
 
-    // Trainees belong to a trade, which the qualification supplies
-    const tradeId = selectedQualification?.trade_id;
-    if (!tradeId) {
-      toast({
-        title: "Qualification has no trade",
-        description: "This qualification is not linked to a trade. Ask the Head of Training to link it to one, then try again.",
-        variant: "destructive",
-      });
+    // The trade picked first; the qualification list is already limited to it
+    if (!tradeId || selectedQualification?.trade_id !== tradeId) {
+      toast({ title: "Choose a trade", description: "Select a trade, then a qualification under it.", variant: "destructive" });
       return;
     }
-    
+
     try {
       await registerTrainee.mutateAsync({
         firstName: formData.firstName,
@@ -279,20 +281,41 @@ const TraineeRegistration = () => {
 
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
+                  <Label htmlFor="trade">Trade *</Label>
+                  <Select
+                    value={tradeId}
+                    onValueChange={(value) => {
+                      setTradeId(value);
+                      // A qualification from another trade is no longer valid
+                      setFormData({ ...formData, qualification: "" });
+                    }}
+                    disabled={qualificationsLoading || tradesLoading}
+                  >
+                    <SelectTrigger id="trade" className={touched.trade && errors.trade && !tradeId ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Select trade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tradesWithQualifications.map((trade) => (
+                        <SelectItem key={trade.id} value={trade.id}>{trade.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="qualification">Qualification / Program *</Label>
-                  <Select 
-                    value={formData.qualification} 
+                  <Select
+                    value={formData.qualification}
                     onValueChange={(value) => {
                       setFormData({ ...formData, qualification: value });
                       setTouched(prev => ({ ...prev, trade: true }));
-                    }} 
-                    disabled={qualificationsLoading}
+                    }}
+                    disabled={qualificationsLoading || !tradeId}
                   >
                     <SelectTrigger className={touched.trade && errors.trade ? "border-destructive" : ""}>
-                      <SelectValue placeholder="Select approved qualification" />
+                      <SelectValue placeholder={tradeId ? "Select qualification under this trade" : "Select a trade first"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {qualifications?.map((qualification) => (
+                      {tradeQualifications.map((qualification) => (
                         <SelectItem key={qualification.id} value={qualification.id}>
                           <div className="flex items-center gap-2">
                             <GraduationCap className="h-4 w-4" />
