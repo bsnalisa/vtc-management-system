@@ -349,6 +349,8 @@ export const useFinancialQueueStats = () => {
        queryClient.invalidateQueries({ queryKey: ["trainee_applications"] });
        queryClient.invalidateQueries({ queryKey: ["financial_queue"] });
        queryClient.invalidateQueries({ queryKey: ["registrations"] });
+      // the registration page steps (admission, registration, fee, enrolment) follow this query
+      queryClient.invalidateQueries({ queryKey: ["registration-details"] });
        queryClient.invalidateQueries({ queryKey: ["trainees"] });
        
        toast({
