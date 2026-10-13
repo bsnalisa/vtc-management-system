@@ -3006,7 +3006,7 @@ export type Database = {
           created_by: string
           english_symbol: string | null
           id: string
-          level: number
+          level: number | null
           maths_symbol: string | null
           mature_age_entry: boolean | null
           mature_min_age: number | null
@@ -3022,7 +3022,7 @@ export type Database = {
           requires_approval: boolean | null
           requires_previous_level: boolean | null
           science_symbol: string | null
-          trade_id: string
+          trade_id: string | null
           updated_at: string
           version_number: number | null
         }
@@ -3035,7 +3035,7 @@ export type Database = {
           created_by: string
           english_symbol?: string | null
           id?: string
-          level: number
+          level?: number | null
           maths_symbol?: string | null
           mature_age_entry?: boolean | null
           mature_min_age?: number | null
@@ -3051,7 +3051,7 @@ export type Database = {
           requires_approval?: boolean | null
           requires_previous_level?: boolean | null
           science_symbol?: string | null
-          trade_id: string
+          trade_id?: string | null
           updated_at?: string
           version_number?: number | null
         }
@@ -3064,7 +3064,7 @@ export type Database = {
           created_by?: string
           english_symbol?: string | null
           id?: string
-          level?: number
+          level?: number | null
           maths_symbol?: string | null
           mature_age_entry?: boolean | null
           mature_min_age?: number | null
@@ -3080,7 +3080,7 @@ export type Database = {
           requires_approval?: boolean | null
           requires_previous_level?: boolean | null
           science_symbol?: string | null
-          trade_id?: string
+          trade_id?: string | null
           updated_at?: string
           version_number?: number | null
         }
@@ -3103,7 +3103,7 @@ export type Database = {
           english_symbol: string | null
           entry_requirement_id: string
           id: string
-          level: number
+          level: number | null
           maths_symbol: string | null
           mature_age_entry: boolean | null
           mature_min_age: number | null
@@ -3117,7 +3117,7 @@ export type Database = {
           requirement_name: string
           requires_previous_level: boolean | null
           science_symbol: string | null
-          trade_id: string
+          trade_id: string | null
           version_number: number
         }
         Insert: {
@@ -3128,7 +3128,7 @@ export type Database = {
           english_symbol?: string | null
           entry_requirement_id: string
           id?: string
-          level: number
+          level?: number | null
           maths_symbol?: string | null
           mature_age_entry?: boolean | null
           mature_min_age?: number | null
@@ -3142,7 +3142,7 @@ export type Database = {
           requirement_name: string
           requires_previous_level?: boolean | null
           science_symbol?: string | null
-          trade_id: string
+          trade_id?: string | null
           version_number?: number
         }
         Update: {
@@ -3153,7 +3153,7 @@ export type Database = {
           english_symbol?: string | null
           entry_requirement_id?: string
           id?: string
-          level?: number
+          level?: number | null
           maths_symbol?: string | null
           mature_age_entry?: boolean | null
           mature_min_age?: number | null
@@ -3167,7 +3167,7 @@ export type Database = {
           requirement_name?: string
           requires_previous_level?: boolean | null
           science_symbol?: string | null
-          trade_id?: string
+          trade_id?: string | null
           version_number?: number
         }
         Relationships: [
@@ -11292,6 +11292,7 @@ export type Database = {
           additional_documents_paths: Json | null
           address: string
           admission_letter_path: string | null
+          applicant_user_id: string | null
           application_number: string
           application_source: string
           auto_qualification_result: Json | null
@@ -11395,6 +11396,7 @@ export type Database = {
           additional_documents_paths?: Json | null
           address: string
           admission_letter_path?: string | null
+          applicant_user_id?: string | null
           application_number: string
           application_source?: string
           auto_qualification_result?: Json | null
@@ -11498,6 +11500,7 @@ export type Database = {
           additional_documents_paths?: Json | null
           address?: string
           admission_letter_path?: string | null
+          applicant_user_id?: string | null
           application_number?: string
           application_source?: string
           auto_qualification_result?: Json | null
@@ -13093,6 +13096,16 @@ export type Database = {
       }
     }
     Functions: {
+      _apply_entry_requirement_change: {
+        Args: {
+          _by: string
+          _changes: Json
+          _org: string
+          _requirement: string
+          _type: string
+        }
+        Returns: string
+      }
       acknowledge_review: { Args: { _id: string }; Returns: undefined }
       add_document_version: {
         Args: {
@@ -13171,6 +13184,10 @@ export type Database = {
         Args: { _entity: string; _org: string; _type: string; _user_id: string }
         Returns: boolean
       }
+      can_approve_entry_requirements: {
+        Args: { _org: string; _user_id: string }
+        Returns: boolean
+      }
       can_approve_qualifications: {
         Args: { _user_id: string }
         Returns: boolean
@@ -13193,6 +13210,10 @@ export type Database = {
       }
       can_manage_supervisor_link: {
         Args: { _placement: string; _user_id: string }
+        Returns: boolean
+      }
+      can_propose_entry_requirements: {
+        Args: { _org: string; _user_id: string }
         Returns: boolean
       }
       can_read_attendance_record: {
@@ -13814,6 +13835,10 @@ export type Database = {
         Args: { _version: string }
         Returns: undefined
       }
+      review_requirement_change: {
+        Args: { _approve: boolean; _notes?: string; _request: string }
+        Returns: undefined
+      }
       review_sme_application: {
         Args: {
           _approve: boolean
@@ -13824,6 +13849,10 @@ export type Database = {
         Returns: string
       }
       run_scheduled_job: { Args: { _job: string }; Returns: number }
+      save_entry_requirement: {
+        Args: { _changes: Json; _requirement: string; _type: string }
+        Returns: Json
+      }
       seed_symbol_points_for_organization: {
         Args: { org_id: string }
         Returns: undefined
