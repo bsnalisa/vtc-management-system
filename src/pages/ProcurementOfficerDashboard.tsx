@@ -45,7 +45,7 @@ export default function ProcurementOfficerDashboard() {
     },
     {
       title: "Total Spent",
-      value: `$${totalSpent.toFixed(2)}`,
+      value: `N$ ${totalSpent.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: TrendingUp,
       color: "text-purple-600",
       bgColor: "bg-purple-50",

@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, lazy } from "react";
 import { ApplicationAssistant } from "@/components/home/ApplicationAssistant";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 const PublicHome = lazy(() => import("./pages/PublicHome"));
 import Auth from "./pages/Auth";
 import ApplicantAuth from "./pages/ApplicantAuth";
@@ -414,6 +414,12 @@ const App = () => (
           <Route path="/organization-admin-dashboard" element={<ProtectedRoute><ProtectedOrganizationAdminDashboard /></ProtectedRoute>} />
           <Route path="/head-of-training-dashboard" element={<ProtectedRoute><ProtectedHeadOfTrainingDashboard /></ProtectedRoute>} />
           <Route path="/trainer-dashboard" element={<ProtectedRoute><ProtectedTrainerDashboard /></ProtectedRoute>} />
+          {/* Parent crumbs of nested pages land on the role's main page instead of "not found" */}
+          <Route path="/trainee" element={<Navigate to="/trainee-dashboard" replace />} />
+          <Route path="/trainee/application" element={<Navigate to="/trainee/application/status" replace />} />
+          <Route path="/trainee/exams" element={<Navigate to="/trainee/exams/timetable" replace />} />
+          <Route path="/debtors" element={<Navigate to="/debtor-officer-dashboard" replace />} />
+          <Route path="/trainee-support" element={<Navigate to="/trainee-support-dashboard" replace />} />
           <Route path="/trainee-dashboard" element={<ProtectedRoute><ProtectedTraineeDashboard /></ProtectedRoute>} />
           <Route path="/hod-dashboard" element={<ProtectedRoute><ProtectedHODDashboard /></ProtectedRoute>} />
           <Route path="/assessment-coordinator-dashboard" element={<ProtectedRoute><ProtectedAssessmentCoordinatorDashboard /></ProtectedRoute>} />

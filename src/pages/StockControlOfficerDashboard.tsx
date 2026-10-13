@@ -35,7 +35,7 @@ function StockControlOfficerDashboard() {
         heroSubtitle="Inventory, movements and reorder alerts at a glance."
         stats={[
           { label: "Total Items", value: totalItems, icon: Package, hint: `${categories?.length || 0} categories`, loading: isLoading },
-          { label: "Total Value", value: `R ${totalValue.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`, icon: Archive, hint: "Current stock value", tone: "accent", loading: isLoading },
+          { label: "Total Value", value: `N$ ${totalValue.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`, icon: Archive, hint: "Current stock value", tone: "accent", loading: isLoading },
           { label: "Low Stock", value: lowCount, icon: TrendingDown, hint: "Need restocking", tone: lowCount > 0 ? "destructive" : "secondary" },
           { label: "Categories", value: categories?.length || 0, icon: Archive, hint: "Configured groups", tone: "secondary" },
         ]}

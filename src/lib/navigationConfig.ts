@@ -377,8 +377,8 @@ export const printingOfficerNavItems: NavItem[] = [
 
 // Librarian Navigation
 export const librarianNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/resource-center", icon: LayoutDashboard },
   { title: "Resource Centre", url: "/library", icon: BookOpen },
-  { title: "Announcements", url: "/announcements", icon: MessageSquare },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Module Reports", url: "/reports/modules", icon: BarChart3 },

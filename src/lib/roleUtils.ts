@@ -57,7 +57,7 @@ export const getRoleDashboardPath = (role: UserRole): string => {
     hr_officer: "/hr-officer-dashboard",
     bdl_coordinator: "/bdl-coordinator-dashboard",
     rpl_coordinator: "/rpl-coordinator-dashboard",
-    librarian: "/library",
+    librarian: "/resource-center",
     subject_matter_expert: "/sme-dashboard",
     printing_distribution_officer: "/printing-dashboard",
     liaison_officer: "/liaison-officer-dashboard",
