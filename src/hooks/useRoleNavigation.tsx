@@ -21,6 +21,7 @@ import {
   bdlCoordinatorNavItems,
   rplCoordinatorNavItems,
   librarianNavItems,
+  financeAdminNavItems,
   smeNavItems,
   printingOfficerNavItems,
   liaisonOfficerNavItems,
@@ -41,6 +42,12 @@ export const useRoleNavigation = () => {
         return adminNavItems;
       case "centre_manager":
         return centreManagerNavItems;
+      case "accountant":
+      case "head_of_finance_admin":
+      case "creditors_officer":
+      case "loan_officer":
+      case "pa_to_centre_manager":
+        return financeAdminNavItems;
       case "head_of_training":
         return headOfTrainingNavItems;
       case "trainer":
@@ -101,6 +108,13 @@ export const useRoleNavigation = () => {
         return "Administration";
       case "centre_manager":
         return "Centre Management";
+      case "accountant":
+      case "head_of_finance_admin":
+      case "creditors_officer":
+      case "loan_officer":
+        return "Finance & Administration";
+      case "pa_to_centre_manager":
+        return "Centre Manager's Office";
       case "head_of_training":
         return "Training Management";
       case "trainer":

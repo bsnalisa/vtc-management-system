@@ -375,6 +375,12 @@ export const printingOfficerNavItems: NavItem[] = [
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 
+// Finance and administration line and the Centre Manager's office (dedicated dashboards follow)
+export const financeAdminNavItems: NavItem[] = [
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
 // Librarian Navigation
 export const librarianNavItems: NavItem[] = [
   { title: "Dashboard", url: "/resource-center", icon: LayoutDashboard },

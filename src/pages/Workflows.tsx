@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus } from "lucide-react";
 import { WorkflowEditor } from "@/components/workflow/WorkflowEditor";
-import { InstanceDialog, statusVariant } from "@/components/workflow/InstanceDialog";
+import { InstanceDialog } from "@/components/workflow/InstanceDialog";
+import { ReportingLinesTab } from "@/components/workflow/ReportingLines";
+import { SUPERVISOR_STEP_LABELS, STATUS_LABELS, displayStatus, statusBadgeVariant, statusLabel } from "@/components/workflow/status";
 import {
   ALERT_EVENTS, WorkflowDefinition, WorkflowInstance, useDeleteDefinition, useOrgUsers, useProcessTypes, useRoleOptions,
   useRunEscalation, useSaveWorkflowSettings, useSetDefinitionActive, useWorkflowDefinitions, useWorkflowInstances, useWorkflowSettings,
@@ -28,7 +30,7 @@ function DefinitionsTab() {
   const [editing, setEditing] = useState<WorkflowDefinition | null | "new">(null);
   const typeLabel = (c: string) => types?.find((t) => t.code === c)?.label ?? c;
   const who = (role: string | null, user: string | null) =>
-    user ? users?.find((u) => u.user_id === user)?.full_name ?? "A person" : roles?.find((r) => r.role_code === role)?.role_name ?? role ?? "";
+    role && SUPERVISOR_STEP_LABELS[role] ? SUPERVISOR_STEP_LABELS[role] : user ? users?.find((u) => u.user_id === user)?.full_name ?? "A person" : roles?.find((r) => r.role_code === role)?.role_name ?? role ?? "";
 
   return (
     <div className="space-y-4">
@@ -72,23 +74,24 @@ function ActivityTab() {
   const { data: types } = useProcessTypes();
   const [status, setStatus] = useState("all");
   const [selected, setSelected] = useState<WorkflowInstance | null>(null);
-  const rows = (data ?? []).filter((i) => status === "all" || i.status === status);
+  const rows = (data ?? []).filter((i) => status === "all" || displayStatus(i) === status);
   return (
     <div className="space-y-4">
       <Select value={status} onValueChange={setStatus}>
-        <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
-        <SelectContent>{["all", "in_progress", "awaiting_info", "approved", "rejected", "cancelled"].map((s) => <SelectItem key={s} value={s}>{s === "all" ? "All statuses" : s.replace("_", " ")}</SelectItem>)}</SelectContent>
+        <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+        <SelectContent><SelectItem value="all">All statuses</SelectItem>{Object.entries(STATUS_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
       </Select>
       <Table>
-        <TableHeader><TableRow><TableHead>Request</TableHead><TableHead>Process</TableHead><TableHead>Started</TableHead><TableHead>Step</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Reference</TableHead><TableHead>Request</TableHead><TableHead>Process</TableHead><TableHead>Started</TableHead><TableHead>Status</TableHead><TableHead>Next action</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
           {rows.map((i) => (
             <TableRow key={i.id}>
+              <TableCell className="font-mono text-xs">{i.reference}</TableCell>
               <TableCell className="font-medium">{i.title}</TableCell>
               <TableCell>{types?.find((t) => t.code === i.process_type)?.label ?? i.process_type}</TableCell>
               <TableCell>{new Date(i.started_at).toLocaleDateString()}</TableCell>
-              <TableCell>{i.current_step}</TableCell>
-              <TableCell><Badge variant={statusVariant(i.status)}>{i.status.replace("_", " ")}</Badge></TableCell>
+              <TableCell><Badge variant={statusBadgeVariant(i)}>{statusLabel(i)}</Badge></TableCell>
+              <TableCell className="text-xs text-muted-foreground max-w-[18rem]">{i.next_action}</TableCell>
               <TableCell className="text-right"><Button size="sm" variant="outline" onClick={() => setSelected(i)}>Open</Button></TableCell>
             </TableRow>
           ))}
@@ -152,8 +155,9 @@ export default function Workflows() {
         <CardHeader><CardTitle>Workflow designer</CardTitle><CardDescription>Define who approves what, how quickly, and what happens when they do not.</CardDescription></CardHeader>
         <CardContent>
           <Tabs defaultValue="definitions">
-            <TabsList><TabsTrigger value="definitions">Workflows</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger><TabsTrigger value="settings">Alerts &amp; settings</TabsTrigger></TabsList>
+            <TabsList><TabsTrigger value="definitions">Workflows</TabsTrigger><TabsTrigger value="lines">Reporting lines</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger><TabsTrigger value="settings">Alerts &amp; settings</TabsTrigger></TabsList>
             <TabsContent value="definitions"><DefinitionsTab /></TabsContent>
+            <TabsContent value="lines"><ReportingLinesTab /></TabsContent>
             <TabsContent value="activity"><ActivityTab /></TabsContent>
             <TabsContent value="settings"><SettingsTab /></TabsContent>
           </Tabs>

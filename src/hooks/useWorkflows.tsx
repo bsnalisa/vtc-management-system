@@ -11,19 +11,22 @@ export interface ProcessType { code: string; label: string; description: string 
 export interface WorkflowStep {
   id?: string; step_no: number; name: string; approver_role: string | null; approver_user: string | null;
   sla_hours: number | null; escalate_to_role: string | null; escalate_to_user: string | null; allow_self_approval: boolean;
+  higher_level?: boolean;
 }
 export interface WorkflowDefinition {
   id: string; process_type: string; name: string; active: boolean; created_at: string; workflow_steps: WorkflowStep[];
 }
-export type InstanceStatus = "in_progress" | "awaiting_info" | "approved" | "rejected" | "cancelled";
+export type InstanceStatus = "draft" | "in_progress" | "awaiting_info" | "approved" | "rejected" | "cancelled" | "completed";
 export interface WorkflowInstance {
   id: string; process_type: string; title: string; summary: Record<string, string>; status: InstanceStatus;
   current_step: number; started_by: string | null; started_at: string; completed_at: string | null; outcome_comment: string | null;
+  reference: string | null; submitter_role: string | null; next_action: string | null; escalated: boolean; resubmitted: boolean; resubmissions: number;
 }
 export interface MyTask {
   task_id: string; instance_id: string; process_type: string; title: string; summary: Record<string, string>;
   step_no: number; step_name: string; due_at: string | null; escalated: boolean; delegated: boolean;
   requested_by: string | null; started_at: string;
+  reference: string | null; submitter_role: string | null; next_action: string | null; can_escalate: boolean;
 }
 export interface WorkflowEvent {
   id: number; event: string; actor: string | null; via: string | null; comment: string | null; created_at: string;
@@ -117,6 +120,7 @@ export const useSaveDefinition = () =>
       _steps: v.steps.map((s) => ({
         name: s.name, approver_role: s.approver_role, approver_user: s.approver_user, sla_hours: s.sla_hours,
         escalate_to_role: s.escalate_to_role, escalate_to_user: s.escalate_to_user, allow_self_approval: s.allow_self_approval,
+        higher_level: !!s.higher_level,
       })),
     });
     if (error) throw error;
@@ -205,10 +209,25 @@ export const useCancelInstance = () =>
   }, ["workflow-instances", "workflow-my-tasks"], "Request cancelled");
 
 export const useStartRequest = () =>
-  useOrgMutation(async (v: { title: string; description: string }) => {
-    const { error } = await db.rpc("workflow_start_request", { _title: v.title, _description: v.description });
+  useOrgMutation(async (v: { title: string; description: string; process?: string; submit?: boolean; draft?: string }) => {
+    const { data, error } = await db.rpc("workflow_create_request", {
+      _process: v.process ?? "general", _title: v.title, _description: v.description, _submit: v.submit ?? true, _draft: v.draft ?? null,
+    });
     if (error) throw error;
-  }, ["workflow-instances"], "Request sent for approval");
+    return { id: data as string, submitted: v.submit ?? true };
+  }, ["workflow-instances", "workflow-my-tasks"], (r) => (r.submitted ? "Request sent for approval" : "Draft saved"));
+
+export const useSubmitDraft = () =>
+  useOrgMutation(async (id: string) => {
+    const { error } = await db.rpc("workflow_submit", { _instance: id });
+    if (error) throw error;
+  }, ["workflow-instances", "workflow-my-tasks"], "Request sent for approval");
+
+export const useMarkCompleted = () =>
+  useOrgMutation(async (v: { id: string; comment: string }) => {
+    const { error } = await db.rpc("workflow_mark_completed", { _instance: v.id, _comment: v.comment || null });
+    if (error) throw error;
+  }, ["workflow-instances"], "Marked as completed");
 
 export const useProvideInfo = () =>
   useOrgMutation(async (v: { id: string; comment: string }) => {
@@ -228,12 +247,12 @@ export const useMyTasks = () =>
   });
 
 export const useActOnTask = () =>
-  useOrgMutation(async (v: { task: string; action: "approve" | "reject" | "request_info"; comment: string }) => {
+  useOrgMutation(async (v: { task: string; action: "approve" | "reject" | "request_info" | "escalate"; comment: string }) => {
     const { data, error } = await db.rpc("workflow_act", { _task: v.task, _action: v.action, _comment: v.comment || null });
     if (error) throw error;
     return data as string;
   }, ["workflow-my-tasks", "workflow-instances"], (r) =>
-    r === "approved" ? "Approved. The request is complete." : r === "rejected" ? "Rejected" : r === "awaiting_info" ? "Information requested" : "Approved. Sent to the next step.");
+    r === "approved" ? "Approved. The request is approved." : r === "rejected" ? "Rejected" : r === "awaiting_info" ? "Returned for correction" : r === "escalated" ? "Escalated to the next level" : "Approved. Sent to the next step.");
 
 // ---- delegation ----
 export const useDelegations = () => {
@@ -274,3 +293,51 @@ export const actByToken = async (token: string, action: "approve" | "reject" | "
   if (error) throw error;
   return data as string;
 };
+
+// ---- reporting lines (who reports to whom) ----
+export interface ReportingLine { organization_id: string; role: string; supervisor_role: string }
+export interface UserSupervisor { organization_id: string; user_id: string; supervisor_user_id: string }
+
+export const useReportingLines = () => {
+  const { organizationId } = useOrganizationContext();
+  return useQuery({
+    queryKey: ["reporting-lines", organizationId], enabled: !!organizationId,
+    queryFn: async () => {
+      const { data, error } = await db.from("reporting_lines").select("*").eq("organization_id", organizationId).order("supervisor_role").order("role");
+      if (error) throw error;
+      return data as ReportingLine[];
+    },
+  });
+};
+export const useSaveReportingLine = () =>
+  useOrgMutation(async (v: { role: string; supervisor_role: string }, orgId) => {
+    const { error } = await db.from("reporting_lines").upsert({ organization_id: orgId, role: v.role, supervisor_role: v.supervisor_role });
+    if (error) throw error;
+  }, ["reporting-lines"], "Reporting line saved");
+export const useDeleteReportingLine = () =>
+  useOrgMutation(async (role: string, orgId) => {
+    const { error } = await db.from("reporting_lines").delete().eq("organization_id", orgId).eq("role", role);
+    if (error) throw error;
+  }, ["reporting-lines"], "Reporting line removed");
+
+export const useUserSupervisors = () => {
+  const { organizationId } = useOrganizationContext();
+  return useQuery({
+    queryKey: ["user-supervisors", organizationId], enabled: !!organizationId,
+    queryFn: async () => {
+      const { data, error } = await db.from("user_supervisors").select("*").eq("organization_id", organizationId);
+      if (error) throw error;
+      return data as UserSupervisor[];
+    },
+  });
+};
+export const useSaveUserSupervisor = () =>
+  useOrgMutation(async (v: { user_id: string; supervisor_user_id: string }, orgId) => {
+    const { error } = await db.from("user_supervisors").upsert({ organization_id: orgId, user_id: v.user_id, supervisor_user_id: v.supervisor_user_id });
+    if (error) throw error;
+  }, ["user-supervisors"], "Supervisor saved");
+export const useDeleteUserSupervisor = () =>
+  useOrgMutation(async (userId: string, orgId) => {
+    const { error } = await db.from("user_supervisors").delete().eq("organization_id", orgId).eq("user_id", userId);
+    if (error) throw error;
+  }, ["user-supervisors"], "Supervisor override removed");

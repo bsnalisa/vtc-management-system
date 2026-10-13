@@ -16,16 +16,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus } from "lucide-react";
 import { RequirementChangeRequests } from "@/components/registration/RequirementChangeRequests";
 import { useRequirementChangeRequests } from "@/hooks/useEntryRequirements";
-import { InstanceDialog, statusVariant } from "@/components/workflow/InstanceDialog";
+import { InstanceDialog } from "@/components/workflow/InstanceDialog";
+import { statusBadgeVariant, statusLabel } from "@/components/workflow/status";
+import { getRoleDisplayName } from "@/lib/roleUtils";
 import {
   MyTask, WorkflowInstance, useActOnTask, useDelegations, useEndDelegation, useMyTasks, useOrgUsers, useProcessTypes,
-  useProvideInfo, useSaveDelegation, useStartRequest, useWorkflowInstances,
+  useProvideInfo, useSaveDelegation, useStartRequest, useSubmitDraft, useWorkflowInstances,
 } from "@/hooks/useWorkflows";
 
 function TaskDialog({ task, onClose }: { task: MyTask; onClose: () => void }) {
   const act = useActOnTask();
   const [comment, setComment] = useState("");
-  const go = async (action: "approve" | "reject" | "request_info") => {
+  const go = async (action: "approve" | "reject" | "request_info" | "escalate") => {
     await act.mutateAsync({ task: task.task_id, action, comment: comment.trim() });
     onClose();
   };
@@ -35,16 +37,18 @@ function TaskDialog({ task, onClose }: { task: MyTask; onClose: () => void }) {
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{task.title}</DialogTitle></DialogHeader>
         <div className="space-y-4 text-sm">
-          <div className="text-muted-foreground">Step {task.step_no}: {task.step_name} · requested by {task.requested_by ?? "unknown"}{task.due_at ? ` · respond by ${new Date(task.due_at).toLocaleString()}` : ""}</div>
+          {task.reference && <div className="font-mono text-xs">{task.reference}</div>}
+          <div className="text-muted-foreground">Step {task.step_no}: {task.step_name} · requested by {task.requested_by ?? "unknown"}{task.submitter_role ? ` (${getRoleDisplayName(task.submitter_role as never)})` : ""}{task.due_at ? ` · respond by ${new Date(task.due_at).toLocaleString()}` : ""}</div>
           {task.delegated && <Badge variant="outline">You are covering for a colleague</Badge>}
           {task.escalated && <Badge variant="destructive" className="ml-2">Escalated: overdue</Badge>}
           <dl className="space-y-2">
             {Object.entries(task.summary).map(([k, v]) => (<div key={k}><dt className="text-muted-foreground">{k}</dt><dd className="whitespace-pre-wrap">{v}</dd></div>))}
           </dl>
-          <div className="space-y-1"><Label>Comment (required to reject or ask for information)</Label><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></div>
+          <div className="space-y-1"><Label>Comments (required to reject, return for correction or escalate)</Label><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></div>
           <div className="flex flex-wrap gap-2">
             <Button disabled={act.isPending} onClick={() => go("approve")}>Approve</Button>
-            <Button variant="outline" disabled={act.isPending || needsComment} title={needsComment ? "Say what you need to know" : ""} onClick={() => go("request_info")}>Ask for information</Button>
+            <Button variant="outline" disabled={act.isPending || needsComment} title={needsComment ? "Say what must be corrected" : ""} onClick={() => go("request_info")}>Return for correction</Button>
+            {task.can_escalate && <Button variant="outline" disabled={act.isPending || needsComment} title={needsComment ? "Say why it needs a higher level" : "Send to your own supervisor for a decision"} onClick={() => go("escalate")}>Escalate</Button>}
             <Button variant="destructive" disabled={act.isPending || needsComment} title={needsComment ? "Give a reason" : ""} onClick={() => go("reject")}>Reject</Button>
           </div>
         </div>
@@ -65,13 +69,14 @@ function ToApproveTab() {
     <div className="space-y-4">
       {canApproveRequirements && <RequirementChangeRequests canReview hideWhenEmpty title="Entry requirement changes to approve" />}
       <Table>
-        <TableHeader><TableRow><TableHead>Request</TableHead><TableHead>Type</TableHead><TableHead>Step</TableHead><TableHead>Respond by</TableHead><TableHead /></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Reference</TableHead><TableHead>Request</TableHead><TableHead>Type</TableHead><TableHead>Step</TableHead><TableHead>Respond by</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
           {data?.map((t) => (
             <TableRow key={t.task_id}>
-              <TableCell className="font-medium">{t.title}<div className="text-xs text-muted-foreground">from {t.requested_by ?? "unknown"}</div></TableCell>
+              <TableCell className="font-mono text-xs">{t.reference}</TableCell>
+              <TableCell className="font-medium">{t.title}<div className="text-xs text-muted-foreground">from {t.requested_by ?? "unknown"}{t.submitter_role ? ` (${getRoleDisplayName(t.submitter_role as never)})` : ""}</div></TableCell>
               <TableCell>{types?.find((p) => p.code === t.process_type)?.label ?? t.process_type}</TableCell>
-              <TableCell>{t.step_name}{t.delegated && <Badge variant="outline" className="ml-2">covering</Badge>}{t.escalated && <Badge variant="destructive" className="ml-2">overdue</Badge>}</TableCell>
+              <TableCell>{t.step_name}{t.delegated && <Badge variant="outline" className="ml-2">covering</Badge>}{t.escalated && <Badge variant="destructive" className="ml-2">higher level</Badge>}</TableCell>
               <TableCell>{t.due_at ? new Date(t.due_at).toLocaleString() : "-"}</TableCell>
               <TableCell className="text-right"><Button size="sm" onClick={() => setSelected(t)}>Decide</Button></TableCell>
             </TableRow>
@@ -85,20 +90,35 @@ function ToApproveTab() {
   );
 }
 
+const REQUEST_TYPES = ["general", "finance_submission", "payment_request", "debtor_adjustment", "loan_request", "asset_request", "training_submission", "trainee_support_submission", "executive_matter"];
+
 function StartRequestDialog() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [process, setProcess] = useState("general");
+  const { data: types } = useProcessTypes();
   const start = useStartRequest();
+  const send = async (submit: boolean) => {
+    await start.mutateAsync({ title, description, process, submit });
+    setTitle(""); setDescription(""); setProcess("general"); setOpen(false);
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />New request</Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Request approval</DialogTitle></DialogHeader>
-        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); await start.mutateAsync({ title, description }); setTitle(""); setDescription(""); setOpen(false); }}>
+        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); await send(true); }}>
+          <div className="space-y-1"><Label>Kind of request</Label>
+            <Select value={process} onValueChange={setProcess}><SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{types?.filter((t) => REQUEST_TYPES.includes(t.code)).map((t) => <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>)}</SelectContent></Select>
+            <p className="text-xs text-muted-foreground">It goes to your direct supervisor.</p></div>
           <div className="space-y-1"><Label>What do you need approved?</Label><Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="space-y-1"><Label>Details</Label><Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <Button type="submit" className="w-full" disabled={start.isPending}>Send for approval</Button>
+          <div className="flex gap-2">
+            <Button type="submit" className="flex-1" disabled={start.isPending || !title.trim()}>Send for approval</Button>
+            <Button type="button" variant="outline" disabled={start.isPending || !title.trim()} onClick={() => send(false)}>Save as draft</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
@@ -108,6 +128,7 @@ function StartRequestDialog() {
 function MyRequestsTab() {
   const { data } = useWorkflowInstances(true);
   const provide = useProvideInfo();
+  const submitDraft = useSubmitDraft();
   const [selected, setSelected] = useState<WorkflowInstance | null>(null);
   const [reply, setReply] = useState<WorkflowInstance | null>(null);
   const [text, setText] = useState("");
@@ -115,15 +136,18 @@ function MyRequestsTab() {
     <div className="space-y-4">
       <div className="flex justify-end"><StartRequestDialog /></div>
       <Table>
-        <TableHeader><TableRow><TableHead>Request</TableHead><TableHead>Started</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Reference</TableHead><TableHead>Request</TableHead><TableHead>Started</TableHead><TableHead>Status</TableHead><TableHead>Next action</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
           {data?.map((i) => (
             <TableRow key={i.id}>
+              <TableCell className="font-mono text-xs">{i.reference}</TableCell>
               <TableCell className="font-medium">{i.title}</TableCell>
               <TableCell>{new Date(i.started_at).toLocaleDateString()}</TableCell>
-              <TableCell><Badge variant={statusVariant(i.status)}>{i.status === "awaiting_info" ? "needs your reply" : i.status.replace("_", " ")}</Badge></TableCell>
+              <TableCell><Badge variant={statusBadgeVariant(i)}>{statusLabel(i)}</Badge></TableCell>
+              <TableCell className="text-xs text-muted-foreground max-w-[18rem]">{i.next_action}</TableCell>
               <TableCell className="text-right space-x-2">
-                {i.status === "awaiting_info" && <Button size="sm" onClick={() => { setReply(i); setText(""); }}>Reply</Button>}
+                {i.status === "draft" && <Button size="sm" disabled={submitDraft.isPending} onClick={() => submitDraft.mutate(i.id)}>Submit</Button>}
+                {i.status === "awaiting_info" && <Button size="sm" onClick={() => { setReply(i); setText(""); }}>Correct and resubmit</Button>}
                 <Button size="sm" variant="outline" onClick={() => setSelected(i)}>Details</Button>
               </TableCell>
             </TableRow>
@@ -135,10 +159,10 @@ function MyRequestsTab() {
       {reply && (
         <Dialog open onOpenChange={(o) => !o && setReply(null)}>
           <DialogContent>
-            <DialogHeader><DialogTitle>Reply to the approver</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Correct and resubmit</DialogTitle></DialogHeader>
             <p className="text-sm text-muted-foreground">{reply.title}</p>
             <Textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} />
-            <Button disabled={!text.trim() || provide.isPending} onClick={async () => { await provide.mutateAsync({ id: reply.id, comment: text.trim() }); setReply(null); }}>Send reply</Button>
+            <Button disabled={!text.trim() || provide.isPending} onClick={async () => { await provide.mutateAsync({ id: reply.id, comment: text.trim() }); setReply(null); }}>Resubmit</Button>
           </DialogContent>
         </Dialog>
       )}
