@@ -4,6 +4,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useScreenApplication } from "@/hooks/useTraineeApplications";
+import { useApprovedQualifications } from "@/hooks/useQualifications";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 import { RequestInfoSection } from "./RequestInfoSection";
 import { ApplicationViewDialog } from "./ApplicationViewDialog";
 
@@ -22,6 +25,11 @@ export const ScreeningDialog = ({ open, onOpenChange, application }: ScreeningDi
   const [remarks, setRemarks] = useState("");
 
   const screenApplication = useScreenApplication();
+  const { data: approvedQualifications, isLoading: qualificationsLoading } = useApprovedQualifications();
+  // Accepting an applicant whose trade has no approved qualification leaves registration stuck
+  const tradeId = application?.trade_id ?? application?.trades?.id;
+  const noQualificationForTrade =
+    !qualificationsLoading && !!tradeId && !(approvedQualifications ?? []).some((q) => q.trade_id === tradeId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +53,15 @@ export const ScreeningDialog = ({ open, onOpenChange, application }: ScreeningDi
     >
       <div className="space-y-4 border-t pt-4">
         <h3 className="font-semibold">Screening decision</h3>
+        {noQualificationForTrade && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              No approved qualification exists for {application.trades?.name ?? "this trade"}, so this applicant cannot be registered
+              after screening. Ask the Head of Training to approve a qualification for the trade before qualifying them.
+            </AlertDescription>
+          </Alert>
+        )}
         <RequestInfoSection application={application} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
