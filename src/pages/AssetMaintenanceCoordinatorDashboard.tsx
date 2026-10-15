@@ -37,7 +37,7 @@ function AssetMaintenanceCoordinatorDashboard() {
         heroSubtitle="Track assets, servicing and repair operations."
         stats={[
           { label: "Total Assets", value: totalAssets, icon: Package, hint: "Registered assets", loading: isLoading },
-          { label: "Total Value", value: `R ${totalValue.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`, icon: TrendingDown, hint: "Current value", tone: "accent" },
+          { label: "Total Value", value: `N$ ${totalValue.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`, icon: TrendingDown, hint: "Current value", tone: "accent" },
           { label: "Under Repair", value: repairCount, icon: Wrench, hint: "Needs attention", tone: repairCount > 0 ? "destructive" : "secondary" },
           { label: "Upcoming Service", value: upcomingMaintenance, icon: FileText, hint: "Next 30 days", tone: "secondary" },
         ]}

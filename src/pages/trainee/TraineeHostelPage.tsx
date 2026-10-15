@@ -76,7 +76,7 @@ const TraineeHostelPage = () => {
                 <div className="p-3 rounded-lg bg-blue-100"><Building className="h-5 w-5 text-blue-600" /></div>
                 <div>
                   <p className="text-sm text-muted-foreground">Room</p>
-                  <p className="font-medium">{room?.room_number || "N/A"} (Floor {room?.floor || "N/A"})</p>
+                  <p className="font-medium">{room?.room_number || "N/A"} (Floor {room?.floor_number ?? "N/A"})</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

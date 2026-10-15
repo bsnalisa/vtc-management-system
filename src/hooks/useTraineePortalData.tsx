@@ -105,7 +105,7 @@ export const useTraineeHostelAllocation = (traineeId: string | null | undefined)
         .select(`
           *,
           hostel_buildings (id, name, gender_type),
-          hostel_rooms (id, room_number, floor, room_type, capacity, current_occupancy),
+          hostel_rooms (id, room_number, floor_number, room_type, capacity, current_occupancy),
           hostel_beds (id, bed_number)
         `)
         .eq("trainee_id", traineeId)
@@ -125,16 +125,18 @@ export const useTraineeRoommates = (roomId: string | null | undefined, traineeId
       if (!roomId || !traineeId) return [];
       const { data, error } = await supabase
         .from("hostel_allocations")
-        .select(`
-          trainee_id,
-          hostel_beds (bed_number),
-          trainees (first_name, last_name, trainee_id, trades:trade_id (name))
-        `)
+        .select("trainee_id, hostel_beds (bed_number)")
         .eq("room_id", roomId)
         .eq("status", "active")
         .neq("trainee_id", traineeId);
-      if (error) return [];
-      return data || [];
+      if (error || !data?.length) return [];
+      // hostel_allocations has no foreign key to trainees, so look the roommates up separately
+      const { data: people } = await supabase
+        .from("trainees")
+        .select("id, first_name, last_name, trainee_id, trades:trade_id (name)")
+        .in("id", data.map((a) => a.trainee_id));
+      const byId = new Map((people ?? []).map((t) => [t.id, t]));
+      return data.map((a) => ({ ...a, trainees: byId.get(a.trainee_id) ?? null }));
     },
     enabled: !!(roomId && traineeId),
   });

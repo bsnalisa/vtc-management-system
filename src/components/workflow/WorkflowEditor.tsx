@@ -6,37 +6,48 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { SUPERVISOR_STEP_LABELS } from "./status";
 import {
   ProcessType, WorkflowDefinition, WorkflowStep, useOrgUsers, useRoleOptions, useSaveDefinition,
 } from "@/hooks/useWorkflows";
 
-type Who = { kind: "role" | "user"; value: string };
+type Who = { kind: "role" | "user" | "supervisor"; value: string };
 interface DraftStep {
-  name: string; approver: Who; sla: string; escalate: Who | null; selfApproval: boolean;
+  name: string; approver: Who; sla: string; escalate: Who | null; selfApproval: boolean; higherLevel: boolean;
 }
 
 const fromStep = (s: WorkflowStep): DraftStep => ({
   name: s.name,
-  approver: s.approver_user ? { kind: "user", value: s.approver_user } : { kind: "role", value: s.approver_role ?? "" },
+  approver: s.approver_user ? { kind: "user", value: s.approver_user }
+    : s.approver_role?.startsWith("@supervisor") ? { kind: "supervisor", value: s.approver_role }
+    : { kind: "role", value: s.approver_role ?? "" },
   sla: s.sla_hours ? String(s.sla_hours) : "",
   escalate: s.escalate_to_user ? { kind: "user", value: s.escalate_to_user } : s.escalate_to_role ? { kind: "role", value: s.escalate_to_role } : null,
   selfApproval: s.allow_self_approval,
+  higherLevel: !!s.higher_level,
 });
-const blank = (): DraftStep => ({ name: "", approver: { kind: "role", value: "" }, sla: "", escalate: null, selfApproval: false });
+const blank = (): DraftStep => ({ name: "", approver: { kind: "role", value: "" }, sla: "", escalate: null, selfApproval: false, higherLevel: false });
 
-function WhoPicker({ value, onChange, allowNone }: { value: Who | null; onChange: (w: Who | null) => void; allowNone?: boolean }) {
+function WhoPicker({ value, onChange, allowNone, allowSupervisor }: { value: Who | null; onChange: (w: Who | null) => void; allowNone?: boolean; allowSupervisor?: boolean }) {
   const { data: roles } = useRoleOptions();
   const { data: users } = useOrgUsers();
   return (
     <div className="flex gap-2">
-      <Select value={value?.kind ?? "none"} onValueChange={(k) => onChange(k === "none" ? null : { kind: k as Who["kind"], value: "" })}>
-        <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
+      <Select value={value?.kind ?? "none"} onValueChange={(k) => onChange(k === "none" ? null : { kind: k as Who["kind"], value: k === "supervisor" ? "@supervisor" : "" })}>
+        <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
         <SelectContent>
           {allowNone && <SelectItem value="none">Nobody</SelectItem>}
+          {allowSupervisor && <SelectItem value="supervisor">Reporting line</SelectItem>}
           <SelectItem value="role">A role</SelectItem>
           <SelectItem value="user">A person</SelectItem>
         </SelectContent>
       </Select>
+      {value?.kind === "supervisor" && (
+        <Select value={value.value} onValueChange={(v) => onChange({ kind: "supervisor", value: v })}>
+          <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+          <SelectContent>{Object.entries(SUPERVISOR_STEP_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+        </Select>
+      )}
       {value?.kind === "role" && (
         <Select value={value.value} onValueChange={(v) => onChange({ kind: "role", value: v })}>
           <SelectTrigger className="flex-1"><SelectValue placeholder="Choose role" /></SelectTrigger>
@@ -83,10 +94,10 @@ export function WorkflowEditor({ definition, processTypes, onClose }: { definiti
   const submit = async () => {
     const out: WorkflowStep[] = steps.map((s, i) => ({
       step_no: i + 1, name: s.name.trim(),
-      approver_role: s.approver.kind === "role" ? s.approver.value : null, approver_user: s.approver.kind === "user" ? s.approver.value : null,
+      approver_role: s.approver.kind !== "user" ? s.approver.value : null, approver_user: s.approver.kind === "user" ? s.approver.value : null,
       sla_hours: s.sla ? Number(s.sla) : null,
       escalate_to_role: s.escalate?.kind === "role" ? s.escalate.value : null, escalate_to_user: s.escalate?.kind === "user" ? s.escalate.value : null,
-      allow_self_approval: s.selfApproval,
+      allow_self_approval: s.selfApproval, higher_level: s.higherLevel,
     }));
     await save.mutateAsync({ id: definition?.id, process_type: processType, name: name.trim(), steps: out });
     onClose();
@@ -117,14 +128,16 @@ export function WorkflowEditor({ definition, processTypes, onClose }: { definiti
                   <Button type="button" variant="ghost" size="icon" aria-label="Move down" disabled={i === steps.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
                   <Button type="button" variant="ghost" size="icon" aria-label="Remove step" onClick={() => setSteps((x) => x.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4" /></Button>
                 </div>
-                <div className="space-y-1"><Label>Who approves (any one holder of the role may decide)</Label>
-                  <WhoPicker value={s.approver} onChange={(w) => patch(i, { approver: w ?? { kind: "role", value: "" } })} /></div>
+                <div className="space-y-1"><Label>Who approves (any one holder of the role, or the people on the reporting line, may decide)</Label>
+                  <WhoPicker allowSupervisor value={s.approver} onChange={(w) => patch(i, { approver: w ?? { kind: "role", value: "" } })} /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>Respond within (hours, optional)</Label>
                     <Input type="number" min={1} value={s.sla} onChange={(e) => patch(i, { sla: e.target.value })} /></div>
                   <div className="space-y-1"><Label>If overdue, also ask</Label>
                     <WhoPicker allowNone value={s.escalate} onChange={(w) => patch(i, { escalate: w })} /></div>
                 </div>
+                <div className="flex items-center gap-2"><Switch checked={s.higherLevel} onCheckedChange={(v) => patch(i, { higherLevel: v })} />
+                  <Label>This is a higher-level step (shown to the submitter as "Pending Higher-Level Approval")</Label></div>
                 <div className="flex items-center gap-2"><Switch checked={s.selfApproval} onCheckedChange={(v) => patch(i, { selfApproval: v })} />
                   <Label>The person who made the request may also approve this step</Label></div>
               </div>

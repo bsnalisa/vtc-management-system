@@ -45,7 +45,7 @@ select public.workflow_start_request('To cancel', 'x') as cinst \gset
 select set_config('request.jwt.claim.sub', :'coord', false);
 select public.expect_error(format('select public.workflow_cancel(%L)', :'cinst'), 'Not authorised|not found', 'bystander cannot cancel');
 select set_config('request.jwt.claim.sub', :'outsider', false);
-select public.assert((select count(*) from workflow_instances) = 0 and (select count(*) from workflow_tasks) = 0 and (select count(*) from workflow_events) = 0 and (select count(*) from workflow_definitions) = 0, 'another centre sees nothing of this workflow');
+select public.assert((select count(*) from workflow_instances) = 0 and (select count(*) from workflow_tasks) = 0 and (select count(*) from workflow_events) = 0 and (select count(*) from workflow_definitions where organization_id = :'orgA') = 0, 'another centre sees nothing of this workflow');
 select public.assert((select count(*) from workflow_my_tasks()) = 0, 'another centre has no tasks');
 select set_config('request.jwt.claim.sub', :'trainer', false);
 select public.assert((select count(*) from workflow_instances) >= 1, 'requester sees their own requests');

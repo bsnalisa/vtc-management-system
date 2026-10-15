@@ -12,23 +12,27 @@ export const useAlumni = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("alumni")
-        .select(`
-          *,
-          trainees (
-            trainee_id,
-            first_name,
-            last_name
-          ),
-          trades (
-            name,
-            code
-          )
-        `)
+        .select("*")
         .eq("organization_id", organizationId)
         .order("graduation_year", { ascending: false });
 
       if (error) throw error;
-      return data;
+      const rows = data ?? [];
+      if (!rows.length) return [];
+
+      // alumni has no foreign keys to trainees/trades/employment, so attach them with separate lookups
+      const uniq = (xs: (string | null)[]) => [...new Set(xs.filter(Boolean))] as string[];
+      const [trainees, trades, jobs] = await Promise.all([
+        supabase.from("trainees").select("id, trainee_id, first_name, last_name").in("id", uniq(rows.map((r) => r.trainee_id))),
+        supabase.from("trades").select("id, name, code").in("id", uniq(rows.map((r) => r.final_trade_id))),
+        supabase.from("alumni_employment").select("*").in("alumni_id", rows.map((r) => r.id)),
+      ]);
+      return rows.map((r) => ({
+        ...r,
+        trainees: (trainees.data ?? []).find((t) => t.id === r.trainee_id) ?? null,
+        trades: (trades.data ?? []).find((t) => t.id === r.final_trade_id) ?? null,
+        alumni_employment: (jobs.data ?? []).filter((j) => j.alumni_id === r.id),
+      }));
     },
     enabled: !!organizationId,
   });

@@ -17,11 +17,7 @@ export const useMessages = (type: "inbox" | "sent" = "inbox") => {
 
       const query = supabase
         .from("messages")
-        .select(`
-          *,
-          sender:sender_id(id, email, profiles(full_name)),
-          receiver:receiver_id(id, email, profiles(full_name))
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (type === "inbox") {
@@ -32,7 +28,18 @@ export const useMessages = (type: "inbox" | "sent" = "inbox") => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      const rows = data ?? [];
+
+      // sender_id / receiver_id point at auth users, which cannot be joined to profiles in one request
+      const ids = [...new Set(rows.flatMap((m) => [m.sender_id, m.receiver_id]).filter(Boolean))] as string[];
+      const { data: people } = ids.length
+        ? await supabase.from("profiles").select("user_id, full_name, email").in("user_id", ids)
+        : { data: [] as { user_id: string; full_name: string | null; email: string | null }[] };
+      const who = (id: string) => {
+        const p = (people ?? []).find((x) => x.user_id === id);
+        return { id, email: p?.email ?? null, profiles: { full_name: p?.full_name ?? null } };
+      };
+      return rows.map((m) => ({ ...m, sender: who(m.sender_id), receiver: who(m.receiver_id) }));
     },
   });
 };
