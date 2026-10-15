@@ -13923,6 +13923,10 @@ export type Database = {
         }
         Returns: number
       }
+      trades_open_for_application: {
+        Args: { _org_id: string }
+        Returns: string[]
+      }
       trainee_access_ok: { Args: { _trainee: string }; Returns: boolean }
       trainee_has_outstanding_fees: {
         Args: { _academic_year: string; _trainee_id: string }
