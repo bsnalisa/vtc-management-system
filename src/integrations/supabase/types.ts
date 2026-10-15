@@ -9927,6 +9927,33 @@ export type Database = {
           },
         ]
       }
+      skilla_threads: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sme_applications: {
         Row: {
           created_at: string
@@ -13922,6 +13949,10 @@ export type Database = {
           _token: string
         }
         Returns: number
+      }
+      trades_open_for_application: {
+        Args: { _org_id: string }
+        Returns: string[]
       }
       trainee_access_ok: { Args: { _trainee: string }; Returns: boolean }
       trainee_has_outstanding_fees: {
