@@ -91,7 +91,7 @@ select public.assert(exists (select 1 from workflow_tasks where instance_id = :'
 reset role;
 insert into user_supervisors (organization_id, user_id, supervisor_user_id) values (:'orgA', :'cr', :'hot');
 set role authenticated; select set_config('request.jwt.claim.sub', :'cr', false);
-select public.workflow_create_request('payment_request', 'Invoice 1', 'x') as i5 \gset
+select public.workflow_create_request('finance_submission', 'Report 1', 'x') as i5 \gset
 select public.assert(exists (select 1 from workflow_task_assignees a join workflow_tasks t on t.id = a.task_id where t.instance_id = :'i5' and a.user_id = :'hot') and not exists (select 1 from workflow_task_assignees a join workflow_tasks t on t.id = a.task_id where t.instance_id = :'i5' and a.user_id = :'hofa'), 'a per-person supervisor overrides the role line');
 
 -- no reporting line: falls back to the Centre Manager

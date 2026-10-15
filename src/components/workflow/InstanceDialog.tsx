@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { WorkflowInstance, useCancelInstance, useInstanceEvents, useOrgUsers } from "@/hooks/useWorkflows";
 import { statusBadgeVariant, statusLabel } from "./status";
+import { WorkflowAttachments } from "./WorkflowAttachments";
 import { getRoleDisplayName } from "@/lib/roleUtils";
 
 const EVENT_LABELS: Record<string, string> = {
@@ -12,7 +13,7 @@ const EVENT_LABELS: Record<string, string> = {
   info_requested: "Returned for correction", info_provided: "Corrected and resubmitted", escalated: "Escalated",
   overdue: "Overdue", no_assignees: "No approver available", completed_approved: "Completed: approved",
   completed_rejected: "Completed: rejected", completed_cancelled: "Cancelled",
-  draft_saved: "Draft saved", submitted: "Submitted for approval", escalated_by_approver: "Escalated for higher-level approval", completed: "Marked completed",
+  draft_saved: "Draft saved", submitted: "Submitted for approval", escalated_by_approver: "Escalated for higher-level approval", completed: "Completed", escalated_over_limit: "Escalated: above the approval limit",
 };
 
 export const statusVariant = (s: string): "default" | "destructive" | "secondary" | "outline" =>
@@ -42,6 +43,7 @@ export function InstanceDialog({ instance, canCancel, onClose }: { instance: Wor
           <dl className="grid grid-cols-2 gap-2">
             {Object.entries(instance.summary).map(([k, v]) => (<div key={k} className="col-span-2"><dt className="text-muted-foreground">{k}</dt><dd className="whitespace-pre-wrap">{v}</dd></div>))}
           </dl>
+          <WorkflowAttachments instanceId={instance.id} canEdit={instance.status === "in_progress" || instance.status === "awaiting_info"} />
           <div>
             <h4 className="font-medium mb-2">Audit trail</h4>
             <ol className="space-y-2 border-l pl-4">

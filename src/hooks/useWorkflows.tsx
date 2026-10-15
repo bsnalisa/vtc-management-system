@@ -7,7 +7,7 @@ import { useOrganizationContext } from "./useOrganizationContext";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
-export interface ProcessType { code: string; label: string; description: string | null }
+export interface ProcessType { code: string; label: string; description: string | null; requires_documents?: boolean }
 export interface WorkflowStep {
   id?: string; step_no: number; name: string; approver_role: string | null; approver_user: string | null;
   sla_hours: number | null; escalate_to_role: string | null; escalate_to_user: string | null; allow_self_approval: boolean;

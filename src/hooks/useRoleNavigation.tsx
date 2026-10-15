@@ -22,6 +22,9 @@ import {
   rplCoordinatorNavItems,
   librarianNavItems,
   financeAdminNavItems,
+  headOfFinanceAdminNavItems,
+  accountantNavItems,
+  creditorsOfficerNavItems,
   smeNavItems,
   printingOfficerNavItems,
   liaisonOfficerNavItems,
@@ -42,9 +45,12 @@ export const useRoleNavigation = () => {
         return adminNavItems;
       case "centre_manager":
         return centreManagerNavItems;
-      case "accountant":
       case "head_of_finance_admin":
+        return headOfFinanceAdminNavItems;
+      case "accountant":
+        return accountantNavItems;
       case "creditors_officer":
+        return creditorsOfficerNavItems;
       case "loan_officer":
       case "pa_to_centre_manager":
         return financeAdminNavItems;

@@ -107,6 +107,7 @@ export const organizationAdminNavItems: NavItem[] = [
 // Centre Manager Navigation: oversight of the whole centre; everything here is read-only except approvals
 export const centreManagerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/centre-manager-dashboard", icon: LayoutDashboard, section: "Overview" },
+  { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
   { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
   { title: "Trainees", url: "/trainees", icon: Users, section: "People" },
@@ -234,6 +235,7 @@ export const debtorOfficerNavItems: NavItem[] = [
   { title: "Cleared Payments", url: "/debtors/cleared-payments", icon: History },
   { title: "Trainee Accounts", url: "/debtors/accounts", icon: DollarSign },
   { title: "Fee Configuration", url: "/debtors/config", icon: Settings },
+  { title: "Adjustments", url: "/debtors/adjustments", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
@@ -277,6 +279,7 @@ export const stockControlNavItems: NavItem[] = [
 export const assetMaintenanceNavItems: NavItem[] = [
   { title: "Dashboard", url: "/asset-maintenance-coordinator-dashboard", icon: LayoutDashboard },
   { title: "Asset Management", url: "/assets", icon: Package },
+  { title: "Asset Requests", url: "/asset-requests", icon: ClipboardCheck },
   { title: "Maintenance", url: "/assets", icon: Wrench },
   { title: "Depreciation", url: "/assets", icon: BarChart3 },
   { title: "Reports", url: "/reports", icon: FileText },
@@ -378,6 +381,39 @@ export const printingOfficerNavItems: NavItem[] = [
 // Finance and administration line and the Centre Manager's office (dedicated dashboards follow)
 export const financeAdminNavItems: NavItem[] = [
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
+export const headOfFinanceAdminNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/head-of-finance-admin-dashboard", icon: LayoutDashboard },
+  { title: "Approval Centre", url: "/finance-approvals", icon: ClipboardCheck },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
+  { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
+  { title: "Asset Requests", url: "/asset-requests", icon: Package },
+  { title: "Suppliers", url: "/suppliers", icon: Users },
+  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
+  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
+  { title: "Reports", url: "/reports", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
+export const accountantNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/accountant-dashboard", icon: LayoutDashboard },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
+  { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
+  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
+  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
+  { title: "Reports", url: "/reports", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
+export const creditorsOfficerNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/creditors-officer-dashboard", icon: LayoutDashboard },
+  { title: "Suppliers", url: "/suppliers", icon: Users },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
 

@@ -44,10 +44,10 @@ export const getRoleDashboardPath = (role: UserRole): string => {
     super_admin: "/super-admin",
     organization_admin: "/organization-admin-dashboard",
     centre_manager: "/centre-manager-dashboard",
-    // dedicated dashboards arrive in a later phase; until then these roles start in their approval queue
-    accountant: "/my-approvals",
-    head_of_finance_admin: "/my-approvals",
-    creditors_officer: "/my-approvals",
+    // the Loan Officer and PA dashboards arrive in a later phase; until then they start in their approval queue
+    accountant: "/accountant-dashboard",
+    head_of_finance_admin: "/head-of-finance-admin-dashboard",
+    creditors_officer: "/creditors-officer-dashboard",
     loan_officer: "/my-approvals",
     pa_to_centre_manager: "/my-approvals",
     admin: "/admin-dashboard",

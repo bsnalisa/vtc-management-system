@@ -17,45 +17,14 @@ import { Plus } from "lucide-react";
 import { RequirementChangeRequests } from "@/components/registration/RequirementChangeRequests";
 import { useRequirementChangeRequests } from "@/hooks/useEntryRequirements";
 import { InstanceDialog } from "@/components/workflow/InstanceDialog";
+import { TaskDecisionDialog } from "@/components/workflow/TaskDecisionDialog";
+import { SubmitRequestDialog, WorkflowAttachments } from "@/components/workflow/WorkflowAttachments";
 import { statusBadgeVariant, statusLabel } from "@/components/workflow/status";
 import { getRoleDisplayName } from "@/lib/roleUtils";
 import {
   MyTask, useAvailableProcesses, WorkflowInstance, useActOnTask, useDelegations, useEndDelegation, useMyTasks, useOrgUsers, useProcessTypes,
-  useProvideInfo, useSaveDelegation, useStartRequest, useSubmitDraft, useWorkflowInstances,
+  useProvideInfo, useSaveDelegation, useStartRequest, useWorkflowInstances,
 } from "@/hooks/useWorkflows";
-
-function TaskDialog({ task, onClose }: { task: MyTask; onClose: () => void }) {
-  const act = useActOnTask();
-  const [comment, setComment] = useState("");
-  const go = async (action: "approve" | "reject" | "request_info" | "escalate") => {
-    await act.mutateAsync({ task: task.task_id, action, comment: comment.trim() });
-    onClose();
-  };
-  const needsComment = !comment.trim();
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>{task.title}</DialogTitle></DialogHeader>
-        <div className="space-y-4 text-sm">
-          {task.reference && <div className="font-mono text-xs">{task.reference}</div>}
-          <div className="text-muted-foreground">Step {task.step_no}: {task.step_name} · requested by {task.requested_by ?? "unknown"}{task.submitter_role ? ` (${getRoleDisplayName(task.submitter_role as never)})` : ""}{task.due_at ? ` · respond by ${new Date(task.due_at).toLocaleString()}` : ""}</div>
-          {task.delegated && <Badge variant="outline">You are covering for a colleague</Badge>}
-          {task.escalated && <Badge variant="destructive" className="ml-2">Escalated: overdue</Badge>}
-          <dl className="space-y-2">
-            {Object.entries(task.summary).map(([k, v]) => (<div key={k}><dt className="text-muted-foreground">{k}</dt><dd className="whitespace-pre-wrap">{v}</dd></div>))}
-          </dl>
-          <div className="space-y-1"><Label>Comments (required to reject, return for correction or escalate)</Label><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></div>
-          <div className="flex flex-wrap gap-2">
-            <Button disabled={act.isPending} onClick={() => go("approve")}>Approve</Button>
-            <Button variant="outline" disabled={act.isPending || needsComment} title={needsComment ? "Say what must be corrected" : ""} onClick={() => go("request_info")}>Return for correction</Button>
-            {task.can_escalate && <Button variant="outline" disabled={act.isPending || needsComment} title={needsComment ? "Say why it needs a higher level" : "Send to your own supervisor for a decision"} onClick={() => go("escalate")}>Escalate</Button>}
-            <Button variant="destructive" disabled={act.isPending || needsComment} title={needsComment ? "Give a reason" : ""} onClick={() => go("reject")}>Reject</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 const REQUIREMENT_APPROVER_ROLES = ["head_of_trainee_support", "super_admin"];
 
@@ -85,7 +54,7 @@ function ToApproveTab() {
       </Table>
       {!data?.length && !canApproveRequirements && <p className="text-sm text-muted-foreground text-center py-6">Nothing is waiting for your approval.</p>}
       {!data?.length && canApproveRequirements && <p className="text-sm text-muted-foreground text-center py-2">No workflow requests are waiting for your approval.</p>}
-      {selected && <TaskDialog key={selected.task_id} task={selected} onClose={() => setSelected(null)} />}
+      {selected && <TaskDecisionDialog key={selected.task_id} task={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }
@@ -95,38 +64,45 @@ function StartRequestDialog() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [process, setProcess] = useState("");
+  const [draft, setDraft] = useState<{ id: string; title: string } | null>(null);
   const { data: types } = useAvailableProcesses();
   const start = useStartRequest();
-  const send = async (submit: boolean) => {
-    await start.mutateAsync({ title, description, process, submit });
-    setTitle(""); setDescription(""); setProcess(""); setOpen(false);
+  const needsDocs = types?.find((t) => t.code === process)?.requires_documents;
+  const create = async (submit: boolean) => {
+    const r = await start.mutateAsync({ title, description, process, submit });
+    setOpen(false);
+    if (!submit) setDraft({ id: r.id, title });
+    setTitle(""); setDescription(""); setProcess("");
   };
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />New request</Button></DialogTrigger>
-      <DialogContent>
-        <DialogHeader><DialogTitle>Request approval</DialogTitle></DialogHeader>
-        <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); await send(true); }}>
-          <div className="space-y-1"><Label>Kind of request</Label>
-            <Select value={process} onValueChange={setProcess}><SelectTrigger><SelectValue placeholder="Choose the kind of request" /></SelectTrigger>
-              <SelectContent>{types?.map((t) => <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>)}</SelectContent></Select>
-            <p className="text-xs text-muted-foreground">It goes to your direct supervisor.</p></div>
-          <div className="space-y-1"><Label>What do you need approved?</Label><Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="space-y-1"><Label>Details</Label><Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div className="flex gap-2">
-            <Button type="submit" className="flex-1" disabled={start.isPending || !title.trim() || !process}>Send for approval</Button>
-            <Button type="button" variant="outline" disabled={start.isPending || !title.trim() || !process} onClick={() => send(false)}>Save as draft</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />New request</Button></DialogTrigger>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Request approval</DialogTitle></DialogHeader>
+          <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); await create(!needsDocs); }}>
+            <div className="space-y-1"><Label>Kind of request</Label>
+              <Select value={process} onValueChange={setProcess}><SelectTrigger><SelectValue placeholder="Choose the kind of request" /></SelectTrigger>
+                <SelectContent>{types?.map((t) => <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>)}</SelectContent></Select>
+              <p className="text-xs text-muted-foreground">It goes to your direct supervisor.{needsDocs ? " This kind needs supporting documents, which you attach next." : ""}</p></div>
+            <div className="space-y-1"><Label>What do you need approved?</Label><Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+            <div className="space-y-1"><Label>Details</Label><Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" disabled={start.isPending || !title.trim() || !process}>{needsDocs ? "Continue: attach documents" : "Send for approval"}</Button>
+              {!needsDocs && <Button type="button" variant="outline" disabled={start.isPending || !title.trim() || !process} onClick={() => create(false)}>Save as draft</Button>}
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {draft && <SubmitRequestDialog instanceId={draft.id} title={draft.title} onClose={() => setDraft(null)} />}
+    </>
   );
 }
 
 function MyRequestsTab() {
   const { data } = useWorkflowInstances(true);
   const provide = useProvideInfo();
-  const submitDraft = useSubmitDraft();
+  const [attachFor, setAttachFor] = useState<WorkflowInstance | null>(null);
   const [selected, setSelected] = useState<WorkflowInstance | null>(null);
   const [reply, setReply] = useState<WorkflowInstance | null>(null);
   const [text, setText] = useState("");
@@ -144,7 +120,7 @@ function MyRequestsTab() {
               <TableCell><Badge variant={statusBadgeVariant(i)}>{statusLabel(i)}</Badge></TableCell>
               <TableCell className="text-xs text-muted-foreground max-w-[18rem]">{i.next_action}</TableCell>
               <TableCell className="text-right space-x-2">
-                {i.status === "draft" && <Button size="sm" disabled={submitDraft.isPending} onClick={() => submitDraft.mutate(i.id)}>Submit</Button>}
+                {i.status === "draft" && <Button size="sm" onClick={() => setAttachFor(i)}>Attach and submit</Button>}
                 {i.status === "awaiting_info" && <Button size="sm" onClick={() => { setReply(i); setText(""); }}>Correct and resubmit</Button>}
                 <Button size="sm" variant="outline" onClick={() => setSelected(i)}>Details</Button>
               </TableCell>
@@ -154,12 +130,14 @@ function MyRequestsTab() {
       </Table>
       {!data?.length && <p className="text-sm text-muted-foreground text-center py-6">You have not made any requests.</p>}
       {selected && <InstanceDialog instance={selected} canCancel onClose={() => setSelected(null)} />}
+      {attachFor && <SubmitRequestDialog instanceId={attachFor.id} title={attachFor.title} onClose={() => setAttachFor(null)} />}
       {reply && (
         <Dialog open onOpenChange={(o) => !o && setReply(null)}>
           <DialogContent>
             <DialogHeader><DialogTitle>Correct and resubmit</DialogTitle></DialogHeader>
             <p className="text-sm text-muted-foreground">{reply.title}</p>
             <Textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} />
+            <WorkflowAttachments instanceId={reply.id} canEdit />
             <Button disabled={!text.trim() || provide.isPending} onClick={async () => { await provide.mutateAsync({ id: reply.id, comment: text.trim() }); setReply(null); }}>Resubmit</Button>
           </DialogContent>
         </Dialog>

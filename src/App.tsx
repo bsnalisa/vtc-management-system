@@ -132,6 +132,12 @@ const RplCredits = lazy(() => import("./pages/RplCredits"));
 const LiaisonPartners = lazy(() => import("./pages/LiaisonPartners"));
 const LiaisonOfficerDashboard = lazy(() => import("./pages/LiaisonOfficerDashboard"));
 const ResourceCentreDashboard = lazy(() => import("./pages/ResourceCentreDashboard"));
+const HeadOfFinanceAdminDashboard = lazy(() => import("./pages/HeadOfFinanceAdminDashboard"));
+const FinanceApprovalCentre = lazy(() => import("./pages/FinanceApprovalCentre"));
+const AccountantDashboard = lazy(() => import("./pages/AccountantDashboard"));
+const CreditorsOfficerDashboard = lazy(() => import("./pages/CreditorsOfficerDashboard"));
+const DebtorAdjustments = lazy(() => import("./pages/DebtorAdjustments"));
+const AssetRequests = lazy(() => import("./pages/AssetRequests"));
 const ProjectsCoordinatorDashboard = lazy(() => import("./pages/ProjectsCoordinatorDashboard"));
 const HROfficerDashboard = lazy(() => import("./pages/HROfficerDashboard"));
 const BDLCoordinatorDashboard = lazy(() => import("./pages/BDLCoordinatorDashboard"));
@@ -292,7 +298,7 @@ const ProtectedStockManagement = withRoleAccess(StockManagement, {
   requiredRoles: ["stock_control_officer", "admin"],
 });
 const ProtectedSupplierManagement = withRoleAccess(SupplierManagement, {
-  requiredRoles: ["procurement_officer"],
+  requiredRoles: ["procurement_officer", "creditors_officer", "accountant", "head_of_finance_admin"],
 });
 const ProtectedPurchaseRequisitions = withRoleAccess(PurchaseRequisitions, {
   requiredRoles: ["procurement_officer"],
@@ -426,6 +432,12 @@ const App = () => (
           <Route path="/debtor-officer-dashboard" element={<ProtectedRoute><ProtectedDebtorOfficerDashboard /></ProtectedRoute>} />
           <Route path="/sme-dashboard" element={<ProtectedRoute><ProtectedSmeDashboard /></ProtectedRoute>} />
           <Route path="/printing-dashboard" element={<ProtectedRoute><ProtectedPrintingDashboard /></ProtectedRoute>} />
+          <Route path="/head-of-finance-admin-dashboard" element={<ProtectedRoute><HeadOfFinanceAdminDashboard /></ProtectedRoute>} />
+          <Route path="/finance-approvals" element={<ProtectedRoute><FinanceApprovalCentre /></ProtectedRoute>} />
+          <Route path="/accountant-dashboard" element={<ProtectedRoute><AccountantDashboard /></ProtectedRoute>} />
+          <Route path="/creditors-officer-dashboard" element={<ProtectedRoute><CreditorsOfficerDashboard /></ProtectedRoute>} />
+          <Route path="/debtors/adjustments" element={<ProtectedRoute><DebtorAdjustments /></ProtectedRoute>} />
+          <Route path="/asset-requests" element={<ProtectedRoute><AssetRequests /></ProtectedRoute>} />
           <Route path="/centre-manager-dashboard" element={<ProtectedRoute><ProtectedCentreManagerDashboard /></ProtectedRoute>} />
           <Route path="/registration-officer-dashboard" element={<ProtectedRoute><ProtectedRegistrationOfficerDashboard /></ProtectedRoute>} />
           <Route path="/stock-control-officer-dashboard" element={<ProtectedRoute><ProtectedStockControlOfficerDashboard /></ProtectedRoute>} />
