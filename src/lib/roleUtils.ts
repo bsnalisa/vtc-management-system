@@ -49,7 +49,7 @@ export const getRoleDashboardPath = (role: UserRole): string => {
     head_of_finance_admin: "/head-of-finance-admin-dashboard",
     creditors_officer: "/creditors-officer-dashboard",
     loan_officer: "/loan-officer-dashboard",
-    pa_to_centre_manager: "/my-approvals",
+    pa_to_centre_manager: "/pa-dashboard",
     admin: "/admin-dashboard",
     head_of_training: "/head-of-training-dashboard",
     trainer: "/trainer-dashboard",

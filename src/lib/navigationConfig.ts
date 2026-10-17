@@ -114,6 +114,7 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/centre-manager-dashboard", icon: LayoutDashboard, section: "Overview" },
   { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
+  { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Overview" },
   { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
   { title: "Trainees", url: "/trainees", icon: Users, section: "People" },
   { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "People" },
@@ -385,6 +386,12 @@ export const printingOfficerNavItems: NavItem[] = [
 
 // Finance and administration line and the Centre Manager's office (dedicated dashboards follow)
 export const financeAdminNavItems: NavItem[] = [
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
+export const paNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/pa-dashboard", icon: LayoutDashboard },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
