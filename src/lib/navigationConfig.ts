@@ -22,6 +22,11 @@ import {
   History,
   DoorClosed,
   LucideIcon,
+  Landmark,
+  Award,
+  HelpCircle,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 
 export interface NavItem {
@@ -390,6 +395,7 @@ export const headOfFinanceAdminNavItems: NavItem[] = [
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
   { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
+  { title: "NSFAF Funding", url: "/loan-officer-dashboard?tab=reconciliation", icon: Landmark },
   { title: "Asset Requests", url: "/asset-requests", icon: Package },
   { title: "Suppliers", url: "/suppliers", icon: Users },
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
@@ -407,6 +413,26 @@ export const accountantNavItems: NavItem[] = [
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
+export const loanOfficerNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/loan-officer-dashboard?tab=overview", icon: LayoutDashboard, section: "Overview" },
+  { title: "Funding Register", url: "/loan-officer-dashboard?tab=register", icon: Users, section: "Trainee Funding" },
+  { title: "Funding Applications", url: "/loan-officer-dashboard?tab=applications", icon: FileText, section: "Trainee Funding" },
+  { title: "Document Verification", url: "/loan-officer-dashboard?tab=documents", icon: ClipboardCheck, section: "Trainee Funding" },
+  { title: "Awards and Agreements", url: "/loan-officer-dashboard?tab=awards", icon: Award, section: "Trainee Funding" },
+  { title: "Registration and Progression", url: "/loan-officer-dashboard?tab=progression", icon: GraduationCap, section: "Trainee Funding" },
+  { title: "Funding Payments", url: "/loan-officer-dashboard?tab=payments", icon: DollarSign, section: "Financial Monitoring" },
+  { title: "Reconciliation", url: "/loan-officer-dashboard?tab=reconciliation", icon: Landmark, section: "Financial Monitoring" },
+  { title: "NSFAF Correspondence", url: "/loan-officer-dashboard?tab=correspondence", icon: MessageSquare, section: "Communication and Support" },
+  { title: "Trainee Enquiries", url: "/loan-officer-dashboard?tab=enquiries", icon: HelpCircle, section: "Communication and Support" },
+  { title: "Appeals and Exceptions", url: "/loan-officer-dashboard?tab=appeals", icon: AlertTriangle, section: "Communication and Support" },
+  { title: "Follow-ups", url: "/loan-officer-dashboard?tab=followups", icon: Clock, section: "Communication and Support" },
+  { title: "Funding Reports", url: "/loan-officer-dashboard?tab=reports", icon: BarChart3, section: "Reporting" },
+  { title: "Audit Trail", url: "/loan-officer-dashboard?tab=audit", icon: History, section: "Reporting" },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Administration" },
+  { title: "Profile and Settings", url: "/profile", icon: Settings, section: "Administration" },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Administration" },
 ];
 
 export const creditorsOfficerNavItems: NavItem[] = [

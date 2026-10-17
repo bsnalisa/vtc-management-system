@@ -46,7 +46,7 @@ export const useFinanceMonthly = (months = 12) =>
   });
 
 /** Run an RPC, refresh the listed queries and say what happened. */
-function useRpc<T, R = unknown>(fn: string, args: (v: T) => Record<string, unknown>, keys: string[], success: string | ((r: R) => string)) {
+export function useRpc<T, R = unknown>(fn: string, args: (v: T) => Record<string, unknown>, keys: string[], success: string | ((r: R) => string)) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (v: T) => {

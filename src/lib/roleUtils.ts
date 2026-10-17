@@ -44,11 +44,11 @@ export const getRoleDashboardPath = (role: UserRole): string => {
     super_admin: "/super-admin",
     organization_admin: "/organization-admin-dashboard",
     centre_manager: "/centre-manager-dashboard",
-    // the Loan Officer and PA dashboards arrive in a later phase; until then they start in their approval queue
+    // the PA dashboard arrives in a later phase; until then it starts in its approval queue
     accountant: "/accountant-dashboard",
     head_of_finance_admin: "/head-of-finance-admin-dashboard",
     creditors_officer: "/creditors-officer-dashboard",
-    loan_officer: "/my-approvals",
+    loan_officer: "/loan-officer-dashboard",
     pa_to_centre_manager: "/my-approvals",
     admin: "/admin-dashboard",
     head_of_training: "/head-of-training-dashboard",

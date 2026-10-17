@@ -13,6 +13,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { withRoleAccess } from "@/components/withRoleAccess";
+import { useFundingOverview } from "@/hooks/useFunding";
+
+function NsfafFundingCard() {
+  const navigate = useNavigate();
+  const { data: o } = useFundingOverview(null);
+  if (!o) return null;
+  return (
+    <Card>
+      <CardHeader><CardTitle>NSFAF funding</CardTitle><CardDescription>Funding recorded by the Loan Officer. Payments need Finance verification; none of it is owed to the VTC.</CardDescription></CardHeader>
+      <CardContent className="space-y-1 text-sm">
+        <div className="flex justify-between"><span>Trainees with a funding record</span><span className="font-medium">{o.tracked}</span></div>
+        <div className="flex justify-between"><span>Awards confirmed by NSFAF</span><span className="font-medium">{o.confirmed}</span></div>
+        <div className="flex justify-between"><span>Payments awaiting reconciliation</span><span className="font-medium">{o.awaiting_reconciliation}</span></div>
+        <Button variant="link" className="h-auto p-0" onClick={() => navigate("/loan-officer-dashboard?tab=reconciliation")}>Open reconciliation</Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 function HeadOfFinanceAdminDashboard() {
   const navigate = useNavigate();
@@ -129,7 +147,7 @@ function HeadOfFinanceAdminDashboard() {
                 </CardContent>
               </Card>
             </div>
-            <p className="text-xs text-muted-foreground">Loan figures appear here once the Loan Officer dashboard is in use.</p>
+            <NsfafFundingCard />
           </>
         )}
       </DashboardShell>
