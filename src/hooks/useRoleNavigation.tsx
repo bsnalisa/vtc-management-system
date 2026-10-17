@@ -21,11 +21,11 @@ import {
   bdlCoordinatorNavItems,
   rplCoordinatorNavItems,
   librarianNavItems,
-  financeAdminNavItems,
   headOfFinanceAdminNavItems,
   accountantNavItems,
   creditorsOfficerNavItems,
   loanOfficerNavItems,
+  paNavItems,
   smeNavItems,
   printingOfficerNavItems,
   liaisonOfficerNavItems,
@@ -55,7 +55,7 @@ export const useRoleNavigation = () => {
       case "loan_officer":
         return loanOfficerNavItems;
       case "pa_to_centre_manager":
-        return financeAdminNavItems;
+        return paNavItems;
       case "head_of_training":
         return headOfTrainingNavItems;
       case "trainer":

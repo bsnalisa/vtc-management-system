@@ -19,6 +19,7 @@ import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
 import { useMyTasks } from "@/hooks/useWorkflows";
 import { useCentreManagerOverview } from "@/hooks/useCentreManagerOverview";
+import { CentreExecutive } from "@/components/dashboard/CentreExecutive";
 
 const money = (n: number) => `N$ ${Math.round(n).toLocaleString("en-ZA")}`;
 const pct = (n: number | null | undefined) => (n == null ? "–" : `${n}%`);
@@ -106,6 +107,8 @@ const CentreManagerDashboard = () => {
                 {waiting.length > 6 && <Button variant="link" className="px-0" onClick={() => navigate("/my-approvals")}>See all {waiting.length}</Button>}
               </CardContent>
             </Card>
+
+            <CentreExecutive />
 
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
