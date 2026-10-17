@@ -138,6 +138,7 @@ const AccountantDashboard = lazy(() => import("./pages/AccountantDashboard"));
 const CreditorsOfficerDashboard = lazy(() => import("./pages/CreditorsOfficerDashboard"));
 const DebtorAdjustments = lazy(() => import("./pages/DebtorAdjustments"));
 const AssetRequests = lazy(() => import("./pages/AssetRequests"));
+const LoanOfficerDashboard = lazy(() => import("./pages/LoanOfficerDashboard"));
 const ProjectsCoordinatorDashboard = lazy(() => import("./pages/ProjectsCoordinatorDashboard"));
 const HROfficerDashboard = lazy(() => import("./pages/HROfficerDashboard"));
 const BDLCoordinatorDashboard = lazy(() => import("./pages/BDLCoordinatorDashboard"));
@@ -437,6 +438,7 @@ const App = () => (
           <Route path="/accountant-dashboard" element={<ProtectedRoute><AccountantDashboard /></ProtectedRoute>} />
           <Route path="/creditors-officer-dashboard" element={<ProtectedRoute><CreditorsOfficerDashboard /></ProtectedRoute>} />
           <Route path="/debtors/adjustments" element={<ProtectedRoute><DebtorAdjustments /></ProtectedRoute>} />
+          <Route path="/loan-officer-dashboard" element={<ProtectedRoute><LoanOfficerDashboard /></ProtectedRoute>} />
           <Route path="/asset-requests" element={<ProtectedRoute><AssetRequests /></ProtectedRoute>} />
           <Route path="/centre-manager-dashboard" element={<ProtectedRoute><ProtectedCentreManagerDashboard /></ProtectedRoute>} />
           <Route path="/registration-officer-dashboard" element={<ProtectedRoute><ProtectedRegistrationOfficerDashboard /></ProtectedRoute>} />

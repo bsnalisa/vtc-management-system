@@ -22,6 +22,7 @@ import {
   History,
   DoorClosed,
   LucideIcon,
+  Landmark,
 } from "lucide-react";
 
 export interface NavItem {
@@ -390,6 +391,7 @@ export const headOfFinanceAdminNavItems: NavItem[] = [
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
   { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
+  { title: "Loans", url: "/loan-officer-dashboard", icon: Landmark },
   { title: "Asset Requests", url: "/asset-requests", icon: Package },
   { title: "Suppliers", url: "/suppliers", icon: Users },
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
@@ -405,6 +407,13 @@ export const accountantNavItems: NavItem[] = [
   { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
+  { title: "Reports", url: "/reports", icon: FileText },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
+export const loanOfficerNavItems: NavItem[] = [
+  { title: "Dashboard", url: "/loan-officer-dashboard", icon: LayoutDashboard },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
