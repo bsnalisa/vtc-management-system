@@ -20,13 +20,16 @@ const plusDays = (n: number) => new Date(Date.now() + n * 86400000).toISOString(
 function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return <div className="space-y-1.5"><Label>{label}</Label>{children}{hint && <p className="text-xs text-muted-foreground">{hint}</p>}</div>;
 }
-function Modal({ open, onClose, title, description, children, footer }: { open: boolean; onClose: () => void; title: string; description?: string; children: ReactNode; footer: ReactNode }) {
+function Modal({ open, onClose, title, description, children, footer, onSubmit }: { open: boolean; onClose: () => void; title: string; description?: string; children: ReactNode; footer: ReactNode; onSubmit: (e: React.FormEvent) => void }) {
+  // The form sits inside the portal-rendered dialog so the submit button is a real descendant of it.
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader><DialogTitle>{title}</DialogTitle>{description && <DialogDescription>{description}</DialogDescription>}</DialogHeader>
-        <div className="space-y-4">{children}</div>
-        <DialogFooter className="gap-2 sm:gap-0"><Button type="button" variant="outline" onClick={onClose}>Cancel</Button>{footer}</DialogFooter>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <DialogHeader><DialogTitle>{title}</DialogTitle>{description && <DialogDescription>{description}</DialogDescription>}</DialogHeader>
+          <div className="space-y-4">{children}</div>
+          <DialogFooter className="gap-2 sm:gap-0"><Button type="button" variant="outline" onClick={onClose}>Cancel</Button>{footer}</DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -50,8 +53,7 @@ export function NewRecordDialog({ open, onClose, year, onCreated, initialQuery =
     onClose(); setQ(""); setPick(""); setIntake(""); onCreated(id);
   };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="New funding record" description={`Link a trainee to an NSFAF funding record${year ? ` for ${year}` : ""}. Each trainee has one record per academic year.`}
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="New funding record" description={`Link a trainee to an NSFAF funding record${year ? ` for ${year}` : ""}. Each trainee has one record per academic year.`}
         footer={<Submit pending={create.isPending} disabled={!pick || !!chosen?.record_id}>Create record</Submit>}>
         <Field label="Find the trainee" hint="Search by trainee number, name or programme">
           <SearchInput value={q} onChange={setQ} placeholder="e.g. 062-26-00001 or Tina" />
@@ -77,7 +79,6 @@ export function NewRecordDialog({ open, onClose, year, onCreated, initialQuery =
           <Field label="Intake"><Input value={intake} onChange={(e) => setIntake(e.target.value)} placeholder="e.g. January 2026" /></Field>
         </div>
       </Modal>
-    </form>
   );
 }
 
@@ -88,8 +89,7 @@ export function ApplicationDialog({ c, open, onClose }: { c: FundingCase; open: 
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ id: c.id, ...f }); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="Update funding application" description={`${c.trainee_name} · ${c.trainee_number}`} footer={<Submit pending={save.isPending}>Save</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="Update funding application" description={`${c.trainee_name} · ${c.trainee_number}`} footer={<Submit pending={save.isPending}>Save</Submit>}>
         <Alert><AlertDescription>Record what NSFAF has told the centre. Approvals are NSFAF decisions and are recorded separately under Funding award.</AlertDescription></Alert>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="NSFAF reference"><Input value={f.reference} onChange={set("reference")} /></Field>
@@ -115,7 +115,6 @@ export function ApplicationDialog({ c, open, onClose }: { c: FundingCase; open: 
           <Field label="Follow-up deadline"><Input type="date" value={f.due} onChange={set("due")} /></Field>
         </div>
       </Modal>
-    </form>
   );
 }
 
@@ -130,8 +129,7 @@ export function DecisionDialog({ c, open, onClose }: { c: FundingCase; open: boo
     onClose();
   };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="Record NSFAF decision" description={`${c.trainee_name} · ${c.nsfaf_reference ?? "no NSFAF reference yet"}`} footer={<Submit pending={save.isPending}>Record decision</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="Record NSFAF decision" description={`${c.trainee_name} · ${c.nsfaf_reference ?? "no NSFAF reference yet"}`} footer={<Submit pending={save.isPending}>Record decision</Submit>}>
         <Alert><AlertDescription>The VTC does not approve funding. Only record a decision NSFAF has issued, with the NSFAF reference on the record and the award letter or correspondence filed under Documents.</AlertDescription></Alert>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="NSFAF decision">
@@ -150,7 +148,6 @@ export function DecisionDialog({ c, open, onClose }: { c: FundingCase; open: boo
           <Field label="Conditions"><Textarea rows={2} value={f.conditions} onChange={set("conditions")} /></Field>
         </>)}
       </Modal>
-    </form>
   );
 }
 
@@ -160,15 +157,13 @@ export function DocumentUploadDialog({ id, open, onClose }: { id: string; open: 
   const [file, setFile] = useState<File | null>(null);
   const submit = async (e: React.FormEvent) => { e.preventDefault(); if (!file) return; await add.mutateAsync({ id, type, file }); setFile(null); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="File a document" footer={<Submit pending={add.isPending} disabled={!file}>Upload</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="File a document" footer={<Submit pending={add.isPending} disabled={!file}>Upload</Submit>}>
         <Field label="Document type">
           <Select value={type} onValueChange={setType}><SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{Object.entries(DOC_TYPE_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select>
         </Field>
         <Field label="File" hint="PDF or image, up to 10 MB"><Input type="file" accept=".pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></Field>
       </Modal>
-    </form>
   );
 }
 
@@ -178,8 +173,7 @@ export function DocumentStatusDialog({ doc, onClose }: { doc: { id: string; file
   const [note, setNote] = useState("");
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ doc: doc.id, status, note }); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open onClose={onClose} title="Document verification" description={doc.file_name} footer={<Submit pending={save.isPending} disabled={status === "requires_correction" && !note.trim()}>Save</Submit>}>
+    <Modal onSubmit={submit} open onClose={onClose} title="Document verification" description={doc.file_name} footer={<Submit pending={save.isPending} disabled={status === "requires_correction" && !note.trim()}>Save</Submit>}>
         <Field label="Outcome">
           <Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="under_review">Under review</SelectItem><SelectItem value="verified">Verified</SelectItem><SelectItem value="requires_correction">Rejected / requires correction</SelectItem></SelectContent></Select>
@@ -187,7 +181,6 @@ export function DocumentStatusDialog({ doc, onClose }: { doc: { id: string; file
         <Field label={status === "requires_correction" ? "What needs to be corrected" : "Note (optional)"}><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
         <p className="text-xs text-muted-foreground">Your name and the time are recorded as the verifier.</p>
       </Modal>
-    </form>
   );
 }
 
@@ -197,15 +190,13 @@ export function RegistrationDialog({ c, open, onClose }: { c: FundingCase; open:
   const [note, setNote] = useState("");
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ id: c.id, status, note }); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="Registration verification" description={`${c.trainee_name} · ${c.academic_year}`} footer={<Submit pending={save.isPending} disabled={status === "discrepancy" && !note.trim()}>Save</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="Registration verification" description={`${c.trainee_name} · ${c.academic_year}`} footer={<Submit pending={save.isPending} disabled={status === "discrepancy" && !note.trim()}>Save</Submit>}>
         <Field label="Outcome">
           <Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="verified">Registration confirmed for the year</SelectItem><SelectItem value="discrepancy">Discrepancy found</SelectItem><SelectItem value="not_verified">Reset to not verified</SelectItem></SelectContent></Select>
         </Field>
         <Field label={status === "discrepancy" ? "Describe the discrepancy" : "Note (optional)"}><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
       </Modal>
-    </form>
   );
 }
 
@@ -216,13 +207,11 @@ export function NoteDialog({ id, open, onClose, initialType = "note", title = "A
   const [summary, setSummary] = useState("");
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ id, type, summary }); setSummary(""); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title={title} footer={<Submit pending={save.isPending} disabled={!summary.trim()}>Save</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title={title} footer={<Submit pending={save.isPending} disabled={!summary.trim()}>Save</Submit>}>
         <Field label="Type"><Select value={type} onValueChange={setType}><SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>{Object.entries(NOTE_TYPES).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select></Field>
         <Field label="Details" hint="Do not enter identity numbers or bank details"><Textarea rows={4} value={summary} onChange={(e) => setSummary(e.target.value)} /></Field>
       </Modal>
-    </form>
   );
 }
 
@@ -233,14 +222,12 @@ export function FollowupDialog({ id, open, onClose, initialKind = "nsfaf_followu
   const [due, setDue] = useState(plusDays(7));
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ id, kind, description, due }); setDescription(""); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="Add follow-up" footer={<Submit pending={save.isPending} disabled={!description.trim() || !due}>Add follow-up</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="Add follow-up" footer={<Submit pending={save.isPending} disabled={!description.trim() || !due}>Add follow-up</Submit>}>
         <Field label="Type"><Select value={kind} onValueChange={setKind}><SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>{Object.entries(FOLLOWUP_KIND_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select></Field>
         <Field label="What needs to happen"><Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></Field>
         <Field label="Due date"><Input type="date" min={today()} value={due} onChange={(e) => setDue(e.target.value)} /></Field>
       </Modal>
-    </form>
   );
 }
 
@@ -249,11 +236,9 @@ export function ResolveDialog({ followup, onClose }: { followup: { id: string; d
   const [note, setNote] = useState("");
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ id: followup.id, note }); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open onClose={onClose} title="Mark as resolved" description={followup.description} footer={<Submit pending={save.isPending} disabled={!note.trim()}>Mark resolved</Submit>}>
+    <Modal onSubmit={submit} open onClose={onClose} title="Mark as resolved" description={followup.description} footer={<Submit pending={save.isPending} disabled={!note.trim()}>Mark resolved</Submit>}>
         <Field label="Resolution note"><Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
       </Modal>
-    </form>
   );
 }
 
@@ -267,8 +252,7 @@ export function PaymentDialog({ id, open, onClose }: { id: string; open: boolean
     onClose();
   };
   return (
-    <form onSubmit={submit}>
-      <Modal open={open} onClose={onClose} title="Record funding payment" description="Record a payment as shown on the NSFAF advice or bank statement. Finance reconciles it afterwards." footer={<Submit pending={save.isPending}>Record payment</Submit>}>
+    <Modal onSubmit={submit} open={open} onClose={onClose} title="Record funding payment" description="Record a payment as shown on the NSFAF advice or bank statement. Finance reconciles it afterwards." footer={<Submit pending={save.isPending}>Record payment</Submit>}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Amount received or recorded (N$)"><Input type="number" required min="0.01" step="0.01" value={f.amount} onChange={set("amount")} /></Field>
           <Field label="Payment date"><Input type="date" required max={today()} value={f.date} onChange={set("date")} /></Field>
@@ -286,7 +270,6 @@ export function PaymentDialog({ id, open, onClose }: { id: string; open: boolean
         </Field>
         <Field label="Recipient or arrangement notes" hint="As stated in the award documentation. Do not enter account numbers."><Input value={f.recipientNote} onChange={set("recipientNote")} /></Field>
       </Modal>
-    </form>
   );
 }
 
@@ -296,8 +279,7 @@ export function ReconcileDialog({ payment, onClose }: { payment: { id: string; t
   const [note, setNote] = useState("");
   const submit = async (e: React.FormEvent) => { e.preventDefault(); await save.mutateAsync({ id: payment.id, outcome, note }); onClose(); };
   return (
-    <form onSubmit={submit}>
-      <Modal open onClose={onClose} title="Finance verification" description={`Reference ${payment.transaction_reference ?? "—"}`} footer={<Submit pending={save.isPending} disabled={outcome !== "reconciled" && !note.trim()}>Save</Submit>}>
+    <Modal onSubmit={submit} open onClose={onClose} title="Finance verification" description={`Reference ${payment.transaction_reference ?? "—"}`} footer={<Submit pending={save.isPending} disabled={outcome !== "reconciled" && !note.trim()}>Save</Submit>}>
         <Field label="Outcome">
           <Select value={outcome} onValueChange={setOutcome}><SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="reconciled">Matches the Finance records: reconciled</SelectItem><SelectItem value="discrepancy">Discrepancy identified</SelectItem><SelectItem value="follow_up">Follow-up required</SelectItem></SelectContent></Select>
@@ -305,6 +287,5 @@ export function ReconcileDialog({ payment, onClose }: { payment: { id: string; t
         <Field label={outcome === "reconciled" ? "Verification note (optional)" : "What is outstanding"}><Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
         <p className="text-xs text-muted-foreground">A reconciled payment is final. The officer who recorded the payment cannot reconcile it.</p>
       </Modal>
-    </form>
   );
 }
