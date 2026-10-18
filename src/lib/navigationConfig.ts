@@ -112,7 +112,7 @@ export const organizationAdminNavItems: NavItem[] = [
 // Centre Manager Navigation: oversight of the whole centre; everything here is read-only except approvals
 export const centreManagerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/centre-manager-dashboard", icon: LayoutDashboard, section: "Overview" },
-  { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck },
+  { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck, section: "Overview" },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
   { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Overview" },
   { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
@@ -416,6 +416,7 @@ export const accountantNavItems: NavItem[] = [
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
   { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
+  { title: "NSFAF Funding", url: "/loan-officer-dashboard?tab=reconciliation", icon: Landmark },
   { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
   { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
   { title: "Reports", url: "/reports", icon: FileText },
