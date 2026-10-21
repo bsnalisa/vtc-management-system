@@ -1589,6 +1589,82 @@ export type Database = {
           },
         ]
       }
+      asset_requests: {
+        Row: {
+          asset_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          completion_notes: string | null
+          created_at: string
+          description: string | null
+          estimated_cost: number
+          id: string
+          kind: string
+          organization_id: string
+          requested_by: string | null
+          status: string
+          title: string
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_cost?: number
+          id?: string
+          kind: string
+          organization_id: string
+          requested_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_cost?: number
+          id?: string
+          kind?: string
+          organization_id?: string
+          requested_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_requests_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_requests_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
           active: boolean
@@ -2510,6 +2586,79 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      debtor_adjustments: {
+        Row: {
+          adjustment_type: string
+          amount: number
+          applied_at: string | null
+          applied_by: string | null
+          created_at: string
+          fee_record_id: string
+          id: string
+          organization_id: string
+          reason: string
+          requested_by: string | null
+          status: string
+          trainee_id: string
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          adjustment_type: string
+          amount: number
+          applied_at?: string | null
+          applied_by?: string | null
+          created_at?: string
+          fee_record_id: string
+          id?: string
+          organization_id: string
+          reason: string
+          requested_by?: string | null
+          status?: string
+          trainee_id: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          adjustment_type?: string
+          amount?: number
+          applied_at?: string | null
+          applied_by?: string | null
+          created_at?: string
+          fee_record_id?: string
+          id?: string
+          organization_id?: string
+          reason?: string
+          requested_by?: string | null
+          status?: string
+          trainee_id?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debtor_adjustments_fee_record_id_fkey"
+            columns: ["fee_record_id"]
+            isOneToOne: false
+            referencedRelation: "fee_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debtor_adjustments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debtor_adjustments_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -3828,6 +3977,385 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id: string
+          note: string | null
+          organization_id: string
+          record_id: string
+          status: string
+          updated_at: string
+          uploaded_by: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id?: string
+          note?: string | null
+          organization_id: string
+          record_id: string
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          note?: string | null
+          organization_id?: string
+          record_id?: string
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_documents_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "funding_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          organization_id: string
+          record_id: string
+          summary: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          organization_id: string
+          record_id: string
+          summary: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          organization_id?: string
+          record_id?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_events_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "funding_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_followups: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string
+          id: string
+          kind: string
+          organization_id: string
+          record_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          due_date: string
+          id?: string
+          kind: string
+          organization_id: string
+          record_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string
+          id?: string
+          kind?: string
+          organization_id?: string
+          record_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_followups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_followups_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "funding_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          expected_amount: number | null
+          finance_note: string | null
+          funding_period: string | null
+          id: string
+          organization_id: string
+          payment_date: string
+          payment_type: string
+          recipient: string
+          recipient_note: string | null
+          reconciled_at: string | null
+          reconciled_by: string | null
+          reconciliation_status: string
+          record_id: string
+          recorded_by: string | null
+          transaction_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          expected_amount?: number | null
+          finance_note?: string | null
+          funding_period?: string | null
+          id?: string
+          organization_id: string
+          payment_date: string
+          payment_type?: string
+          recipient?: string
+          recipient_note?: string | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reconciliation_status?: string
+          record_id: string
+          recorded_by?: string | null
+          transaction_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          expected_amount?: number | null
+          finance_note?: string | null
+          funding_period?: string | null
+          id?: string
+          organization_id?: string
+          payment_date?: string
+          payment_type?: string
+          recipient?: string
+          recipient_note?: string | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reconciliation_status?: string
+          record_id?: string
+          recorded_by?: string | null
+          transaction_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_payments_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "funding_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_records: {
+        Row: {
+          academic_year: string
+          application_status: string
+          assigned_to: string | null
+          award_conditions: string | null
+          award_decision_date: string | null
+          award_recorded_at: string | null
+          award_recorded_by: string | null
+          award_source: string | null
+          award_status: string
+          awarded_amount: number | null
+          created_at: string
+          created_by: string | null
+          eligibility_status: string
+          follow_up_due: string | null
+          funding_category: string
+          funding_period_end: string | null
+          funding_period_start: string | null
+          id: string
+          intake: string | null
+          last_nsfaf_response: string | null
+          last_nsfaf_response_at: string | null
+          next_action: string | null
+          nsfaf_reference: string | null
+          organization_id: string
+          registration_note: string | null
+          registration_status: string
+          registration_verified_at: string | null
+          registration_verified_by: string | null
+          submission_date: string | null
+          trainee_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          application_status?: string
+          assigned_to?: string | null
+          award_conditions?: string | null
+          award_decision_date?: string | null
+          award_recorded_at?: string | null
+          award_recorded_by?: string | null
+          award_source?: string | null
+          award_status?: string
+          awarded_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          eligibility_status?: string
+          follow_up_due?: string | null
+          funding_category?: string
+          funding_period_end?: string | null
+          funding_period_start?: string | null
+          id?: string
+          intake?: string | null
+          last_nsfaf_response?: string | null
+          last_nsfaf_response_at?: string | null
+          next_action?: string | null
+          nsfaf_reference?: string | null
+          organization_id: string
+          registration_note?: string | null
+          registration_status?: string
+          registration_verified_at?: string | null
+          registration_verified_by?: string | null
+          submission_date?: string | null
+          trainee_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          application_status?: string
+          assigned_to?: string | null
+          award_conditions?: string | null
+          award_decision_date?: string | null
+          award_recorded_at?: string | null
+          award_recorded_by?: string | null
+          award_source?: string | null
+          award_status?: string
+          awarded_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          eligibility_status?: string
+          follow_up_due?: string | null
+          funding_category?: string
+          funding_period_end?: string | null
+          funding_period_start?: string | null
+          id?: string
+          intake?: string | null
+          last_nsfaf_response?: string | null
+          last_nsfaf_response_at?: string | null
+          next_action?: string | null
+          nsfaf_reference?: string | null
+          organization_id?: string
+          registration_note?: string | null
+          registration_status?: string
+          registration_verified_at?: string | null
+          registration_verified_by?: string | null
+          submission_date?: string | null
+          trainee_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_records_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_records_trainee_id_fkey"
+            columns: ["trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
             referencedColumns: ["id"]
           },
         ]
@@ -5669,6 +6197,85 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          credit_account: string
+          debit_account: string
+          description: string
+          entry_date: string
+          entry_number: string
+          id: string
+          organization_id: string
+          posted_at: string | null
+          posted_by: string | null
+          reversal_of: string | null
+          status: string
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          credit_account: string
+          debit_account: string
+          description: string
+          entry_date?: string
+          entry_number: string
+          id?: string
+          organization_id: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reversal_of?: string | null
+          status?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          credit_account?: string
+          debit_account?: string
+          description?: string
+          entry_date?: string
+          entry_number?: string
+          id?: string
+          organization_id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reversal_of?: string | null
+          status?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_reversal_of_fkey"
+            columns: ["reversal_of"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_assignments: {
         Row: {
           class_id: string
@@ -7408,6 +8015,197 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_correspondence: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          direction: string
+          document_path: string | null
+          due_on: string | null
+          handling_note: string | null
+          id: string
+          item_date: string
+          organization_id: string
+          party: string
+          reference: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          direction: string
+          document_path?: string | null
+          due_on?: string | null
+          handling_note?: string | null
+          id?: string
+          item_date?: string
+          organization_id: string
+          party: string
+          reference: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          document_path?: string | null
+          due_on?: string | null
+          handling_note?: string | null
+          id?: string
+          item_date?: string
+          organization_id?: string
+          party?: string
+          reference?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_correspondence_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_meetings: {
+        Row: {
+          agenda: string | null
+          attendees: string | null
+          created_at: string
+          created_by: string | null
+          end_time: string | null
+          id: string
+          location: string | null
+          meeting_date: string
+          minutes: string | null
+          organization_id: string
+          start_time: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          attendees?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          meeting_date: string
+          minutes?: string | null
+          organization_id: string
+          start_time?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          attendees?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          meeting_date?: string
+          minutes?: string | null
+          organization_id?: string
+          start_time?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_meetings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_tasks: {
+        Row: {
+          completed_at: string | null
+          correspondence_id: string | null
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          due_on: string | null
+          id: string
+          meeting_id: string | null
+          organization_id: string
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          correspondence_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          due_on?: string | null
+          id?: string
+          meeting_id?: string | null
+          organization_id: string
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          correspondence_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          due_on?: string | null
+          id?: string
+          meeting_id?: string | null
+          organization_id?: string
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_tasks_correspondence_id_fkey"
+            columns: ["correspondence_id"]
+            isOneToOne: false
+            referencedRelation: "office_correspondence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "office_tasks_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "office_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "office_tasks_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -9685,6 +10483,32 @@ export type Database = {
           },
         ]
       }
+      reporting_lines: {
+        Row: {
+          organization_id: string
+          role: string
+          supervisor_role: string
+        }
+        Insert: {
+          organization_id: string
+          role: string
+          supervisor_role: string
+        }
+        Update: {
+          organization_id?: string
+          role?: string
+          supervisor_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reporting_lines_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       requirement_change_requests: {
         Row: {
           created_at: string
@@ -10449,6 +11273,100 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: []
+      }
+      supplier_invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          document_path: string | null
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          notes: string | null
+          organization_id: string
+          paid_at: string | null
+          paid_by: string | null
+          payment_reference: string | null
+          status: string
+          subtotal: number
+          supplier_id: string
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          document_path?: string | null
+          due_date: string
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          notes?: string | null
+          organization_id: string
+          paid_at?: string | null
+          paid_by?: string | null
+          payment_reference?: string | null
+          status?: string
+          subtotal: number
+          supplier_id: string
+          tax_amount?: number
+          total_amount: number
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          document_path?: string | null
+          due_date?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          notes?: string | null
+          organization_id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          payment_reference?: string | null
+          status?: string
+          subtotal?: number
+          supplier_id?: string
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_performance: {
         Row: {
@@ -12458,6 +13376,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_supervisors: {
+        Row: {
+          organization_id: string
+          supervisor_user_id: string
+          user_id: string
+        }
+        Insert: {
+          organization_id: string
+          supervisor_user_id: string
+          user_id: string
+        }
+        Update: {
+          organization_id?: string
+          supervisor_user_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_supervisors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vacancies: {
         Row: {
           closes_on: string | null
@@ -12677,6 +13621,41 @@ export type Database = {
           },
         ]
       }
+      workflow_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          id: string
+          instance_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          id?: string
+          instance_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          instance_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_attachments_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_definitions: {
         Row: {
           active: boolean
@@ -12776,6 +13755,39 @@ export type Database = {
           },
         ]
       }
+      workflow_escalation_limits: {
+        Row: {
+          limit_amount: number
+          organization_id: string
+          process_type: string
+        }
+        Insert: {
+          limit_amount: number
+          organization_id: string
+          process_type: string
+        }
+        Update: {
+          limit_amount?: number
+          organization_id?: string
+          process_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_escalation_limits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_escalation_limits_process_type_fkey"
+            columns: ["process_type"]
+            isOneToOne: false
+            referencedRelation: "workflow_process_types"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       workflow_events: {
         Row: {
           actor: string | null
@@ -12819,47 +13831,68 @@ export type Database = {
       }
       workflow_instances: {
         Row: {
+          amount: number | null
           completed_at: string | null
           current_step: number
           definition_id: string
+          escalated: boolean
           id: string
+          next_action: string | null
           organization_id: string
           outcome_comment: string | null
           process_type: string
+          reference: string | null
+          resubmissions: number
+          resubmitted: boolean
           started_at: string
           started_by: string | null
           status: string
           subject_id: string | null
+          submitter_role: string | null
           summary: Json
           title: string
         }
         Insert: {
+          amount?: number | null
           completed_at?: string | null
           current_step?: number
           definition_id: string
+          escalated?: boolean
           id?: string
+          next_action?: string | null
           organization_id: string
           outcome_comment?: string | null
           process_type: string
+          reference?: string | null
+          resubmissions?: number
+          resubmitted?: boolean
           started_at?: string
           started_by?: string | null
           status?: string
           subject_id?: string | null
+          submitter_role?: string | null
           summary?: Json
           title: string
         }
         Update: {
+          amount?: number | null
           completed_at?: string | null
           current_step?: number
           definition_id?: string
+          escalated?: boolean
           id?: string
+          next_action?: string | null
           organization_id?: string
           outcome_comment?: string | null
           process_type?: string
+          reference?: string | null
+          resubmissions?: number
+          resubmitted?: boolean
           started_at?: string
           started_by?: string | null
           status?: string
           subject_id?: string | null
+          submitter_role?: string | null
           summary?: Json
           title?: string
         }
@@ -12892,16 +13925,19 @@ export type Database = {
           code: string
           description: string | null
           label: string
+          requires_documents: boolean
         }
         Insert: {
           code: string
           description?: string | null
           label: string
+          requires_documents?: boolean
         }
         Update: {
           code?: string
           description?: string | null
           label?: string
+          requires_documents?: boolean
         }
         Relationships: []
       }
@@ -12936,6 +13972,7 @@ export type Database = {
           definition_id: string
           escalate_to_role: string | null
           escalate_to_user: string | null
+          higher_level: boolean
           id: string
           name: string
           sla_hours: number | null
@@ -12948,6 +13985,7 @@ export type Database = {
           definition_id: string
           escalate_to_role?: string | null
           escalate_to_user?: string | null
+          higher_level?: boolean
           id?: string
           name: string
           sla_hours?: number | null
@@ -12960,6 +13998,7 @@ export type Database = {
           definition_id?: string
           escalate_to_role?: string | null
           escalate_to_user?: string | null
+          higher_level?: boolean
           id?: string
           name?: string
           sla_hours?: number | null
@@ -13148,12 +14187,31 @@ export type Database = {
         }
         Returns: number
       }
+      add_funding_document: {
+        Args: { _id: string; _name: string; _path: string; _type: string }
+        Returns: string
+      }
+      add_funding_followup: {
+        Args: {
+          _assigned?: string
+          _description: string
+          _due: string
+          _id: string
+          _kind: string
+        }
+        Returns: string
+      }
+      add_funding_note: {
+        Args: { _id: string; _summary: string; _type: string }
+        Returns: undefined
+      }
       admin_centre_ok: {
         Args: { _org: string; _write?: boolean }
         Returns: boolean
       }
       admin_write_allowed: { Args: never; Returns: boolean }
       application_window_status: { Args: { _org_slug: string }; Returns: Json }
+      apply_debtor_adjustment: { Args: { _id: string }; Returns: undefined }
       assert_centre_access: { Args: { _org: string }; Returns: undefined }
       assert_trainee_access: { Args: { _trainee: string }; Returns: undefined }
       assessment_certification_summary: {
@@ -13273,6 +14331,7 @@ export type Database = {
       cancel_hostel_room_request: { Args: { _id: string }; Returns: undefined }
       cancel_leave: { Args: { _id: string }; Returns: undefined }
       centre_access_ok: { Args: { _org: string }; Returns: boolean }
+      centre_manager_executive: { Args: { _org?: string }; Returns: Json }
       centre_manager_overview: { Args: { _org?: string }; Returns: Json }
       certified_trainees_report: {
         Args: { _academic_year?: string }
@@ -13366,7 +14425,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      complete_asset_request: {
+        Args: { _id: string; _notes?: string }
+        Returns: undefined
+      }
       convert_public_rpl_application: { Args: { _id: string }; Returns: string }
+      create_funding_record: {
+        Args: {
+          _category?: string
+          _intake?: string
+          _trainee: string
+          _year?: string
+        }
+        Returns: string
+      }
+      create_journal_entry: {
+        Args: {
+          _amount: number
+          _credit: string
+          _date: string
+          _debit: string
+          _description: string
+        }
+        Returns: string
+      }
       create_supervisor_link: {
         Args: {
           _base_url?: string
@@ -13401,8 +14483,111 @@ export type Database = {
         Args: { _org: string }
         Returns: number
       }
+      finance_assert_role: {
+        Args: { _org: string; _roles: string[] }
+        Returns: undefined
+      }
+      finance_monthly: {
+        Args: { _months?: number }
+        Returns: {
+          expenditure: number
+          income: number
+          month: string
+        }[]
+      }
+      finance_new_request: {
+        Args: {
+          _amount: number
+          _org: string
+          _process: string
+          _subject: string
+          _summary: Json
+          _title: string
+        }
+        Returns: string
+      }
+      finance_overview: { Args: never; Returns: Json }
       forum_topic_class: { Args: { _topic: string }; Returns: string }
       forum_topic_locked: { Args: { _topic: string }; Returns: boolean }
+      funding_assert: {
+        Args: { _record: string; _roles: string[] }
+        Returns: string
+      }
+      funding_cases_base: {
+        Args: { _year?: string }
+        Returns: {
+          academic_year: string
+          amount_paid: number
+          application_status: string
+          assigned_to: string
+          attention: string[]
+          award_status: string
+          awarded_amount: number
+          eligibility_status: string
+          follow_up_due: string
+          funding_category: string
+          id: string
+          intake: string
+          level: number
+          missing_documents: string[]
+          next_action: string
+          nsfaf_reference: string
+          open_followups: number
+          organization_id: string
+          overall_status: string
+          overdue_followups: number
+          payment_status: string
+          programme: string
+          qualification: string
+          registration_status: string
+          trainee_name: string
+          trainee_number: string
+          trainee_uuid: string
+          updated_at: string
+        }[]
+      }
+      funding_coverage: { Args: { _year?: string }; Returns: Json }
+      funding_filter_options: { Args: { _year?: string }; Returns: Json }
+      funding_finance_roles: { Args: never; Returns: string[] }
+      funding_followup_list: {
+        Args: { _kind?: string; _status?: string; _year?: string }
+        Returns: Json
+      }
+      funding_log: {
+        Args: {
+          _details?: Json
+          _org: string
+          _record: string
+          _summary: string
+          _type: string
+        }
+        Returns: undefined
+      }
+      funding_overview: { Args: { _year?: string }; Returns: Json }
+      funding_payment_list: {
+        Args: { _status?: string; _year?: string }
+        Returns: Json
+      }
+      funding_read_roles: { Args: never; Returns: string[] }
+      funding_recent_activity: {
+        Args: { _limit?: number; _year?: string }
+        Returns: Json
+      }
+      funding_record_detail: { Args: { _id: string }; Returns: Json }
+      funding_register: {
+        Args: {
+          _dir?: string
+          _filters?: Json
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _sort?: string
+          _year?: string
+        }
+        Returns: Json
+      }
+      funding_required_docs: { Args: never; Returns: string[] }
+      funding_search: { Args: { _q: string; _year?: string }; Returns: Json }
       generate_application_number: { Args: never; Returns: string }
       generate_continuous_trainee_number:
         | { Args: never; Returns: string }
@@ -13812,10 +14997,60 @@ export type Database = {
       }
       notify_printing_officer: { Args: { _sitting: string }; Returns: number }
       notify_sitting_induction: { Args: { _sitting: string }; Returns: number }
+      office_add_meeting: {
+        Args: {
+          _agenda?: string
+          _attendees?: string
+          _date: string
+          _end?: string
+          _location?: string
+          _start?: string
+          _title: string
+        }
+        Returns: string
+      }
+      office_add_task: {
+        Args: {
+          _correspondence?: string
+          _detail?: string
+          _due?: string
+          _meeting?: string
+          _source?: string
+          _title: string
+        }
+        Returns: string
+      }
+      office_assert: { Args: { _org: string }; Returns: undefined }
+      office_delegation_log: { Args: never; Returns: Json }
+      office_log_correspondence: {
+        Args: {
+          _channel?: string
+          _direction: string
+          _document?: string
+          _due?: string
+          _item_date?: string
+          _party: string
+          _subject: string
+        }
+        Returns: string
+      }
+      office_set_correspondence_status: {
+        Args: { _id: string; _note?: string; _status: string }
+        Returns: undefined
+      }
+      office_set_task_status: {
+        Args: { _id: string; _status: string }
+        Returns: undefined
+      }
+      office_update_meeting: {
+        Args: { _id: string; _minutes?: string; _status: string }
+        Returns: undefined
+      }
       organization_has_module: {
         Args: { _module_code: string; _org_id: string }
         Returns: boolean
       }
+      post_journal_entry: { Args: { _id: string }; Returns: undefined }
       publish_timetable: {
         Args: { _academic_year: string; _publish?: boolean; _term: number }
         Returns: number
@@ -13832,15 +15067,83 @@ export type Database = {
         Returns: undefined
       }
       quiz_class: { Args: { _quiz: string }; Returns: string }
+      reconcile_funding_payment: {
+        Args: { _note?: string; _outcome: string; _pid: string }
+        Returns: undefined
+      }
+      record_funding_payment: {
+        Args: {
+          _amount: number
+          _date: string
+          _expected?: number
+          _id: string
+          _period?: string
+          _recipient?: string
+          _recipient_note?: string
+          _reference: string
+          _type?: string
+        }
+        Returns: string
+      }
+      record_nsfaf_decision: {
+        Args: {
+          _amount?: number
+          _conditions?: string
+          _decision: string
+          _decision_date: string
+          _end?: string
+          _id: string
+          _source: string
+          _start?: string
+        }
+        Returns: undefined
+      }
+      record_supplier_invoice: {
+        Args: {
+          _document?: string
+          _due_date: string
+          _invoice_date: string
+          _notes?: string
+          _number: string
+          _subtotal: number
+          _supplier: string
+          _tax: number
+        }
+        Returns: string
+      }
+      record_supplier_payment: {
+        Args: { _id: string; _paid_on?: string; _reference: string }
+        Returns: undefined
+      }
       reinstate_deferred_trainee: { Args: { _id: string }; Returns: undefined }
       request_application_info: {
         Args: { _application: string; _note: string }
         Returns: undefined
       }
+      request_asset_approval: {
+        Args: {
+          _asset: string
+          _cost: number
+          _description: string
+          _kind: string
+          _title: string
+        }
+        Returns: string
+      }
+      request_debtor_adjustment: {
+        Args: {
+          _amount: number
+          _fee_record: string
+          _reason: string
+          _type: string
+        }
+        Returns: string
+      }
       request_hostel_room: {
         Args: { _note?: string; _room: string }
         Returns: string
       }
+      request_invoice_payment: { Args: { _id: string }; Returns: string }
       request_leave: {
         Args: {
           _end: string
@@ -13849,6 +15152,10 @@ export type Database = {
           _start: string
         }
         Returns: string
+      }
+      resolve_funding_followup: {
+        Args: { _fid: string; _note: string }
+        Returns: undefined
       }
       respond_graduation_invitation: {
         Args: { _channel?: string; _code: number; _token: string }
@@ -13861,6 +15168,10 @@ export type Database = {
       restore_document_version: {
         Args: { _version: string }
         Returns: undefined
+      }
+      reverse_journal_entry: {
+        Args: { _id: string; _reason: string }
+        Returns: string
       }
       review_requirement_change: {
         Args: { _approve: boolean; _notes?: string; _request: string }
@@ -13880,6 +15191,8 @@ export type Database = {
         Args: { _changes: Json; _requirement: string; _type: string }
         Returns: Json
       }
+      seed_default_workflows: { Args: { _org: string }; Returns: undefined }
+      seed_reporting_lines: { Args: { _org: string }; Returns: undefined }
       seed_symbol_points_for_organization: {
         Args: { org_id: string }
         Returns: undefined
@@ -13896,6 +15209,15 @@ export type Database = {
         Args: { _base_url?: string; _ceremony: string }
         Returns: number
       }
+      send_payment_to_finance: { Args: { _pid: string }; Returns: undefined }
+      set_funding_document_status: {
+        Args: { _doc: string; _note?: string; _status: string }
+        Returns: undefined
+      }
+      set_funding_registration: {
+        Args: { _id: string; _note?: string; _status: string }
+        Returns: undefined
+      }
       set_item_completed: {
         Args: { _done?: boolean; _item: string }
         Returns: undefined
@@ -13905,6 +15227,7 @@ export type Database = {
         Returns: string
       }
       start_quiz_attempt: { Args: { _quiz: string }; Returns: Json }
+      submit_journal_entry: { Args: { _id: string }; Returns: string }
       submit_public_rpl_application: {
         Args: {
           _email: string
@@ -13963,10 +15286,39 @@ export type Database = {
         Args: { _academic_year?: string; _trainee: string }
         Returns: Json
       }
+      update_funding_application: {
+        Args: {
+          _assigned?: string
+          _category?: string
+          _due?: string
+          _eligibility?: string
+          _id: string
+          _intake?: string
+          _next_action?: string
+          _reference?: string
+          _response?: string
+          _response_on?: string
+          _status?: string
+          _submitted_on?: string
+        }
+        Returns: undefined
+      }
+      update_supplier_invoice: {
+        Args: {
+          _document: string
+          _due_date: string
+          _id: string
+          _notes: string
+          _subtotal: number
+          _tax: number
+        }
+        Returns: undefined
+      }
       user_visible_to_my_centres: {
         Args: { _user_id: string }
         Returns: boolean
       }
+      verify_supplier_invoice: { Args: { _id: string }; Returns: undefined }
       workflow_act: {
         Args: { _action: string; _comment?: string; _task: string }
         Returns: string
@@ -13993,6 +15345,15 @@ export type Database = {
         Args: { _comment: string; _instance: string; _outcome: string }
         Returns: undefined
       }
+      workflow_available_processes: {
+        Args: never
+        Returns: {
+          code: string
+          description: string
+          label: string
+          requires_documents: boolean
+        }[]
+      }
       workflow_can_act: {
         Args: { _task: string; _user_id: string }
         Returns: boolean
@@ -14015,7 +15376,21 @@ export type Database = {
         }
         Returns: undefined
       }
+      workflow_create_request: {
+        Args: {
+          _description: string
+          _draft?: string
+          _process: string
+          _submit?: boolean
+          _title: string
+        }
+        Returns: string
+      }
       workflow_escalate_overdue: { Args: { _org: string }; Returns: number }
+      workflow_finish_internal: {
+        Args: { _actor: string; _comment: string; _instance: string }
+        Returns: undefined
+      }
       workflow_get_task_by_token: { Args: { _token: string }; Returns: Json }
       workflow_list_users: {
         Args: never
@@ -14036,18 +15411,26 @@ export type Database = {
         }
         Returns: undefined
       }
+      workflow_mark_completed: {
+        Args: { _comment?: string; _instance: string }
+        Returns: undefined
+      }
       workflow_my_tasks: {
         Args: never
         Returns: {
+          can_escalate: boolean
           delegated: boolean
           due_at: string
           escalated: boolean
           instance_id: string
+          next_action: string
           process_type: string
+          reference: string
           requested_by: string
           started_at: string
           step_name: string
           step_no: number
+          submitter_role: string
           summary: Json
           task_id: string
           title: string
@@ -14080,6 +15463,7 @@ export type Database = {
         Args: { _instance: string; _step_no: number }
         Returns: string
       }
+      workflow_people_names: { Args: { _ids: string[] }; Returns: string }
       workflow_provide_info: {
         Args: { _comment: string; _instance: string }
         Returns: undefined
@@ -14112,7 +15496,20 @@ export type Database = {
         Args: { _description: string; _title: string }
         Returns: string
       }
+      workflow_submit: { Args: { _instance: string }; Returns: undefined }
+      workflow_submitter_role: {
+        Args: { _org: string; _user: string }
+        Returns: string
+      }
       workflow_summary_text: { Args: { _summary: Json }; Returns: string }
+      workflow_supervisor_level: {
+        Args: { _level: number; _org: string; _user: string }
+        Returns: string[]
+      }
+      workflow_supervisors_of: {
+        Args: { _org: string; _user: string }
+        Returns: string[]
+      }
     }
     Enums: {
       account_provisioning_status:
@@ -14153,6 +15550,11 @@ export type Database = {
         | "subject_matter_expert"
         | "printing_distribution_officer"
         | "centre_manager"
+        | "accountant"
+        | "head_of_finance_admin"
+        | "creditors_officer"
+        | "loan_officer"
+        | "pa_to_centre_manager"
       approval_action: "submitted" | "approved" | "rejected" | "returned"
       asset_condition: "excellent" | "good" | "fair" | "poor" | "needs_repair"
       asset_status:
@@ -14376,6 +15778,11 @@ export const Constants = {
         "subject_matter_expert",
         "printing_distribution_officer",
         "centre_manager",
+        "accountant",
+        "head_of_finance_admin",
+        "creditors_officer",
+        "loan_officer",
+        "pa_to_centre_manager",
       ],
       approval_action: ["submitted", "approved", "rejected", "returned"],
       asset_condition: ["excellent", "good", "fair", "poor", "needs_repair"],
