@@ -1,0 +1,20 @@
+const {session,BASE}=require('./lib.js');
+(async()=>{
+ const log=(...a)=>console.log(...a);
+ const {b,p}=await session('debtor_officer');
+ p.on('pageerror',e=>log('PAGEERROR',e.message));
+ p.on('response',async r=>{const u=r.url();if(u.includes('clear-application-fee')||(r.status()>=400&&u.includes('supabase')))log('HTTP',r.status(),u.split('/').slice(-2).join('/'),(await r.text().catch(()=>'')).slice(0,300))});
+ await p.goto(BASE+'/debtors/application-fees',{waitUntil:'networkidle'});await p.waitForTimeout(2000);
+ const card=p.locator('div:has(> div button:has-text("Clear Payment"))').filter({hasText:'Shilongo'}).first();
+ await p.locator('button:has-text("Clear Payment")').first().click().catch(e=>log('no button',e.message));
+ await p.waitForTimeout(800);
+ const dlg=p.locator('[role=dialog]');
+ log('dialog:',(await dlg.innerText()).replace(/\s+/g,' ').slice(0,250));
+ await dlg.locator('input').first().fill('100');
+ await p.screenshot({path:'fee_dlg.png'});
+ await dlg.locator('button:has-text("Confirm")').click();
+ await p.waitForTimeout(6000);
+ await p.screenshot({path:'fee_after.png'});
+ log('toast:',(await p.locator('[role=status],li[data-state=open]').allInnerTexts()).join(' | ').slice(0,300));
+ await b.close();
+})();
