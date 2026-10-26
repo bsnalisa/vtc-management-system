@@ -73,6 +73,9 @@ select public.assert((select count(*) from trainees where national_id = 'DIFFERE
 -- no usable identifier: manual verification, never an automatic identity
 select public.assert((select (public.identity_resolve('No','Document','2002-01-01','N/A', 'a0000000-0000-0000-0000-00000000000a', null))->>'code') = 'MANUAL_VERIFICATION_REQUIRED', 'no usable document number needs manual verification');
 
+-- the source registration has a system email (the trigger regenerates a cleared one, which must not collide at the destination)
+update trainees set system_email = 'tessa.transfer@nvtc.example' where id = :'tess_row';
+
 -- ===== direct writes are refused =====
 set role authenticated; select set_config('request.jwt.claim.sub', :'regA', false);
 select public.expect_error($$insert into trainee_transfers (reference, identity_id, source_trainee_id, source_org, destination_org, requested_by, reason, status) values ('X', gen_random_uuid(), gen_random_uuid(), 'a0000000-0000-0000-0000-00000000000a','b0000000-0000-0000-0000-00000000000b', gen_random_uuid(), 'a long enough reason', 'APPROVED')$$, 'permission denied|row-level security', 'transfers cannot be written directly');
@@ -124,6 +127,7 @@ select public.assert((select status from trainees where id = :'tess_row') = 'tra
 select public.assert((select count(*) from trainees where identity_id = :'tess_ident' and status = 'active' and organization_id = :'orgB') = 1, 'one active registration at the destination');
 select public.assert((select trainee_id from trainees where identity_id = :'tess_ident' and organization_id = :'orgB') = :'tess_no', 'the number is unchanged');
 select public.assert((select user_id from trainees where identity_id = :'tess_ident' and organization_id = :'orgB') = :'trU', 'the login moved with the trainee');
+select public.assert((select system_email from trainees where identity_id = :'tess_ident' and organization_id = :'orgB') = 'tessa.transfer@nvtc.example' and (select system_email from trainees where id = :'tess_row') like 'transferred-%@archived.invalid', 'the address moves to the destination and the closed record keeps an archived one');
 select public.assert(exists (select 1 from user_roles where user_id = :'trU' and role = 'trainee' and organization_id = :'orgB') and not exists (select 1 from user_roles where user_id = :'trU' and role = 'trainee' and organization_id = :'orgA'), 'the trainee role follows the registration');
 select public.assert((select count(*) from trainees where identity_id = :'tess_ident') = 2 and (select count(distinct identity_id) from trainees where national_id = 'NAT-TR-0001') = 1, 'one person, two registration records');
 select public.assert((public.execute_transfer(:'tid')::jsonb->>'already_completed')::boolean, 'executing again does nothing');
