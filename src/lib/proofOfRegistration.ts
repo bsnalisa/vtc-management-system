@@ -57,7 +57,7 @@ export const PROOF_CSS = `
   .foot .cn { font-weight: bold; color: var(--primary); font-size: 8.5pt; }
   .foot p { margin: 0 0 1px; }
   .foot .gap { height: 4mm; }
-  .spacer { height: 32mm; }
+  .spacer { height: 28mm; }
   @media print { .foot { position: fixed; left: 0; right: 0; bottom: 0; } }
   @media screen { .spacer { display: none; } }
   h1 { font-size: 20pt; margin: 0; color: var(--primary); letter-spacing: .3px; padding-bottom: 2mm; border-bottom: 1.5pt solid var(--accent); }
@@ -85,10 +85,10 @@ export const PROOF_CSS = `
   .box.ok { background: #2e7d32; } .box.ok .l, .box.ok .v { color: #fff; }
   p.enq { text-align: justify; margin: 0 0 6mm; }
   .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; align-items: end; break-inside: avoid; margin-top: 4mm; }
-  .sign .sig { height: 18mm; display: flex; align-items: flex-end; } .sign .sig img { max-height: 17mm; max-width: 60mm; }
+  .sign .sig { height: 14mm; display: flex; align-items: flex-end; } .sign .sig img { max-height: 13mm; max-width: 60mm; }
   .sign .line { border-top: 1px solid #000; padding-top: 1mm; }
   .stamp { border: 1px dashed #999; height: 32mm; display: flex; align-items: center; justify-content: center; color: #8a8a8a; font-size: 8pt; text-transform: uppercase; letter-spacing: .6px; }
-  .fine { font-size: 7.5pt; color: #595959; font-style: italic; margin-top: 5mm; }
+  .fine { font-size: 7.5pt; color: #595959; font-style: italic; margin-top: 2mm; }
   .samplebanner { color: #c00000; font-weight: bold; font-size: 7.5pt; margin: 0 0 3mm; }
   .sample { position: fixed; top: 38%; left: 0; right: 0; text-align: center; font-size: 80pt; font-weight: bold; color: rgba(150,150,150,.18); transform: rotate(-24deg); pointer-events: none; letter-spacing: 8px; }
 `;
