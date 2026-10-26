@@ -5726,6 +5726,143 @@ export type Database = {
           },
         ]
       }
+      identity_audit_events: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          identity_id: string | null
+          organization_id: string | null
+          outcome: string
+          reason: string | null
+          trainee_id: string | null
+          transfer_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          identity_id?: string | null
+          organization_id?: string | null
+          outcome?: string
+          reason?: string | null
+          trainee_id?: string | null
+          transfer_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          identity_id?: string | null
+          organization_id?: string | null
+          outcome?: string
+          reason?: string | null
+          trainee_id?: string | null
+          transfer_id?: string | null
+        }
+        Relationships: []
+      }
+      identity_migration_report: {
+        Row: {
+          generated_at: string
+          id: string
+          report: Json
+        }
+        Insert: {
+          generated_at?: string
+          id?: string
+          report: Json
+        }
+        Update: {
+          generated_at?: string
+          id?: string
+          report?: Json
+        }
+        Relationships: []
+      }
+      identity_review_cases: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          identity_a: string | null
+          identity_b: string | null
+          kind: string
+          organization_id: string | null
+          resolution_reason: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          identity_a?: string | null
+          identity_b?: string | null
+          kind: string
+          organization_id?: string | null
+          resolution_reason?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          identity_a?: string | null
+          identity_b?: string | null
+          kind?: string
+          organization_id?: string | null
+          resolution_reason?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_review_cases_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "identity_review_cases_identity_a_fkey"
+            columns: ["identity_a"]
+            isOneToOne: false
+            referencedRelation: "trainee_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "identity_review_cases_identity_b_fkey"
+            columns: ["identity_b"]
+            isOneToOne: false
+            referencedRelation: "trainee_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "identity_review_cases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interlibrary_loans: {
         Row: {
           author: string | null
@@ -9284,6 +9421,143 @@ export type Database = {
           },
         ]
       }
+      proof_of_registration_prints: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          organization_id: string
+          registration_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          registration_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          registration_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proof_of_registration_prints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proof_of_registration_prints_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proof_of_registration_settings: {
+        Row: {
+          accent_color: string
+          centre_name: string | null
+          clerk_email: string | null
+          clerk_name: string | null
+          clerk_phone: string | null
+          clerk_role_label: string
+          clerk_title: string | null
+          correspondence_note: string
+          currency_label: string
+          email: string | null
+          fax: string | null
+          footer_disclaimer: string
+          logo_url: string | null
+          organization_id: string
+          physical_address: string | null
+          postal_address: string | null
+          primary_color: string
+          signatory_job_title: string
+          signatory_name: string | null
+          signatory_title: string | null
+          signature_url: string | null
+          stamp_label: string
+          telephone: string | null
+          updated_at: string
+          updated_by: string | null
+          website: string | null
+        }
+        Insert: {
+          accent_color?: string
+          centre_name?: string | null
+          clerk_email?: string | null
+          clerk_name?: string | null
+          clerk_phone?: string | null
+          clerk_role_label?: string
+          clerk_title?: string | null
+          correspondence_note?: string
+          currency_label?: string
+          email?: string | null
+          fax?: string | null
+          footer_disclaimer?: string
+          logo_url?: string | null
+          organization_id: string
+          physical_address?: string | null
+          postal_address?: string | null
+          primary_color?: string
+          signatory_job_title?: string
+          signatory_name?: string | null
+          signatory_title?: string | null
+          signature_url?: string | null
+          stamp_label?: string
+          telephone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website?: string | null
+        }
+        Update: {
+          accent_color?: string
+          centre_name?: string | null
+          clerk_email?: string | null
+          clerk_name?: string | null
+          clerk_phone?: string | null
+          clerk_role_label?: string
+          clerk_title?: string | null
+          correspondence_note?: string
+          currency_label?: string
+          email?: string | null
+          fax?: string | null
+          footer_disclaimer?: string
+          logo_url?: string | null
+          organization_id?: string
+          physical_address?: string | null
+          postal_address?: string | null
+          primary_color?: string
+          signatory_job_title?: string
+          signatory_name?: string | null
+          signatory_title?: string | null
+          signature_url?: string | null
+          stamp_label?: string
+          telephone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proof_of_registration_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proof_of_registrations: {
         Row: {
           academic_year: string
@@ -12680,6 +12954,243 @@ export type Database = {
           },
         ]
       }
+      trainee_identities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          first_name: string | null
+          first_registration_year: number
+          first_year_source: string
+          id: string
+          identity_verified: boolean
+          last_name: string | null
+          merged_into: string | null
+          national_id_normalised: string | null
+          number_format: string
+          status: string
+          trainee_number: string
+          updated_at: string
+          verification_method: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          first_name?: string | null
+          first_registration_year: number
+          first_year_source?: string
+          id?: string
+          identity_verified?: boolean
+          last_name?: string | null
+          merged_into?: string | null
+          national_id_normalised?: string | null
+          number_format: string
+          status?: string
+          trainee_number: string
+          updated_at?: string
+          verification_method?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          first_name?: string | null
+          first_registration_year?: number
+          first_year_source?: string
+          id?: string
+          identity_verified?: boolean
+          last_name?: string | null
+          merged_into?: string | null
+          national_id_normalised?: string | null
+          number_format?: string
+          status?: string
+          trainee_number?: string
+          updated_at?: string
+          verification_method?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainee_identities_merged_into_fkey"
+            columns: ["merged_into"]
+            isOneToOne: false
+            referencedRelation: "trainee_identities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainee_number_ledger: {
+        Row: {
+          identity_id: string
+          issued_at: string
+          kind: string
+          number: string
+          reason: string | null
+          retired_at: string | null
+        }
+        Insert: {
+          identity_id: string
+          issued_at?: string
+          kind: string
+          number: string
+          reason?: string | null
+          retired_at?: string | null
+        }
+        Update: {
+          identity_id?: string
+          issued_at?: string
+          kind?: string
+          number?: string
+          reason?: string | null
+          retired_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainee_number_ledger_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_identities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainee_transfers: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          destination_org: string
+          destination_trainee_id: string | null
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          identity_id: string
+          reason: string
+          reference: string
+          requested_by: string
+          source_org: string
+          source_trainee_id: string
+          status: string
+          support_comment: string | null
+          support_decided_at: string | null
+          support_decided_by: string | null
+          support_decided_role: string | null
+          support_decision: string | null
+          training_comment: string | null
+          training_decided_at: string | null
+          training_decided_by: string | null
+          training_decided_role: string | null
+          training_decision: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          destination_org: string
+          destination_trainee_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          identity_id: string
+          reason: string
+          reference: string
+          requested_by: string
+          source_org: string
+          source_trainee_id: string
+          status?: string
+          support_comment?: string | null
+          support_decided_at?: string | null
+          support_decided_by?: string | null
+          support_decided_role?: string | null
+          support_decision?: string | null
+          training_comment?: string | null
+          training_decided_at?: string | null
+          training_decided_by?: string | null
+          training_decided_role?: string | null
+          training_decision?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          destination_org?: string
+          destination_trainee_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          identity_id?: string
+          reason?: string
+          reference?: string
+          requested_by?: string
+          source_org?: string
+          source_trainee_id?: string
+          status?: string
+          support_comment?: string | null
+          support_decided_at?: string | null
+          support_decided_by?: string | null
+          support_decided_role?: string | null
+          support_decision?: string | null
+          training_comment?: string | null
+          training_decided_at?: string | null
+          training_decided_by?: string | null
+          training_decided_role?: string | null
+          training_decision?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainee_transfers_destination_org_fkey"
+            columns: ["destination_org"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_transfers_destination_trainee_id_fkey"
+            columns: ["destination_trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_transfers_destination_trainee_id_fkey"
+            columns: ["destination_trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_transfers_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_transfers_source_org_fkey"
+            columns: ["source_org"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_transfers_source_trainee_id_fkey"
+            columns: ["source_trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_login_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainee_transfers_source_trainee_id_fkey"
+            columns: ["source_trainee_id"]
+            isOneToOne: false
+            referencedRelation: "trainees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainee_update_requests: {
         Row: {
           approval_notes: string | null
@@ -12757,6 +13268,8 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           has_pending_update: boolean | null
           id: string
+          identity_conflict: boolean
+          identity_id: string
           is_email_system_generated: boolean | null
           last_name: string
           level: number
@@ -12789,6 +13302,8 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           has_pending_update?: boolean | null
           id?: string
+          identity_conflict?: boolean
+          identity_id: string
           is_email_system_generated?: boolean | null
           last_name: string
           level: number
@@ -12821,6 +13336,8 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"]
           has_pending_update?: boolean | null
           id?: string
+          identity_conflict?: boolean
+          identity_id?: string
           is_email_system_generated?: boolean | null
           last_name?: string
           level?: number
@@ -12838,6 +13355,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trainees_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "trainee_identities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trainees_organization_id_fkey"
             columns: ["organization_id"]
@@ -14210,6 +14734,10 @@ export type Database = {
         Returns: boolean
       }
       admin_write_allowed: { Args: never; Returns: boolean }
+      allocate_trainee_identity: {
+        Args: { _application: string }
+        Returns: Json
+      }
       application_window_status: { Args: { _org_slug: string }; Returns: Json }
       apply_debtor_adjustment: { Args: { _id: string }; Returns: undefined }
       assert_centre_access: { Args: { _org: string }; Returns: undefined }
@@ -14330,6 +14858,7 @@ export type Database = {
       }
       cancel_hostel_room_request: { Args: { _id: string }; Returns: undefined }
       cancel_leave: { Args: { _id: string }; Returns: undefined }
+      cancel_transfer: { Args: { _id: string }; Returns: undefined }
       centre_access_ok: { Args: { _org: string }; Returns: boolean }
       centre_manager_executive: { Args: { _org?: string }; Returns: Json }
       centre_manager_overview: { Args: { _org?: string }; Returns: Json }
@@ -14351,6 +14880,10 @@ export type Database = {
       check_organization_limit: {
         Args: { _current_count: number; _limit_type: string; _org_id: string }
         Returns: boolean
+      }
+      check_registration_eligibility: {
+        Args: { _identity: string; _org: string }
+        Returns: Json
       }
       check_subscription_expiry: {
         Args: never
@@ -14430,6 +14963,10 @@ export type Database = {
         Returns: undefined
       }
       convert_public_rpl_application: { Args: { _id: string }; Returns: string }
+      copy_proof_settings: {
+        Args: { _from: string; _to: string }
+        Returns: undefined
+      }
       create_funding_record: {
         Args: {
           _category?: string
@@ -14470,7 +15007,12 @@ export type Database = {
         Args: { _approve: boolean; _id: string; _notes?: string }
         Returns: string
       }
+      decide_transfer: {
+        Args: { _comment?: string; _decision: string; _id: string }
+        Returns: Json
+      }
       end_admin_override: { Args: never; Returns: undefined }
+      execute_transfer: { Args: { _id: string }; Returns: Json }
       expire_trial_packages: {
         Args: never
         Returns: {
@@ -14730,6 +15272,68 @@ export type Database = {
           user_id: string
         }[]
       }
+      identity_actor_role: { Args: never; Returns: string }
+      identity_create: {
+        Args: {
+          _created_for?: string
+          _dob: string
+          _first: string
+          _last: string
+          _method: string
+          _norm: string
+          _verified: boolean
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          first_name: string | null
+          first_registration_year: number
+          first_year_source: string
+          id: string
+          identity_verified: boolean
+          last_name: string | null
+          merged_into: string | null
+          national_id_normalised: string | null
+          number_format: string
+          status: string
+          trainee_number: string
+          updated_at: string
+          verification_method: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trainee_identities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      identity_log: {
+        Args: {
+          _details?: Json
+          _event: string
+          _identity: string
+          _org: string
+          _outcome: string
+          _reason: string
+          _trainee: string
+          _transfer: string
+        }
+        Returns: undefined
+      }
+      identity_resolve: {
+        Args: {
+          _application?: string
+          _dob: string
+          _first: string
+          _last: string
+          _national: string
+          _org: string
+        }
+        Returns: Json
+      }
+      identity_review_queue: { Args: never; Returns: Json }
+      identity_visible: { Args: { _identity: string }; Returns: boolean }
       invoke_message_dispatcher: { Args: never; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_assessment_staff: {
@@ -14761,6 +15365,7 @@ export type Database = {
         Args: { _org: string; _user_id: string }
         Returns: boolean
       }
+      is_identity_admin: { Args: never; Returns: boolean }
       is_job_runner: { Args: never; Returns: boolean }
       is_liaison_staff: {
         Args: { _org: string; _user_id: string }
@@ -14912,6 +15517,10 @@ export type Database = {
         }
         Returns: string
       }
+      log_proof_print: {
+        Args: { _action: string; _registration: string }
+        Returns: undefined
+      }
       log_provisioning_attempt: {
         Args: {
           _application_id: string
@@ -14958,6 +15567,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      merge_identities: {
+        Args: { _from: string; _into: string; _reason: string }
+        Returns: Json
+      }
       my_centre_ids: { Args: never; Returns: string[] }
       my_learning_classes: {
         Args: never
@@ -14983,6 +15596,8 @@ export type Database = {
         }[]
       }
       my_statement_of_results: { Args: never; Returns: Json }
+      my_transfer_overview: { Args: never; Returns: Json }
+      normalise_national_id: { Args: { _id: string }; Returns: string }
       notify_person: {
         Args: {
           _email: string
@@ -15046,11 +15661,28 @@ export type Database = {
         Args: { _id: string; _minutes?: string; _status: string }
         Returns: undefined
       }
+      org_role_users: {
+        Args: { _org: string; _roles: string[] }
+        Returns: string[]
+      }
       organization_has_module: {
         Args: { _module_code: string; _org_id: string }
         Returns: boolean
       }
       post_journal_entry: { Args: { _id: string }; Returns: undefined }
+      proof_of_registration_data: {
+        Args: { _registration: string }
+        Returns: Json
+      }
+      proof_settings_can_edit: { Args: { _org: string }; Returns: boolean }
+      proof_settings_complete: {
+        Args: {
+          s: Database["public"]["Tables"]["proof_of_registration_settings"]["Row"]
+        }
+        Returns: boolean
+      }
+      proof_settings_get: { Args: { _org: string }; Returns: Json }
+      proof_settings_overview: { Args: never; Returns: Json }
       publish_timetable: {
         Args: { _academic_year: string; _publish?: boolean; _term: number }
         Returns: number
@@ -15115,7 +15747,16 @@ export type Database = {
         Args: { _id: string; _paid_on?: string; _reference: string }
         Returns: undefined
       }
+      registration_eligibility: {
+        Args: { _identity: string; _org: string }
+        Returns: Json
+      }
+      registration_is_active: { Args: { _status: string }; Returns: boolean }
       reinstate_deferred_trainee: { Args: { _id: string }; Returns: undefined }
+      remap_legacy_identity: {
+        Args: { _identity: string; _reason: string }
+        Returns: Json
+      }
       request_application_info: {
         Args: { _application: string; _note: string }
         Returns: undefined
@@ -15157,6 +15798,10 @@ export type Database = {
         Args: { _fid: string; _note: string }
         Returns: undefined
       }
+      resolve_identity_review: {
+        Args: { _case: string; _decision: string; _reason: string }
+        Returns: undefined
+      }
       respond_graduation_invitation: {
         Args: { _channel?: string; _code: number; _token: string }
         Returns: boolean
@@ -15169,6 +15814,7 @@ export type Database = {
         Args: { _version: string }
         Returns: undefined
       }
+      retry_transfer: { Args: { _id: string }; Returns: Json }
       reverse_journal_entry: {
         Args: { _id: string; _reason: string }
         Returns: string
@@ -15191,6 +15837,11 @@ export type Database = {
         Args: { _changes: Json; _requirement: string; _type: string }
         Returns: Json
       }
+      save_proof_settings: {
+        Args: { _org: string; _s: Json }
+        Returns: undefined
+      }
+      secure_digits5: { Args: never; Returns: string }
       seed_default_workflows: { Args: { _org: string }; Returns: undefined }
       seed_reporting_lines: { Args: { _org: string }; Returns: undefined }
       seed_symbol_points_for_organization: {
@@ -15263,6 +15914,10 @@ export type Database = {
         Args: { _answers: Json; _token: string }
         Returns: boolean
       }
+      submit_transfer_request: {
+        Args: { _destination: string; _reason: string }
+        Returns: Json
+      }
       supervisor_sign_entries: {
         Args: {
           _comment?: string
@@ -15282,8 +15937,28 @@ export type Database = {
         Args: { _academic_year: string; _trainee_id: string }
         Returns: boolean
       }
+      trainee_identity_summary: { Args: { _trainee: string }; Returns: Json }
+      trainee_number_capacity: { Args: never; Returns: Json }
       transcript_data: {
         Args: { _academic_year?: string; _trainee: string }
+        Returns: Json
+      }
+      transfer_destinations: { Args: never; Returns: Json }
+      transfer_history: { Args: { _id: string }; Returns: Json }
+      transfer_notify: {
+        Args: {
+          _event: string
+          _link?: string
+          _message: string
+          _org: string
+          _title: string
+          _user: string
+        }
+        Returns: undefined
+      }
+      transfer_queue: { Args: never; Returns: Json }
+      transfer_row_json: {
+        Args: { tr: Database["public"]["Tables"]["trainee_transfers"]["Row"] }
         Returns: Json
       }
       update_funding_application: {
@@ -15605,6 +16280,7 @@ export type Database = {
         | "deferred"
         | "withdrawn"
         | "archived"
+        | "transferred"
       training_mode:
         | "fulltime"
         | "bdl"
@@ -15839,6 +16515,7 @@ export const Constants = {
         "deferred",
         "withdrawn",
         "archived",
+        "transferred",
       ],
       training_mode: [
         "fulltime",
