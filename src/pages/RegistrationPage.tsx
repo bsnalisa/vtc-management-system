@@ -1,3 +1,4 @@
+import { PrintProofButton } from "@/components/registration/ProofOfRegistration";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Banknote, CheckCircle2, Circle, ClipboardCheck, GraduationCap, UserCheck } from "lucide-react";
@@ -135,6 +136,7 @@ const RegistrationPage = () => {
                 <>
                   <p className="flex items-center gap-2"><UserCheck className="h-4 w-4 text-primary" />{app.first_name} {app.last_name} is a registered trainee ({app.trainee_number}).</p>
                   {data!.traineeId && <Button variant="outline" onClick={() => navigate(`/trainees/${data!.traineeId}`)}><GraduationCap className="mr-2 h-4 w-4" />Open the trainee record</Button>}
+                  {data!.traineeId && <PrintProofButton traineeId={data!.traineeId} variant="outline" size="default" />}
                 </>
               ) : <p className="text-muted-foreground">Once the registration fee is cleared the applicant becomes a registered trainee and can sign in to the trainee portal.</p>}
             </Step>

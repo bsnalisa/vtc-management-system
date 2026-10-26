@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useOrganizationContext } from "./useOrganizationContext";
 import { printHtml } from "@/lib/printDocument";
 import {
-  ProofOfRegistration, ResultsGroup, StatementTransaction, accountStatementHtml, proofOfRegistrationHtml, resultsTitle, statementOfResultsHtml,
+  ResultsGroup, StatementTransaction, accountStatementHtml, resultsTitle, statementOfResultsHtml,
 } from "@/lib/traineeDocuments";
 
 // The functions below are newer than the generated Supabase types, so call them untyped.
@@ -44,13 +44,6 @@ export function useTraineeDocumentActions() {
 
   return {
     busy,
-    printProof: (registrationId: string) =>
-      run("proof", async () => {
-        const { data, error } = await db.rpc("issue_proof_of_registration", { _registration: registrationId });
-        if (error) throw new Error(error.message);
-        printHtml("Proof of Registration", proofOfRegistrationHtml(data as ProofOfRegistration), org);
-      }),
-
     printResults: () =>
       run("results", async () => {
         const { data, error } = await db.rpc("my_statement_of_results");

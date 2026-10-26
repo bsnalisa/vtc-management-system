@@ -62,11 +62,8 @@ export function buildDocument(
   <footer>Printed ${esc(new Date().toLocaleString())}</footer></body></html>`;
 }
 
-export function printHtml(
-  title: string,
-  bodyHtml: string,
-  org: { name?: string | null; logoUrl?: string | null; subtitle?: string | null } = {},
-): void {
+/** Prints a complete HTML document (its own <html>, styles and @page rules) through a hidden iframe. */
+export function printRawDocument(fullHtml: string): void {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
@@ -78,7 +75,7 @@ export function printHtml(
     throw new Error("Could not open the print view");
   }
   doc.open();
-  doc.write(buildDocument(title, bodyHtml, org));
+  doc.write(fullHtml);
   doc.close();
 
   let done = false;
@@ -99,4 +96,12 @@ export function printHtml(
     imgs.filter((i) => !i.complete).forEach((i) => { i.onload = one; i.onerror = one; });
     setTimeout(go, 2000);
   }
+}
+
+export function printHtml(
+  title: string,
+  bodyHtml: string,
+  org: { name?: string | null; logoUrl?: string | null; subtitle?: string | null } = {},
+): void {
+  printRawDocument(buildDocument(title, bodyHtml, org));
 }

@@ -1,3 +1,4 @@
+import { PrintProofButton } from "@/components/registration/ProofOfRegistration";
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -130,6 +131,7 @@ const TraineeDetail = () => {
             <p className="text-lg font-semibold">{trainee.first_name} {trainee.last_name}</p>
             <p className="text-sm text-muted-foreground">{trainee.trainee_id}</p>
           </div>
+          <div className="ml-auto"><PrintProofButton traineeId={trainee.id} /></div>
         </div>
 
         {trainee.has_pending_update && (
