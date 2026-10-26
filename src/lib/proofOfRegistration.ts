@@ -88,6 +88,7 @@ export const PROOF_CSS = `
   .sign .sig { height: 14mm; display: flex; align-items: flex-end; } .sign .sig img { max-height: 13mm; max-width: 60mm; }
   .sign .line { border-top: 1px solid #000; padding-top: 1mm; }
   .stamp { border: 1px dashed #999; height: 32mm; display: flex; align-items: center; justify-content: center; color: #8a8a8a; font-size: 8pt; text-transform: uppercase; letter-spacing: .6px; }
+  .closing { break-inside: avoid; page-break-inside: avoid; }
   .fine { font-size: 7.5pt; color: #595959; font-style: italic; margin-top: 2mm; }
   .samplebanner { color: #c00000; font-weight: bold; font-size: 7.5pt; margin: 0 0 3mm; }
   .sample { position: fixed; top: 38%; left: 0; right: 0; text-align: center; font-size: 80pt; font-weight: bold; color: rgba(150,150,150,.18); transform: rotate(-24deg); pointer-events: none; letter-spacing: 8px; }
@@ -155,10 +156,10 @@ export function proofDocumentHtml(d: ProofData, opts: { sample?: boolean; now?: 
     ? `Should you have any enquiries, please do not hesitate to contact ${esc(clerkName)}, the ${esc(s.clerk_role_label)}, at: (T) ${esc(s.clerk_phone || s.telephone || "")}${(s.clerk_email || s.email) ? `, or email at ${esc(s.clerk_email || s.email)}` : ""}`
     : `Should you have any enquiries, please do not hesitate to contact the centre at: (T) ${esc(s.telephone ?? "")}${s.email ? `, or email at ${esc(s.email)}` : ""}`;
   const sig = safeUrl(s.signature_url);
-  const sign = `<p class="enq">${enquiries}</p>
+  const sign = `<div class="closing"><p class="enq">${enquiries}</p>
     <div class="sign"><div><div>Sincerely,</div><div class="sig">${sig ? `<img src="${esc(sig)}" alt="">` : ""}</div><div class="line">${esc(line(s.signatory_title, s.signatory_name))}<br><b>${esc(s.signatory_job_title)}</b></div></div>
     <div class="stamp">${esc(s.stamp_label)}</div></div>
-    <div class="fine">${esc(s.footer_disclaimer)}</div>`;
+    <div class="fine">${esc(s.footer_disclaimer)}</div></div>`;
 
   const body = `${opts.sample ? '<div class="samplebanner">SAMPLE FOR DEMONSTRATION ONLY – all trainee, reference and fee details are illustrative. Not an official document.</div>' : ""}<h1>PROOF OF REGISTRATION</h1>
     <div class="sub">Academic Year ${esc(d.academic_year)} &nbsp;|&nbsp; Date issued: ${esc(longDate(now))}${d.reference_number ? ` &nbsp;|&nbsp; Reference: ${esc(d.reference_number)}` : ""}</div>${trainee}${units}${fees}${boxes}${sign}`;
