@@ -1,5 +1,8 @@
 # VTC Management System - Production Deployment Guide
 
+> **Note:** production is published through Lovable (the app) and by applying `supabase/migrations` to the project database. The Vercel and edge-function GitHub workflow described below (`.github/workflows/deploy.yml`) was removed because it never ran successfully and is not how this system ships. CI is `.github/workflows/test.yml` (type-check, build, and the SQL tests).
+
+
 ## Overview
 
 This guide covers deploying the VTC Management System to production with:
