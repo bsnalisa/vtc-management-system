@@ -1,4 +1,5 @@
 \set ON_ERROR_STOP on
+select set_config('app.legacy_import', 'on', false);
 \set admin '11111111-0000-0000-0000-000000000001'
 \set lib '11111111-0000-0000-0000-000000000002'
 \set tr1 '11111111-0000-0000-0000-000000000003'
@@ -7,15 +8,17 @@
 \set orgA 'a0000000-0000-0000-0000-00000000000a'
 \set orgB 'b0000000-0000-0000-0000-00000000000b'
 
--- ===== 1.6 trainee number =====
-select public.assert(public.generate_trainee_number(:'orgA') ~ '^062-[0-9]{2}-[0-9]{5}$', 'trainee number format 062-YY-NNNNN');
-select public.assert(public.generate_trainee_number(:'orgB') ~ '^099-[0-9]{2}-[0-9]{5}$', 'org B uses its own prefix');
-select public.assert(public.generate_trainee_id(:'orgA') ~ '^062-', 'generate_trainee_id delegates');
-select public.assert(public.generate_continuous_trainee_number(:'orgA') ~ '^062-', 'generate_continuous_trainee_number delegates');
--- inserting a trainee without an id gets a new-format number
+-- ===== trainee numbers: one global format, issued only by the identity service =====
+select public.expect_error($$select public.generate_trainee_number('a0000000-0000-0000-0000-00000000000a')$$, 'Retired', 'the per-centre generator is retired');
+select public.expect_error($$select public.generate_trainee_id('a0000000-0000-0000-0000-00000000000a')$$, 'Retired', 'generate_trainee_id is retired');
+select public.expect_error($$select public.generate_continuous_trainee_number('a0000000-0000-0000-0000-00000000000a')$$, 'Retired', 'generate_continuous_trainee_number is retired');
+-- a row inserted with a made-up number gets a real one (the number is never taken from the caller)
+reset role;
+select set_config('app.legacy_import', 'off', false);
 insert into trainees (organization_id,first_name,last_name,gender,date_of_birth,national_id,phone,address,trade_id,training_mode,level,academic_year,trainee_id)
- values (:'orgA','Auto','Number','male','2000-01-01','N9','0','x','c0000000-0000-0000-0000-000000000001','fulltime',1,'2026','');
-select public.assert((select trainee_id from trainees where first_name='Auto') ~ '^062-[0-9]{2}-[0-9]{5}$', 'trigger issues new format');
+ values (:'orgA','Auto','Number','male','2000-01-01','ID-AUTO-0001','0','x','c0000000-0000-0000-0000-000000000001','fulltime',1,'2026','MADE-UP-1');
+select public.assert((select trainee_id from trainees where first_name='Auto') ~ '^[0-9]{9}$' and (select trainee_id from trainees where first_name='Auto') <> 'MADE-UP-1', 'the database issues a nine-digit number');
+select set_config('app.legacy_import', 'on', false);
 select 'OK trainee number';
 
 -- ===== Trainee affairs RLS =====

@@ -1,3 +1,4 @@
+import { PrintProofButton } from "@/components/registration/ProofOfRegistration";
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -458,6 +459,9 @@ This is an official academic record. Any alterations render it invalid.
 
             {/* Generate Button */}
             <div className="flex gap-2 pt-2">
+              {selectedDocType === "proof_of_registration" ? (
+                <PrintProofButton traineeId={selectedTrainee.id} variant="default" size="default" label="Open Proof of Registration" />
+              ) : (
               <Button
                 onClick={generateDocument}
                 disabled={!selectedDocType || isGenerating}
@@ -470,6 +474,7 @@ This is an official academic record. Any alterations render it invalid.
                 )}
                 Generate & Download
               </Button>
+              )}
             </div>
           </div>
         )}

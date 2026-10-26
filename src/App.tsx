@@ -69,6 +69,10 @@ const PlacementOfficerDashboard = lazy(() => import("./pages/PlacementOfficerDas
 const StaffOnboarding = lazy(() => import("./pages/StaffOnboarding"));
 const TrainingModules = lazy(() => import("./pages/TrainingModules"));
 const OrganizationSettings = lazy(() => import("./pages/OrganizationSettings"));
+const TransferRequests = lazy(() => import("./pages/TransferRequests"));
+const IdentityRegistry = lazy(() => import("./pages/IdentityRegistry"));
+const TraineeTransferPage = lazy(() => import("./pages/trainee/TraineeTransferPage"));
+const ProofOfRegistrationSettings = lazy(() => import("./pages/ProofOfRegistrationSettings"));
 const SupportTickets = lazy(() => import("./pages/SupportTickets"));
 const TraineeAffairs = lazy(() => import("./pages/TraineeAffairs"));
 const Library = lazy(() => import("./pages/Library"));
@@ -546,6 +550,10 @@ const App = () => (
           
           <Route path="/roles" element={<ProtectedRoute><RoleManagement /></ProtectedRoute>} />
           <Route path="/role-activity" element={<ProtectedRoute><ProtectedRoleActivityDashboard /></ProtectedRoute>} />
+          <Route path="/transfers" element={<ProtectedRoute><TransferRequests /></ProtectedRoute>} />
+          <Route path="/identity-registry" element={<ProtectedRoute><IdentityRegistry /></ProtectedRoute>} />
+          <Route path="/trainee/transfer" element={<ProtectedRoute><TraineeTransferPage /></ProtectedRoute>} />
+          <Route path="/proof-of-registration-settings" element={<ProtectedRoute><ProofOfRegistrationSettings /></ProtectedRoute>} />
           <Route path="/organization-settings" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
           <Route path="/modules-management" element={<ProtectedRoute><ProtectedModulesManagement /></ProtectedRoute>} />
           <Route path="/trainee-affairs" element={<ProtectedRoute><ProtectedTraineeAffairs /></ProtectedRoute>} />

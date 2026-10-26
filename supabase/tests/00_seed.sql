@@ -1,4 +1,6 @@
 \set ON_ERROR_STOP on
+-- historical (legacy-numbered) records are imported by the database owner only
+select set_config('app.legacy_import', 'on', false);
 create or replace function public.assert(cond boolean, msg text) returns void language plpgsql as $$ begin if cond is not true then raise exception 'ASSERT FAILED: %', msg; end if; end $$;
 create or replace function public.expect_error(q text, pat text, msg text) returns void language plpgsql as $$
 begin

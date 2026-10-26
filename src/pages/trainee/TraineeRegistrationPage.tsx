@@ -8,7 +8,8 @@ import { Loader2, CheckCircle, Clock, FileText, Download, Eye } from "lucide-rea
 import { withRoleAccess } from "@/components/withRoleAccess";
 import { useTraineeUserId, useTraineeRecord, useTraineeApplication, useTraineeEnrollments } from "@/hooks/useTraineePortalData";
 import { ReturningRegistrationCard } from "@/components/registration/ReturningRegistrationCard";
-import { useMyRegistrations, useTraineeDocumentActions } from "@/hooks/useTraineeDocuments";
+import { useMyRegistrations } from "@/hooks/useTraineeDocuments";
+import { PrintProofButton } from "@/components/registration/ProofOfRegistration";
 
 const TraineeRegistrationPage = () => {
   const userId = useTraineeUserId();
@@ -16,7 +17,6 @@ const TraineeRegistrationPage = () => {
   const { data: application, isLoading: aLoading } = useTraineeApplication(userId);
   const { data: enrollments } = useTraineeEnrollments(trainee?.id);
   const { data: registrations } = useMyRegistrations(trainee?.id);
-  const docs = useTraineeDocumentActions();
 
   const isLoading = tLoading || aLoading;
 
@@ -71,9 +71,7 @@ const TraineeRegistrationPage = () => {
                 <p className="text-sm text-muted-foreground">{completedRegistration ? `Print or save your proof of registration for ${completedRegistration.academic_year}.` : "Available once your registration fees are cleared and your registration is complete."}</p>
               </div>
             </div>
-            <Button disabled={!completedRegistration || docs.busy === "proof"} onClick={() => completedRegistration && docs.printProof(completedRegistration.id)}>
-              {docs.busy === "proof" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}Print proof
-            </Button>
+            <PrintProofButton variant="default" size="default" label="Print proof" registrationId={completedRegistration?.id} disabled={!completedRegistration} />
           </CardContent>
         </Card>
         <Card className="border-0 shadow-md">

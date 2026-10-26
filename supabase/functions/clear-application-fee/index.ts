@@ -223,22 +223,27 @@ Deno.serve(async (req) => {
       // ATOMIC IDENTITY CREATION - ALL STEPS HERE
       // ========================================
 
-      // Step 1: Generate trainee number (FIRST TIME)
-      const { data: traineeNumber, error: numError } = await supabaseAdmin
-        .rpc('generate_continuous_trainee_number', { org_id: application.organization_id })
-      
+      // Step 1: Resolve the person's global identity and permanent trainee number (the database issues it:
+      // a new person gets a new nine-digit number, a known person keeps theirs, and registration is refused while
+      // they are active at another VTC or the identity needs review)
+      const { data: allocation, error: numError } = await supabaseAdmin
+        .rpc('allocate_trainee_identity', { _application: application.id })
+      const traineeNumber: string | null = allocation?.ok ? allocation.trainee_number : null
+
       if (numError || !traineeNumber) {
-        console.error('Failed to generate trainee number:', numError)
-        
+        const blocked = !numError && allocation && allocation.ok === false
+        const message: string = blocked ? allocation.message : 'Failed to allocate trainee number'
+        console.error('Failed to allocate trainee number:', numError ?? allocation)
+
         await supabaseAdmin.from('provisioning_logs').insert({
           organization_id: application.organization_id,
           application_id: application.id,
           trigger_type: 'auto',
           result: 'failed',
           email: application.email,
-          error_message: 'Failed to generate trainee number',
+          error_message: blocked ? `${allocation.code}: ${message}` : 'Failed to allocate trainee number',
         })
-        
+
         // Rollback queue update
         await supabaseAdmin
           .from('financial_queue')
@@ -252,9 +257,10 @@ Deno.serve(async (req) => {
 
         return new Response(JSON.stringify({ 
           success: false, 
-          error: 'Failed to generate trainee number - payment rolled back',
+          code: blocked ? allocation.code : 'NUMBER_ALLOCATION_FAILED',
+          error: `${message} - payment rolled back`,
         }), {
-          status: 500,
+          status: blocked ? 409 : 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }

@@ -1,4 +1,5 @@
 \set ON_ERROR_STOP on
+select set_config('app.legacy_import', 'on', false);
 \set trainerA '11111111-0000-0000-0000-000000000004'
 \set orgA 'a0000000-0000-0000-0000-00000000000a'
 \set orgB 'b0000000-0000-0000-0000-00000000000b'
@@ -21,7 +22,7 @@ insert into user_roles (user_id, role, organization_id) values
  (:'multi','librarian',:'orgA'), (:'multi','trainer',:'orgB');
 -- a trainee at centre B (copy of the centre A trainee with its unique fields changed)
 create temp table tb as select * from trainees where id = :'T1';
-update tb set id = :'TB', trainee_id = 'B-0001', national_id = 'B-NATID', user_id = null, organization_id = :'orgB', email = null, system_email = null;
+update tb set id = :'TB', identity_id = null, trainee_id = 'B-0001', national_id = 'B-NATID', user_id = null, organization_id = :'orgB', email = null, system_email = null;
 insert into trainees select * from tb;
 insert into fee_records (id, trainee_id, organization_id, total_fee, academic_year) values
  ('f1000000-0000-0000-0000-00000000000a', :'T1', :'orgA', 1000, '2026'),

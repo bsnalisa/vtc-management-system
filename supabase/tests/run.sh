@@ -39,5 +39,6 @@ for t in "$here"/[0-9][0-9]_*.sql; do
   echo "$out" | grep -E -i "^OK|error|ASSERT|DETAIL" || true
   [ "$rc" -eq 0 ] || status=1
 done
+bash "$here/concurrency.sh" "$tmpl" || status=1
 psql -q -d postgres -c "drop database if exists vtc_test_run" -c "drop database if exists $tmpl" >/dev/null 2>&1
 exit $status

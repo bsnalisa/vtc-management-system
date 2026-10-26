@@ -53,6 +53,8 @@ export const adminNavItems: NavItem[] = [
   { title: "Role Management", url: "/roles", icon: Shield },
   { title: "Role Activity", url: "/role-activity", icon: BarChart3 },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings },
+  { title: "Proof of Registration", url: "/proof-of-registration-settings", icon: FileText },
+  { title: "Identity Registry", url: "/identity-registry", icon: Shield },
   { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText },
   { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList },
   { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck },
@@ -87,6 +89,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar, section: "Centre Setup" },
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar, section: "Centre Setup" },
   { title: "Document Settings", url: "/document-settings", icon: FileText, section: "Centre Setup" },
+  { title: "Proof of Registration", url: "/proof-of-registration-settings", icon: FileText, section: "Centre Setup" },
   { title: "Workflows", url: "/workflows", icon: Settings, section: "Centre Setup" },
   { title: "Moodle", url: "/moodle", icon: GraduationCap, section: "Centre Setup" },
   { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText, section: "Oversight" },
@@ -117,6 +120,7 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Overview" },
   { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
   { title: "Trainees", url: "/trainees", icon: Users, section: "People" },
+  { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck, section: "People" },
   { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "People" },
   { title: "Classes", url: "/classes", icon: DoorClosed, section: "People" },
   { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList, section: "People" },
@@ -130,6 +134,7 @@ export const centreManagerNavItems: NavItem[] = [
 // Head of Training Navigation (Academic Command Center)
 export const headOfTrainingNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-training-dashboard", icon: LayoutDashboard },
+  { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck },
   { title: "Trade Management", url: "/trade-management", icon: Briefcase },
   { title: "Qualification Approvals", url: "/qualification-approvals", icon: ClipboardCheck },
   { title: "Template Approvals", url: "/assessment-template-approvals", icon: ClipboardList },
@@ -181,6 +186,7 @@ export const traineeNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainee-dashboard", icon: LayoutDashboard },
   { title: "My Profile", url: "/profile", icon: UserCircle },
   { title: "Registration", url: "/trainee/registration", icon: ClipboardList },
+  { title: "Transfer to another VTC", url: "/trainee/transfer", icon: ClipboardList },
   { title: "Documents", url: "/trainee/application/documents", icon: FileText },
   { title: "Admission Status", url: "/trainee/application/status", icon: FileText },
   { title: "Hostel", url: "/trainee/hostel", icon: Building },
@@ -251,6 +257,7 @@ export const debtorOfficerNavItems: NavItem[] = [
 // Registration Officer Navigation
 export const registrationOfficerNavItems: NavItem[] = [
   { title: "Dashboard", url: "/registration-officer-dashboard", icon: LayoutDashboard },
+  { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck },
   { title: "Applications Inbox", url: "/applications-inbox", icon: FileText },
   { title: "Online Applications", url: "/online-applications", icon: ClipboardList },
   { title: "Admission Results", url: "/applications", icon: ClipboardCheck },
@@ -465,6 +472,7 @@ export const librarianNavItems: NavItem[] = [
 export const headOfTraineeSupportNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainee-support-dashboard", icon: LayoutDashboard },
   { title: "Pending Approvals", url: "/trainee-support/pending-approvals", icon: ClipboardCheck },
+  { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck },
   { title: "Trainee List", url: "/trainees", icon: Users },
   { title: "Entry Requirements", url: "/entry-requirements", icon: ClipboardList },
   { title: "Trainee Affairs", url: "/trainee-affairs", icon: ClipboardList },

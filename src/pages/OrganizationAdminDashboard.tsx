@@ -56,6 +56,7 @@ const OrganizationAdminDashboard = () => {
           { icon: Shield, label: "Roles", desc: "Role management", url: "/roles" },
           { icon: CalendarClock, label: "Registration Windows", desc: "Application periods", url: "/registration-windows" },
           { icon: FileText, label: "Document Settings", desc: "Templates and numbering", url: "/document-settings" },
+          { icon: FileText, label: "Proof of Registration", desc: "Letterhead, footer and signatory", url: "/proof-of-registration-settings" },
           { icon: FileBarChart, label: "Reports", desc: "Centre reports", url: "/reports" },
           { icon: History, label: "System Logs", desc: "Audit trail", url: "/system-logs" },
           { icon: UserCheck, label: "My Approvals", desc: "Pending tasks", url: "/my-approvals", badge: pending },
