@@ -1,4 +1,5 @@
 \set ON_ERROR_STOP on
+select set_config('app.legacy_import', 'on', false);
 \set trainerA '11111111-0000-0000-0000-000000000004'
 \set adminA '11111111-0000-0000-0000-000000000001'
 \set orgA 'a0000000-0000-0000-0000-00000000000a'
@@ -15,7 +16,7 @@ alter table user_roles disable trigger trg_guard_privileged_roles;
 insert into user_roles (user_id, role, organization_id) values (:'cmA','centre_manager',:'orgA'),(:'cmB','centre_manager',:'orgB'),(:'sa','super_admin',null);
 alter table user_roles enable trigger trg_guard_privileged_roles;
 create temp table tb as select * from trainees where id = :'T1';
-update tb set id = :'TB', trainee_id = 'B-0001', national_id = 'B-NATID', user_id = null, organization_id = :'orgB', email = null, system_email = null;
+update tb set id = :'TB', identity_id = null, trainee_id = 'B-0001', national_id = 'B-NATID', user_id = null, organization_id = :'orgB', email = null, system_email = null;
 insert into trainees select * from tb;
 insert into fee_records (id, trainee_id, organization_id, total_fee, amount_paid, academic_year) values
  ('f1000000-0000-0000-0000-00000000000a', :'T1', :'orgA', 1000, 400, '2026'),
@@ -71,7 +72,7 @@ reset role;
 
 -- ===== an Organization Admin does not register trainees =====
 create temp table newt as select * from trainees where id = :'T1';
-update newt set id = gen_random_uuid(), trainee_id = 'A-NEW', national_id = 'A-NEW-NATID', user_id = null, email = null, system_email = null;
+update newt set id = gen_random_uuid(), identity_id = null, first_name = 'Newcomer', last_name = 'Person', date_of_birth = '1999-05-05', trainee_id = 'A-NEW', national_id = 'A-NEW-NATID', user_id = null, email = null, system_email = null;
 grant select on newt to authenticated;
 set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', false);
 select public.expect_error($$insert into trainees select * from newt$$, 'row-level security', 'an Organization Admin cannot register a trainee');
@@ -84,11 +85,11 @@ select public.assert((select count(*) from trainees where trainee_id = 'A-NEW') 
 
 -- someone who is both Organization Admin and registration officer may register
 insert into user_roles (user_id, role, organization_id) values (:'adminA','registration_officer',:'orgA');
-update newt set id = gen_random_uuid(), trainee_id = 'A-NEW2', national_id = 'A-NEW2-NATID';
+update newt set id = gen_random_uuid(), identity_id = null, first_name = 'Second', last_name = 'Newcomer', date_of_birth = '1998-04-04', trainee_id = 'A-NEW2', national_id = 'A-NEW2-NATID';
 set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', false);
 insert into trainees select * from newt;
 reset role;
-select public.assert((select count(*) from trainees where trainee_id = 'A-NEW2') = 1, 'an admin who is also a registration officer can register');
+select public.assert((select count(*) from trainees where national_id = 'A-NEW2-NATID') = 1 and (select trainee_id from trainees where national_id = 'A-NEW2-NATID') ~ '^[0-9]{9}$', 'an admin who is also a registration officer can register, and the database issues the number');
 
 -- ===== reports =====
 set role authenticated; select set_config('request.jwt.claim.sub', :'cmA', false);

@@ -1,4 +1,5 @@
 import { PrintProofButton } from "@/components/registration/ProofOfRegistration";
+import { useIdentitySummary } from "@/hooks/useTransfers";
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ const TraineeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: trainee, isLoading } = useTraineeDetail(id);
+  const { data: identity } = useIdentitySummary(id);
   const { data: trades } = useTrades();
   const updatePersonalDetails = useUpdateTraineePersonalDetails();
   const createUpdateRequest = useCreateUpdateRequest();
@@ -133,6 +135,19 @@ const TraineeDetail = () => {
           </div>
           <div className="ml-auto"><PrintProofButton traineeId={trainee.id} /></div>
         </div>
+
+        {identity && (
+          <div className="rounded-lg border bg-muted/30 p-4 text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p><span className="text-muted-foreground">Global trainee number </span><span className="font-mono font-semibold">{identity.trainee_number}</span> <span className="text-xs text-muted-foreground">(read-only, the same at every VTC{identity.number_format === "legacy" ? "; older number format" : ""})</span></p>
+              {!identity.identity_verified && <span className="text-xs text-amber-700">Identity not yet verified against an ID document</span>}
+            </div>
+            {identity.earlier_numbers.length > 0 && <p className="mt-1 text-xs text-muted-foreground">Earlier numbers on record: {identity.earlier_numbers.join(", ")}</p>}
+            {identity.registrations.length > 1 && (
+              <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">{identity.registrations.map((r, i) => <li key={i}>{r.organization_name}: {r.status}{r.this_record ? " (this record)" : ""}</li>)}</ul>
+            )}
+          </div>
+        )}
 
         {trainee.has_pending_update && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">

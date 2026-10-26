@@ -1,4 +1,5 @@
 \set ON_ERROR_STOP on
+select set_config('app.legacy_import', 'on', false);
 \set orgA 'a0000000-0000-0000-0000-00000000000a'
 \set orgB 'b0000000-0000-0000-0000-00000000000b'
 \set T1 'd0000000-0000-0000-0000-000000000001'
@@ -17,7 +18,7 @@ insert into user_roles (user_id, role, organization_id) values
  (:'cm','centre_manager',:'orgA'),(:'hofa','head_of_finance_admin',:'orgA'),(:'lo','loan_officer',:'orgA'),(:'acc','accountant',:'orgA'),(:'trn','trainer',:'orgA'),(:'loB','loan_officer',:'orgB');
 alter table user_roles enable trigger trg_guard_privileged_roles;
 create temp table tb2 as select * from trainees where id = :'T1';
-update tb2 set id = :'TB', trainee_id = 'B-0002', national_id = 'B-NATID2', user_id = null, organization_id = :'orgB', email = null, system_email = null;
+update tb2 set id = :'TB', identity_id = null, trainee_id = 'B-0002', national_id = 'B-NATID2', user_id = null, organization_id = :'orgB', email = null, system_email = null;
 insert into trainees select * from tb2 on conflict do nothing;
 
 set role authenticated; select set_config('request.jwt.claim.sub', :'lo', false);
