@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationContext } from "./useOrganizationContext";
 import type { TrainingMode } from "@/lib/trainingModes";
+import { asTraineeInsert } from "@/lib/traineeIdentity";
 
 export interface HistoricalTraineeData {
   first_name: string;
@@ -101,26 +102,28 @@ export const useCaptureHistoricalTrainee = () => {
 
       const { data: result, error } = await supabase
         .from("trainees")
-        .insert([{
-          first_name: data.first_name,
-          last_name: data.last_name,
-          national_id: data.national_id,
-          phone: data.phone || "",
-          email: data.email,
-          address: data.address || "",
-          trade_id: data.trade_id,
-          level: data.level,
-          academic_year: data.academic_year,
-          training_mode: data.training_mode,
-          organization_id: organizationId,
-          gender: "other" as const,
-          date_of_birth: "1990-01-01",
-          status: "archived",
-          archived_at: new Date().toISOString(),
-          archived_by: user.id,
-          archive_notes: data.archive_notes,
-          trainee_id: "",
-        }])
+        .insert([
+          asTraineeInsert({
+            first_name: data.first_name,
+            last_name: data.last_name,
+            national_id: data.national_id,
+            phone: data.phone || "",
+            email: data.email,
+            address: data.address || "",
+            trade_id: data.trade_id,
+            level: data.level,
+            academic_year: data.academic_year,
+            training_mode: data.training_mode,
+            organization_id: organizationId,
+            gender: "other" as const,
+            date_of_birth: "1990-01-01",
+            status: "archived",
+            archived_at: new Date().toISOString(),
+            archived_by: user.id,
+            archive_notes: data.archive_notes,
+            trainee_id: "",
+          }),
+        ])
         .select()
         .single();
 
