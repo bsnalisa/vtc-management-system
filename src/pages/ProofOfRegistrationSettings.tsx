@@ -133,11 +133,11 @@ function ProofOfRegistrationSettings() {
           <div className="grid gap-6 xl:grid-cols-2">
             <form onSubmit={submit} className="space-y-6" noValidate>
               <Card>
-                <CardHeader><CardTitle className="text-base">Letterhead {current && status(current)}</CardTitle><CardDescription>Shown at the top and bottom of every page.</CardDescription></CardHeader>
+                <CardHeader><CardTitle className="text-base">Letterhead and footer {current && status(current)}</CardTitle><CardDescription>The logo goes at the top of every page. The footer at the bottom shows exactly what you enter here: centre name and address on the left; telephone, fax, postal address, email and website in the middle; the correspondence note on the right. Empty fields are left out.</CardDescription></CardHeader>
                 <CardContent className="space-y-4">
                   <Field label="Centre logo *" error={show("logo_url")}><ImageField org={org} kind="logo" value={form.logo_url} onChange={(u) => { setForm({ ...form, logo_url: u }); setTouched(true); }} hint="PNG, JPG or SVG, up to 2 MB. A transparent background and roughly 3:2 shape works best." /></Field>
                   <Field label="Centre name *" error={show("centre_name")}><Input value={form.centre_name} onChange={set("centre_name")} /></Field>
-                  <Field label="Physical address *" error={show("physical_address")}><Textarea rows={2} value={form.physical_address} onChange={set("physical_address")} /></Field>
+                  <Field label="Physical address *" error={show("physical_address")} hint="Each line you type shows on its own line in the footer."><Textarea rows={2} value={form.physical_address} onChange={set("physical_address")} /></Field>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Postal address / P.O. Box"><Input value={form.postal_address} onChange={set("postal_address")} /></Field>
                     <Field label="Website"><Input value={form.website} onChange={set("website")} /></Field>
@@ -145,7 +145,7 @@ function ProofOfRegistrationSettings() {
                     <Field label="Fax" error={show("fax")}><Input value={form.fax} onChange={set("fax")} /></Field>
                   </div>
                   <Field label="Email *" error={show("email")}><Input type="email" value={form.email} onChange={set("email")} /></Field>
-                  <Field label="Correspondence note"><Input value={form.correspondence_note} onChange={set("correspondence_note")} /></Field>
+                  <Field label="Correspondence note (footer, right-hand column)"><Input value={form.correspondence_note} onChange={set("correspondence_note")} /></Field>
                 </CardContent>
               </Card>
 

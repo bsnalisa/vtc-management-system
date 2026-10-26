@@ -1,5 +1,4 @@
 import { esc } from "./printDocument";
-import { trainingModeLabel } from "./trainingModes";
 
 /**
  * The one proof-of-registration template. Every place that shows or prints it (trainee portal, registration pages,
@@ -16,7 +15,7 @@ export interface ProofSettings {
 
 export interface FeeLine { date: string; reference: string | null; description: string; debit: number; credit: number }
 export interface ProofData {
-  registration_id: string; organization_id: string; reference_number: string | null; issued_on: string; academic_year: string; registration_status: string;
+  registration_id: string; organization_id: string; reference_number: string | null; issued_on: string; academic_year: string; registration_status: string; year_of_study: number | null;
   trainee: { name: string; trainee_number: string; national_id: string | null; level: number | null; training_mode: string; occupational_area: string | null };
   qualification: { code: string; title: string; nqf_level: number | null; duration: string } | null;
   units: { unit_id: string; title: string; level: number | null; credits: number | null }[];
@@ -39,7 +38,8 @@ const dmy = (d: string | Date) => { const x = new Date(d); return `${String(x.ge
 const longDate = (d: string | Date) => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 const safeColour = (c: string | null | undefined, fallback: string) => (c && /^#[0-9a-fA-F]{6}$/.test(c) ? c : fallback);
 const safeUrl = (u: string | null | undefined) => (u && /^https:\/\//i.test(u) ? u : "");
-const ordinal = (n: number) => `${n}${["th", "st", "nd", "rd"][(n % 100 >> 3) ^ 1 && n % 10 < 4 ? n % 10 : 0]}`;
+const ordinal = (n: number) => { const v = n % 100; return `${n}${v >= 11 && v <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`; };
+const MODE: Record<string, string> = { fulltime: "Full-Time", bdl: "Blended / Distance Learning", shortcourse: "Short Course", apprenticeship: "Apprenticeship", rpl: "Recognition of Prior Learning" };
 const line = (...parts: (string | null | undefined)[]) => parts.map((p) => (p ?? "").trim()).filter(Boolean).join(" ");
 
 export const PROOF_CSS = `
@@ -53,9 +53,13 @@ export const PROOF_CSS = `
   .letterhead { text-align: right; padding-bottom: 6mm; min-height: 14mm; }
   .letterhead img { max-height: 20mm; max-width: 70mm; object-fit: contain; }
   .letterhead .name { font-size: 14pt; font-weight: bold; color: var(--primary); }
-  .foot { display: grid; grid-template-columns: 1.1fr 1.2fr 1fr; gap: 6mm; border-top: 1px solid #d0d7e2; padding-top: 3mm; margin-top: 6mm; font-size: 7.5pt; color: #595959; }
-  .foot .cn { font-weight: bold; color: var(--primary); }
+  .foot { display: grid; grid-template-columns: 1.1fr 1.2fr 1fr; gap: 6mm; padding-top: 3mm; margin-top: 6mm; font-size: 7.5pt; color: #222; background: #fff; }
+  .foot .cn { font-weight: bold; color: var(--primary); font-size: 8.5pt; }
   .foot p { margin: 0 0 1px; }
+  .foot .gap { height: 4mm; }
+  .spacer { height: 32mm; }
+  @media print { .foot { position: fixed; left: 0; right: 0; bottom: 0; } }
+  @media screen { .spacer { display: none; } }
   h1 { font-size: 20pt; margin: 0; color: var(--primary); letter-spacing: .3px; padding-bottom: 2mm; border-bottom: 1.5pt solid var(--accent); }
   .sub { color: #595959; margin: 2mm 0 5mm; }
   .grid { display: grid; gap: 1.5mm; margin-bottom: 6mm; }
@@ -85,6 +89,7 @@ export const PROOF_CSS = `
   .sign .line { border-top: 1px solid #000; padding-top: 1mm; }
   .stamp { border: 1px dashed #999; height: 32mm; display: flex; align-items: center; justify-content: center; color: #8a8a8a; font-size: 8pt; text-transform: uppercase; letter-spacing: .6px; }
   .fine { font-size: 7.5pt; color: #595959; font-style: italic; margin-top: 5mm; }
+  .samplebanner { color: #c00000; font-weight: bold; font-size: 7.5pt; margin: 0 0 3mm; }
   .sample { position: fixed; top: 38%; left: 0; right: 0; text-align: center; font-size: 80pt; font-weight: bold; color: rgba(150,150,150,.18); transform: rotate(-24deg); pointer-events: none; letter-spacing: 8px; }
 `;
 
@@ -104,21 +109,24 @@ export function proofDocumentHtml(d: ProofData, opts: { sample?: boolean; now?: 
   const balance = Number(d.fees.balance);
 
   const header = `<div class="letterhead">${logo ? `<img src="${esc(logo)}" alt="${esc(centreName)}">` : `<div class="name">${esc(centreName)}</div>`}</div>`;
-  const footer = `<div class="foot">
-    <div><p class="cn">${esc(centreName)}</p>${s.physical_address ? `<p>${esc(s.physical_address).replace(/\n/g, "<br>")}</p>` : ""}</div>
-    <div>${s.telephone ? `<p>Tel: ${esc(s.telephone)}</p>` : ""}${s.fax ? `<p>Fax: ${esc(s.fax)}</p>` : ""}${s.postal_address ? `<p>${esc(s.postal_address)}</p>` : ""}${s.email ? `<p>Email: ${esc(s.email)}</p>` : ""}${s.website ? `<p>Website: ${esc(s.website)}</p>` : ""}</div>
-    <div><p>${esc(s.correspondence_note)}</p></div></div>`;
+  // Only what the centre has configured is shown; each address field keeps its own line breaks.
+  const multi = (v: string | null | undefined) => esc(v ?? "").replace(/\r?\n/g, "<br>");
+  const contacts = [s.telephone && `Tel: ${esc(s.telephone)}`, s.fax && `Fax: ${esc(s.fax)}`, s.postal_address && multi(s.postal_address)].filter(Boolean).map((x) => `<p>${x}</p>`).join("");
+  const online = [s.email && `<p><b>Email:</b> ${esc(s.email)}</p>`, s.website && `<p><b>Website:</b> ${esc(s.website)}</p>`].filter(Boolean).join("");
+  const footer = `<div class="foot"><div><p class="cn">${esc(centreName)}</p>${s.physical_address ? `<p>${multi(s.physical_address)}</p>` : ""}</div>
+    <div>${contacts}${online ? `<div class="gap"></div>${online}` : ""}</div>
+    <div>${s.correspondence_note ? `<p>${multi(s.correspondence_note)}</p>` : ""}</div></div>`;
 
   const q = d.qualification;
-  const yearOfStudy = d.trainee.level ? ordinal(d.trainee.level) + " level" : "";
+  const yearOfStudy = d.year_of_study ? `${ordinal(d.year_of_study)} year` : "";
   const totalCredits = d.units.reduce((n, u) => n + Number(u.credits ?? 0), 0);
 
   const trainee = `<div class="grid">
     <div class="row" style="grid-template-columns:2fr 1fr">${cell("Name", d.trainee.name)}${cell("Trainee Number", d.trainee.trainee_number)}</div>
     <div class="row" style="grid-template-columns:1fr 2fr">${cell("ID Number", d.trainee.national_id ?? "")}${cell("Occupational Area", d.trainee.occupational_area ?? "")}</div>
     <div class="row">${cell("Qualification", q ? line(q.code, q.code ? "–" : "", q.title) : "")}</div>
-    <div class="row" style="grid-template-columns:1fr 1fr 1fr">${cell("Level", q?.nqf_level ? `Level ${q.nqf_level}` : yearOfStudy)}${cell("Study Mode", trainingModeLabel(d.trainee.training_mode))}${cell("Registration Status", d.registration_status.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()))}</div>
-    <div class="row" style="grid-template-columns:1fr 1fr">${cell("Duration", (q?.duration ?? "").replace(/^1 (\w+?)s$/, "1 $1"))}${cell("Reference", d.reference_number ?? "Issued once registration is complete")}</div>
+    <div class="row" style="grid-template-columns:1fr 1fr 1fr">${cell("Level", String(q?.nqf_level ?? d.trainee.level ?? ""))}${cell("Current Year of Study", yearOfStudy)}${cell("Study Mode", MODE[d.trainee.training_mode] ?? d.trainee.training_mode)}</div>
+    <div class="row" style="grid-template-columns:1fr 1fr">${cell("Duration", (q?.duration ?? "").replace(/^(\d+) (\w+?)s$/, (m, n, u) => (n === "1" ? `1 ${u[0].toUpperCase()}${u.slice(1)}` : `${n} ${u[0].toUpperCase()}${u.slice(1)}s`)))}${cell("Registration Status", d.registration_status.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()))}</div>
   </div>`;
 
   const unitRows = d.units.length
@@ -144,28 +152,27 @@ export function proofDocumentHtml(d: ProofData, opts: { sample?: boolean; now?: 
 
   const clerkName = line(s.clerk_title, s.clerk_name);
   const enquiries = clerkName
-    ? `Should you have any enquiries, please do not hesitate to contact ${esc(clerkName)}, the ${esc(s.clerk_role_label)}, at: (T) ${esc(s.clerk_phone || s.telephone || "")}${(s.clerk_email || s.email) ? `, or email at ${esc(s.clerk_email || s.email)}` : ""}.`
-    : `Should you have any enquiries, please do not hesitate to contact the centre at: (T) ${esc(s.telephone ?? "")}${s.email ? `, or email at ${esc(s.email)}` : ""}.`;
+    ? `Should you have any enquiries, please do not hesitate to contact ${esc(clerkName)}, the ${esc(s.clerk_role_label)}, at: (T) ${esc(s.clerk_phone || s.telephone || "")}${(s.clerk_email || s.email) ? `, or email at ${esc(s.clerk_email || s.email)}` : ""}`
+    : `Should you have any enquiries, please do not hesitate to contact the centre at: (T) ${esc(s.telephone ?? "")}${s.email ? `, or email at ${esc(s.email)}` : ""}`;
   const sig = safeUrl(s.signature_url);
   const sign = `<p class="enq">${enquiries}</p>
-    <div class="sign"><div><div>Sincerely,</div><div class="sig">${sig ? `<img src="${esc(sig)}" alt="">` : ""}</div><div class="line"><b>${esc(line(s.signatory_title, s.signatory_name))}</b><br><b>${esc(s.signatory_job_title)}</b></div></div>
+    <div class="sign"><div><div>Sincerely,</div><div class="sig">${sig ? `<img src="${esc(sig)}" alt="">` : ""}</div><div class="line">${esc(line(s.signatory_title, s.signatory_name))}<br><b>${esc(s.signatory_job_title)}</b></div></div>
     <div class="stamp">${esc(s.stamp_label)}</div></div>
     <div class="fine">${esc(s.footer_disclaimer)}</div>`;
 
-  const body = `<h1>PROOF OF REGISTRATION</h1>
-    <div class="sub">Academic Year ${esc(d.academic_year)} &nbsp;|&nbsp; Date issued: ${esc(longDate(now))}</div>${trainee}${units}${fees}${boxes}${sign}`;
+  const body = `${opts.sample ? '<div class="samplebanner">SAMPLE FOR DEMONSTRATION ONLY – all trainee, reference and fee details are illustrative. Not an official document.</div>' : ""}<h1>PROOF OF REGISTRATION</h1>
+    <div class="sub">Academic Year ${esc(d.academic_year)} &nbsp;|&nbsp; Date issued: ${esc(longDate(now))}${d.reference_number ? ` &nbsp;|&nbsp; Reference: ${esc(d.reference_number)}` : ""}</div>${trainee}${units}${fees}${boxes}${sign}`;
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>Proof of Registration – ${esc(d.trainee.name)}</title>
     <style>:root{--primary:${primary};--accent:${accent}}${PROOF_CSS}</style></head><body>
-    ${opts.sample ? '<div class="sample">SAMPLE</div>' : ""}
-    <table class="page"><thead><tr><td>${header}</td></tr></thead><tbody><tr><td>${body}</td></tr></tbody><tfoot><tr><td>${footer}</td></tr></tfoot></table></body></html>`;
+    <table class="page"><thead><tr><td>${header}</td></tr></thead><tbody><tr><td>${body}</td></tr></tbody><tfoot><tr><td><div class="spacer"></div></td></tr></tfoot></table>${footer}</body></html>`;
 }
 
 /** Plausible example data for the settings preview, so an admin can see the letterhead before any trainee exists. */
 export function sampleProofData(settings: Partial<ProofSettings> | null, centreName: string | null): ProofData {
   return {
     registration_id: "sample", organization_id: "sample", reference_number: "POR-26-00001", issued_on: new Date().toISOString(), academic_year: String(new Date().getFullYear()),
-    registration_status: "registered",
+    registration_status: "registered", year_of_study: 1,
     trainee: { name: "Sample Trainee", trainee_number: "000-26-00001", national_id: "00000000000", level: 1, training_mode: "fulltime", occupational_area: "Electrical" },
     qualification: { code: "QUAL-0000", title: "National Certificate in Sample Trade", nqf_level: 2, duration: "1 years" },
     units: [

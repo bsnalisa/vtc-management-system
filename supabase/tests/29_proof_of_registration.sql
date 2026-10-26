@@ -56,6 +56,7 @@ select public.assert(:'doc'::jsonb->'trainee'->>'name' = 'Tina One' and (:'doc':
 select public.assert(jsonb_array_length(:'doc'::jsonb->'units') = 2 and :'doc'::jsonb->'units'->0->>'unit_id' = 'US-6001' and (:'doc'::jsonb->'units'->0->>'credits')::int = 6, 'unit standards with their IDs and credits, in qualification order');
 select public.assert((:'doc'::jsonb->'fees'->>'total_debit')::numeric = 7250 and (:'doc'::jsonb->'fees'->>'total_credit')::numeric = 3500 and (:'doc'::jsonb->'fees'->>'balance')::numeric = 3750, 'fees charged, paid and balance exclude other years');
 select public.assert(jsonb_array_length(:'doc'::jsonb->'fees'->'lines') = 3 and (:'doc'::jsonb->'fees'->'lines'->1->>'description') = 'Payment received – Eft', 'fee lines carry the payment method');
+select public.assert((:'doc'::jsonb->>'year_of_study')::int = 1, 'first registration for the qualification is the first year of study');
 select public.assert((public.proof_of_registration_data(:'regid')->>'reference_number') = (:'doc'::jsonb->>'reference_number'), 'the reference number is stable');
 select public.log_proof_print(:'regid', 'print');
 

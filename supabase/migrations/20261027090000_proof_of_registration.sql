@@ -240,7 +240,9 @@ BEGIN
 
   RETURN jsonb_build_object(
     'registration_id', reg.id, 'organization_id', reg.organization_id, 'reference_number', _ref, 'issued_on', CURRENT_DATE,
-    'academic_year', reg.academic_year, 'registration_status', reg.registration_status, 'registered_on', COALESCE(reg.registered_at, reg.created_at),
+    'academic_year', reg.academic_year, 'registration_status', reg.registration_status,
+    'year_of_study', (SELECT count(*) FROM public.registrations r2 WHERE r2.trainee_id = reg.trainee_id AND r2.academic_year <= reg.academic_year
+                       AND r2.qualification_id IS NOT DISTINCT FROM reg.qualification_id AND r2.registration_status <> 'rejected'), 'registered_on', COALESCE(reg.registered_at, reg.created_at),
     'trainee', jsonb_build_object('name', t.first_name || ' ' || t.last_name, 'trainee_number', t.trainee_id, 'national_id', t.national_id,
       'level', t.level, 'training_mode', t.training_mode, 'occupational_area', (SELECT name FROM public.trades WHERE id = t.trade_id)),
     'qualification', CASE WHEN q.id IS NULL THEN NULL ELSE jsonb_build_object('code', q.qualification_code, 'title', q.qualification_title,
