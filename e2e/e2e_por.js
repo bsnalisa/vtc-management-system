@@ -1,0 +1,21 @@
+const {session,BASE}=require('./lib.js');
+const tag=process.argv[2]||'a';
+(async()=>{
+ const log=(...a)=>console.log(...a);
+ const {b,p}=await session('registration_officer');
+ p.on('pageerror',e=>log('PAGEERROR',e.message));
+ p.on('response',async r=>{const u=r.url();if(u.includes('proof_of_registration')||u.includes('log_proof')||(r.status()>=400&&u.includes('supabase')&&!u.includes('active_package')))log('HTTP',r.status(),u.split('/').slice(-2).join('/'),(await r.text().catch(()=>'')).slice(0,120))});
+ await p.addInitScript(()=>{window.__prints=0;const o=window.print;window.print=()=>{window.__prints++};});
+ await p.goto(BASE+'/trainees/2ebcb010-69d6-4a6b-8d29-fb01d75d0dd5',{waitUntil:'networkidle'});await p.waitForTimeout(2000);
+ await p.click('button:has-text("Print Proof of Registration")');await p.waitForTimeout(3500);
+ const dlg=p.locator('[role=dialog]');
+ log('dialog text:',(await dlg.innerText()).replace(/\s+/g,' ').slice(0,300));
+ await p.screenshot({path:`por_dlg_${tag}.png`});
+ const html=await dlg.locator('iframe').getAttribute('srcdoc');
+ const pg=await b.newPage();await pg.setContent(html,{waitUntil:'networkidle'});await pg.pdf({path:`por_${tag}.pdf`,format:'A4',printBackground:true});
+ require('fs').writeFileSync(`por_${tag}.html`,html);
+ log('html has centre:',/Nakayale/.test(html),'ref:',(html.match(/POR-\d\d-\d{5}/)||[])[0],'trainee no:',/NVTC202600005/.test(html),'img:',/<img/.test(html));
+ await dlg.locator('button:has-text("Print")').first().click();await p.waitForTimeout(2500);
+ await dlg.locator('button:has-text("Download PDF")').click();await p.waitForTimeout(2500);
+ await b.close();
+})();

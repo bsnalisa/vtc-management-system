@@ -9,12 +9,14 @@ on:
       - main
 
 jobs:
-  test:
+  frontend:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,10 +28,14 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npm run type-check || echo "Type checking completed"
+        run: npm run type-check
 
-      - name: Lint
-        run: npm run lint || echo "Linting completed"
+      # The repository still carries older lint errors, so only the files a pull request changes must pass.
+      - name: Lint changed files
+        if: github.event_name == 'pull_request'
+        run: |
+          files=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }}...HEAD -- '*.ts' '*.tsx')
+          if [ -n "$files" ]; then npx eslint --max-warnings=100000 $files; else echo "No TypeScript files changed"; fi
 
       - name: Build test
         run: npm run build
@@ -37,3 +43,35 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
+  database:
+    # Applies every migration to a throw-away Postgres and runs the SQL behaviour and concurrency tests.
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install the Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Run the database tests
+        run: bash supabase/tests/run.sh
