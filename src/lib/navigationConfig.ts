@@ -27,6 +27,10 @@ import {
   HelpCircle,
   AlertTriangle,
   Clock,
+  LifeBuoy,
+  Activity,
+  ServerCog,
+  ArrowUpCircle,
 } from "lucide-react";
 
 export interface NavItem {
@@ -61,6 +65,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Resource Centre", url: "/library", icon: BookOpen },
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
+  { title: "Escalated Tickets", url: "/escalated-tickets", icon: ArrowUpCircle },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
@@ -80,10 +85,12 @@ export const adminNavItems: NavItem[] = [
 
 // Organization Admin Navigation (Technical & Administrative Only - No Academic Functions)
 export const organizationAdminNavItems: NavItem[] = [
-  { title: "Dashboard", url: "/organization-admin-dashboard", icon: LayoutDashboard, section: "Overview" },
-  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
-  { title: "User Management", url: "/users", icon: Users, section: "People & Access" },
-  { title: "Role Management", url: "/roles", icon: Shield, section: "People & Access" },
+  { title: "Dashboard", url: "/organization-admin-dashboard", icon: LayoutDashboard, section: "Dashboard" },
+  { title: "Support Tickets", url: "/support-tickets", icon: LifeBuoy, section: "Support Services" },
+  { title: "Escalations to Super Admin", url: "/support-tickets?tab=escalated", icon: ArrowUpCircle, section: "Support Services" },
+  { title: "System Diagnostics", url: "/system-status", icon: ServerCog, section: "Support Services" },
+  { title: "User Accounts", url: "/users", icon: Users, section: "User Management" },
+  { title: "Roles & Permissions", url: "/roles", icon: Shield, section: "User Management" },
   { title: "Organization Settings", url: "/organization-settings", icon: Settings, section: "Centre Setup" },
   { title: "Modules", url: "/modules-management", icon: BookOpen, section: "Centre Setup" },
   { title: "Registration Windows", url: "/registration-windows", icon: Calendar, section: "Centre Setup" },
@@ -92,24 +99,10 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Proof of Registration", url: "/proof-of-registration-settings", icon: FileText, section: "Centre Setup" },
   { title: "Workflows", url: "/workflows", icon: Settings, section: "Centre Setup" },
   { title: "Moodle", url: "/moodle", icon: GraduationCap, section: "Centre Setup" },
-  { title: "RPL & Exemptions", url: "/assessment-requests", icon: FileText, section: "Oversight" },
-  { title: "Assessment Development", url: "/assessment-development", icon: ClipboardList, section: "Oversight" },
-  { title: "Assessment Sittings", url: "/assessment-sittings", icon: ClipboardCheck, section: "Oversight" },
-  { title: "Delivery Plans", url: "/delivery-plans", icon: Calendar, section: "Oversight" },
-  { title: "Logbook Review", url: "/logbook-review", icon: ClipboardCheck, section: "Oversight" },
-  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap, section: "Oversight" },
-  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList, section: "Oversight" },
-  { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Oversight" },
-  { title: "Learning Space", url: "/learning", icon: BookOpen, section: "Oversight" },
-  { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen, section: "Oversight" },
-  { title: "Resource Centre", url: "/library", icon: BookOpen, section: "Oversight" },
-  { title: "Certification Reports", url: "/reports/certification", icon: FileText, section: "Oversight" },
-  { title: "Module Reports", url: "/reports/modules", icon: BarChart3, section: "Oversight" },
-  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard, section: "Finance (read-only)" },
-  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign, section: "Finance (read-only)" },
-  { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Support & Records" },
-  { title: "System Logs", url: "/system-logs", icon: FileText, section: "Support & Records" },
-  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Support & Records" },
+  { title: "Activity Logs", url: "/role-activity", icon: Activity, section: "System Monitoring" },
+  { title: "Audit Trail", url: "/system-logs", icon: History, section: "System Monitoring" },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "My Work" },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "My Work" },
 ];
 
 // Centre Manager Navigation: oversight of the whole centre; everything here is read-only except approvals

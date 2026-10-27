@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useUserRole, UserRole } from "@/hooks/useUserRole";
 
 interface WithRoleAccessOptions {
-  requiredRoles: UserRole[];
+  /** Roles that may open the page. Omit to allow every signed-in role except the blocked ones. */
+  requiredRoles?: UserRole[];
+  /** Roles that must not open the page even though others may (the Super Admin is never blocked). */
+  blockedRoles?: UserRole[];
   redirectTo?: string;
 }
 
@@ -15,14 +18,16 @@ export function withRoleAccess<P extends object>(
   return function ProtectedComponent(props: P) {
     const { role, loading } = useUserRole();
     const navigate = useNavigate();
-    const { requiredRoles, redirectTo = "/dashboard" } = options;
+    const { requiredRoles, blockedRoles = [], redirectTo = "/dashboard" } = options;
+    const allowed = (r: UserRole) => r === "super_admin" || (!blockedRoles.includes(r) && (!requiredRoles || requiredRoles.includes(r)));
+    const permitted = !!role && allowed(role);
 
     useEffect(() => {
       // Super admins have access to everything
-      if (!loading && role && role !== "super_admin" && !requiredRoles.includes(role)) {
+      if (!loading && role && !permitted) {
         navigate(redirectTo, { replace: true });
       }
-    }, [role, loading, navigate]);
+    }, [role, loading, permitted, navigate, redirectTo]);
 
     if (loading) {
       return (
@@ -36,7 +41,7 @@ export function withRoleAccess<P extends object>(
     }
 
     // Super admins bypass all role restrictions
-    if (!role || (role !== "super_admin" && !requiredRoles.includes(role))) {
+    if (!role || !permitted) {
       return null;
     }
 

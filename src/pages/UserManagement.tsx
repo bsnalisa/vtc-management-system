@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import { LoadingIndicator } from "@/components/ui/loading-spinner";
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -45,7 +46,8 @@ const UserManagement = () => {
   const { organizationId } = useOrganizationContext();
   const { role: userRole, navItems, groupLabel } = useRoleNavigation();
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
