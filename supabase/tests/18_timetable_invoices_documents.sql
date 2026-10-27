@@ -5,11 +5,15 @@
 \set trainerA '11111111-0000-0000-0000-000000000004'
 \set adminB '11111111-0000-0000-0000-000000000007'
 \set orgA 'a0000000-0000-0000-0000-00000000000a'
+\set hotA '11111111-0000-0000-0000-0000000000f0'
 \set orgB 'b0000000-0000-0000-0000-00000000000b'
 \set T1 'd0000000-0000-0000-0000-000000000001'
 \set T2 'd0000000-0000-0000-0000-000000000002'
 \set C 'c1000000-0000-0000-0000-0000000000f1'
 
+insert into auth.users (id,email) values (:'hotA','hot-f@a.test') on conflict do nothing;
+insert into profiles (user_id, full_name, email) select id, split_part(email,'@',1), email from auth.users where id = :'hotA' on conflict do nothing;
+insert into user_roles (user_id, role, organization_id) values (:'hotA', 'head_of_training', :'orgA');
 -- ===== timetable =====
 insert into trainers (id, organization_id, user_id, trainer_id, full_name) values ('70000000-0000-0000-0000-0000000000f1', :'orgA', :'trainerA', 'TF', 'Trainer F') on conflict do nothing;
 insert into classes (id, organization_id, trade_id, level, training_mode, class_code, class_name, academic_year, trainer_id)
@@ -17,7 +21,7 @@ insert into classes (id, organization_id, trade_id, level, training_mode, class_
 insert into class_enrollments (class_id, trainee_id) values (:'C', :'T1') on conflict do nothing;
 delete from class_enrollments where class_id = :'C' and trainee_id = :'T2';
 insert into courses (id, code, name, trade_id, level) values ('c2000000-0000-0000-0000-0000000000f1', 'WLD-101', 'Welding basics', 'c0000000-0000-0000-0000-000000000001', 1) on conflict do nothing;
-set role authenticated; select set_config('request.jwt.claim.sub', :'admin', false);
+set role authenticated; select set_config('request.jwt.claim.sub', :'hotA', false);
 insert into timetable_entries (organization_id, academic_year, term, class_id, course_id, day, period_number) values (:'orgA', '2026', 1, :'C', 'c2000000-0000-0000-0000-0000000000f1', 'Monday', 1);
 select public.assert((select published from timetable_entries) = false, 'a saved entry starts as a draft');
 select set_config('request.jwt.claim.sub', :'tr1', false);
@@ -27,7 +31,7 @@ select public.assert((select count(*) from timetable_entries) = 1, 'staff see dr
 select public.expect_error($$select public.publish_timetable('2026', 1)$$, 'Not authorised', 'a trainer cannot publish');
 select set_config('request.jwt.claim.sub', :'tr1', false);
 select public.expect_error($$select public.publish_timetable('2026', 1)$$, 'Not authorised', 'a trainee cannot publish');
-select set_config('request.jwt.claim.sub', :'admin', false);
+select set_config('request.jwt.claim.sub', :'hotA', false);
 select public.assert(public.publish_timetable('2026', 1) = 1, 'publishing changes the entries of that term');
 select public.assert(public.publish_timetable('2026', 1) = 0, 'publishing again changes nothing');
 select set_config('request.jwt.claim.sub', :'tr1', false);

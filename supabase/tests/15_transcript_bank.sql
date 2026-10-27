@@ -20,6 +20,8 @@ insert into qualification_results (organization_id, qualification_id, template_c
  -- trainee 2: one component failed, one result not yet approved
  (:'orgA', :'Q', 'a8000000-0000-0000-0000-000000000001', :'T2', '2026', 40, 30, 50, 'fail', now()),
  (:'orgA', :'Q', 'a8000000-0000-0000-0000-000000000002', :'T2', '2026', 90, 90, 60, 'pass', null);
+insert into auth.users (id,email) values ('11111111-0000-0000-0000-0000000000e1','hot@a.test');
+insert into user_roles (user_id, role, organization_id) values ('11111111-0000-0000-0000-0000000000e1','head_of_training',:'orgA');
 set role authenticated; select set_config('request.jwt.claim.sub', :'tr1', false);
 select public.assert((public.transcript_data(:'T1') ->> 'total_credits')::int = 20 and (public.transcript_data(:'T1') ->> 'completed_credits')::int = 20, 'all components passed: credits completed');
 select public.assert((public.transcript_data(:'T1') ->> 'average_mark')::numeric = 67.5, 'average of final marks (75 and 60)');
@@ -32,7 +34,7 @@ select public.expect_error($$select public.transcript_data('d0000000-0000-0000-0
 select public.expect_error($$select public.issue_transcript('d0000000-0000-0000-0000-000000000001', '2026')$$, 'Not authorised', 'staff of another centre cannot issue it');
 select set_config('request.jwt.claim.sub', :'tr1', false);
 select public.expect_error($$select public.issue_transcript('d0000000-0000-0000-0000-000000000001', '2026')$$, 'Not authorised', 'a trainee cannot issue their own transcript');
-select set_config('request.jwt.claim.sub', :'admin', false);
+select set_config('request.jwt.claim.sub', '11111111-0000-0000-0000-0000000000e1', false);
 select public.assert(public.issue_transcript(:'T1', '2026') ->> 'transcript_number' like 'TR-%', 'staff issue a transcript with a number');
 select public.assert((select public.issue_transcript(:'T1', '2026') ->> 'transcript_number') = (select transcript_number from transcripts where trainee_id = :'T1'), 'issuing again keeps the same number');
 select public.assert((select count(*) from transcripts where trainee_id = :'T1') = 1, 'one transcript row per trainee and year');

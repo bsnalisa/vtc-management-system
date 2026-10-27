@@ -20,7 +20,7 @@ export default function SystemStatus() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useItSystemStatus();
   const c = data?.counts;
-  const problems = (c?.messages_waiting ?? 0) + (c?.messages_failed_7d ?? 0) + (c?.account_setup_failures_14d ?? 0) + (data?.accounts.failed_logins ?? 0);
+  const problems = (c && !c.delivery_configured ? 1 : 0) + (c?.messages_waiting ?? 0) + (c?.messages_failed_7d ?? 0) + (c?.account_setup_failures_14d ?? 0) + (data?.accounts.failed_logins ?? 0);
 
   return (
     <DashboardLayout title="System Diagnostics" subtitle="What is failing at your centre right now" navItems={navItems} groupLabel={groupLabel}>
@@ -46,6 +46,20 @@ export default function SystemStatus() {
               );
             })}
           </div>
+
+          <Card>
+            <CardHeader><CardTitle>Message delivery</CardTitle><CardDescription>Emails and SMS to trainees and staff are sent by a background job.</CardDescription></CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              {c!.delivery_configured ? (
+                <p>Delivery is switched on. {c!.messages_sent_7d} message{c!.messages_sent_7d === 1 ? "" : "s"} sent in the last 7 days.</p>
+              ) : (
+                <>
+                  <p className="font-medium">Message delivery is not set up, so messages stay in the queue and are never sent.</p>
+                  <p className="text-muted-foreground">This is a platform set-up step for the Super Admin: store the functions URL and dispatch secret in the database vault, add the matching DISPATCH_SECRET and email provider keys to the edge functions, then the queue sends within five minutes. See docs/messaging-setup.md.</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader><CardTitle>Account set-up failures</CardTitle><CardDescription>Trainee accounts the system could not create. Check the details, then use Support Tickets to follow up or escalate.</CardDescription></CardHeader>
