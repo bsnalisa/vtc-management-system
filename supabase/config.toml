@@ -71,3 +71,9 @@ verify_jwt = false
 
 [functions.create-applicant-account]
 verify_jwt = true
+
+[functions.purge-test-storage]
+verify_jwt = false
+
+[functions.seed-test-accounts]
+verify_jwt = false

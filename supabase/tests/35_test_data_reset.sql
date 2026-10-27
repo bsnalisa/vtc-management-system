@@ -21,6 +21,10 @@ select trainee_id as rno from trainees where national_id = 'NAT-RESET-R' \gset
 insert into fee_records (trainee_id, total_fee, amount_paid, academic_year, organization_id) select id, 1000, 0, '2026', :'orgA' from trainees where national_id in ('NAT-RESET-T','NAT-RESET-R');
 insert into outbound_messages (organization_id, channel, recipient, subject, body) values (:'orgA','email','tt@a.test','s','b'),(:'orgA','email','x@vms-test.example','s','b'),(:'orgA','email','tr@a.test','s','b');
 
+insert into admin_audit_log (organization_id, actor_id, action, entity, entity_id, summary) select :'orgA', :'stR', 'trainee.updated', 'trainees', id::text, 'edited a test trainee' from trainees where national_id = 'NAT-RESET-T';
+insert into admin_audit_log (organization_id, actor_id, action, entity, entity_id, summary) values (:'orgA', :'stT', 'x.did', 'things', 'abc', 'by a test login'), (:'orgA', :'stR', 'x.did', 'things', 'abc', 'by a real login');
+insert into storage.objects (bucket_id, name, owner) values ('organization-logos', 'test/logo.png', :'stT'), ('organization-logos', 'real/logo.png', :'stR');
+
 set role authenticated; select set_config('request.jwt.claim.sub', :'stR', false);
 select public.expect_error($$select public.reset_test_data(true, false)$$, 'Only the Super Admin', 'staff cannot run the reset');
 select public.expect_error($$select public.mark_test_identities(array['1'])$$, 'Only the Super Admin', 'staff cannot mark test trainees');
@@ -41,6 +45,7 @@ reset role;
 select public.assert((select count(*) from trainees where national_id = 'NAT-RESET-T') = 0, 'the test trainee is gone');
 select public.assert((select count(*) from fee_records where trainee_id not in (select id from trainees)) = 0 and (select count(*) from fee_records f join trainees t on t.id = f.trainee_id where t.national_id = 'NAT-RESET-R') = 1, 'their fee records went, the real trainee''s stayed');
 select public.assert((select count(*) from auth.users where id = '97777777-0000-0000-0000-000000000002') = 0 and (select count(*) from user_roles where user_id = '97777777-0000-0000-0000-000000000002') = 0 and (select count(*) from profiles where user_id = '97777777-0000-0000-0000-000000000002') = 0, 'the login, role and profile are gone');
+select public.assert((select count(*) from admin_audit_log where summary = 'edited a test trainee') = 0, 'log entries about the removed trainee are gone');
 select public.assert((select count(*) from trainee_number_ledger where number = :'tno') = 0 and (select count(*) from trainee_identities where trainee_number = :'tno') = 0, 'the identity and its number are removed');
 select public.assert((select count(*) from trainees where national_id = 'NAT-RESET-R') = 1 and (select count(*) from trainee_identities where trainee_number = :'rno') = 1 and (select count(*) from auth.users where id = '97777777-0000-0000-0000-000000000003') = 1, 'the real trainee, identity and login are untouched');
 select public.assert((select count(*) from auth.users where id = '97777777-0000-0000-0000-000000000004') = 1, 'staff logins stay unless asked for');
@@ -55,6 +60,8 @@ select public.reset_test_data(false, true);
 reset role;
 select public.assert((select count(*) from auth.users where id = '97777777-0000-0000-0000-000000000004') = 0 and (select count(*) from user_roles where user_id = '97777777-0000-0000-0000-000000000004') = 0, 'test staff logins are removed on request');
 select public.assert((select count(*) from auth.users where id in ('97777777-0000-0000-0000-000000000001','97777777-0000-0000-0000-000000000005','97777777-0000-0000-0000-000000000003')) = 3, 'the Super Admin and real logins stay');
+select public.assert((select count(*) from admin_audit_log where summary = 'by a test login') = 0 and (select count(*) from admin_audit_log where summary = 'by a real login') = 1, 'actions by test logins are removed, real ones stay');
+select public.assert((select count(*) from test_storage_queue where name = 'test/logo.png') = 1 and (select count(*) from test_storage_queue where name = 'real/logo.png') = 0, 'files uploaded by test logins are queued for removal');
 select public.assert((select count(*) from outbound_messages where recipient = 'x@vms-test.example') = 0, 'messages to the test domain are removed');
 
 -- the test number is free again, a numbered TEST- identity is marked on its own

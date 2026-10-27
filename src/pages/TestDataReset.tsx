@@ -19,7 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 const db = supabase as any;
 
 interface TestIdentity { trainee_number: string; full_name: string; centre: string; status: string }
-interface ResetResult { dry_run: boolean; identities: number; logins: number; rows: Record<string, number> }
+interface ResetResult { dry_run: boolean; identities: number; logins: number; files_queued: number; rows: Record<string, number> }
+interface Seeded { centre: string; created: { role: string; email: string; password: string }[]; skipped: { role: string; email: string; reason: string }[] }
 
 const CONFIRM_WORD = "RESET";
 
@@ -69,10 +70,51 @@ export default function TestDataReset() {
         toast({ title: "Test data removed", description: `${res.identities} test trainee${res.identities === 1 ? "" : "s"} and ${res.logins} login${res.logins === 1 ? "" : "s"} removed.` });
         setConfirm("");
         qc.invalidateQueries({ queryKey: ["test-identities"] });
+        if (res.files_queued > 0) files.mutate();
       }
     },
     onError: (e: Error) => toast({ title: "Reset failed, nothing was changed", description: e.message, variant: "destructive" }),
   });
+
+  const files = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("purge-test-storage", { body: {} });
+      if (error) throw error;
+      return data as { removed: number; failed: string[] };
+    },
+    onSuccess: (r) => toast({ title: `${r.removed} test file${r.removed === 1 ? "" : "s"} removed`, description: r.failed.length ? `${r.failed.length} could not be removed` : undefined }),
+    onError: (e: Error) => toast({ title: "Test files were not removed", description: e.message, variant: "destructive" }),
+  });
+
+  const centres = useQuery({
+    queryKey: ["centres-for-seed"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("organizations").select("id, name").order("name");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
+  const [centre, setCentre] = useState("");
+  const [suffix, setSuffix] = useState("");
+  const [seeded, setSeeded] = useState<Seeded | null>(null);
+  const seed = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("seed-test-accounts", { body: { organization_id: centre, suffix: suffix || undefined } });
+      if (error) throw error;
+      return data as Seeded;
+    },
+    onSuccess: (r) => { setSeeded(r); qc.invalidateQueries({ queryKey: ["test-identities"] }); },
+    onError: (e: Error) => toast({ title: "Test accounts were not created", description: e.message, variant: "destructive" }),
+  });
+  const downloadCsv = () => {
+    if (!seeded) return;
+    const csv = ["role,email,password", ...seeded.created.map((c) => `${c.role},${c.email},${c.password}`)].join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "test-accounts.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
   const rows = preview ? Object.entries(preview.rows) : [];
 
@@ -126,7 +168,7 @@ export default function TestDataReset() {
 
             {preview && (
               <div className="space-y-2">
-                <p className="text-sm">{preview.dry_run ? "Preview: " : "Removed: "}{preview.identities} test trainee{preview.identities === 1 ? "" : "s"}, {preview.logins} login{preview.logins === 1 ? "" : "s"}.</p>
+                <p className="text-sm">{preview.dry_run ? "Preview: " : "Removed: "}{preview.identities} test trainee{preview.identities === 1 ? "" : "s"}, {preview.logins} login{preview.logins === 1 ? "" : "s"}{preview.files_queued > 0 ? `, ${preview.files_queued} uploaded file${preview.files_queued === 1 ? "" : "s"}` : ""}.</p>
                 {rows.length > 0 && (
                   <div className="max-h-72 overflow-auto">
                     <Table>
@@ -145,6 +187,36 @@ export default function TestDataReset() {
                   <Input id="confirm" className="max-w-[200px]" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
                   <Button variant="destructive" disabled={confirm !== CONFIRM_WORD || run.isPending} onClick={() => run.mutate(false)}>{run.isPending && <ButtonSpinner />}Remove test data</Button>
                 </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Start again with fresh test accounts</CardTitle>
+            <CardDescription>Creates one test login for every role at a centre, with new random passwords. The passwords are shown once and are not stored, so download them now.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="centre">Centre</Label>
+                <select id="centre" className="h-10 rounded-md border border-input bg-background px-3 text-sm" value={centre} onChange={(e) => setCentre(e.target.value)}>
+                  <option value="">Choose a centre</option>
+                  {(centres.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="suffix">Address suffix (optional, for a second centre)</Label>
+                <Input id="suffix" className="max-w-[200px]" value={suffix} onChange={(e) => setSuffix(e.target.value)} placeholder="gobabis" />
+              </div>
+              <Button disabled={!centre || seed.isPending} onClick={() => seed.mutate()}>{seed.isPending && <ButtonSpinner />}Create test accounts</Button>
+            </div>
+            {seeded && (
+              <div className="space-y-2">
+                <p className="text-sm">{seeded.created.length} account{seeded.created.length === 1 ? "" : "s"} created at {seeded.centre}. These passwords will not be shown again.</p>
+                <Button variant="outline" onClick={downloadCsv}>Download as CSV</Button>
+                {seeded.skipped.length > 0 && <Alert variant="destructive"><AlertDescription>Skipped: {seeded.skipped.map((k) => `${k.email} (${k.reason})`).join("; ")}</AlertDescription></Alert>}
               </div>
             )}
           </CardContent>

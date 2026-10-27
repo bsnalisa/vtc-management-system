@@ -34,6 +34,27 @@ CREATE OR REPLACE FUNCTION public.test_data_purges_append_only() RETURNS trigger
 BEGIN RAISE EXCEPTION 'The reset log can never be changed or removed' USING ERRCODE = '42501'; END $$;
 CREATE TRIGGER trg_test_data_purges_append_only BEFORE UPDATE OR DELETE ON public.test_data_purges FOR EACH ROW EXECUTE FUNCTION public.test_data_purges_append_only();
 
+-- files uploaded by test logins; the database cannot delete storage files, so the purge-test-storage function removes them from this list
+CREATE TABLE IF NOT EXISTS public.test_storage_queue (
+  bucket_id text NOT NULL, name text NOT NULL, queued_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (bucket_id, name)
+);
+ALTER TABLE public.test_storage_queue ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Super admins read the test file queue" ON public.test_storage_queue FOR SELECT TO authenticated USING (public.is_super_admin(auth.uid()));
+
+CREATE OR REPLACE FUNCTION private.queue_test_files(_uids uuid[]) RETURNS integer LANGUAGE plpgsql SET search_path = public, pg_temp AS $$
+DECLARE n integer := 0;
+BEGIN
+  BEGIN
+    EXECUTE 'INSERT INTO public.test_storage_queue (bucket_id, name) SELECT bucket_id, name FROM storage.objects WHERE owner = ANY ($1) ON CONFLICT DO NOTHING' USING _uids;
+    GET DIAGNOSTICS n = ROW_COUNT;
+  EXCEPTION WHEN undefined_table OR undefined_column OR invalid_schema_name THEN n := 0;
+  END;
+  RETURN n;
+END $$;
+REVOKE ALL ON FUNCTION private.queue_test_files(uuid[]) FROM PUBLIC, anon, authenticated;
+SELECT private.queue_test_files(coalesce(array_agg(id), '{}')) FROM auth.users WHERE email ILIKE '%@vms-test.example';
+
 CREATE OR REPLACE FUNCTION public.mark_test_identities(_numbers text[], _is_test boolean DEFAULT true) RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE n integer;
 BEGIN
@@ -90,6 +111,9 @@ BEGIN
   EXECUTE format('SELECT count(*) FROM %s WHERE %s', _tbl, _pred) INTO _n;
   IF _n > 0 THEN
     IF regexp_replace(_tbl::text, '^public\.', '') = ANY (_protected) THEN RAISE EXCEPTION 'Reset stopped: it would remove % row(s) of %, which is core set-up data', _n, _tbl; END IF;
+    IF EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid = _tbl AND attname = 'id' AND atttypid = 'uuid'::regtype AND NOT attisdropped) THEN
+      EXECUTE format('INSERT INTO pg_temp.purge_ids SELECT id::text FROM %s WHERE %s ON CONFLICT DO NOTHING', _tbl, _pred);
+    END IF;
     EXECUTE format('DELETE FROM %s WHERE %s', _tbl, _pred);
     INSERT INTO pg_temp.purge_counts VALUES (_tbl::text, _n) ON CONFLICT (tbl) DO UPDATE SET n = purge_counts.n + EXCLUDED.n;
   END IF;
@@ -103,6 +127,8 @@ BEGIN
   IF auth.uid() IS NOT NULL AND NOT public.is_super_admin(auth.uid()) THEN RAISE EXCEPTION 'Only the Super Admin can reset test data' USING ERRCODE = '42501'; END IF;
   CREATE TEMP TABLE IF NOT EXISTS purge_counts (tbl text PRIMARY KEY, n bigint NOT NULL);
   DELETE FROM purge_counts;
+  CREATE TEMP TABLE IF NOT EXISTS purge_ids (id text PRIMARY KEY);
+  DELETE FROM purge_ids;
   BEGIN
     PERFORM set_config('session_replication_role', 'replica', true);
     SELECT coalesce(array_agg(id), '{}') INTO _iids FROM public.trainee_identities WHERE is_test;
@@ -135,11 +161,29 @@ BEGIN
         GET DIAGNOSTICS _n = ROW_COUNT;
         IF _n > 0 THEN INSERT INTO purge_counts VALUES (r.table_name, _n) ON CONFLICT (tbl) DO UPDATE SET n = purge_counts.n + EXCLUDED.n; END IF;
       END LOOP;
+      PERFORM private.queue_test_files(_uids);
       PERFORM private.purge_cascade('auth.users'::regclass, format('id = ANY (%L::uuid[])', _uids::text), '{}');
     END IF;
 
+    -- log entries that only name a removed record or login (no foreign key): audit, activity and history rows
+    FOR r IN SELECT c.table_name, c.column_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema = c.table_schema AND t.table_name = c.table_name AND t.table_type = 'BASE TABLE'
+              WHERE c.table_schema = 'public' AND c.column_name IN ('entity_id', 'record_id', 'subject_id') AND c.data_type IN ('uuid', 'text', 'character varying') LOOP
+      EXECUTE format('DELETE FROM public.%I WHERE %I::text IN (SELECT id FROM purge_ids)', r.table_name, r.column_name);
+      GET DIAGNOSTICS _n = ROW_COUNT;
+      IF _n > 0 THEN INSERT INTO purge_counts VALUES (r.table_name || ' (log entries)', _n) ON CONFLICT (tbl) DO UPDATE SET n = purge_counts.n + EXCLUDED.n; END IF;
+    END LOOP;
+    IF cardinality(_uids) > 0 THEN
+      FOR r IN SELECT c.table_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema = c.table_schema AND t.table_name = c.table_name AND t.table_type = 'BASE TABLE'
+                WHERE c.table_schema = 'public' AND c.column_name = 'actor_id' AND c.data_type = 'uuid' LOOP
+        EXECUTE format('DELETE FROM public.%I WHERE actor_id = ANY ($1)', r.table_name) USING _uids;
+        GET DIAGNOSTICS _n = ROW_COUNT;
+        IF _n > 0 THEN INSERT INTO purge_counts VALUES (r.table_name || ' (actions by test logins)', _n) ON CONFLICT (tbl) DO UPDATE SET n = purge_counts.n + EXCLUDED.n; END IF;
+      END LOOP;
+    END IF;
+    SELECT count(*) INTO _n FROM public.test_storage_queue;
+
     SELECT coalesce(jsonb_object_agg(tbl, n ORDER BY tbl), '{}') INTO _res FROM purge_counts;
-    _res := jsonb_build_object('dry_run', _dry_run, 'identities', cardinality(_iids), 'logins', cardinality(_uids), 'rows', _res);
+    _res := jsonb_build_object('dry_run', _dry_run, 'identities', cardinality(_iids), 'logins', cardinality(_uids), 'files_queued', _n, 'rows', _res);
     IF _dry_run THEN RAISE EXCEPTION 'DRY:%', _res::text USING ERRCODE = 'P0099'; END IF;
     INSERT INTO public.test_data_purges (run_by, include_staff, counts) VALUES (auth.uid(), _include_staff, _res);
     PERFORM set_config('session_replication_role', 'origin', true);
