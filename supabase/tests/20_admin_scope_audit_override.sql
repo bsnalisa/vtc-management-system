@@ -64,8 +64,12 @@ select public.assert((select total_fee from fee_records where id = 'f1000000-000
 
 -- ===== override =====
 set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', false);
-select public.expect_error($$select public.start_admin_override('short', 30)$$, 'reason', 'an override needs a real reason');
-select public.start_admin_override('Fixing a wrong fee for trainee 1', 30);
+-- the administrator cannot start an override any more (finance and grades are not part of the IT administrator role)
+select public.expect_error($$select public.start_admin_override('Fixing a wrong fee for trainee 1', 30)$$, 'not part of the Organization Admin role', 'an administrator cannot start an override');
+reset role;
+-- the gate itself still honours an override that exists (simulated here as a legacy row)
+insert into admin_overrides (user_id, organization_id, reason, expires_at) values (:'adminA', 'a0000000-0000-0000-0000-00000000000a', 'Legacy override for the gate test', now() + interval '30 minutes');
+set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', false);
 select public.assert(public.has_active_admin_override(:'adminA'), 'the override is active');
 update fee_records set total_fee = 900 where id = 'f1000000-0000-0000-0000-00000000000a';
 reset role;
@@ -73,7 +77,7 @@ select public.assert((select total_fee from fee_records where id = 'f1000000-000
 set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', false);
 select public.assert((select count(*) from admin_overrides where user_id = :'adminA') = 1, 'a centre admin sees their own override');
 select set_config('request.jwt.claim.sub', :'debtor', false);
-select public.expect_error($$select public.start_admin_override('I am not an admin at all', 30)$$, 'Organization Admin', 'only centre admins can start an override');
+select public.expect_error($$select public.start_admin_override('I am not an admin at all', 30)$$, 'not part of the Organization Admin role', 'nobody else can start an override either');
 select public.assert((select count(*) from admin_overrides) = 0, 'other staff cannot see overrides');
 select set_config('request.jwt.claim.sub', :'adminA', false);
 select public.end_admin_override();
@@ -86,7 +90,7 @@ update admin_overrides set expires_at = now() - interval '1 minute', ended_at = 
 select public.assert(not public.has_active_admin_override(:'adminA'), 'an expired override does not count');
 
 -- ===== audit trail =====
-select public.assert((select count(*) from admin_audit_log where action = 'override.started') = 1 and (select count(*) from admin_audit_log where action = 'override.ended') = 1, 'override start and end are logged');
+select public.assert((select count(*) from admin_audit_log where action = 'override.started') = 0 and (select count(*) from admin_audit_log where action = 'override.ended') = 1, 'ending an override is logged (none can be started any more)');
 select public.assert((select count(*) from admin_audit_log where action = 'fee_records.update' and actor_id = :'adminA') = 1, 'the admin''s fee change is logged once (the blocked attempts are not)');
 select public.assert((select (details->'changes'->'total_fee'->>'to')::numeric from admin_audit_log where action = 'fee_records.update') = 900, 'the log records what changed');
 select public.assert((select (details->>'override')::boolean from admin_audit_log where action = 'fee_records.update'), 'the log says it was done under an override');
@@ -94,7 +98,7 @@ select public.assert((select count(*) from admin_audit_log where actor_id = :'de
 select public.expect_error($$update admin_audit_log set action = 'x'$$, 'cannot be changed', 'the audit log cannot be edited');
 select public.expect_error($$delete from admin_audit_log$$, 'cannot be changed', 'the audit log cannot be deleted');
 set role authenticated; select set_config('request.jwt.claim.sub', :'adminA', false);
-select public.assert((select count(*) from admin_audit_log) >= 3, 'a centre admin reads their audit log');
+select public.assert((select count(*) from admin_audit_log) >= 2, 'a centre admin reads their audit log');
 select public.expect_error($$insert into admin_audit_log (action, entity) values ('forged', 'x')$$, 'permission denied|row-level security', 'clients cannot write audit entries');
 select set_config('request.jwt.claim.sub', :'adminB', false);
 select public.assert((select count(*) from admin_audit_log where organization_id = 'a0000000-0000-0000-0000-00000000000a') = 0, 'another centre''s admin cannot read this audit log');

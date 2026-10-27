@@ -110,12 +110,15 @@ const GraduationSurveys = lazy(() => import("./pages/GraduationSurveys"));
 const SurveyResponse = lazy(() => import("./pages/SurveyResponse"));
 const GraduationRsvp = lazy(() => import("./pages/GraduationRsvp"));
 const RoleActivityDashboard = lazy(() => import("./pages/RoleActivityDashboard"));
+const EscalatedTickets = lazy(() => import("./pages/EscalatedTickets"));
+const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const ModulesManagement = lazy(() => import("./pages/ModulesManagement"));
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { OrganizationProvider } from "./hooks/useOrganizationContext";
 import { withRoleAccess } from "./components/withRoleAccess";
+import type { UserRole } from "@/hooks/useUserRole";
 const TraineeDetail = lazy(() => import("./pages/TraineeDetail"));
 const HeadOfTraineeSupportDashboard = lazy(() => import("./pages/HeadOfTraineeSupportDashboard"));
 const ProjectsRegister = lazy(() => import("./pages/ProjectsRegister"));
@@ -355,22 +358,22 @@ const ProtectedAlumniManagement = withRoleAccess(AlumniManagement, {
   requiredRoles: ["admin", "super_admin", "placement_officer"],
 });
 const ProtectedGraduationSurveys = withRoleAccess(GraduationSurveys, {
-  requiredRoles: ["admin", "organization_admin", "centre_manager", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
+  requiredRoles: ["admin", "centre_manager", "head_of_training", "head_of_trainee_support", "registration_officer", "placement_officer"],
 });
 const ProtectedAssessmentRequests = withRoleAccess(AssessmentRequests, {
-  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer"],
+  requiredRoles: ["admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer"],
 });
 const ProtectedAssessmentDevelopment = withRoleAccess(AssessmentDevelopment, {
-  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "subject_matter_expert"],
+  requiredRoles: ["admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "subject_matter_expert"],
 });
 const ProtectedAssessmentSittings = withRoleAccess(AssessmentSittings, {
-  requiredRoles: ["admin", "organization_admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "printing_distribution_officer"],
+  requiredRoles: ["admin", "assessment_coordinator", "rpl_coordinator", "head_of_training", "registration_officer", "printing_distribution_officer"],
 });
 const ProtectedDeliveryPlans = withRoleAccess(DeliveryPlans, {
-  requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "assessment_coordinator", "trainer"],
+  requiredRoles: ["admin", "head_of_training", "hod", "assessment_coordinator", "trainer"],
 });
 const ProtectedLogbookReview = withRoleAccess(LogbookReview, {
-  requiredRoles: ["admin", "organization_admin", "head_of_training", "hod", "placement_officer", "trainer"],
+  requiredRoles: ["admin", "head_of_training", "hod", "placement_officer", "trainer"],
 });
 const ProtectedWorkflows = withRoleAccess(Workflows, {
   requiredRoles: ["admin", "organization_admin"],
@@ -396,6 +399,21 @@ const ProtectedTraineeAffairs = withRoleAccess(TraineeAffairs, {
 const ProtectedEntryRequirements = withRoleAccess(EntryRequirementsManagement, {
   requiredRoles: ["registration_officer", "head_of_trainee_support"],
 });
+
+// The Organization Admin is the centre's IT administrator: academic, results and finance pages are not part of that role.
+const notForItAdmin = { blockedRoles: ["organization_admin"] as UserRole[] };
+const ProtectedTranscripts = withRoleAccess(Transcripts, notForItAdmin);
+const ProtectedLibrary = withRoleAccess(Library, notForItAdmin);
+const ProtectedCourseCatalogue = withRoleAccess(CourseCatalogue, notForItAdmin);
+const ProtectedLearningSpace = withRoleAccess(LearningSpace, notForItAdmin);
+const ProtectedDeferralRequests = withRoleAccess(DeferralRequests, notForItAdmin);
+const ProtectedReports = withRoleAccess(Reports, notForItAdmin);
+const ProtectedCertificationReports = withRoleAccess(CertificationReports, notForItAdmin);
+const ProtectedModuleReports = withRoleAccess(ModuleReports, notForItAdmin);
+const ProtectedBankReconciliation = withRoleAccess(BankReconciliation, notForItAdmin);
+const ProtectedAccountingExport = withRoleAccess(AccountingExport, notForItAdmin);
+const ProtectedEscalatedTickets = withRoleAccess(EscalatedTickets, { requiredRoles: ["super_admin"] });
+const ProtectedSystemStatus = withRoleAccess(SystemStatus, { requiredRoles: ["organization_admin", "admin"] });
 
 const App = () => (
   <ErrorBoundary>
@@ -504,7 +522,7 @@ const App = () => (
           <Route path="/trainers" element={<ProtectedRoute><ProtectedTrainerManagement /></ProtectedRoute>} />
           <Route path="/attendance" element={<ProtectedRoute><AttendanceRegister /></ProtectedRoute>} />
           <Route path="/fees" element={<ProtectedRoute><ProtectedFeeManagement /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><ProtectedReports /></ProtectedRoute>} />
           <Route path="/enrollments" element={<ProtectedRoute><CourseEnrollment /></ProtectedRoute>} />
           <Route path="/assessment-results" element={<ProtectedRoute><AssessmentResults /></ProtectedRoute>} />
           <Route path="/gradebooks" element={<ProtectedRoute><GradebookManagement /></ProtectedRoute>} />
@@ -565,8 +583,10 @@ const App = () => (
           <Route path="/logbook-review" element={<ProtectedRoute><ProtectedLogbookReview /></ProtectedRoute>} />
           <Route path="/workflows" element={<ProtectedRoute><ProtectedWorkflows /></ProtectedRoute>} />
           <Route path="/my-approvals" element={<ProtectedRoute><MyApprovals /></ProtectedRoute>} />
-          <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+          <Route path="/library" element={<ProtectedRoute><ProtectedLibrary /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
+          <Route path="/escalated-tickets" element={<ProtectedRoute><ProtectedEscalatedTickets /></ProtectedRoute>} />
+          <Route path="/system-status" element={<ProtectedRoute><ProtectedSystemStatus /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />
           <Route path="/qualification-approvals" element={<ProtectedRoute><QualificationApprovals /></ProtectedRoute>} />
@@ -588,18 +608,18 @@ const App = () => (
           <Route path="/trainee/requests" element={<ProtectedRoute><TraineeRequestsPage /></ProtectedRoute>} />
           <Route path="/trainee/logbook" element={<ProtectedRoute><TraineeLogbookPage /></ProtectedRoute>} />
           <Route path="/academic-calendar" element={<ProtectedRoute><AcademicCalendar /></ProtectedRoute>} />
-          <Route path="/deferral-requests" element={<ProtectedRoute><DeferralRequests /></ProtectedRoute>} />
+          <Route path="/deferral-requests" element={<ProtectedRoute><ProtectedDeferralRequests /></ProtectedRoute>} />
           <Route path="/trainee/deferral" element={<ProtectedRoute><TraineeDeferralPage /></ProtectedRoute>} />
-          <Route path="/course-catalogue" element={<ProtectedRoute><CourseCatalogue /></ProtectedRoute>} />
+          <Route path="/course-catalogue" element={<ProtectedRoute><ProtectedCourseCatalogue /></ProtectedRoute>} />
           <Route path="/trainee/transcript" element={<ProtectedRoute><TraineeTranscriptPage /></ProtectedRoute>} />
-          <Route path="/transcripts" element={<ProtectedRoute><Transcripts /></ProtectedRoute>} />
-          <Route path="/bank-reconciliation" element={<ProtectedRoute><BankReconciliation /></ProtectedRoute>} />
-          <Route path="/accounting-export" element={<ProtectedRoute><AccountingExport /></ProtectedRoute>} />
-          <Route path="/learning" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} />
+          <Route path="/transcripts" element={<ProtectedRoute><ProtectedTranscripts /></ProtectedRoute>} />
+          <Route path="/bank-reconciliation" element={<ProtectedRoute><ProtectedBankReconciliation /></ProtectedRoute>} />
+          <Route path="/accounting-export" element={<ProtectedRoute><ProtectedAccountingExport /></ProtectedRoute>} />
+          <Route path="/learning" element={<ProtectedRoute><ProtectedLearningSpace /></ProtectedRoute>} />
           <Route path="/moodle" element={<ProtectedRoute><MoodleIntegration /></ProtectedRoute>} />
           <Route path="/registration-windows" element={<ProtectedRoute><RegistrationWindows /></ProtectedRoute>} />
-          <Route path="/reports/certification" element={<ProtectedRoute><CertificationReports /></ProtectedRoute>} />
-          <Route path="/reports/modules" element={<ProtectedRoute><ModuleReports /></ProtectedRoute>} />
+          <Route path="/reports/certification" element={<ProtectedRoute><ProtectedCertificationReports /></ProtectedRoute>} />
+          <Route path="/reports/modules" element={<ProtectedRoute><ProtectedModuleReports /></ProtectedRoute>} />
           <Route path="/trainee/timetable" element={<ProtectedRoute><TraineeTimetablePage /></ProtectedRoute>} />
           <Route path="/document-settings" element={<ProtectedRoute><DocumentSettings /></ProtectedRoute>} />
           <Route path="/trainee/events" element={<ProtectedRoute><TraineeEventsPage /></ProtectedRoute>} />

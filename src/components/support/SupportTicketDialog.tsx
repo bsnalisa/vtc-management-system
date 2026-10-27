@@ -61,7 +61,7 @@ export function SupportTicketDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="priority">Priority *</Label>
-              <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
+              <Select value={priority} onValueChange={(value) => setPriority(value as typeof priority)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

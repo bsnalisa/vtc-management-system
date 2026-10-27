@@ -30,7 +30,6 @@ import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { toast as showToast } from "sonner";
 import { signOutAndClearCaches } from "@/lib/authUtils";
 import { AppLogo } from "@/components/AppLogo";
-import { AdminOverrideBar } from "@/components/admin/AdminOverrideBar";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 
 interface NavItem {
@@ -208,6 +207,7 @@ function TopHeader({
   onSignOut 
 }: { 
   organizationName: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings: any;
   onSignOut: () => void;
 }) {
@@ -229,7 +229,6 @@ function TopHeader({
 
       {/* User Actions */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-        <AdminOverrideBar />
         <RoleSwitcher />
         <Button 
           variant="ghost" 
