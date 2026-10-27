@@ -11747,15 +11747,76 @@ export type Database = {
         }
         Relationships: []
       }
+      support_ticket_messages: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          author_role: string | null
+          body: string
+          created_at: string
+          id: string
+          internal: boolean
+          kind: string
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          author_role?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          internal?: boolean
+          kind: string
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          author_role?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          internal?: boolean
+          kind?: string
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
           assigned_to: string | null
           category: string | null
           created_at: string
           description: string
+          escalated_at: string | null
+          escalated_by: string | null
+          escalation_reason: string | null
+          escalation_status: string
           id: string
+          last_requester_reply_at: string | null
+          last_staff_reply_at: string | null
           organization_id: string
           priority: string
+          reference: string | null
           resolution_notes: string | null
           resolved_at: string | null
           status: string
@@ -11768,9 +11829,16 @@ export type Database = {
           category?: string | null
           created_at?: string
           description: string
+          escalated_at?: string | null
+          escalated_by?: string | null
+          escalation_reason?: string | null
+          escalation_status?: string
           id?: string
+          last_requester_reply_at?: string | null
+          last_staff_reply_at?: string | null
           organization_id: string
           priority?: string
+          reference?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           status?: string
@@ -11783,9 +11851,16 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string
+          escalated_at?: string | null
+          escalated_by?: string | null
+          escalation_reason?: string | null
+          escalation_status?: string
           id?: string
+          last_requester_reply_at?: string | null
+          last_staff_reply_at?: string | null
           organization_id?: string
           priority?: string
+          reference?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           status?: string
@@ -12065,6 +12140,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      test_data_purges: {
+        Row: {
+          counts: Json
+          id: string
+          include_staff: boolean
+          run_at: string
+          run_by: string | null
+        }
+        Insert: {
+          counts: Json
+          id?: string
+          include_staff: boolean
+          run_at?: string
+          run_by?: string | null
+        }
+        Update: {
+          counts?: Json
+          id?: string
+          include_staff?: boolean
+          run_at?: string
+          run_by?: string | null
+        }
+        Relationships: []
+      }
+      test_storage_queue: {
+        Row: {
+          bucket_id: string
+          name: string
+          queued_at: string
+        }
+        Insert: {
+          bucket_id: string
+          name: string
+          queued_at?: string
+        }
+        Update: {
+          bucket_id?: string
+          name?: string
+          queued_at?: string
+        }
+        Relationships: []
       }
       timetable_entries: {
         Row: {
@@ -12964,6 +13081,7 @@ export type Database = {
           first_year_source: string
           id: string
           identity_verified: boolean
+          is_test: boolean
           last_name: string | null
           merged_into: string | null
           national_id_normalised: string | null
@@ -12982,6 +13100,7 @@ export type Database = {
           first_year_source?: string
           id?: string
           identity_verified?: boolean
+          is_test?: boolean
           last_name?: string | null
           merged_into?: string | null
           national_id_normalised?: string | null
@@ -13000,6 +13119,7 @@ export type Database = {
           first_year_source?: string
           id?: string
           identity_verified?: boolean
+          is_test?: boolean
           last_name?: string | null
           merged_into?: string | null
           national_id_normalised?: string | null
@@ -15236,7 +15356,7 @@ export type Database = {
       has_custom_permission: {
         Args: {
           _module_code: string
-          _permission_type?: string
+          _permission_type: string
           _user_id: string
         }
         Returns: boolean
@@ -15292,6 +15412,7 @@ export type Database = {
           first_year_source: string
           id: string
           identity_verified: boolean
+          is_test: boolean
           last_name: string | null
           merged_into: string | null
           national_id_normalised: string | null
@@ -15416,6 +15537,11 @@ export type Database = {
         Args: { _academic_year: string; _trainee: string }
         Returns: Json
       }
+      it_account_overview: { Args: { _orgs: string[] }; Returns: Json }
+      it_admin_centres: { Args: never; Returns: string[] }
+      it_dashboard: { Args: never; Returns: Json }
+      it_system_counts: { Args: { _orgs: string[] }; Returns: Json }
+      it_system_status: { Args: never; Returns: Json }
       leave_balances: {
         Args: { _user?: string; _year?: number }
         Returns: {
@@ -15461,6 +15587,15 @@ export type Database = {
           email: string
           full_name: string
           user_id: string
+        }[]
+      }
+      list_test_identities: {
+        Args: never
+        Returns: {
+          centre: string
+          full_name: string
+          status: string
+          trainee_number: string
         }[]
       }
       lock_assessment_cycle: {
@@ -15567,10 +15702,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mark_test_identities: {
+        Args: { _is_test?: boolean; _numbers: string[] }
+        Returns: number
+      }
       merge_identities: {
         Args: { _from: string; _into: string; _reason: string }
         Returns: Json
       }
+      message_delivery_configured: { Args: never; Returns: boolean }
       my_centre_ids: { Args: never; Returns: string[] }
       my_learning_classes: {
         Args: never
@@ -15598,6 +15738,7 @@ export type Database = {
       my_statement_of_results: { Args: never; Returns: Json }
       my_transfer_overview: { Args: never; Returns: Json }
       normalise_national_id: { Args: { _id: string }; Returns: string }
+      not_it_admin: { Args: never; Returns: boolean }
       notify_person: {
         Args: {
           _email: string
@@ -15794,6 +15935,10 @@ export type Database = {
         }
         Returns: string
       }
+      reset_test_data: {
+        Args: { _dry_run?: boolean; _include_staff?: boolean }
+        Returns: Json
+      }
       resolve_funding_followup: {
         Args: { _fid: string; _note: string }
         Returns: undefined
@@ -15928,6 +16073,47 @@ export type Database = {
         }
         Returns: number
       }
+      support_notify: {
+        Args: {
+          _event: string
+          _link: string
+          _message: string
+          _org: string
+          _title: string
+          _user: string
+        }
+        Returns: undefined
+      }
+      support_post: {
+        Args: {
+          _body: string
+          _internal: boolean
+          _kind: string
+          _t: Database["public"]["Tables"]["support_tickets"]["Row"]
+        }
+        Returns: string
+      }
+      support_ticket_add_message: {
+        Args: { _body: string; _internal?: boolean; _ticket: string }
+        Returns: string
+      }
+      support_ticket_assign: {
+        Args: { _assignee: string; _ticket: string }
+        Returns: undefined
+      }
+      support_ticket_escalate: {
+        Args: { _reason: string; _ticket: string }
+        Returns: undefined
+      }
+      support_ticket_set_status: {
+        Args: { _note?: string; _status: string; _ticket: string }
+        Returns: undefined
+      }
+      support_ticket_super_action: {
+        Args: { _action: string; _note: string; _ticket: string }
+        Returns: undefined
+      }
+      ticket_actor_kind: { Args: { _org: string }; Returns: string }
       trades_open_for_application: {
         Args: { _org_id: string }
         Returns: string[]
