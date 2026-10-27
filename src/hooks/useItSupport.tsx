@@ -7,7 +7,7 @@ const db = supabase as any;
 
 export interface AccountHelp { name: string | null; email: string; roles: string; reason: "failed_logins" | "deactivated" | "never_signed_in"; detail: string }
 export interface AccountOverview { total: number; never_signed_in: number; deactivated: number; failed_logins: number; needs_help: AccountHelp[] }
-export interface SystemCounts { messages_waiting: number; messages_failed_7d: number; account_setup_failures_14d: number; modules_enabled: number }
+export interface SystemCounts { messages_waiting: number; messages_failed_7d: number; account_setup_failures_14d: number; modules_enabled: number; delivery_configured: boolean; messages_sent_7d: number }
 
 export interface ItDashboard {
   tickets: { open: number; in_progress: number; awaiting_response: number; assigned_to_me: number; escalated: number; returned: number; resolved_14d: number; unassigned: number };
