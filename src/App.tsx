@@ -111,6 +111,7 @@ const SurveyResponse = lazy(() => import("./pages/SurveyResponse"));
 const GraduationRsvp = lazy(() => import("./pages/GraduationRsvp"));
 const RoleActivityDashboard = lazy(() => import("./pages/RoleActivityDashboard"));
 const EscalatedTickets = lazy(() => import("./pages/EscalatedTickets"));
+const TestDataReset = lazy(() => import("./pages/TestDataReset"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const ModulesManagement = lazy(() => import("./pages/ModulesManagement"));
 import NotFound from "./pages/NotFound";
@@ -413,6 +414,7 @@ const ProtectedModuleReports = withRoleAccess(ModuleReports, notForItAdmin);
 const ProtectedBankReconciliation = withRoleAccess(BankReconciliation, notForItAdmin);
 const ProtectedAccountingExport = withRoleAccess(AccountingExport, notForItAdmin);
 const ProtectedEscalatedTickets = withRoleAccess(EscalatedTickets, { requiredRoles: ["super_admin"] });
+const ProtectedTestDataReset = withRoleAccess(TestDataReset, { requiredRoles: ["super_admin"] });
 const ProtectedSystemStatus = withRoleAccess(SystemStatus, { requiredRoles: ["organization_admin", "admin"] });
 
 const App = () => (
@@ -586,6 +588,7 @@ const App = () => (
           <Route path="/library" element={<ProtectedRoute><ProtectedLibrary /></ProtectedRoute>} />
           <Route path="/support-tickets" element={<ProtectedRoute><SupportTickets /></ProtectedRoute>} />
           <Route path="/escalated-tickets" element={<ProtectedRoute><ProtectedEscalatedTickets /></ProtectedRoute>} />
+          <Route path="/test-data-reset" element={<ProtectedRoute><ProtectedTestDataReset /></ProtectedRoute>} />
           <Route path="/system-status" element={<ProtectedRoute><ProtectedSystemStatus /></ProtectedRoute>} />
           <Route path="/system-logs" element={<ProtectedRoute><SystemLogs /></ProtectedRoute>} />
           <Route path="/qualifications" element={<ProtectedRoute><QualificationManagement /></ProtectedRoute>} />

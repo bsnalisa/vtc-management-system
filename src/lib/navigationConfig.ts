@@ -31,6 +31,7 @@ import {
   Activity,
   ServerCog,
   ArrowUpCircle,
+  Trash2,
 } from "lucide-react";
 
 export interface NavItem {
@@ -66,6 +67,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "Escalated Tickets", url: "/escalated-tickets", icon: ArrowUpCircle },
+  { title: "Test Data Reset", url: "/test-data-reset", icon: Trash2 },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
