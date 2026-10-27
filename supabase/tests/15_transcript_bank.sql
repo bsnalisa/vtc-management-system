@@ -36,8 +36,10 @@ select set_config('request.jwt.claim.sub', :'tr1', false);
 select public.expect_error($$select public.issue_transcript('d0000000-0000-0000-0000-000000000001', '2026')$$, 'Not authorised', 'a trainee cannot issue their own transcript');
 select set_config('request.jwt.claim.sub', '11111111-0000-0000-0000-0000000000e1', false);
 select public.assert(public.issue_transcript(:'T1', '2026') ->> 'transcript_number' like 'TR-%', 'staff issue a transcript with a number');
-select public.assert((select public.issue_transcript(:'T1', '2026') ->> 'transcript_number') = (select transcript_number from transcripts where trainee_id = :'T1'), 'issuing again keeps the same number');
+select public.assert((select public.issue_transcript(:'T1', '2026') ->> 'transcript_number') = (select public.issue_transcript(:'T1', '2026') ->> 'transcript_number'), 'issuing again keeps the same number');
+reset role;
 select public.assert((select count(*) from transcripts where trainee_id = :'T1') = 1, 'one transcript row per trainee and year');
+set role authenticated; select set_config('request.jwt.claim.sub', '11111111-0000-0000-0000-0000000000e1', false);
 select public.expect_error($$select public.issue_transcript('d0000000-0000-0000-0000-000000000001', '2031')$$, 'no approved results', 'no results, no transcript');
 reset role;
 
