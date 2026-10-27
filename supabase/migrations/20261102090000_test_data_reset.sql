@@ -130,7 +130,8 @@ BEGIN
   CREATE TEMP TABLE IF NOT EXISTS purge_ids (id text PRIMARY KEY);
   DELETE FROM purge_ids;
   BEGIN
-    PERFORM set_config('session_replication_role', 'replica', true);
+    -- SET LOCAL, not set_config(): the hosted database allows the statement but refuses the function
+    EXECUTE 'SET LOCAL session_replication_role = replica';
     SELECT coalesce(array_agg(id), '{}') INTO _iids FROM public.trainee_identities WHERE is_test;
     -- logins of test trainees, unless the login also belongs to a real person or holds a staff role
     SELECT coalesce(array_agg(DISTINCT t.user_id), '{}') INTO _uids FROM public.trainees t
@@ -186,12 +187,12 @@ BEGIN
     _res := jsonb_build_object('dry_run', _dry_run, 'identities', cardinality(_iids), 'logins', cardinality(_uids), 'files_queued', _n, 'rows', _res);
     IF _dry_run THEN RAISE EXCEPTION 'DRY:%', _res::text USING ERRCODE = 'P0099'; END IF;
     INSERT INTO public.test_data_purges (run_by, include_staff, counts) VALUES (auth.uid(), _include_staff, _res);
-    PERFORM set_config('session_replication_role', 'origin', true);
+    EXECUTE 'SET LOCAL session_replication_role = origin';
   EXCEPTION WHEN SQLSTATE 'P0099' THEN
     GET STACKED DIAGNOSTICS _msg = MESSAGE_TEXT;
     _res := substr(_msg, 5)::jsonb;
   END;
-  PERFORM set_config('session_replication_role', 'origin', true);
+  EXECUTE 'SET LOCAL session_replication_role = origin';
   RETURN _res;
 END $$;
 
