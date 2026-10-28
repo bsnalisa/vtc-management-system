@@ -107,24 +107,25 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "My Work" },
 ];
 
-// Centre Manager Navigation: oversight of the whole centre; everything here is read-only except approvals
+// Centre Manager Navigation: grouped by the duties in the job description. The Centre Manager
+// oversees; pages outside "Leadership" and "Financial Management" are view-only because creating
+// or changing those records belongs to other roles (e.g. classes to the Head of Training).
 export const centreManagerNavItems: NavItem[] = [
-  { title: "Dashboard", url: "/centre-manager-dashboard", icon: LayoutDashboard, section: "Overview" },
-  { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck, section: "Overview" },
-  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
-  { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Overview" },
-  { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
-  { title: "Centre Targets", url: "/centre-targets", icon: Landmark, section: "Overview" },
-  { title: "Trainees", url: "/trainees", icon: Users, section: "People" },
-  { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck, section: "People" },
-  { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "People" },
-  { title: "Classes", url: "/classes", icon: DoorClosed, section: "People" },
-  { title: "Deferral Requests", url: "/deferral-requests", icon: ClipboardList, section: "People" },
-  { title: "Certification Reports", url: "/reports/certification", icon: FileText, section: "Results" },
-  { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Results" },
-  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap, section: "Results" },
-  { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Support & Records" },
-  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Support & Records" },
+  { title: "Dashboard", url: "/centre-manager-dashboard", icon: LayoutDashboard, section: "Leadership" },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Leadership" },
+  { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Leadership" },
+  { title: "Centre Targets", url: "/centre-targets", icon: Landmark, section: "Leadership" },
+  { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck, section: "Financial Management" },
+  { title: "Classes", url: "/classes", icon: DoorClosed, section: "Quality of Training (view only)" },
+  { title: "Trainees", url: "/trainees", icon: Users, section: "Quality of Training (view only)" },
+  { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck, section: "Quality of Training (view only)" },
+  { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Quality of Training (view only)" },
+  { title: "Certification Reports", url: "/reports/certification", icon: FileText, section: "Quality of Training (view only)" },
+  { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap, section: "Quality of Training (view only)" },
+  { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "Staff Management (view only)" },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Staff Management (view only)" },
+  { title: "Reports", url: "/reports", icon: FileText, section: "Administration" },
+  { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Administration" },
 ];
 
 // Head of Training Navigation (Academic Command Center)

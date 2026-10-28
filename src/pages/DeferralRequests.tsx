@@ -119,5 +119,5 @@ const DeferralRequests = () => {
 };
 
 export default withRoleAccess(DeferralRequests, {
-  requiredRoles: ["admin", "organization_admin", "centre_manager", "registration_officer", "head_of_training", "head_of_trainee_support"],
+  requiredRoles: ["admin", "organization_admin", "registration_officer", "head_of_training", "head_of_trainee_support"],
 });

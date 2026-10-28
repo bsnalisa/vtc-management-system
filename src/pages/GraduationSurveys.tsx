@@ -51,7 +51,7 @@ function CeremonyDialog() {
   );
 }
 
-function CeremoniesTab() {
+function CeremoniesTab({ readOnly }: { readOnly: boolean }) {
   const { data: ceremonies } = useCeremonies();
   const [selected, setSelected] = useState("");
   const ceremony = ceremonies?.find((c) => c.id === selected);
@@ -70,16 +70,18 @@ function CeremoniesTab() {
           <SelectTrigger className="max-w-sm"><SelectValue placeholder="Select a ceremony" /></SelectTrigger>
           <SelectContent>{ceremonies?.map((c) => <SelectItem key={c.id} value={c.id}>{c.title} ({c.graduation_year})</SelectItem>)}</SelectContent>
         </Select>
-        <CeremonyDialog />
+        {!readOnly && <CeremonyDialog />}
       </div>
 
       {ceremony && (
         <>
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-muted-foreground">{new Date(ceremony.ceremony_date).toLocaleString()}{ceremony.venue ? ` · ${ceremony.venue}` : ""}</span>
-            <Button size="sm" disabled={send.isPending} onClick={() => send.mutate(ceremony.id)}>
-              {ceremony.invitations_sent_at ? "Send to graduates not yet invited / unanswered" : "Send invitations"}
-            </Button>
+            {!readOnly && (
+              <Button size="sm" disabled={send.isPending} onClick={() => send.mutate(ceremony.id)}>
+                {ceremony.invitations_sent_at ? "Send to graduates not yet invited / unanswered" : "Send invitations"}
+              </Button>
+            )}
           </div>
           <div className="flex gap-2">
             <Badge>Attending (1): {yes}</Badge><Badge variant="secondary">Declined (2): {no}</Badge><Badge variant="outline">Awaiting reply: {pending}</Badge>
@@ -93,8 +95,8 @@ function CeremoniesTab() {
                   <TableCell>{i.response_code === 1 ? "1 - Yes" : i.response_code === 2 ? "2 - No" : "Awaiting"}</TableCell>
                   <TableCell>{i.response_channel ?? "-"}</TableCell>
                   <TableCell className="space-x-2 text-right">
-                    <Button size="sm" variant="outline" onClick={() => rsvp.mutate({ id: i.id, code: 1 })}>Yes</Button>
-                    <Button size="sm" variant="outline" onClick={() => rsvp.mutate({ id: i.id, code: 2 })}>No</Button>
+                    {!readOnly && <Button size="sm" variant="outline" onClick={() => rsvp.mutate({ id: i.id, code: 1 })}>Yes</Button>}
+                    {!readOnly && <Button size="sm" variant="outline" onClick={() => rsvp.mutate({ id: i.id, code: 2 })}>No</Button>}
                   </TableCell>
                 </TableRow>
               ))}
@@ -107,7 +109,7 @@ function CeremoniesTab() {
   );
 }
 
-function SurveysTab() {
+function SurveysTab({ readOnly }: { readOnly: boolean }) {
   const { data: surveys } = useSurveys();
   const send = useSendSurvey();
   const setStatus = useSurveyStatus();
@@ -116,7 +118,7 @@ function SurveysTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end"><SurveyBuilderDialog /></div>
+      {!readOnly && <div className="flex justify-end"><SurveyBuilderDialog /></div>}
       <Table>
         <TableHeader><TableRow><TableHead>Survey</TableHead><TableHead>Audience</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>
@@ -126,10 +128,10 @@ function SurveysTab() {
               <TableCell>{s.target_graduation_year ? `Class of ${s.target_graduation_year}` : "All graduates"}</TableCell>
               <TableCell><Badge variant={s.status === "open" ? "default" : "secondary"}>{s.status}</Badge></TableCell>
               <TableCell className="space-x-2 text-right">
-                {s.status !== "closed" && (
+                {!readOnly && s.status !== "closed" && (
                   <Button size="sm" disabled={send.isPending} onClick={() => send.mutate(s.id)}>{s.status === "draft" ? "Send" : "Send to new graduates"}</Button>
                 )}
-                {s.status === "open" && <Button size="sm" variant="outline" onClick={() => setStatus.mutate({ id: s.id, status: "closed" })}>Close</Button>}
+                {!readOnly && s.status === "open" && <Button size="sm" variant="outline" onClick={() => setStatus.mutate({ id: s.id, status: "closed" })}>Close</Button>}
                 <Button size="sm" variant="outline" onClick={() => { setSelected(s.id); if (s.status === "draft") toast.info("Results appear once the survey is sent."); }}>Results</Button>
               </TableCell>
             </TableRow>
@@ -143,7 +145,8 @@ function SurveysTab() {
 }
 
 export default function GraduationSurveys() {
-  const { navItems, groupLabel } = useRoleNavigation();
+  const { navItems, groupLabel, role } = useRoleNavigation();
+  const readOnly = role === "centre_manager";
   return (
     <DashboardLayout title="Graduation & Surveys" subtitle="Ceremony attendance and graduate feedback" navItems={navItems} groupLabel={groupLabel}>
       <Card>
@@ -154,8 +157,8 @@ export default function GraduationSurveys() {
         <CardContent>
           <Tabs defaultValue="ceremonies">
             <TabsList><TabsTrigger value="ceremonies">Ceremonies</TabsTrigger><TabsTrigger value="surveys">Surveys &amp; Reports</TabsTrigger></TabsList>
-            <TabsContent value="ceremonies"><CeremoniesTab /></TabsContent>
-            <TabsContent value="surveys"><SurveysTab /></TabsContent>
+            <TabsContent value="ceremonies"><CeremoniesTab readOnly={readOnly} /></TabsContent>
+            <TabsContent value="surveys"><SurveysTab readOnly={readOnly} /></TabsContent>
           </Tabs>
         </CardContent>
       </Card>
