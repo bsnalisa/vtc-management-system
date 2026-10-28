@@ -19,7 +19,8 @@ import { toast } from "sonner";
 const ALL = "all";
 
 const Transcripts = () => {
-  const { navItems, groupLabel } = useRoleNavigation();
+  const { navItems, groupLabel, role } = useRoleNavigation();
+  const canIssue = role !== "centre_manager";
   const { organizationName, settings } = useOrganizationContext();
   const { data: trainees, isLoading: traineesLoading } = useTrainees();
   const [search, setSearch] = useState("");
@@ -90,10 +91,10 @@ const Transcripts = () => {
                 <Button variant="outline" size="sm" disabled={!preview?.blocks.length} onClick={() => preview && print(preview, academicYear)}>
                   <Printer className="h-4 w-4 mr-2" />Print preview
                 </Button>
-                <Button size="sm" disabled={!academicYear || !preview?.blocks.length || issue.isPending} onClick={issueAndPrint}
+                {canIssue && <Button size="sm" disabled={!academicYear || !preview?.blocks.length || issue.isPending} onClick={issueAndPrint}
                   title={academicYear ? undefined : "Choose one academic year to issue"}>
                   {issue.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileCheck className="h-4 w-4 mr-2" />}Issue and print
-                </Button>
+                </Button>}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
