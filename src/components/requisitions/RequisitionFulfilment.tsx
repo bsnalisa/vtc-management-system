@@ -33,6 +33,7 @@ function OrderDialog({ v, f, onClose }: { v: RequisitionView; f: Fulfilment; onC
   const [supplier, setSupplier] = useState(p?.supplier_name ?? "");
   const [quote, setQuote] = useState(p?.quotation_reference ?? "");
   const [notes, setNotes] = useState(p?.notes ?? "");
+  const [value, setValue] = useState("");
   const [ref, setRef] = useState(p?.order_reference ?? "");
   const [orderDate, setOrderDate] = useState(p?.order_date ?? today());
   const [expected, setExpected] = useState(p?.expected_delivery ?? "");
@@ -44,8 +45,9 @@ function OrderDialog({ v, f, onClose }: { v: RequisitionView; f: Fulfilment; onC
           <Field id="sup" label="Supplier"><Input id="sup" value={supplier} onChange={(e) => setSupplier(e.target.value)} maxLength={200} /></Field>
           <Field id="quo" label="Quotation reference"><Input id="quo" value={quote} onChange={(e) => setQuote(e.target.value)} maxLength={100} /></Field>
           <Field id="pn" label="Procurement notes"><Textarea id="pn" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
+          <Field id="ov" label="Order value in N$ (so the Centre Manager can see spending)"><Input id="ov" inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} placeholder={p?.order_value != null ? String(p.order_value) : ""} /></Field>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" disabled={act.isPending} onClick={async () => { await act.mutateAsync({ fn: "requisition_procurement_save", args: { _id: v.id, _supplier_id: null, _supplier_name: supplier, _quotation_reference: quote, _notes: notes }, done: "Procurement details saved" }); }}>Save supplier details</Button>
+            <Button variant="outline" disabled={act.isPending} onClick={async () => { await act.mutateAsync({ fn: "requisition_procurement_save", args: { _id: v.id, _supplier_id: null, _supplier_name: supplier, _quotation_reference: quote, _notes: notes }, done: "Procurement details saved" }); if (value.trim() !== "") await act.mutateAsync({ fn: "requisition_set_order_value", args: { _id: v.id, _value: Number(value) }, done: "Order value saved" }); }}>Save supplier details</Button>
           </div>
           {f.can_place_order && (
             <div className="space-y-3 border-t pt-3">

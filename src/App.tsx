@@ -58,6 +58,8 @@ const AssetManagement = lazy(() => import("./pages/AssetManagement"));
 const StockManagement = lazy(() => import("./pages/StockManagement"));
 const ProcurementOfficerDashboard = lazy(() => import("./pages/ProcurementOfficerDashboard"));
 const SupplierManagement = lazy(() => import("./pages/SupplierManagement"));
+const CentreTargets = lazy(() => import("./pages/CentreTargets"));
+const StaffEstablishment = lazy(() => import("./pages/StaffEstablishment"));
 const Requisitions = lazy(() => import("./pages/Requisitions"));
 const RequisitionEdit = lazy(() => import("./pages/RequisitionEdit"));
 const RequisitionDetail = lazy(() => import("./pages/RequisitionDetail"));
@@ -552,6 +554,8 @@ const App = () => (
           <Route path="/packages" element={<ProtectedRoute><ProtectedPackageManagement /></ProtectedRoute>} />
           <Route path="/suppliers" element={<ProtectedRoute><ProtectedSupplierManagement /></ProtectedRoute>} />
           <Route path="/purchase-requisitions" element={<Navigate to="/requisitions?tab=procurement" replace />} />
+          <Route path="/centre-targets" element={<ProtectedRoute><CentreTargets /></ProtectedRoute>} />
+          <Route path="/staff-establishment" element={<ProtectedRoute><StaffEstablishment /></ProtectedRoute>} />
           <Route path="/requisitions" element={<ProtectedRoute><Requisitions /></ProtectedRoute>} />
           <Route path="/requisitions/new" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />
           <Route path="/requisitions/instance/:instanceId" element={<ProtectedRoute><RequisitionByInstance /></ProtectedRoute>} />
