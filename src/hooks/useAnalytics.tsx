@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { attachAuditUsers } from "@/hooks/useAuditLogs";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useSuperAdminAnalytics = () => {
@@ -41,11 +42,7 @@ export const useSuperAdminAnalytics = () => {
       // Recent activity (audit logs)
       const { data: recentActivity } = await supabase
         .from("system_audit_logs")
-        .select(`
-          action,
-          created_at,
-          user:user_id(email, profiles(full_name))
-        `)
+        .select("action, created_at, user_id")
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -54,7 +51,7 @@ export const useSuperAdminAnalytics = () => {
         activeOrganizations: activeOrgs || 0,
         totalUsers: totalUsers || 0,
         packageUsage: packageCounts || {},
-        recentActivity: recentActivity || [],
+        recentActivity: await attachAuditUsers(recentActivity || []),
       };
     },
   });

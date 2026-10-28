@@ -85,7 +85,7 @@
                 .from("trainee_applications")
                 .select("id, first_name, last_name, trainee_number, system_email, phone, trade_id")
                 .eq("id", entry.entity_id)
-                .single();
+                .maybeSingle();
               return { ...entry, trainee_applications: appData };
             } else if (entry.entity_type === 'REGISTRATION' || entry.entity_type === 'HOSTEL') {
               // entity_id is registration_id for both REGISTRATION and HOSTEL entries
@@ -109,7 +109,7 @@
                   .from("trainee_applications")
                   .select("id, first_name, last_name, trainee_number, system_email, phone, trade_id")
                   .eq("id", regData.application_id)
-                  .single();
+                  .maybeSingle();
                 return { ...entry, trainee_applications: appData, registration: regData };
               }
               

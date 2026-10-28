@@ -104,7 +104,7 @@ export const useTraineeHostelAllocation = (traineeId: string | null | undefined)
         .from("hostel_allocations")
         .select(`
           *,
-          hostel_buildings (id, name, gender_type),
+          hostel_buildings (id, building_name, gender_type),
           hostel_rooms (id, room_number, floor_number, room_type, capacity, current_occupancy),
           hostel_beds (id, bed_number)
         `)

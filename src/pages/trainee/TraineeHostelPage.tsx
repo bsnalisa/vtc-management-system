@@ -69,7 +69,7 @@ const TraineeHostelPage = () => {
                 <div className="p-3 rounded-lg bg-primary/10"><Building className="h-5 w-5 text-primary" /></div>
                 <div>
                   <p className="text-sm text-muted-foreground">Building</p>
-                  <p className="font-medium">{building?.name || "N/A"}</p>
+                  <p className="font-medium">{building?.building_name || "N/A"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

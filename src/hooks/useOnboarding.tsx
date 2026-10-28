@@ -74,9 +74,9 @@ export const useOnboardingProgress = (userId?: string) => {
         .from("onboarding_progress")
         .select("*")
         .eq("user_id", targetUserId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) throw error;
 
       return data as OnboardingProgress | null;
     },

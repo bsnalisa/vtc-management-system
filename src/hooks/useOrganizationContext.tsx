@@ -129,8 +129,7 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
             .eq("organization_id", orgId)
             .maybeSingle(),
           supabase
-            .rpc('get_organization_active_package', { _org_id: orgId })
-            .maybeSingle(),
+            .rpc('get_organization_active_package', { _org_id: orgId }),
           supabase
             .from("organization_modules")
             .select(`modules (code)`)
@@ -150,12 +149,14 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
         }
 
         // Process package info
-        if (packageResult.data) {
+        // rpc results are lists; a centre without an active package simply has none
+        const activePackage = Array.isArray(packageResult.data) ? packageResult.data[0] : packageResult.data;
+        if (activePackage) {
           setPackageInfo({
-            package_id: packageResult.data.package_id,
-            package_name: packageResult.data.package_name,
-            module_access: (packageResult.data.module_access || []) as string[],
-            limits: (packageResult.data.limits as {
+            package_id: activePackage.package_id,
+            package_name: activePackage.package_name,
+            module_access: (activePackage.module_access || []) as string[],
+            limits: (activePackage.limits as {
               max_trainees: number | null;
               max_trainers: number | null;
               max_classes: number | null;
@@ -166,9 +167,9 @@ export const OrganizationProvider = ({ children }: { children: React.ReactNode }
               max_classes: null,
               max_storage_mb: null,
             },
-            is_trial: packageResult.data.is_trial,
-            end_date: packageResult.data.end_date,
-            status: packageResult.data.status,
+            is_trial: activePackage.is_trial,
+            end_date: activePackage.end_date,
+            status: activePackage.status,
           });
         }
 

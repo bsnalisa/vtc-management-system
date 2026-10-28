@@ -429,8 +429,6 @@ export const headOfFinanceAdminNavItems: NavItem[] = [
   { title: "NSFAF Funding", url: "/loan-officer-dashboard?tab=reconciliation", icon: Landmark },
   { title: "Asset Requests", url: "/asset-requests", icon: Package },
   { title: "Suppliers", url: "/suppliers", icon: Users },
-  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
-  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
@@ -442,8 +440,6 @@ export const accountantNavItems: NavItem[] = [
   { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
   { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
   { title: "NSFAF Funding", url: "/loan-officer-dashboard?tab=reconciliation", icon: Landmark },
-  { title: "Bank Reconciliation", url: "/bank-reconciliation", icon: CreditCard },
-  { title: "Accounting Export", url: "/accounting-export", icon: DollarSign },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];
