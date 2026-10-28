@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
@@ -20,6 +20,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useMyTasks } from "@/hooks/useWorkflows";
 import { useCentreManagerOverview } from "@/hooks/useCentreManagerOverview";
 import { FacilityApprovalAlert } from "@/components/classes/FacilityApprovalAlert";
+import { useBudgetsWaiting } from "@/hooks/useBudgets";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { CentreExecutive } from "@/components/dashboard/CentreExecutive";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancePanel, QualityPanel, StaffingPanel, StakeholdersPanel } from "@/components/dashboard/centre/CentrePanels";
@@ -54,6 +56,8 @@ const CentreManagerDashboard = () => {
   const navigate = useNavigate();
   const { navItems, groupLabel } = useRoleNavigation();
   const { data: profile } = useProfile();
+  const { organizationId } = useOrganizationContext();
+  const { data: budgetsWaiting } = useBudgetsWaiting(organizationId, true);
   const { data: o, isLoading, error } = useCentreManagerOverview();
   const { data: tasks, error: tasksError } = useMyTasks();
 
@@ -102,6 +106,7 @@ const CentreManagerDashboard = () => {
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
             <FacilityApprovalAlert role="centre_manager" linkToClasses />
+            {!!budgetsWaiting && <Alert><AlertDescription>{budgetsWaiting} departmental budget{budgetsWaiting === 1 ? " is" : "s are"} waiting for your approval. <Link to="/budgets" className="underline">Open Budgets</Link></AlertDescription></Alert>}
         {isLoading && <div className="flex justify-center py-6"><LoadingSpinner text="Loading centre figures" /></div>}
         {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>Centre figures could not be loaded: {(error as Error).message}</AlertDescription></Alert>}
         {o && (

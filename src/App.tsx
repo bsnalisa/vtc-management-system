@@ -63,6 +63,7 @@ const StaffEstablishment = lazy(() => import("./pages/StaffEstablishment"));
 const Requisitions = lazy(() => import("./pages/Requisitions"));
 const RequisitionEdit = lazy(() => import("./pages/RequisitionEdit"));
 const RequisitionTemplate = lazy(() => import("./pages/RequisitionTemplate"));
+const Budgets = lazy(() => import("./pages/Budgets"));
 const ReportingStructure = lazy(() => import("./pages/ReportingStructure"));
 const RoleFactory = lazy(() => import("./pages/RoleFactory"));
 const RoleAssignments = lazy(() => import("./pages/RoleAssignments"));
@@ -569,6 +570,7 @@ const App = () => (
           <Route path="/reporting-structure" element={<ProtectedRoute><ReportingStructure /></ProtectedRoute>} />
           <Route path="/reporting-confirmations" element={<ProtectedRoute><ReportingConfirmations /></ProtectedRoute>} />
           <Route path="/requisition-template" element={<ProtectedRoute><RequisitionTemplate /></ProtectedRoute>} />
+          <Route path="/budgets" element={<ProtectedRoute><Budgets /></ProtectedRoute>} />
           <Route path="/requisitions/new" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />
           <Route path="/requisitions/instance/:instanceId" element={<ProtectedRoute><RequisitionByInstance /></ProtectedRoute>} />
           <Route path="/requisitions/:id/edit" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />

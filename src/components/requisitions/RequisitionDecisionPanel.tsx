@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRequisitionActions } from "@/hooks/useRequisitions";
+import { useBudgetForRequisition } from "@/hooks/useBudgets";
 import { useToast } from "@/hooks/use-toast";
 import { STAGE_DECISIONS, STAGE_LABEL, type RequisitionView } from "./status";
 
@@ -16,6 +17,8 @@ export function RequisitionDecisionPanel({ view }: { view: RequisitionView }) {
   const stage = view.stages.find((s) => s.state === "current");
   const [comment, setComment] = useState("");
   const [gl, setGl] = useState("");
+  const accountantStage = stage?.stage_key === "accountant" && !!view.task_id;
+  const { data: budget } = useBudgetForRequisition(accountantStage ? view.id : undefined);
   if (!stage || !view.task_id) return null;
   const options = STAGE_DECISIONS[stage.stage_key] ?? [];
 
@@ -35,6 +38,13 @@ export function RequisitionDecisionPanel({ view }: { view: RequisitionView }) {
         <CardDescription>Your decision is recorded with your name, role and the time, and cannot be changed afterwards.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {accountantStage && budget && (
+          <p className="rounded border p-2 text-sm">
+            {budget.found
+              ? <>Budget for {budget.department} ({budget.year}): N$ {Number(budget.total).toLocaleString()} approved, N$ {Number(budget.committed).toLocaleString()} committed, <strong>N$ {Number(budget.available).toLocaleString()} available</strong>.</>
+              : <>No approved {budget.year} budget is recorded for {budget.department || "this department"}.</>}
+          </p>
+        )}
         {stage.stage_key === "accountant" && (
           <div className="space-y-1">
             <Label htmlFor="gl">GL code (required for "Fund Available")</Label>
