@@ -119,4 +119,11 @@ reset role;
 select public.assert((select count(*) from workflow_events where instance_id = 'a9100000-0000-0000-0000-000000000001' and event = 'reassigned') = 1, 'on the approval history');
 select public.assert((select count(*) from reporting_events where event = 'approvals_reassigned') = 1 and (select count(*) from reporting_events) >= 8, 'and in the reporting log');
 select public.expect_error($$update reporting_events set event = 'x'$$, 'can never be changed', 'the log is append-only');
+-- removing a supervisor that started today takes effect today
+select set_config('request.jwt.claim.sub', :'oa', false);
+set role authenticated;
+select public.reporting_set_supervisor(:'orgA', :'tr', :'rq', current_date);
+select public.reporting_remove_supervisor(:'orgA', :'tr', current_date);
+reset role;
+select public.assert((select count(*) from user_supervisors where user_id = :'tr' and (effective_to is null or effective_to >= current_date)) = 0, 'a supervisor that started today can be removed the same day');
 select 'OK reporting structure';

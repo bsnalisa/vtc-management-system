@@ -29,6 +29,7 @@ set role authenticated; select set_config('request.jwt.claim.sub', :'sm', false)
 select public.assert((select count(*) from trainees) = 0 and (select count(*) from fee_records) = 0 and (select count(*) from purchase_requisitions) = 0 and (select count(*) from classes) = 0 and (select count(*) from stock_items) = 0, 'a Staff Member alone cannot read trainees, fees, classes, stock or requisitions');
 select public.expect_error($$insert into trades (organization_id, name, code) values ('a0000000-0000-0000-0000-00000000000a', 'X', 'XX')$$, 'row-level|violates', 'nor write to them');
 select public.assert((select count(*) from user_roles where user_id = '98200000-0000-0000-0000-000000000003') = 1 and (select count(*) from organizations) >= 1, 'but can still see their own role and the centre');
+select public.assert((select count(*) from user_roles) = 1, 'and sees no colleague''s roles');
 select public.assert(public.my_capabilities(:'orgA') = ARRAY[]::text[] and jsonb_array_length(public.my_dashboard(:'orgA') -> 'widgets') = 0, 'and has no capabilities and an empty dashboard');
 
 -- a brand-new position, defined from scratch and given to that person
