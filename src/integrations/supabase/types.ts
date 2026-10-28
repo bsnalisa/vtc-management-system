@@ -17912,6 +17912,7 @@ export type Database = {
         | "creditors_officer"
         | "loan_officer"
         | "pa_to_centre_manager"
+        | "staff_member"
       approval_action: "submitted" | "approved" | "rejected" | "returned"
       asset_condition: "excellent" | "good" | "fair" | "poor" | "needs_repair"
       asset_status:
@@ -18141,6 +18142,7 @@ export const Constants = {
         "creditors_officer",
         "loan_officer",
         "pa_to_centre_manager",
+        "staff_member",
       ],
       approval_action: ["submitted", "approved", "rejected", "returned"],
       asset_condition: ["excellent", "good", "fair", "poor", "needs_repair"],

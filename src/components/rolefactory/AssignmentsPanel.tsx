@@ -21,7 +21,7 @@ export function AssignmentsPanel({ org }: { org: string | null | undefined }) {
   const picked = data.roles.find((r) => r.id === role);
   return (
     <div className="space-y-6">
-      <p className="max-w-3xl text-sm text-muted-foreground">A role made in the role factory grants only the capabilities its approved version lists. The person must already be staff at this centre. Roles with sensitive capabilities are assigned by the Super Admin.</p>
+      <p className="max-w-3xl text-sm text-muted-foreground">A role made in the role factory grants only the capabilities its approved version lists. The person must already have a login at this centre; for a brand-new position, create the login in User Management with the Staff Member role (it has no access of its own), then assign the role here. Roles with sensitive capabilities are assigned by the Super Admin.</p>
       <div className="grid max-w-3xl items-end gap-3 sm:grid-cols-3">
         <div className="space-y-1"><Label>Person</Label><Select value={user} onValueChange={setUser}><SelectTrigger><SelectValue placeholder="Choose person" /></SelectTrigger><SelectContent>{data.staff.map((s) => <SelectItem key={s.user_id} value={s.user_id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
         <div className="space-y-1"><Label>Role</Label><Select value={role} onValueChange={setRole}><SelectTrigger><SelectValue placeholder="Choose role" /></SelectTrigger><SelectContent>{data.roles.map((r) => <SelectItem key={r.id} value={r.id} disabled={!r.can_assign}>{r.role_name}{r.sensitive ? " (sensitive)" : ""}</SelectItem>)}</SelectContent></Select></div>

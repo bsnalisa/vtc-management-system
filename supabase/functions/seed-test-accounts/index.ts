@@ -10,7 +10,7 @@ const ROLES = [
   'hostel_coordinator', 'procurement_officer', 'stock_control_officer', 'asset_maintenance_coordinator', 'maintenance_coordinator', 'librarian',
   'printing_distribution_officer', 'subject_matter_expert', 'placement_officer', 'head_of_trainee_support', 'projects_coordinator', 'hr_officer',
   'bdl_coordinator', 'rpl_coordinator', 'liaison_officer', 'resource_center_coordinator', 'centre_manager', 'applicant', 'accountant',
-  'head_of_finance_admin', 'creditors_officer', 'loan_officer', 'pa_to_centre_manager',
+  'head_of_finance_admin', 'creditors_officer', 'loan_officer', 'pa_to_centre_manager', 'staff_member',
 ];
 
 function password(): string {
