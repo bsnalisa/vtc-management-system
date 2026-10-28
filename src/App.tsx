@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 import { Suspense, lazy } from "react";
 import { ApplicationAssistant } from "@/components/home/ApplicationAssistant";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -203,7 +204,37 @@ const ClearedPayments = lazy(() => import("./pages/debtors/ClearedPayments"));
 const TraineeAccountsPage = lazy(() => import("./pages/debtors/TraineeAccounts"));
 const FeeConfiguration = lazy(() => import("./pages/debtors/FeeConfiguration"));
 
+// Tell people when something failed instead of leaving a silent empty screen. Queries toast once per message
+// (pages show their own inline errors too); mutations that handle their own error are left alone.
+const shown = new Map<string, number>();
+const friendly = (e: unknown) => {
+  const m = e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : "";
+  if (/failed to fetch|networkerror|load failed/i.test(m)) return "You appear to be offline or the connection dropped. Check your connection and try again.";
+  if (/jwt expired|not authenticated/i.test(m)) return "Your session has expired. Please sign in again.";
+  return m || "Something went wrong. Please try again.";
+};
+const tell = (title: string, e: unknown) => {
+  const description = friendly(e);
+  const now = Date.now();
+  if ((shown.get(description) ?? 0) > now - 10000) return;
+  shown.set(description, now);
+  toast({ title, description, variant: "destructive" });
+};
+
+// A new release replaces the old script files; reload once so the open page picks up the new ones
+if (typeof window !== "undefined") {
+  window.addEventListener("vite:preloadError", () => {
+    try {
+      if (sessionStorage.getItem("reloaded-for-update")) return;
+      sessionStorage.setItem("reloaded-for-update", "1");
+    } catch { /* storage unavailable: reload anyway */ }
+    window.location.reload();
+  });
+}
+
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: (e, q) => { if (q.state.data === undefined) tell("Could not load data", e); } }),
+  mutationCache: new MutationCache({ onError: (e, _v, _c, m) => { if (!m.options.onError) tell("Not saved", e); } }),
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
