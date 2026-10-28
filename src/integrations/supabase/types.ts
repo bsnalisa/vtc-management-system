@@ -2322,6 +2322,38 @@ export type Database = {
           },
         ]
       }
+      centre_targets: {
+        Row: {
+          indicator: string
+          organization_id: string
+          target: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          indicator: string
+          organization_id: string
+          target: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          indicator?: string
+          organization_id?: string
+          target?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "centre_targets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_enrollments: {
         Row: {
           class_id: string
@@ -2375,10 +2407,15 @@ export type Database = {
         Row: {
           academic_year: string
           active: boolean | null
+          approval_at: string | null
+          approval_by: string | null
+          approval_note: string | null
+          approval_status: string
           capacity: number | null
           class_code: string
           class_name: string
           created_at: string
+          created_by: string | null
           id: string
           level: number
           organization_id: string | null
@@ -2391,10 +2428,15 @@ export type Database = {
         Insert: {
           academic_year: string
           active?: boolean | null
+          approval_at?: string | null
+          approval_by?: string | null
+          approval_note?: string | null
+          approval_status?: string
           capacity?: number | null
           class_code: string
           class_name: string
           created_at?: string
+          created_by?: string | null
           id?: string
           level: number
           organization_id?: string | null
@@ -2407,10 +2449,15 @@ export type Database = {
         Update: {
           academic_year?: string
           active?: boolean | null
+          approval_at?: string | null
+          approval_by?: string | null
+          approval_note?: string | null
+          approval_status?: string
           capacity?: number | null
           class_code?: string
           class_name?: string
           created_at?: string
+          created_by?: string | null
           id?: string
           level?: number
           organization_id?: string | null
@@ -3584,6 +3631,190 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_approval_events: {
+        Row: {
+          actor: string | null
+          actor_name: string | null
+          actor_role: string | null
+          at: string
+          event: string
+          id: number
+          item_id: string
+          item_label: string | null
+          kind: string
+          note: string | null
+          organization_id: string
+        }
+        Insert: {
+          actor?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          at?: string
+          event: string
+          id?: number
+          item_id: string
+          item_label?: string | null
+          kind: string
+          note?: string | null
+          organization_id: string
+        }
+        Update: {
+          actor?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          at?: string
+          event?: string
+          id?: number
+          item_id?: string
+          item_label?: string | null
+          kind?: string
+          note?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      factory_role_events: {
+        Row: {
+          actor: string | null
+          actor_name: string | null
+          at: string
+          details: Json
+          event: string
+          id: number
+          organization_id: string | null
+          role_id: string | null
+        }
+        Insert: {
+          actor?: string | null
+          actor_name?: string | null
+          at?: string
+          details?: Json
+          event: string
+          id?: number
+          organization_id?: string | null
+          role_id?: string | null
+        }
+        Update: {
+          actor?: string | null
+          actor_name?: string | null
+          at?: string
+          details?: Json
+          event?: string
+          id?: number
+          organization_id?: string | null
+          role_id?: string | null
+        }
+        Relationships: []
+      }
+      factory_role_versions: {
+        Row: {
+          approved_capabilities: string[] | null
+          created_at: string
+          created_by: string | null
+          id: string
+          job_description: string
+          proposal_capabilities: string[]
+          proposal_method: string | null
+          proposal_note: string | null
+          reports_to_role: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role_id: string
+          selected_capabilities: string[]
+          status: string
+          submitted_at: string | null
+          version: number
+        }
+        Insert: {
+          approved_capabilities?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          job_description: string
+          proposal_capabilities?: string[]
+          proposal_method?: string | null
+          proposal_note?: string | null
+          reports_to_role?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_id: string
+          selected_capabilities?: string[]
+          status?: string
+          submitted_at?: string | null
+          version: number
+        }
+        Update: {
+          approved_capabilities?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          job_description?: string
+          proposal_capabilities?: string[]
+          proposal_method?: string | null
+          proposal_note?: string | null
+          reports_to_role?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_id?: string
+          selected_capabilities?: string[]
+          status?: string
+          submitted_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_role_versions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "factory_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      factory_roles: {
+        Row: {
+          active_version_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          retired_at: string | null
+          role_code: string
+          role_name: string
+          status: string
+        }
+        Insert: {
+          active_version_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          retired_at?: string | null
+          role_code: string
+          role_name: string
+          status?: string
+        }
+        Update: {
+          active_version_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          retired_at?: string | null
+          role_code?: string
+          role_name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_roles_active_version_fk"
+            columns: ["active_version_id"]
+            isOneToOne: false
+            referencedRelation: "factory_role_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -9161,6 +9392,52 @@ export type Database = {
           },
         ]
       }
+      ppe_requisition_registrations: {
+        Row: {
+          included_at: string
+          included_by: string | null
+          organization_id: string
+          registration_id: string
+          requisition_id: string
+        }
+        Insert: {
+          included_at?: string
+          included_by?: string | null
+          organization_id: string
+          registration_id: string
+          requisition_id: string
+        }
+        Update: {
+          included_at?: string
+          included_by?: string | null
+          organization_id?: string
+          registration_id?: string
+          requisition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppe_requisition_registrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ppe_requisition_registrations_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: true
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ppe_requisition_registrations_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -9904,32 +10181,44 @@ export type Database = {
       }
       purchase_requisition_items: {
         Row: {
+          cancelled_quantity: number
           created_at: string
           estimated_unit_cost: number
+          extra: Json
           id: string
           item_description: string
+          line_no: number | null
           quantity: number
           requisition_id: string
+          specifications: string | null
           stock_item_id: string | null
           total_estimated_cost: number | null
         }
         Insert: {
+          cancelled_quantity?: number
           created_at?: string
-          estimated_unit_cost: number
+          estimated_unit_cost?: number
+          extra?: Json
           id?: string
           item_description: string
+          line_no?: number | null
           quantity: number
           requisition_id: string
+          specifications?: string | null
           stock_item_id?: string | null
           total_estimated_cost?: number | null
         }
         Update: {
+          cancelled_quantity?: number
           created_at?: string
           estimated_unit_cost?: number
+          extra?: Json
           id?: string
           item_description?: string
+          line_no?: number | null
           quantity?: number
           requisition_id?: string
+          specifications?: string | null
           stock_item_id?: string | null
           total_estimated_cost?: number | null
         }
@@ -9954,7 +10243,10 @@ export type Database = {
         Row: {
           approved_by: string | null
           approved_date: string | null
+          closed_at: string | null
+          closed_by: string | null
           created_at: string
+          custom_fields: Json
           department: string | null
           id: string
           justification: string | null
@@ -9962,14 +10254,23 @@ export type Database = {
           rejected_reason: string | null
           requested_by: string
           requested_date: string
+          requester_role: string | null
           requisition_number: string
+          round: number
           status: string
+          submitted_at: string | null
+          template_id: string | null
+          template_version: number
           updated_at: string
+          workflow_instance_id: string | null
         }
         Insert: {
           approved_by?: string | null
           approved_date?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
           created_at?: string
+          custom_fields?: Json
           department?: string | null
           id?: string
           justification?: string | null
@@ -9977,14 +10278,23 @@ export type Database = {
           rejected_reason?: string | null
           requested_by: string
           requested_date?: string
+          requester_role?: string | null
           requisition_number: string
+          round?: number
           status?: string
+          submitted_at?: string | null
+          template_id?: string | null
+          template_version?: number
           updated_at?: string
+          workflow_instance_id?: string | null
         }
         Update: {
           approved_by?: string | null
           approved_date?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
           created_at?: string
+          custom_fields?: Json
           department?: string | null
           id?: string
           justification?: string | null
@@ -9992,11 +10302,32 @@ export type Database = {
           rejected_reason?: string | null
           requested_by?: string
           requested_date?: string
+          requester_role?: string | null
           requisition_number?: string
+          round?: number
           status?: string
+          submitted_at?: string | null
+          template_id?: string | null
+          template_version?: number
           updated_at?: string
+          workflow_instance_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "purchase_requisitions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "requisition_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       qualification_approvals: {
         Row: {
@@ -10757,6 +11088,110 @@ export type Database = {
           },
         ]
       }
+      reporting_change_requests: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          kind: string
+          new_supervisor_role: string | null
+          new_supervisor_user: string | null
+          note: string | null
+          organization_id: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          subject_role: string | null
+          subject_user: string | null
+        }
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          kind: string
+          new_supervisor_role?: string | null
+          new_supervisor_user?: string | null
+          note?: string | null
+          organization_id: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          subject_role?: string | null
+          subject_user?: string | null
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          kind?: string
+          new_supervisor_role?: string | null
+          new_supervisor_user?: string | null
+          note?: string | null
+          organization_id?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          subject_role?: string | null
+          subject_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reporting_change_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reporting_events: {
+        Row: {
+          actor: string | null
+          actor_name: string | null
+          actor_role: string | null
+          at: string
+          details: Json
+          event: string
+          id: number
+          organization_id: string
+          subject_role: string | null
+          subject_user: string | null
+        }
+        Insert: {
+          actor?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          at?: string
+          details?: Json
+          event: string
+          id?: number
+          organization_id: string
+          subject_role?: string | null
+          subject_user?: string | null
+        }
+        Update: {
+          actor?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          at?: string
+          details?: Json
+          event?: string
+          id?: number
+          organization_id?: string
+          subject_role?: string | null
+          subject_user?: string | null
+        }
+        Relationships: []
+      }
       reporting_lines: {
         Row: {
           organization_id: string
@@ -10836,6 +11271,589 @@ export type Database = {
           },
         ]
       }
+      requisition_decisions: {
+        Row: {
+          comments: string | null
+          decided_at: string
+          decided_by: string
+          decided_by_name: string | null
+          decided_by_role: string | null
+          decision: string
+          gl_code: string | null
+          id: string
+          instance_id: string
+          requisition_id: string
+          round: number
+          stage_key: string
+          stage_no: number
+          task_id: string
+        }
+        Insert: {
+          comments?: string | null
+          decided_at?: string
+          decided_by: string
+          decided_by_name?: string | null
+          decided_by_role?: string | null
+          decision: string
+          gl_code?: string | null
+          id?: string
+          instance_id: string
+          requisition_id: string
+          round: number
+          stage_key: string
+          stage_no: number
+          task_id: string
+        }
+        Update: {
+          comments?: string | null
+          decided_at?: string
+          decided_by?: string
+          decided_by_name?: string | null
+          decided_by_role?: string | null
+          decision?: string
+          gl_code?: string | null
+          id?: string
+          instance_id?: string
+          requisition_id?: string
+          round?: number
+          stage_key?: string
+          stage_no?: number
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_decisions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_decisions_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_discrepancies: {
+        Row: {
+          description: string | null
+          id: string
+          kind: string
+          quantity: number
+          raised_at: string
+          raised_by: string | null
+          receipt_id: string | null
+          requisition_id: string
+          requisition_item_id: string
+          resolution: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          kind: string
+          quantity: number
+          raised_at?: string
+          raised_by?: string | null
+          receipt_id?: string | null
+          requisition_id: string
+          requisition_item_id: string
+          resolution?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          kind?: string
+          quantity?: number
+          raised_at?: string
+          raised_by?: string | null
+          receipt_id?: string | null
+          requisition_id?: string
+          requisition_item_id?: string
+          resolution?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_discrepancies_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "requisition_receipts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_discrepancies_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_discrepancies_requisition_item_id_fkey"
+            columns: ["requisition_item_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisition_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_documents: {
+        Row: {
+          doc_key: string | null
+          file_name: string
+          file_path: string
+          id: string
+          kind: string
+          requisition_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          doc_key?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          kind: string
+          requisition_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          doc_key?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          kind?: string
+          requisition_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_documents_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_procurement: {
+        Row: {
+          expected_delivery: string | null
+          notes: string | null
+          order_date: string | null
+          order_reference: string | null
+          order_value: number | null
+          organization_id: string
+          purchase_order_id: string | null
+          quotation_reference: string | null
+          requisition_id: string
+          supplier_id: string | null
+          supplier_name: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          expected_delivery?: string | null
+          notes?: string | null
+          order_date?: string | null
+          order_reference?: string | null
+          order_value?: number | null
+          organization_id: string
+          purchase_order_id?: string | null
+          quotation_reference?: string | null
+          requisition_id: string
+          supplier_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          expected_delivery?: string | null
+          notes?: string | null
+          order_date?: string | null
+          order_reference?: string | null
+          order_value?: number | null
+          organization_id?: string
+          purchase_order_id?: string | null
+          quotation_reference?: string | null
+          requisition_id?: string
+          supplier_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_procurement_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_procurement_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_procurement_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: true
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_procurement_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_procurement_events: {
+        Row: {
+          at: string
+          by_name: string | null
+          by_role: string | null
+          by_user: string | null
+          comment: string | null
+          details: Json
+          event: string
+          id: number
+          requisition_id: string
+        }
+        Insert: {
+          at?: string
+          by_name?: string | null
+          by_role?: string | null
+          by_user?: string | null
+          comment?: string | null
+          details?: Json
+          event: string
+          id?: never
+          requisition_id: string
+        }
+        Update: {
+          at?: string
+          by_name?: string | null
+          by_role?: string | null
+          by_user?: string | null
+          comment?: string | null
+          details?: Json
+          event?: string
+          id?: never
+          requisition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_procurement_events_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_receipt_items: {
+        Row: {
+          accepted: number
+          damaged: number
+          id: string
+          incorrect: number
+          missing: number
+          note: string | null
+          receipt_id: string
+          requisition_item_id: string
+        }
+        Insert: {
+          accepted?: number
+          damaged?: number
+          id?: string
+          incorrect?: number
+          missing?: number
+          note?: string | null
+          receipt_id: string
+          requisition_item_id: string
+        }
+        Update: {
+          accepted?: number
+          damaged?: number
+          id?: string
+          incorrect?: number
+          missing?: number
+          note?: string | null
+          receipt_id?: string
+          requisition_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_receipt_items_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "requisition_receipts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_receipt_items_requisition_item_id_fkey"
+            columns: ["requisition_item_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisition_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_receipts: {
+        Row: {
+          comments: string | null
+          created_at: string
+          delivery_date: string
+          id: string
+          organization_id: string
+          receipt_no: string
+          received_by: string
+          received_by_name: string | null
+          received_by_role: string | null
+          requisition_id: string
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          delivery_date: string
+          id?: string
+          organization_id: string
+          receipt_no: string
+          received_by: string
+          received_by_name?: string | null
+          received_by_role?: string | null
+          requisition_id: string
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          delivery_date?: string
+          id?: string
+          organization_id?: string
+          receipt_no?: string
+          received_by?: string
+          received_by_name?: string | null
+          received_by_role?: string | null
+          requisition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_receipts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisition_receipts_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_snapshots: {
+        Row: {
+          department: string
+          fields: Json
+          items: Json
+          purpose: string
+          requester_name: string | null
+          requester_role: string | null
+          requisition_id: string
+          round: number
+          submitted_at: string
+          supervisor_names: string | null
+          template_version: number
+        }
+        Insert: {
+          department: string
+          fields?: Json
+          items: Json
+          purpose: string
+          requester_name?: string | null
+          requester_role?: string | null
+          requisition_id: string
+          round: number
+          submitted_at?: string
+          supervisor_names?: string | null
+          template_version: number
+        }
+        Update: {
+          department?: string
+          fields?: Json
+          items?: Json
+          purpose?: string
+          requester_name?: string | null
+          requester_role?: string | null
+          requisition_id?: string
+          round?: number
+          submitted_at?: string
+          supervisor_names?: string | null
+          template_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_snapshots_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_status: string | null
+          id: number
+          reason: string | null
+          requisition_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: string | null
+          id?: never
+          reason?: string | null
+          requisition_id: string
+          to_status: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: string | null
+          id?: never
+          reason?: string | null
+          requisition_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_status_history_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisition_template_events: {
+        Row: {
+          actor: string | null
+          actor_name: string | null
+          actor_role: string | null
+          at: string
+          event: string
+          id: number
+          note: string | null
+          organization_id: string
+          template_id: string
+        }
+        Insert: {
+          actor?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          at?: string
+          event: string
+          id?: number
+          note?: string | null
+          organization_id: string
+          template_id: string
+        }
+        Update: {
+          actor?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          at?: string
+          event?: string
+          id?: number
+          note?: string | null
+          organization_id?: string
+          template_id?: string
+        }
+        Relationships: []
+      }
+      requisition_templates: {
+        Row: {
+          change_note: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          definition: Json
+          id: string
+          organization_id: string
+          proposed_at: string | null
+          proposed_by: string | null
+          published_at: string | null
+          status: string
+          version: number
+        }
+        Insert: {
+          change_note?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          definition: Json
+          id?: string
+          organization_id: string
+          proposed_at?: string | null
+          proposed_by?: string | null
+          published_at?: string | null
+          status?: string
+          version: number
+        }
+        Update: {
+          change_note?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          definition?: Json
+          id?: string
+          organization_id?: string
+          proposed_at?: string | null
+          proposed_by?: string | null
+          published_at?: string | null
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisition_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_activity_logs: {
         Row: {
           action: string
@@ -10863,6 +11881,33 @@ export type Database = {
           page_url?: string | null
           role?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      role_capability_catalogue: {
+        Row: {
+          active: boolean
+          area: string
+          code: string
+          description: string
+          label: string
+          sensitive: boolean
+        }
+        Insert: {
+          active?: boolean
+          area: string
+          code: string
+          description: string
+          label: string
+          sensitive?: boolean
+        }
+        Update: {
+          active?: boolean
+          area?: string
+          code?: string
+          description?: string
+          label?: string
+          sensitive?: boolean
         }
         Relationships: []
       }
@@ -11107,6 +12152,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "sme_applications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_establishment: {
+        Row: {
+          approved_posts: number
+          id: string
+          notes: string | null
+          organization_id: string
+          post_title: string
+          role: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          approved_posts: number
+          id?: string
+          notes?: string | null
+          organization_id: string
+          post_title: string
+          role: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          approved_posts?: number
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          post_title?: string
+          role?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_establishment_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -13659,8 +14745,13 @@ export type Database = {
       training_buildings: {
         Row: {
           active: boolean | null
+          approval_at: string | null
+          approval_by: string | null
+          approval_note: string | null
+          approval_status: string
           code: string
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           location: string | null
@@ -13670,8 +14761,13 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          approval_at?: string | null
+          approval_by?: string | null
+          approval_note?: string | null
+          approval_status?: string
           code: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           location?: string | null
@@ -13681,8 +14777,13 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          approval_at?: string | null
+          approval_by?: string | null
+          approval_note?: string | null
+          approval_status?: string
           code?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           location?: string | null
@@ -13742,10 +14843,15 @@ export type Database = {
       training_rooms: {
         Row: {
           active: boolean | null
+          approval_at: string | null
+          approval_by: string | null
+          approval_note: string | null
+          approval_status: string
           building_id: string
           capacity: number | null
           code: string
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           name: string
@@ -13755,10 +14861,15 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          approval_at?: string | null
+          approval_by?: string | null
+          approval_note?: string | null
+          approval_status?: string
           building_id: string
           capacity?: number | null
           code: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           name: string
@@ -13768,10 +14879,15 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          approval_at?: string | null
+          approval_by?: string | null
+          approval_note?: string | null
+          approval_status?: string
           building_id?: string
           capacity?: number | null
           code?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           name?: string
@@ -13952,6 +15068,54 @@ export type Database = {
           },
         ]
       }
+      user_custom_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          organization_id: string
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_custom_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_custom_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "factory_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -14022,16 +15186,34 @@ export type Database = {
       }
       user_supervisors: {
         Row: {
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          note: string | null
           organization_id: string
           supervisor_user_id: string
           user_id: string
         }
         Insert: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          note?: string | null
           organization_id: string
           supervisor_user_id: string
           user_id: string
         }
         Update: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          note?: string | null
           organization_id?: string
           supervisor_user_id?: string
           user_id?: string
@@ -14981,7 +16163,15 @@ export type Database = {
       cancel_transfer: { Args: { _id: string }; Returns: undefined }
       centre_access_ok: { Args: { _org: string }; Returns: boolean }
       centre_manager_executive: { Args: { _org?: string }; Returns: Json }
+      centre_manager_finance: {
+        Args: { _org?: string; _year?: string }
+        Returns: Json
+      }
       centre_manager_overview: { Args: { _org?: string }; Returns: Json }
+      centre_manager_quality: { Args: { _org?: string }; Returns: Json }
+      centre_manager_staffing: { Args: { _org?: string }; Returns: Json }
+      centre_manager_stakeholders: { Args: { _org?: string }; Returns: Json }
+      centre_targets_list: { Args: { _org?: string }; Returns: Json }
       certified_trainees_report: {
         Args: { _academic_year?: string }
         Returns: {
@@ -15115,6 +16305,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_uniform_requisition: {
+        Args: { _org: string; _trade?: string; _year?: string }
+        Returns: Json
+      }
       decide_deferral: {
         Args: { _approve: boolean; _id: string; _notes?: string }
         Returns: string
@@ -15144,6 +16338,11 @@ export type Database = {
       extracurricular_send_reminders: {
         Args: { _org: string }
         Returns: number
+      }
+      facility_approval_summary: { Args: { _org: string }; Returns: Json }
+      facility_decide: {
+        Args: { _approve: boolean; _id: string; _kind: string; _note?: string }
+        Returns: string
       }
       finance_assert_role: {
         Args: { _org: string; _roles: string[] }
@@ -15711,6 +16910,7 @@ export type Database = {
         Returns: Json
       }
       message_delivery_configured: { Args: never; Returns: boolean }
+      my_capabilities: { Args: { _org: string }; Returns: string[] }
       my_centre_ids: { Args: never; Returns: string[] }
       my_learning_classes: {
         Args: never
@@ -15898,6 +17098,61 @@ export type Database = {
         Args: { _identity: string; _reason: string }
         Returns: Json
       }
+      reporting_change_requests_list: { Args: { _org?: string }; Returns: Json }
+      reporting_decide_change: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: string
+      }
+      reporting_events_list: {
+        Args: { _limit?: number; _org: string }
+        Returns: Json
+      }
+      reporting_gaps: { Args: { _org: string }; Returns: Json }
+      reporting_org_chart: { Args: { _org: string }; Returns: Json }
+      reporting_preview: {
+        Args: {
+          _from?: string
+          _org: string
+          _supervisor?: string
+          _to?: string
+          _user: string
+        }
+        Returns: Json
+      }
+      reporting_reassign_pending: {
+        Args: {
+          _from_user: string
+          _org: string
+          _reason: string
+          _submitter: string
+          _to_user: string
+        }
+        Returns: Json
+      }
+      reporting_remove_line: {
+        Args: { _org: string; _role: string }
+        Returns: Json
+      }
+      reporting_remove_supervisor: {
+        Args: { _from?: string; _org: string; _user: string }
+        Returns: Json
+      }
+      reporting_set_line: {
+        Args: { _org: string; _role: string; _supervisor_role: string }
+        Returns: Json
+      }
+      reporting_set_supervisor: {
+        Args: {
+          _from?: string
+          _note?: string
+          _org: string
+          _supervisor: string
+          _to?: string
+          _user: string
+        }
+        Returns: Json
+      }
+      reporting_withdraw_change: { Args: { _id: string }; Returns: undefined }
       request_application_info: {
         Args: { _application: string; _note: string }
         Returns: undefined
@@ -15935,6 +17190,150 @@ export type Database = {
         }
         Returns: string
       }
+      requisition_add_document: {
+        Args: { _id: string; _kind: string; _name: string; _path: string }
+        Returns: undefined
+      }
+      requisition_add_note: {
+        Args: { _comment: string; _id: string }
+        Returns: undefined
+      }
+      requisition_attach_request_document: {
+        Args: { _doc_key: string; _id: string; _name: string; _path: string }
+        Returns: undefined
+      }
+      requisition_can_view: {
+        Args: { _req: string; _user: string }
+        Returns: boolean
+      }
+      requisition_cancel: {
+        Args: { _id: string; _reason: string }
+        Returns: undefined
+      }
+      requisition_cancel_order: {
+        Args: { _id: string; _reason: string }
+        Returns: undefined
+      }
+      requisition_close: {
+        Args: { _id: string; _note: string }
+        Returns: undefined
+      }
+      requisition_decide: {
+        Args: {
+          _comment: string
+          _decision: string
+          _gl_code?: string
+          _task: string
+        }
+        Returns: string
+      }
+      requisition_fulfilment: { Args: { _id: string }; Returns: Json }
+      requisition_letterhead: { Args: { _req: string }; Returns: Json }
+      requisition_list: {
+        Args: {
+          _limit?: number
+          _offset?: number
+          _scope: string
+          _search?: string
+          _status?: string
+        }
+        Returns: {
+          created_at: string
+          department: string
+          id: string
+          item_count: number
+          next_action: string
+          purpose: string
+          requester_name: string
+          requisition_number: string
+          round: number
+          status: string
+          submitted_at: string
+          task_id: string
+          total_count: number
+        }[]
+      }
+      requisition_my_supervisor: { Args: { _org: string }; Returns: Json }
+      requisition_place_order: {
+        Args: {
+          _expected_delivery: string
+          _id: string
+          _order_date: string
+          _order_reference: string
+          _purchase_order?: string
+          _supplier_name: string
+        }
+        Returns: undefined
+      }
+      requisition_procurement_save: {
+        Args: {
+          _id: string
+          _notes: string
+          _quotation_reference: string
+          _supplier_id: string
+          _supplier_name: string
+        }
+        Returns: undefined
+      }
+      requisition_procurement_summary: { Args: { _org: string }; Returns: Json }
+      requisition_record_delay: {
+        Args: { _id: string; _new_expected: string; _reason: string }
+        Returns: undefined
+      }
+      requisition_record_receipt: {
+        Args: {
+          _comments: string
+          _delivery_date: string
+          _id: string
+          _lines: Json
+        }
+        Returns: Json
+      }
+      requisition_remove_request_document: {
+        Args: { _doc: string }
+        Returns: undefined
+      }
+      requisition_reopen: { Args: { _id: string }; Returns: undefined }
+      requisition_resolve_discrepancy: {
+        Args: { _disc: string; _note: string; _resolution: string }
+        Returns: string
+      }
+      requisition_save_draft: {
+        Args: {
+          _department: string
+          _fields?: Json
+          _id: string
+          _items: Json
+          _org: string
+          _purpose: string
+        }
+        Returns: string
+      }
+      requisition_set_order_value: {
+        Args: { _id: string; _value: number }
+        Returns: undefined
+      }
+      requisition_stage_key: { Args: { _step: number }; Returns: string }
+      requisition_submit: { Args: { _id: string }; Returns: Json }
+      requisition_template_current: {
+        Args: { _org: string; _requisition?: string }
+        Returns: Json
+      }
+      requisition_template_decide: {
+        Args: { _approve: boolean; _id: string; _note: string }
+        Returns: number
+      }
+      requisition_template_overview: { Args: { _org: string }; Returns: Json }
+      requisition_template_save_draft: {
+        Args: { _definition: Json; _note: string; _org: string }
+        Returns: string
+      }
+      requisition_template_submit: { Args: { _id: string }; Returns: undefined }
+      requisition_template_withdraw: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      requisition_view: { Args: { _id: string }; Returns: Json }
       reset_test_data: {
         Args: { _dry_run?: boolean; _include_staff?: boolean }
         Returns: Json
@@ -15977,7 +17376,67 @@ export type Database = {
         }
         Returns: string
       }
+      role_factory_assign: {
+        Args: { _org: string; _role: string; _user: string }
+        Returns: string
+      }
+      role_factory_assignable: { Args: { _org: string }; Returns: Json }
+      role_factory_catalogue: { Args: never; Returns: Json }
+      role_factory_create: {
+        Args: {
+          _code: string
+          _job_description: string
+          _name: string
+          _reports_to_role?: string
+        }
+        Returns: string
+      }
+      role_factory_decide: {
+        Args: {
+          _ack_sensitive?: boolean
+          _approve: boolean
+          _note: string
+          _version: string
+        }
+        Returns: string
+      }
+      role_factory_events_list: { Args: { _role?: string }; Returns: Json }
+      role_factory_new_version: { Args: { _role: string }; Returns: string }
+      role_factory_overview: { Args: never; Returns: Json }
+      role_factory_record_ai: {
+        Args: {
+          _actor: string
+          _capabilities: string[]
+          _note: string
+          _version: string
+        }
+        Returns: Json
+      }
+      role_factory_retire: {
+        Args: { _note: string; _role: string }
+        Returns: undefined
+      }
+      role_factory_run_rules: { Args: { _version: string }; Returns: Json }
+      role_factory_save_draft: {
+        Args: {
+          _capabilities: string[]
+          _job_description: string
+          _reports_to_role: string
+          _version: string
+        }
+        Returns: undefined
+      }
+      role_factory_submit: { Args: { _version: string }; Returns: undefined }
+      role_factory_unassign: {
+        Args: { _assignment: string }
+        Returns: undefined
+      }
+      role_factory_withdraw: { Args: { _version: string }; Returns: undefined }
       run_scheduled_job: { Args: { _job: string }; Returns: number }
+      save_centre_target: {
+        Args: { _indicator: string; _org: string; _target: number }
+        Returns: undefined
+      }
       save_entry_requirement: {
         Args: { _changes: Json; _requirement: string; _type: string }
         Returns: Json
@@ -15986,9 +17445,20 @@ export type Database = {
         Args: { _org: string; _s: Json }
         Returns: undefined
       }
+      save_staff_establishment: {
+        Args: {
+          _approved: number
+          _notes?: string
+          _org: string
+          _post_title: string
+          _role: string
+        }
+        Returns: undefined
+      }
       secure_digits5: { Args: never; Returns: string }
       seed_default_workflows: { Args: { _org: string }; Returns: undefined }
       seed_reporting_lines: { Args: { _org: string }; Returns: undefined }
+      seed_requisition_workflow: { Args: { _org: string }; Returns: undefined }
       seed_symbol_points_for_organization: {
         Args: { org_id: string }
         Returns: undefined
@@ -16146,6 +17616,32 @@ export type Database = {
       transfer_row_json: {
         Args: { tr: Database["public"]["Tables"]["trainee_transfers"]["Row"] }
         Returns: Json
+      }
+      uniform_ppe_needs: {
+        Args: { _org: string; _trade?: string; _year?: string }
+        Returns: Json
+      }
+      uniform_ppe_register: {
+        Args: {
+          _only_open?: boolean
+          _org: string
+          _trade?: string
+          _year?: string
+        }
+        Returns: {
+          academic_year: string
+          chef_jacket_size: string
+          chef_trouser_size: string
+          full_name: string
+          overall_size: string
+          registration_id: string
+          requisition_number: string
+          shoe_size: string
+          skirt_trousers_size: string
+          trade_name: string
+          trainee_number: string
+          tshirt_size: string
+        }[]
       }
       update_funding_application: {
         Args: {
