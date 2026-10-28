@@ -23,6 +23,7 @@ import {
   DoorClosed,
   LucideIcon,
   Landmark,
+  ShieldCheck,
   Award,
   HelpCircle,
   AlertTriangle,
@@ -70,6 +71,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Test Data Reset", url: "/test-data-reset", icon: Trash2 },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
+  { title: "Reporting Confirmations", url: "/reporting-confirmations", icon: ShieldCheck },
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar },
   { title: "Course Catalogue", url: "/course-catalogue", icon: BookOpen },
   { title: "Learning Space", url: "/learning", icon: BookOpen },
@@ -100,6 +102,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Document Settings", url: "/document-settings", icon: FileText, section: "Centre Setup" },
   { title: "Proof of Registration", url: "/proof-of-registration-settings", icon: FileText, section: "Centre Setup" },
   { title: "Workflows", url: "/workflows", icon: Settings, section: "Centre Setup" },
+  { title: "Reporting Structure", url: "/reporting-structure", icon: Users, section: "Centre Setup" },
   { title: "Moodle", url: "/moodle", icon: GraduationCap, section: "Centre Setup" },
   { title: "Activity Logs", url: "/role-activity", icon: Activity, section: "System Monitoring" },
   { title: "Audit Trail", url: "/system-logs", icon: History, section: "System Monitoring" },
@@ -126,6 +129,7 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "Staff Management (view only)" },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar, section: "Staff Management (view only)" },
   { title: "Reports", url: "/reports", icon: FileText, section: "Administration" },
+  { title: "Reporting Structure", url: "/reporting-structure", icon: Users, section: "Administration" },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare, section: "Administration" },
 ];
 
