@@ -82,7 +82,7 @@ function ChangeTab({ canManage }: { canManage: boolean }) {
   const me = people.find((p) => p.user_id === user);
   const pv = preview.data;
   const approvers = useMemo(() => Array.from(new Map((pv?.pending_approvals ?? []).flatMap((a) => a.approvers).map((a) => [a.user_id, a])).values()), [pv]);
-  if (!canManage) return <Alert><AlertDescription>Only the Organisation Admin changes reporting lines. You can see the chart, gaps, requests and history.</AlertDescription></Alert>;
+  if (!canManage) return <Alert><AlertDescription>Only the Organisation Admin changes reporting lines. You can see the chart, gaps and history.</AlertDescription></Alert>;
   return (
     <div className="space-y-6">
       <div className="grid max-w-3xl gap-3 sm:grid-cols-2">
@@ -175,7 +175,8 @@ function LinesTab({ canManage }: { canManage: boolean }) {
 }
 
 function RequestsTab({ canManage }: { canManage: boolean }) {
-  const { data, isLoading } = useChangeRequests(false);
+  const { data, isLoading } = useChangeRequests(false, canManage);
+  if (!canManage) return <Alert><AlertDescription>Change requests are visible to the Organisation Admin and the Super Admin.</AlertDescription></Alert>;
   if (isLoading) return <LoadingSpinner text="Loading..." className="py-6" />;
   return <ChangeRequestsList rows={data ?? []} canDecide={false} canWithdraw={canManage} />;
 }
@@ -196,7 +197,7 @@ function ReportingStructure() {
   const { navItems, groupLabel, role } = useRoleNavigation();
   const canManage = role === "organization_admin" || role === "admin";
   const { data: gaps } = useReportingGaps();
-  const { data: reqs } = useChangeRequests(false);
+  const { data: reqs } = useChangeRequests(false, canManage);
   const open = (reqs ?? []).filter((r) => r.status === "pending").length;
   return (
     <DashboardLayout title="Reporting structure" subtitle="Who supervises whom, and so who approves what" navItems={navItems} groupLabel={groupLabel}>
