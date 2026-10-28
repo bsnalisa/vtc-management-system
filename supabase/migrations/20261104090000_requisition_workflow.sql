@@ -89,7 +89,7 @@ BEGIN
 
   -- segregation of duties: one person never decides two stages of the same requisition
   _def := pg_get_functiondef('public.workflow_open_step(uuid, integer)'::regprocedure);
-  _old := '-- a submitter with no reporting line (or whose supervisor is themselves) goes to the Centre Manager';
+  _old := 'IF s.approver_role ~ ''^@supervisor[1-3]?$'' AND NOT EXISTS (SELECT 1 FROM public.workflow_task_assignees WHERE task_id = _task) THEN';
   IF position(_old IN _def) = 0 THEN RAISE EXCEPTION 'workflow_open_step: expected text not found'; END IF;
   _def := replace(_def, _old, E'IF i.process_type = ''purchase_requisition'' THEN\n'
     || E'    SELECT count(*) INTO _n FROM public.workflow_task_assignees WHERE task_id = _task;\n'
