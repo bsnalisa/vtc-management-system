@@ -110,8 +110,10 @@ select 'OK adoption: assessment requests';
 
 -- ===== adoption: delivery plans =====
 insert into trainers (id, organization_id, user_id, trainer_id, full_name, email) values ('70000000-0000-0000-0000-000000000001', :'orgA', :'trainer', 'TR1', 'Trainer One', 'trainer@a.test');
+select set_config('app.facility_fn', 'on', false);
 insert into classes (id, organization_id, trade_id, level, training_mode, class_code, class_name, academic_year, qualification_id, trainer_id)
  values ('71000000-0000-0000-0000-000000000001', :'orgA', 'c0000000-0000-0000-0000-000000000001', 1, 'fulltime', 'W1', 'Welding L1 A', '2026', :'Q', '70000000-0000-0000-0000-000000000001');
+select set_config('app.facility_fn', 'off', false);
 insert into qualification_unit_standards (qualification_id, unit_standard_id, unit_standard_title, credit_value, level) values (:'Q','US-1','Safety',10,1);
 insert into workflow_definitions (id, organization_id, process_type, name, active) values ('d6000000-0000-0000-0000-000000000001', :'orgA', 'delivery_plan', 'Plans', true);
 insert into workflow_steps (definition_id, step_no, name, approver_role) values ('d6000000-0000-0000-0000-000000000001', 1, 'Head of Training', 'head_of_training');

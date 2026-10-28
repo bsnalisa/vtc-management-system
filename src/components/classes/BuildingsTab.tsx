@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ApprovalCell } from "@/components/classes/FacilityApproval";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -23,7 +24,7 @@ interface BuildingForm {
 
 const EMPTY_FORM: BuildingForm = { name: "", code: "", description: "", location: "", trade_ids: [] };
 
-const BuildingsTab = () => {
+const BuildingsTab = ({ readOnly = false, canApprove = false }: { readOnly?: boolean; canApprove?: boolean }) => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<BuildingForm>({ ...EMPTY_FORM });
@@ -75,7 +76,7 @@ const BuildingsTab = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Dialog open={open} onOpenChange={setOpen}>
+        {!readOnly && <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpen()}>
               <Plus className="h-4 w-4 mr-2" /> Add Building
@@ -132,13 +133,13 @@ const BuildingsTab = () => {
               </div>
             </form>
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> Buildings & Workshops</CardTitle>
-          <CardDescription>Manage physical buildings and assign trades to them</CardDescription>
+          <CardDescription>{readOnly ? "Buildings and workshops are created by the Head of Training and approved by the Centre Manager" : "New buildings wait for the Centre Manager's approval before they can be used"}</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -153,7 +154,8 @@ const BuildingsTab = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Assigned Trades</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Approval</TableHead>
+                  {!readOnly && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -169,7 +171,8 @@ const BuildingsTab = () => {
                         )) : <span className="text-muted-foreground text-sm">None</span>}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell><ApprovalCell kind="building" item={b} label={b.name} canApprove={canApprove} /></TableCell>
+                    {!readOnly && <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => handleOpen(b)}>
                           <Pencil className="h-4 w-4" />
@@ -190,7 +193,7 @@ const BuildingsTab = () => {
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
-                    </TableCell>
+                    </TableCell>}
                   </TableRow>
                 ))}
               </TableBody>

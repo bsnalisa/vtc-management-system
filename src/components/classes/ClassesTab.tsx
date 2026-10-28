@@ -13,6 +13,7 @@ import { useTrades } from "@/hooks/useTrades";
 import { useTrainers } from "@/hooks/useTrainers";
 import { useQualifications } from "@/hooks/useQualifications";
 import { Badge } from "@/components/ui/badge";
+import { ApprovalCell } from "@/components/classes/FacilityApproval";
 import { RecordCard } from "@/components/ui/record-card";
 
 const EMPTY_FORM: ClassData = {
@@ -27,7 +28,7 @@ const EMPTY_FORM: ClassData = {
   trainer_id: "",
 };
 
-const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
+const ClassesTab = ({ readOnly = false, canApprove = false }: { readOnly?: boolean; canApprove?: boolean }) => {
   const [open, setOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<any>(null);
   const [formData, setFormData] = useState<ClassData>({ ...EMPTY_FORM });
@@ -218,7 +219,7 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
             <div className="responsive-records">
               <div className="record-cards">
                 {classes.map(cls => <RecordCard key={cls.id} title={cls.class_name} subtitle={cls.class_code}
-                  status={<Badge variant="outline">Level {cls.level}</Badge>}
+                  status={<div className="flex flex-col items-end gap-1"><Badge variant="outline">Level {cls.level}</Badge><ApprovalCell kind="class" item={cls} label={cls.class_name} canApprove={canApprove} /></div>}
                   fields={[
                     { label: "Trade", value: cls.trades?.code || "—" },
                     { label: "Qualification", value: cls.qualifications ? `${cls.qualifications.qualification_code} – ${cls.qualifications.qualification_title}` : "—" },
@@ -246,6 +247,7 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                   <TableHead>Trainer</TableHead>
                   <TableHead>Capacity</TableHead>
                   <TableHead>Year</TableHead>
+                  <TableHead>Approval</TableHead>
                   {!readOnly && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
@@ -267,6 +269,7 @@ const ClassesTab = ({ readOnly = false }: { readOnly?: boolean }) => {
                     <TableCell>{cls.trainers?.full_name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                     <TableCell>{cls.capacity}</TableCell>
                     <TableCell>{cls.academic_year}</TableCell>
+                    <TableCell><ApprovalCell kind="class" item={cls} label={cls.class_name} canApprove={canApprove} /></TableCell>
                     {!readOnly && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

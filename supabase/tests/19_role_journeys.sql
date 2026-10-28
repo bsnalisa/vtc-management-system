@@ -96,9 +96,11 @@ select public.assert((select count(*) from vacancies) = 0 and (select count(*) f
 reset role;
 
 -- ===== blended learning =====
+select set_config('app.facility_fn', 'on', false);
 insert into classes (id, organization_id, trade_id, level, training_mode, class_code, class_name, academic_year, trainer_id) values
  ('c1000000-0000-0000-0000-0000000000b1', :'orgA', 'c0000000-0000-0000-0000-000000000001', 1, 'bdl', 'BDL1', 'Blended welding', '2026', null),
  ('c1000000-0000-0000-0000-0000000000b2', :'orgA', 'c0000000-0000-0000-0000-000000000001', 1, 'fulltime', 'FT1', 'Full-time welding', '2026', null);
+select set_config('app.facility_fn', 'off', false);
 insert into class_enrollments (class_id, trainee_id) values ('c1000000-0000-0000-0000-0000000000b1', :'T1') on conflict do nothing;
 delete from class_enrollments where class_id = 'c1000000-0000-0000-0000-0000000000b1' and trainee_id = :'T2';
 set role authenticated; select set_config('request.jwt.claim.sub', :'bdl', false);

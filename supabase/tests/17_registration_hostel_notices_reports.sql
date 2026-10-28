@@ -50,8 +50,10 @@ select public.assert((select count(*) from outbound_messages where recipient = '
 -- ===== emailed notices =====
 insert into employers (id, organization_id, name) values ('e1000000-0000-0000-0000-000000000002', :'orgA', 'Beta Works') on conflict do nothing;
 insert into trainers (id, organization_id, user_id, trainer_id, full_name) values ('70000000-0000-0000-0000-0000000000c1', :'orgA', '11111111-0000-0000-0000-000000000004', 'TC', 'Trainer C') on conflict do nothing;
+select set_config('app.facility_fn', 'on', false);
 insert into classes (id, organization_id, trade_id, level, training_mode, class_code, class_name, academic_year, trainer_id)
  values ('c1000000-0000-0000-0000-0000000000c2', :'orgA', 'c0000000-0000-0000-0000-000000000001', 1, 'fulltime', 'W9', 'Welding 9', '2026', (select id from trainers where user_id = '11111111-0000-0000-0000-000000000004'));
+select set_config('app.facility_fn', 'off', false);
 insert into class_enrollments (class_id, trainee_id) values ('c1000000-0000-0000-0000-0000000000c2', :'T1') on conflict do nothing;
 insert into internship_placements (organization_id, trainee_id, employer_id, start_date, end_date, status, placement_number) values (:'orgA', :'T1', 'e1000000-0000-0000-0000-000000000002', current_date, current_date + 60, 'pending', 'PL-N1');
 select public.assert(public.t_notif_count('11111111-0000-0000-0000-000000000004'::uuid, 'Trainee placed%') = 0, 'a pending placement notifies nobody');

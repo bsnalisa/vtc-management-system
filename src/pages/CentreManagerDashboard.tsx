@@ -19,6 +19,7 @@ import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
 import { useMyTasks } from "@/hooks/useWorkflows";
 import { useCentreManagerOverview } from "@/hooks/useCentreManagerOverview";
+import { FacilityApprovalAlert } from "@/components/classes/FacilityApprovalAlert";
 import { CentreExecutive } from "@/components/dashboard/CentreExecutive";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancePanel, QualityPanel, StaffingPanel, StakeholdersPanel } from "@/components/dashboard/centre/CentrePanels";
@@ -100,6 +101,7 @@ const CentreManagerDashboard = () => {
             <TabsTrigger value="stakeholders">Stakeholders and reports</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
+            <FacilityApprovalAlert role="centre_manager" linkToClasses />
         {isLoading && <div className="flex justify-center py-6"><LoadingSpinner text="Loading centre figures" /></div>}
         {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>Centre figures could not be loaded: {(error as Error).message}</AlertDescription></Alert>}
         {o && (

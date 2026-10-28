@@ -6,24 +6,27 @@ import { Users, Building2, DoorOpen } from "lucide-react";
 import ClassesTab from "@/components/classes/ClassesTab";
 import BuildingsTab from "@/components/classes/BuildingsTab";
 import RoomsTab from "@/components/classes/RoomsTab";
+import { FacilityApprovalAlert } from "@/components/classes/FacilityApprovalAlert";
 
 const ClassManagement = () => {
   const { navItems, role } = useRoleNavigation();
   const isTrainer = role === "trainer";
   // The Centre Manager oversees classes; creating and changing them belongs to the Head of Training
-  const isViewer = isTrainer || role === "centre_manager";
+  const isCentreManager = role === "centre_manager";
   const [activeTab, setActiveTab] = useState("classes");
 
   return (
     <DashboardLayout
       title={isTrainer ? "My Classes" : role === "centre_manager" ? "Classes" : "Class Management"}
-      subtitle={isTrainer ? "View classes allocated to you" : role === "centre_manager" ? "View classes (managed by the Head of Training)" : "Manage classes, buildings/workshops, and rooms"}
+      subtitle={isTrainer ? "View classes allocated to you" : role === "centre_manager" ? "Classes, buildings and rooms made by the Head of Training, for your approval" : "Manage classes, buildings/workshops, and rooms"}
       navItems={navItems}
       groupLabel="Training Management"
     >
-      {isViewer ? (
+      {isTrainer ? (
         <ClassesTab readOnly />
       ) : (
+        <>
+        {(isCentreManager || role === "head_of_training") && <div className="mb-4"><FacilityApprovalAlert role={isCentreManager ? "centre_manager" : "head_of_training"} /></div>}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="classes" className="flex items-center gap-2">
@@ -38,15 +41,16 @@ const ClassManagement = () => {
           </TabsList>
 
           <TabsContent value="classes" className="mt-4">
-            <ClassesTab />
+            <ClassesTab readOnly={isCentreManager} canApprove={isCentreManager} />
           </TabsContent>
           <TabsContent value="buildings" className="mt-4">
-            <BuildingsTab />
+            <BuildingsTab readOnly={isCentreManager} canApprove={isCentreManager} />
           </TabsContent>
           <TabsContent value="rooms" className="mt-4">
-            <RoomsTab />
+            <RoomsTab readOnly={isCentreManager} canApprove={isCentreManager} />
           </TabsContent>
         </Tabs>
+        </>
       )}
     </DashboardLayout>
   );
