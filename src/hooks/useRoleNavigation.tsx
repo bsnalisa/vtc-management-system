@@ -30,13 +30,15 @@ import {
   printingOfficerNavItems,
   liaisonOfficerNavItems,
   resourceCenterNavItems,
+  type NavItem,
 } from "@/lib/navigationConfig";
 import { getRoleDashboardPath, getRoleDisplayName } from "@/lib/roleUtils";
+import { FileText } from "lucide-react";
 
 export const useRoleNavigation = () => {
   const { role, loading } = useUserRole();
 
-  const getNavItems = () => {
+  const roleNavItems = () => {
     switch (role) {
       case "super_admin":
         return adminNavItems; // Super admin uses admin nav when in org context
@@ -104,6 +106,17 @@ export const useRoleNavigation = () => {
       default:
         return [];
     }
+  };
+
+  // Every staff role can make a requisition and decide the ones assigned to it
+  const getNavItems = (): NavItem[] => {
+    const items: NavItem[] = roleNavItems();
+    if (!role || role === "trainee" || items.length === 0 || items.some((i) => i.url === "/requisitions")) return items;
+    const entry: NavItem = { title: "Requisitions", url: "/requisitions", icon: FileText };
+    const at = items.findIndex((i) => i.url === "/my-approvals");
+    const section = at >= 0 ? items[at].section : undefined;
+    const withSection: NavItem = section ? { ...entry, section } : entry;
+    return at >= 0 ? [...items.slice(0, at), withSection, ...items.slice(at)] : [...items, withSection];
   };
 
   const getGroupLabel = () => {

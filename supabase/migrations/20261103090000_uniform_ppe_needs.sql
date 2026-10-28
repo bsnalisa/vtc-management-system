@@ -33,12 +33,12 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
     LEFT JOIN public.trainees t ON t.id = r.trainee_id
     LEFT JOIN public.trades tr ON tr.id = a.trade_id
     LEFT JOIN public.ppe_requisition_registrations l ON l.registration_id = r.id
-    LEFT JOIN public.purchase_requisitions pr ON pr.id = l.requisition_id
+    LEFT JOIN public.purchase_requisitions pr ON pr.id = l.requisition_id AND pr.status <> 'cancelled'
    WHERE r.organization_id = _org AND r.registration_status = 'registered'
      AND (t.id IS NULL OR t.status::text NOT IN ('withdrawn', 'transferred'))
      AND (_year IS NULL OR r.academic_year = _year)
      AND (_trade IS NULL OR a.trade_id = _trade)
-     AND (NOT _open_only OR l.registration_id IS NULL)
+     AND (NOT _open_only OR pr.id IS NULL)
 $$;
 REVOKE ALL ON FUNCTION private.ppe_base(uuid, text, uuid, boolean) FROM PUBLIC, anon, authenticated;
 
@@ -98,14 +98,18 @@ BEGIN
   CREATE TEMP TABLE _ppe_regs ON COMMIT DROP AS SELECT registration_id FROM private.ppe_base(_org, _year, _trade, true) WHERE has_sizes;
   SELECT count(*) INTO _regs FROM _ppe_regs;
   IF _regs = 0 THEN RAISE EXCEPTION 'No registered trainees with outstanding uniform or PPE sizes' USING ERRCODE = 'P0002'; END IF;
-  _num := 'REQ-UNI-' || to_char(now(), 'YYYYMMDD-HH24MISS');
+  -- a draft in the normal requisition process: the Procurement Officer prices it and submits it for approval like any other requisition
+  _num := 'DRAFT-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 10));
+  PERFORM set_config('app.requisition_fn', 'on', true);
   INSERT INTO public.purchase_requisitions (organization_id, requisition_number, requested_by, department, justification, status)
     VALUES (_org, _num, auth.uid(), 'Training',
             format('Uniforms and PPE for %s newly registered trainee(s)%s, from the sizes given on their applications. Unit costs are to be completed from supplier quotations.', _regs,
                    CASE WHEN _year IS NOT NULL THEN ' (' || _year || ')' ELSE '' END), 'draft')
     RETURNING id INTO _req;
-  INSERT INTO public.purchase_requisition_items (requisition_id, item_description, quantity, estimated_unit_cost)
-    SELECT _req, i.item || ', size ' || i.size, i.quantity, 0
+  PERFORM set_config('app.requisition_fn', 'off', true);
+  INSERT INTO public.requisition_status_history (requisition_id, from_status, to_status, reason, changed_by) VALUES (_req, NULL, 'draft', 'Prepared from registered trainees'' PPE sizes', auth.uid());
+  INSERT INTO public.purchase_requisition_items (requisition_id, line_no, item_description, quantity, estimated_unit_cost)
+    SELECT _req, row_number() OVER (ORDER BY i.item, i.size), i.item || ', size ' || i.size, i.quantity, 0
       FROM (SELECT item, size, count(*) AS quantity FROM (
               SELECT 'Safety shoes' AS item, b.shoe_size AS size FROM private.ppe_base(_org, _year, _trade, true) b WHERE b.registration_id IN (SELECT registration_id FROM _ppe_regs)
               UNION ALL SELECT 'Overall', b.overall_size FROM private.ppe_base(_org, _year, _trade, true) b WHERE b.registration_id IN (SELECT registration_id FROM _ppe_regs)
@@ -116,7 +120,8 @@ BEGIN
             WHERE size IS NOT NULL GROUP BY item, size) i;
   GET DIAGNOSTICS _lines = ROW_COUNT;
   INSERT INTO public.ppe_requisition_registrations (registration_id, requisition_id, organization_id, included_by)
-    SELECT registration_id, _req, _org, auth.uid() FROM _ppe_regs;
+    SELECT registration_id, _req, _org, auth.uid() FROM _ppe_regs
+    ON CONFLICT (registration_id) DO UPDATE SET requisition_id = EXCLUDED.requisition_id, included_at = now(), included_by = EXCLUDED.included_by;
   DROP TABLE _ppe_regs;
   RETURN jsonb_build_object('requisition_id', _req, 'requisition_number', _num, 'trainees', _regs, 'lines', _lines);
 END $$;

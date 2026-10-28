@@ -81,7 +81,7 @@ const PurchaseOrderDialog = ({ open, onOpenChange, order }: PurchaseOrderDialogP
   const createItem = useCreatePurchaseOrderItem();
   const deleteItem = useDeletePurchaseOrderItem();
 
-  const approvedRequisitions = requisitions.filter(r => r.status === 'approved');
+  const approvedRequisitions = requisitions.filter(r => ['approved_awaiting_procurement', 'procurement_in_progress'].includes(r.status));
 
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),

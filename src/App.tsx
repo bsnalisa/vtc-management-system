@@ -58,7 +58,10 @@ const AssetManagement = lazy(() => import("./pages/AssetManagement"));
 const StockManagement = lazy(() => import("./pages/StockManagement"));
 const ProcurementOfficerDashboard = lazy(() => import("./pages/ProcurementOfficerDashboard"));
 const SupplierManagement = lazy(() => import("./pages/SupplierManagement"));
-const PurchaseRequisitions = lazy(() => import("./pages/PurchaseRequisitions"));
+const Requisitions = lazy(() => import("./pages/Requisitions"));
+const RequisitionEdit = lazy(() => import("./pages/RequisitionEdit"));
+const RequisitionDetail = lazy(() => import("./pages/RequisitionDetail"));
+const RequisitionByInstance = lazy(() => import("./pages/RequisitionByInstance"));
 const PurchaseOrders = lazy(() => import("./pages/PurchaseOrders"));
 const ReceivingReports = lazy(() => import("./pages/ReceivingReports"));
 const PermissionsMatrix = lazy(() => import("./pages/PermissionsMatrix"));
@@ -311,9 +314,6 @@ const ProtectedStockManagement = withRoleAccess(StockManagement, {
 const ProtectedSupplierManagement = withRoleAccess(SupplierManagement, {
   requiredRoles: ["procurement_officer", "creditors_officer", "accountant", "head_of_finance_admin"],
 });
-const ProtectedPurchaseRequisitions = withRoleAccess(PurchaseRequisitions, {
-  requiredRoles: ["procurement_officer"],
-});
 const ProtectedPurchaseOrders = withRoleAccess(PurchaseOrders, {
   requiredRoles: ["procurement_officer"],
 });
@@ -551,7 +551,12 @@ const App = () => (
           <Route path="/super-admin/audit-logs" element={<ProtectedRoute><ProtectedSuperAdminAuditLogs /></ProtectedRoute>} />
           <Route path="/packages" element={<ProtectedRoute><ProtectedPackageManagement /></ProtectedRoute>} />
           <Route path="/suppliers" element={<ProtectedRoute><ProtectedSupplierManagement /></ProtectedRoute>} />
-          <Route path="/purchase-requisitions" element={<ProtectedRoute><ProtectedPurchaseRequisitions /></ProtectedRoute>} />
+          <Route path="/purchase-requisitions" element={<Navigate to="/requisitions?tab=procurement" replace />} />
+          <Route path="/requisitions" element={<ProtectedRoute><Requisitions /></ProtectedRoute>} />
+          <Route path="/requisitions/new" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />
+          <Route path="/requisitions/instance/:instanceId" element={<ProtectedRoute><RequisitionByInstance /></ProtectedRoute>} />
+          <Route path="/requisitions/:id/edit" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />
+          <Route path="/requisitions/:id" element={<ProtectedRoute><RequisitionDetail /></ProtectedRoute>} />
           <Route path="/purchase-orders" element={<ProtectedRoute><ProtectedPurchaseOrders /></ProtectedRoute>} />
           <Route path="/receiving-reports" element={<ProtectedRoute><ProtectedReceivingReports /></ProtectedRoute>} />
           <Route path="/stock" element={<ProtectedRoute><ProtectedStockManagement /></ProtectedRoute>} />

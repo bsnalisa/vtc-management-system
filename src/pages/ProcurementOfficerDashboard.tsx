@@ -3,7 +3,8 @@ import { usePurchaseRequisitions, usePurchaseOrders, useSuppliers } from "@/hook
 import { Package, FileText, Users, TrendingUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { RequisitionStatusBadge } from "@/components/requisitions/RequisitionStatusBadge";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
@@ -18,14 +19,14 @@ export default function ProcurementOfficerDashboard() {
   const { data: suppliers = [], isLoading: loadingSuppliers } = useSuppliers();
   const { data: profile } = useProfile();
 
-  const pendingRequisitions = requisitions.filter(r => r.status === 'pending_approval').length;
+  const awaitingProcurement = requisitions.filter(r => r.status === 'approved_awaiting_procurement').length;
   const activeOrders = orders.filter(o => o.status === 'sent' || o.status === 'acknowledged').length;
   const totalSpent = orders.reduce((sum, o) => sum + Number(o.grand_total), 0);
 
   const stats = [
     {
-      title: "Pending Requisitions",
-      value: pendingRequisitions,
+      title: "Approved: Awaiting Procurement",
+      value: awaitingProcurement,
       icon: FileText,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
@@ -107,14 +108,8 @@ export default function ProcurementOfficerDashboard() {
                   <div className="space-y-2">
                     {requisitions.slice(0, 5).map((req) => (
                       <div key={req.id} className="flex justify-between items-center p-2 border rounded">
-                        <span className="font-medium">{req.requisition_number}</span>
-                        <span className={`text-sm px-2 py-1 rounded ${
-                          req.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          req.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {req.status.replace('_', ' ')}
-                        </span>
+                        <Link to={`/requisitions/${req.id}`} className="font-medium hover:underline">{req.requisition_number}</Link>
+                        <RequisitionStatusBadge status={req.status} />
                       </div>
                     ))}
                   </div>
@@ -158,7 +153,7 @@ export default function ProcurementOfficerDashboard() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Purchase Requisitions</CardTitle>
-                <Button onClick={() => navigate("/purchase-requisitions")}>
+                <Button onClick={() => navigate("/requisitions?tab=procurement")}>
                   Manage Requisitions
                 </Button>
               </div>

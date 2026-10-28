@@ -34,8 +34,8 @@ select public.expect_error($$select public.uniform_ppe_needs('a0000000-0000-0000
 
 select set_config('request.jwt.claim.sub', :'pA', false);
 select public.assert((public.create_uniform_requisition(:'orgA') ->> 'trainees')::int = 2, 'a requisition is prepared for the two trainees');
-select public.assert((select quantity from purchase_requisition_items i join purchase_requisitions r on r.id = i.requisition_id where r.requisition_number like 'REQ-UNI-%' and i.item_description = 'Safety shoes, size 40') = 2, 'its lines add up the sizes');
-select public.assert((select status from purchase_requisitions where requisition_number like 'REQ-UNI-%') = 'draft', 'it is a draft for the officer to price and submit');
+select public.assert((select quantity from purchase_requisition_items i join purchase_requisitions r on r.id = i.requisition_id where r.requisition_number like 'DRAFT-%' and i.item_description = 'Safety shoes, size 40') = 2, 'its lines add up the sizes');
+select public.assert((select status from purchase_requisitions where requisition_number like 'DRAFT-%') = 'draft', 'it is a draft for the officer to price and submit');
 select public.assert((public.uniform_ppe_needs(:'orgA') ->> 'open_trainees')::int = 0 and (public.uniform_ppe_needs(:'orgA') ->> 'already_requisitioned')::int = 2, 'the same trainees are not requisitioned twice');
 select public.expect_error($$select public.create_uniform_requisition('a0000000-0000-0000-0000-00000000000a')$$, 'No registered trainees', 'nothing left to requisition');
 select public.assert((select count(*) from public.uniform_ppe_register(:'orgA') where requisition_number is not null) = 2, 'the register shows which requisition each trainee is in');

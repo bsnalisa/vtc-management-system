@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -29,6 +30,7 @@ import {
 const REQUIREMENT_APPROVER_ROLES = ["head_of_trainee_support", "super_admin"];
 
 function ToApproveTab() {
+  const navigate = useNavigate();
   const { role } = useRoleNavigation();
   const canApproveRequirements = !!role && REQUIREMENT_APPROVER_ROLES.includes(role);
   const { data } = useMyTasks();
@@ -47,7 +49,7 @@ function ToApproveTab() {
               <TableCell>{types?.find((p) => p.code === t.process_type)?.label ?? t.process_type}</TableCell>
               <TableCell>{t.step_name}{t.delegated && <Badge variant="outline" className="ml-2">covering</Badge>}{t.escalated && <Badge variant="destructive" className="ml-2">higher level</Badge>}</TableCell>
               <TableCell>{t.due_at ? new Date(t.due_at).toLocaleString() : "-"}</TableCell>
-              <TableCell className="text-right"><Button size="sm" onClick={() => setSelected(t)}>Decide</Button></TableCell>
+              <TableCell className="text-right"><Button size="sm" onClick={() => (t.process_type === "purchase_requisition" ? navigate(`/requisitions/instance/${t.instance_id}`) : setSelected(t))}>{t.process_type === "purchase_requisition" ? "Open requisition" : "Decide"}</Button></TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -100,6 +102,7 @@ function StartRequestDialog() {
 }
 
 function MyRequestsTab() {
+  const navigate = useNavigate();
   const { data } = useWorkflowInstances(true);
   const provide = useProvideInfo();
   const [attachFor, setAttachFor] = useState<WorkflowInstance | null>(null);
@@ -121,7 +124,7 @@ function MyRequestsTab() {
               <TableCell className="text-xs text-muted-foreground max-w-[18rem]">{i.next_action}</TableCell>
               <TableCell className="text-right space-x-2">
                 {i.status === "draft" && <Button size="sm" onClick={() => setAttachFor(i)}>Attach and submit</Button>}
-                {i.status === "awaiting_info" && <Button size="sm" onClick={() => { setReply(i); setText(""); }}>Correct and resubmit</Button>}
+                {i.status === "awaiting_info" && <Button size="sm" onClick={() => (i.process_type === "purchase_requisition" ? navigate(`/requisitions/instance/${i.id}`) : (setReply(i), setText("")))}>Correct and resubmit</Button>}
                 <Button size="sm" variant="outline" onClick={() => setSelected(i)}>Details</Button>
               </TableCell>
             </TableRow>
