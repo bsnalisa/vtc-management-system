@@ -117,7 +117,7 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "Centre Targets", url: "/centre-targets", icon: Landmark, section: "Leadership" },
   { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck, section: "Financial Management" },
   { title: "Requisition Template", url: "/requisition-template", icon: ClipboardList, section: "Financial Management" },
-  { title: "Classes", url: "/classes", icon: DoorClosed, section: "Quality of Training (view only)" },
+  { title: "Classes & Facilities", url: "/classes", icon: DoorClosed, section: "Quality of Training" },
   { title: "Trainees", url: "/trainees", icon: Users, section: "Quality of Training (view only)" },
   { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck, section: "Quality of Training (view only)" },
   { title: "Transcripts", url: "/transcripts", icon: FileText, section: "Quality of Training (view only)" },

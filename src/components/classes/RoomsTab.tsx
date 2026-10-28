@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ApprovalCell } from "@/components/classes/FacilityApproval";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -30,7 +31,7 @@ const ROOM_TYPE_LABELS: Record<string, string> = {
   workshop: "Workshop",
 };
 
-const RoomsTab = () => {
+const RoomsTab = ({ readOnly = false, canApprove = false }: { readOnly?: boolean; canApprove?: boolean }) => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<RoomForm>({ ...EMPTY_FORM });
@@ -83,7 +84,7 @@ const RoomsTab = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <Dialog open={open} onOpenChange={setOpen}>
+        {!readOnly && <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpen()}>
               <Plus className="h-4 w-4 mr-2" /> Add Room
@@ -141,7 +142,7 @@ const RoomsTab = () => {
               </div>
             </form>
           </DialogContent>
-        </Dialog>
+        </Dialog>}
 
         <div className="flex items-center gap-2">
           <Label className="text-sm whitespace-nowrap">Filter by building:</Label>
@@ -158,7 +159,7 @@ const RoomsTab = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><DoorOpen className="h-5 w-5" /> Rooms</CardTitle>
-          <CardDescription>Classrooms, labs, and workshops inside buildings</CardDescription>
+          <CardDescription>{readOnly ? "Rooms are created by the Head of Training and approved by the Centre Manager" : "Classrooms, labs, and workshops inside buildings. New rooms wait for the Centre Manager's approval."}</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -174,7 +175,8 @@ const RoomsTab = () => {
                   <TableHead>Building</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Capacity</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Approval</TableHead>
+                  {!readOnly && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,7 +187,8 @@ const RoomsTab = () => {
                     <TableCell>{room.training_buildings?.name || "—"}</TableCell>
                     <TableCell><Badge variant={roomTypeBadgeVariant(room.room_type)}>{ROOM_TYPE_LABELS[room.room_type] || room.room_type}</Badge></TableCell>
                     <TableCell>{room.capacity}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell><ApprovalCell kind="room" item={room} label={room.name} canApprove={canApprove} /></TableCell>
+                    {!readOnly && <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => handleOpen(room)}>
                           <Pencil className="h-4 w-4" />
@@ -206,7 +209,7 @@ const RoomsTab = () => {
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
-                    </TableCell>
+                    </TableCell>}
                   </TableRow>
                 ))}
               </TableBody>
