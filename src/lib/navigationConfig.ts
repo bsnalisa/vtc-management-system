@@ -186,6 +186,13 @@ export const trainerNavItems: NavItem[] = [
 ];
 
 // --------------------- Trainee Navigation ---------------------
+// Staff Member: a login with no access of its own; the dashboard shows what the roles made in the role factory allow
+export const staffMemberNavItems: NavItem[] = [
+  { title: "My Role Dashboard", url: "/my-role-dashboard", icon: LayoutDashboard },
+  { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
+];
+
 export const traineeNavItems: NavItem[] = [
   { title: "Dashboard", url: "/trainee-dashboard", icon: LayoutDashboard },
   { title: "My Profile", url: "/profile", icon: UserCircle },

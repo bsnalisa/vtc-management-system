@@ -6,6 +6,7 @@ import {
   headOfTrainingNavItems,
   trainerNavItems,
   traineeNavItems,
+  staffMemberNavItems,
   hodNavItems,
   assessmentCoordinatorNavItems,
   debtorOfficerNavItems,
@@ -71,6 +72,8 @@ export const useRoleNavigation = () => {
         return trainerNavItems;
       case "trainee":
         return traineeNavItems;
+      case "staff_member":
+        return staffMemberNavItems;
       case "hod":
         return hodNavItems;
       case "assessment_coordinator":
@@ -155,6 +158,8 @@ export const useRoleNavigation = () => {
         return "Trainer Tools";
       case "trainee":
         return "My Portal";
+      case "staff_member":
+        return "My Work";
       case "hod":
         return "Department Management";
       case "assessment_coordinator":
