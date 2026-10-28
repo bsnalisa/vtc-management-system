@@ -28,7 +28,7 @@ const TraineePaymentsPage = () => {
         .from("trainees")
         .select("id")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       if (!trainee) return null;
 
