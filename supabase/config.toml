@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.seed-test-accounts]
 verify_jwt = false
+
+[functions.analyse-job-description]
+verify_jwt = false
