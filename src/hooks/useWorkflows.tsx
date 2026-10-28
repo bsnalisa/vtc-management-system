@@ -320,16 +320,6 @@ export const useReportingLines = () => {
     },
   });
 };
-export const useSaveReportingLine = () =>
-  useOrgMutation(async (v: { role: string; supervisor_role: string }, orgId) => {
-    const { error } = await db.from("reporting_lines").upsert({ organization_id: orgId, role: v.role, supervisor_role: v.supervisor_role });
-    if (error) throw error;
-  }, ["reporting-lines"], "Reporting line saved");
-export const useDeleteReportingLine = () =>
-  useOrgMutation(async (role: string, orgId) => {
-    const { error } = await db.from("reporting_lines").delete().eq("organization_id", orgId).eq("role", role);
-    if (error) throw error;
-  }, ["reporting-lines"], "Reporting line removed");
 
 export const useUserSupervisors = () => {
   const { organizationId } = useOrganizationContext();
@@ -342,13 +332,3 @@ export const useUserSupervisors = () => {
     },
   });
 };
-export const useSaveUserSupervisor = () =>
-  useOrgMutation(async (v: { user_id: string; supervisor_user_id: string }, orgId) => {
-    const { error } = await db.from("user_supervisors").upsert({ organization_id: orgId, user_id: v.user_id, supervisor_user_id: v.supervisor_user_id });
-    if (error) throw error;
-  }, ["user-supervisors"], "Supervisor saved");
-export const useDeleteUserSupervisor = () =>
-  useOrgMutation(async (userId: string, orgId) => {
-    const { error } = await db.from("user_supervisors").delete().eq("organization_id", orgId).eq("user_id", userId);
-    if (error) throw error;
-  }, ["user-supervisors"], "Supervisor override removed");
