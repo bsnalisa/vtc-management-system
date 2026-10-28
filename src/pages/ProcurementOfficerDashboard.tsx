@@ -8,6 +8,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { UniformPpeNeeds } from "@/components/procurement/UniformPpeNeeds";
 
 export default function ProcurementOfficerDashboard() {
   const { navItems, groupLabel } = useRoleNavigation();
@@ -85,6 +86,7 @@ export default function ProcurementOfficerDashboard() {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="uniforms">Uniforms &amp; PPE</TabsTrigger>
           <TabsTrigger value="requisitions">Requisitions</TabsTrigger>
           <TabsTrigger value="orders">Purchase Orders</TabsTrigger>
           <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
@@ -145,6 +147,10 @@ export default function ProcurementOfficerDashboard() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="uniforms">
+          <UniformPpeNeeds />
         </TabsContent>
 
         <TabsContent value="requisitions">
