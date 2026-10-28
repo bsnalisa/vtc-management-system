@@ -131,65 +131,6 @@ export const usePurchaseRequisitions = () => {
   });
 };
 
-export const useCreatePurchaseRequisition = () => {
-  const queryClient = useQueryClient();
-  const { organizationId } = useOrganizationContext();
-
-  return useMutation({
-    mutationFn: async (requisition: Omit<PurchaseRequisition, "id" | "organization_id" | "created_at" | "updated_at">) => {
-      if (!organizationId) throw new Error("Organization ID required");
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { data, error } = await supabase
-        .from("purchase_requisitions")
-        .insert({ 
-          ...requisition, 
-          organization_id: organizationId,
-          requested_by: user.id 
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-requisitions"] });
-      toast.success("Purchase requisition created successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create requisition: ${error.message}`);
-    },
-  });
-};
-
-export const useUpdatePurchaseRequisition = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<PurchaseRequisition> & { id: string }) => {
-      const { data, error } = await supabase
-        .from("purchase_requisitions")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-requisitions"] });
-      toast.success("Requisition updated successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to update requisition: ${error.message}`);
-    },
-  });
-};
-
 // Purchase Orders
 export interface PurchaseOrder {
   id: string;
