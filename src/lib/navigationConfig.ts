@@ -114,6 +114,7 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck, section: "Overview" },
   { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Overview" },
   { title: "Reports", url: "/reports", icon: FileText, section: "Overview" },
+  { title: "Centre Targets", url: "/centre-targets", icon: Landmark, section: "Overview" },
   { title: "Trainees", url: "/trainees", icon: Users, section: "People" },
   { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck, section: "People" },
   { title: "Trainers", url: "/trainers", icon: GraduationCap, section: "People" },
@@ -364,6 +365,7 @@ export const hrOfficerNavItems: NavItem[] = [
   { title: "Leave Management", url: "/hr/leave", icon: Calendar },
   { title: "Recruitment", url: "/hr/recruitment", icon: Briefcase },
   { title: "Performance", url: "/hr/performance", icon: BarChart3 },
+  { title: "Staff Establishment", url: "/staff-establishment", icon: Users },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
@@ -393,6 +395,7 @@ export const financeAdminNavItems: NavItem[] = [
 
 export const paNavItems: NavItem[] = [
   { title: "Dashboard", url: "/pa-dashboard", icon: LayoutDashboard },
+  { title: "Centre Targets", url: "/centre-targets", icon: Landmark },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "My Leave & HR", url: "/my-hr", icon: Calendar },
 ];

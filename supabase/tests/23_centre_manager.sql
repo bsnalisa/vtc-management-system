@@ -40,7 +40,7 @@ select public.expect_error($$select public.centre_manager_overview('b0000000-000
 select set_config('request.jwt.claim.sub', :'trainerA', false);
 select public.expect_error($$select public.centre_manager_overview()$$, 'Not authorised', 'a trainer cannot open the overview');
 select set_config('request.jwt.claim.sub', :'adminA', false);
-select public.assert(public.centre_manager_overview() ? 'finance', 'an Organization Admin can preview the overview');
+select public.expect_error($$select public.centre_manager_overview()$$, 'Not authorised', 'the IT administrator cannot read the centre''s finance and academic figures');
 select set_config('request.jwt.claim.sub', :'sa', false);
 select public.assert((public.centre_manager_overview(:'orgB'::uuid)->'finance'->>'billed')::numeric = 5000, 'platform staff can open any centre');
 reset role;

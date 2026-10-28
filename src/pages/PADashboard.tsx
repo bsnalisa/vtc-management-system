@@ -93,7 +93,7 @@ function TaskDialog({ onClose }: { onClose: () => void }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Due"><Input type="date" value={f.due} onChange={(e) => setF({ ...f, due: e.target.value })} /></Field>
         <Field label="Requested by"><Select value={f.source} onValueChange={(v) => setF({ ...f, source: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value="centre_manager">Centre Manager</SelectItem><SelectItem value="self">Myself</SelectItem><SelectItem value="meeting">A meeting</SelectItem><SelectItem value="correspondence">Correspondence</SelectItem></SelectContent></Select></Field>
+          <SelectContent><SelectItem value="centre_manager">Centre Manager</SelectItem><SelectItem value="self">Myself</SelectItem><SelectItem value="meeting">A meeting</SelectItem><SelectItem value="correspondence">Correspondence</SelectItem><SelectItem value="report">A report due (NTA or internal)</SelectItem><SelectItem value="review">A review due</SelectItem></SelectContent></Select></Field>
       </div>
       <Field label="Details"><Textarea rows={3} value={f.detail} onChange={(e) => setF({ ...f, detail: e.target.value })} /></Field>
     </Modal>

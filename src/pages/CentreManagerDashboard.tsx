@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -20,6 +20,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useMyTasks } from "@/hooks/useWorkflows";
 import { useCentreManagerOverview } from "@/hooks/useCentreManagerOverview";
 import { CentreExecutive } from "@/components/dashboard/CentreExecutive";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FinancePanel, QualityPanel, StaffingPanel, StakeholdersPanel } from "@/components/dashboard/centre/CentrePanels";
 
 const money = (n: number) => `N$ ${Math.round(n).toLocaleString("en-ZA")}`;
 const pct = (n: number | null | undefined) => (n == null ? "–" : `${n}%`);
@@ -59,9 +61,11 @@ const CentreManagerDashboard = () => {
     if (e) toast.error(`Could not load some dashboard figures: ${(e as Error).message}`);
   }, [error, tasksError]);
 
+  const [tab, setTab] = useState("overview");
   const waiting = tasks ?? [];
   const f = o?.finance;
-  const passed = o?.results.by_status.find((s) => /pass|compet/i.test(s.status))?.count ?? 0;
+  const PASS = new Set(["pass", "passed", "competent"]);
+  const passed = o?.results.by_status.filter((s) => PASS.has(s.status.toLowerCase())).reduce((n, s) => n + s.count, 0) ?? 0;
   const decided = o?.results.by_status.filter((s) => !/pending/i.test(s.status)).reduce((n, s) => n + s.count, 0) ?? 0;
   const passRate = decided > 0 ? Math.round((1000 * passed) / decided) / 10 : null;
 
@@ -87,6 +91,15 @@ const CentreManagerDashboard = () => {
         ]}
         actionCols={4}
       >
+        <Tabs value={tab} onValueChange={setTab} className="space-y-4">
+          <TabsList className="h-auto flex-wrap justify-start">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="finance">Finance and spending</TabsTrigger>
+            <TabsTrigger value="quality">Quality of training</TabsTrigger>
+            <TabsTrigger value="people">Staffing</TabsTrigger>
+            <TabsTrigger value="stakeholders">Stakeholders and reports</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="space-y-4">
         {isLoading && <div className="flex justify-center py-6"><LoadingSpinner text="Loading centre figures" /></div>}
         {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>Centre figures could not be loaded: {(error as Error).message}</AlertDescription></Alert>}
         {o && (
@@ -205,6 +218,12 @@ const CentreManagerDashboard = () => {
             </div>
           </>
         )}
+          </TabsContent>
+          <TabsContent value="finance"><FinancePanel active={tab === "finance"} /></TabsContent>
+          <TabsContent value="quality"><QualityPanel active={tab === "quality"} /></TabsContent>
+          <TabsContent value="people"><StaffingPanel active={tab === "people"} /></TabsContent>
+          <TabsContent value="stakeholders"><StakeholdersPanel active={tab === "stakeholders"} /></TabsContent>
+        </Tabs>
       </DashboardShell>
     </DashboardLayout>
   );

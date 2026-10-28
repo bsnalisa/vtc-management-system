@@ -60,7 +60,7 @@ export interface RequisitionRow {
 
 export interface FulfilmentItem { item_id: string; no: number; description: string; requested: number; cancelled: number; ordered: number; accepted: number; outstanding: number; damaged: number; incorrect: number; missing: number }
 export interface Fulfilment {
-  procurement: { supplier_id: string | null; supplier_name: string | null; quotation_reference: string | null; order_reference: string | null; order_date: string | null; expected_delivery: string | null; notes: string | null } | null;
+  procurement: { supplier_id: string | null; supplier_name: string | null; quotation_reference: string | null; order_reference: string | null; order_date: string | null; expected_delivery: string | null; notes: string | null; order_value?: number | null } | null;
   overdue: boolean; items: FulfilmentItem[];
   receipts: { id: string; receipt_no: string; delivery_date: string; comments: string | null; by: string; role: string | null; at: string;
     lines: { item_id: string; no: number; description: string; accepted: number; damaged: number; incorrect: number; missing: number; note: string | null }[] }[];
