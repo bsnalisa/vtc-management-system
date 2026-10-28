@@ -44,14 +44,25 @@ export interface ReqStage {
   stage_no: number; stage_key: string; state: "decided" | "returned" | "current" | "upcoming"; people: ReqPerson[];
   decision: { decision: string; comments: string | null; gl_code: string | null; at: string; by: string; role: string | null } | null;
 }
-export interface ReqItem { no: number; quantity: number; description: string; specifications: string | null }
+export type TemplateFieldType = "text" | "textarea" | "number" | "date" | "select";
+export interface TemplateField { key: string; label: string; type: TemplateFieldType; required: boolean; help: string; options: string[] }
+export interface TemplateDocument { key: string; label: string; required: boolean }
+export interface TemplateLabels { purpose: string; department: string; quantity: string; description: string; specifications: string }
+export interface TemplateDefinition { instructions: string; labels: TemplateLabels; fields: TemplateField[]; columns: TemplateField[]; documents: TemplateDocument[] }
+export const DEFAULT_TEMPLATE: TemplateDefinition = {
+  instructions: "",
+  labels: { purpose: "Purpose / justification", department: "Department", quantity: "Quantity", description: "Description", specifications: "Specifications" },
+  fields: [], columns: [], documents: [],
+};
+export interface ReqItem { no: number; quantity: number; description: string; specifications: string | null; extra?: Record<string, string> }
 export interface RequisitionView {
-  id: string; organization_id: string; requisition_number: string; status: string; round: number; purpose: string | null; department: string | null; template_version: number;
+  id: string; organization_id: string; requisition_number: string; status: string; round: number; purpose: string | null; department: string | null; template_version: number; template?: TemplateDefinition; fields?: Record<string, string>;
+  request_documents?: { id: string; doc_key: string | null; file_path: string; file_name: string; at: string }[];
   submitted_at: string | null; created_at: string; requester: ReqPerson; is_requester: boolean; next_action: string | null; items: ReqItem[]; stages: ReqStage[];
   can_decide: boolean; task_id: string | null; can_edit: boolean; can_reopen: boolean; can_cancel: boolean;
   decisions: { round: number; stage_key: string; stage_no: number; decision: string; gl_code: string | null; comments: string | null; by: string; role: string | null; at: string }[];
   history: { from: string | null; to: string; reason: string | null; at: string; by: string | null }[];
-  rounds: { round: number; submitted_at: string; purpose: string; items: ReqItem[]; supervisor: string | null }[];
+  rounds: { round: number; submitted_at: string; purpose: string; fields?: Record<string, string>; items: ReqItem[]; supervisor: string | null }[];
 }
 export interface RequisitionRow {
   id: string; requisition_number: string; purpose: string | null; department: string | null; status: string; requester_name: string | null; submitted_at: string | null; created_at: string;

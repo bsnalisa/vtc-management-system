@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { printRawDocument } from "@/lib/printDocument";
 import { requisitionDocumentHtml } from "@/lib/requisitionDocument";
+import { DEFAULT_TEMPLATE } from "@/components/requisitions/status";
 import { RequisitionStatusBadge } from "@/components/requisitions/RequisitionStatusBadge";
 import { RequisitionHistory, RequisitionStages } from "@/components/requisitions/RequisitionTimeline";
 import { RequisitionDecisionPanel } from "@/components/requisitions/RequisitionDecisionPanel";
@@ -51,6 +52,8 @@ export default function RequisitionDetail() {
   if (isLoading) return shell(<LoadingSpinner text="Loading..." className="py-8" />);
   if (error || !v) return shell(<Alert variant="destructive"><AlertDescription>{(error as Error)?.message ?? "Requisition not found"}</AlertDescription></Alert>);
 
+  const tpl = { ...DEFAULT_TEMPLATE, ...(v.template ?? {}), labels: { ...DEFAULT_TEMPLATE.labels, ...(v.template?.labels ?? {}) } };
+
   return shell(
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -79,12 +82,32 @@ export default function RequisitionDetail() {
         <CardHeader><CardTitle>Purpose</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <p className="whitespace-pre-wrap">{v.purpose}</p>
+          {(tpl.fields ?? []).some((f) => v.fields?.[f.key]) && (
+            <dl className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+              {(tpl.fields ?? []).filter((f) => v.fields?.[f.key]).map((f) => <div key={f.key}><dt className="inline text-muted-foreground">{f.label}: </dt><dd className="inline whitespace-pre-wrap">{v.fields?.[f.key]}</dd></div>)}
+            </dl>
+          )}
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader><TableRow><TableHead className="w-12">No.</TableHead><TableHead className="w-24">Quantity</TableHead><TableHead>Description</TableHead><TableHead>Specifications</TableHead></TableRow></TableHeader>
-              <TableBody>{v.items.map((i) => <TableRow key={i.no}><TableCell>{i.no}</TableCell><TableCell>{i.quantity}</TableCell><TableCell className="whitespace-normal">{i.description}</TableCell><TableCell className="whitespace-normal">{i.specifications ?? ""}</TableCell></TableRow>)}</TableBody>
+              <TableHeader><TableRow><TableHead className="w-12">No.</TableHead><TableHead className="w-24">{tpl.labels.quantity}</TableHead><TableHead>{tpl.labels.description}</TableHead><TableHead>{tpl.labels.specifications}</TableHead>{(tpl.columns ?? []).map((c) => <TableHead key={c.key}>{c.label}</TableHead>)}</TableRow></TableHeader>
+              <TableBody>{v.items.map((i) => <TableRow key={i.no}><TableCell>{i.no}</TableCell><TableCell>{i.quantity}</TableCell><TableCell className="whitespace-normal">{i.description}</TableCell><TableCell className="whitespace-normal">{i.specifications ?? ""}</TableCell>{(tpl.columns ?? []).map((c) => <TableCell key={c.key}>{i.extra?.[c.key] ?? ""}</TableCell>)}</TableRow>)}</TableBody>
             </Table>
           </div>
+          {!!v.request_documents?.length && (
+            <div className="space-y-1 text-sm">
+              <div className="font-medium">Supporting documents</div>
+              {v.request_documents.map((d) => (
+                <div key={d.id} className="flex flex-wrap items-center gap-2">
+                  <span>{(tpl.documents ?? []).find((x) => x.key === d.doc_key)?.label ?? "Document"}: {d.file_name}</span>
+                  <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={async () => {
+                    const { data, error } = await supabase.storage.from("documents").createSignedUrl(d.file_path, 120);
+                    if (error || !data) { toast({ title: "Could not open the document", description: error?.message, variant: "destructive" }); return; }
+                    window.open(data.signedUrl, "_blank", "noopener");
+                  }}>Open</Button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

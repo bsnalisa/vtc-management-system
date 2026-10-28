@@ -116,6 +116,7 @@ export const centreManagerNavItems: NavItem[] = [
   { title: "Centre Office", url: "/pa-dashboard", icon: Briefcase, section: "Leadership" },
   { title: "Centre Targets", url: "/centre-targets", icon: Landmark, section: "Leadership" },
   { title: "Finance Approvals", url: "/finance-approvals", icon: ClipboardCheck, section: "Financial Management" },
+  { title: "Requisition Template", url: "/requisition-template", icon: ClipboardList, section: "Financial Management" },
   { title: "Classes", url: "/classes", icon: DoorClosed, section: "Quality of Training (view only)" },
   { title: "Trainees", url: "/trainees", icon: Users, section: "Quality of Training (view only)" },
   { title: "Transfer Requests", url: "/transfers", icon: ClipboardCheck, section: "Quality of Training (view only)" },
@@ -301,6 +302,7 @@ export const assetMaintenanceNavItems: NavItem[] = [
 export const procurementNavItems: NavItem[] = [
   { title: "Dashboard", url: "/procurement-officer-dashboard", icon: LayoutDashboard },
   { title: "Purchase Orders", url: "/purchase-orders", icon: FileText },
+  { title: "Requisition Template", url: "/requisition-template", icon: ClipboardList },
   { title: "Receiving Reports", url: "/receiving-reports", icon: FileText },
   { title: "Suppliers", url: "/suppliers", icon: Users },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
@@ -405,6 +407,7 @@ export const headOfFinanceAdminNavItems: NavItem[] = [
   { title: "Dashboard", url: "/head-of-finance-admin-dashboard", icon: LayoutDashboard },
   { title: "Approval Centre", url: "/finance-approvals", icon: ClipboardCheck },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
+  { title: "Requisition Template", url: "/requisition-template", icon: ClipboardList },
   { title: "Creditors", url: "/creditors-officer-dashboard", icon: FileText },
   { title: "Debtor Adjustments", url: "/debtors/adjustments", icon: DollarSign },
   { title: "NSFAF Funding", url: "/loan-officer-dashboard?tab=reconciliation", icon: Landmark },

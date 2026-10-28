@@ -62,6 +62,7 @@ const CentreTargets = lazy(() => import("./pages/CentreTargets"));
 const StaffEstablishment = lazy(() => import("./pages/StaffEstablishment"));
 const Requisitions = lazy(() => import("./pages/Requisitions"));
 const RequisitionEdit = lazy(() => import("./pages/RequisitionEdit"));
+const RequisitionTemplate = lazy(() => import("./pages/RequisitionTemplate"));
 const RequisitionDetail = lazy(() => import("./pages/RequisitionDetail"));
 const RequisitionByInstance = lazy(() => import("./pages/RequisitionByInstance"));
 const PurchaseOrders = lazy(() => import("./pages/PurchaseOrders"));
@@ -557,6 +558,7 @@ const App = () => (
           <Route path="/centre-targets" element={<ProtectedRoute><CentreTargets /></ProtectedRoute>} />
           <Route path="/staff-establishment" element={<ProtectedRoute><StaffEstablishment /></ProtectedRoute>} />
           <Route path="/requisitions" element={<ProtectedRoute><Requisitions /></ProtectedRoute>} />
+          <Route path="/requisition-template" element={<ProtectedRoute><RequisitionTemplate /></ProtectedRoute>} />
           <Route path="/requisitions/new" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />
           <Route path="/requisitions/instance/:instanceId" element={<ProtectedRoute><RequisitionByInstance /></ProtectedRoute>} />
           <Route path="/requisitions/:id/edit" element={<ProtectedRoute><RequisitionEdit /></ProtectedRoute>} />

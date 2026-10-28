@@ -1,7 +1,7 @@
 import { esc } from "./printDocument";
 import { PAGE_FRAME_CSS, letterheadHtml, safeColour, type LetterheadSettings } from "./letterhead";
 import type { RequisitionView, ReqStage } from "@/components/requisitions/status";
-import { DECISION_LABEL, STAGE_LABEL } from "@/components/requisitions/status";
+import { DECISION_LABEL, DEFAULT_TEMPLATE, STAGE_LABEL } from "@/components/requisitions/status";
 
 /**
  * The printed Internal Quotation Request Form. Centre-specific content (letterhead) comes from the centre's settings through the shared
@@ -69,18 +69,25 @@ export function requisitionDocumentHtml(v: RequisitionView, letterhead: { centre
   const primary = safeColour(s.primary_color, "#034EA1");
   const accent = safeColour(s.accent_color, "#EE4023");
   const { header, footer } = letterheadHtml(s, centreName);
+  // labels, extra fields and item columns come from the template the requisition was made on
+  const tpl = v.template ?? DEFAULT_TEMPLATE;
+  const lb = { ...DEFAULT_TEMPLATE.labels, ...(tpl.labels ?? {}) };
+  const cols = tpl.columns ?? [];
+  const extras = (tpl.fields ?? []).filter((f) => (v.fields ?? {})[f.key]);
   const items = v.items.length
-    ? v.items.map((i, n) => `<tr><td class="no">${n + 1}.</td><td class="qty">${esc(i.quantity)}</td><td>${esc(i.description)}</td><td>${esc(i.specifications ?? "")}</td></tr>`).join("")
-    : `<tr><td colspan="4">No items listed.</td></tr>`;
+    ? v.items.map((i, n) => `<tr><td class="no">${n + 1}.</td><td class="qty">${esc(i.quantity)}</td><td>${esc(i.description)}</td><td>${esc(i.specifications ?? "")}</td>${cols.map((c) => `<td>${esc(i.extra?.[c.key] ?? "")}</td>`).join("")}</tr>`).join("")
+    : `<tr><td colspan="${4 + cols.length}">No items listed.</td></tr>`;
+  const extraBlock = extras.length ? `<div class="req">${extras.map((f) => `<div>${esc(f.label)}: <b>${esc((v.fields ?? {})[f.key])}</b></div>`).join("")}</div>` : "";
   const submitted = v.submitted_at ? `Submitted electronically on ${dmy(v.submitted_at)}` : "Not yet submitted";
   const body = `<h1>Internal Quotation Request Form</h1>
     <div class="ref">Reference: <b>${esc(v.requisition_number)}</b> &nbsp;|&nbsp; Form version ${esc(v.template_version)}${v.round > 1 ? ` &nbsp;|&nbsp; Round ${esc(v.round)}` : ""}</div>
     <p class="purpose">${multi(v.purpose)}</p>
-    <table class="items"><thead><tr><th class="no">No</th><th class="qty">Quantity</th><th>Description</th><th>Specifications</th></tr></thead><tbody>${items}</tbody></table>
+    ${extraBlock}
+    <table class="items"><thead><tr><th class="no">No</th><th class="qty">${esc(lb.quantity)}</th><th>${esc(lb.description)}</th><th>${esc(lb.specifications)}</th>${cols.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${items}</tbody></table>
     <div class="req">
       <div>Requested by: <b>${esc(v.requester.name)}</b></div>
       <div class="line"><span class="lbl">Signature:</span><span class="sig">${v.submitted_at ? esc(submitted) : ""}</span><span class="lbl">Date:</span><span class="dt">${v.submitted_at ? esc(dmy(v.submitted_at)) : ""}</span></div>
-      <div>Department: <b>${esc(v.department ?? "")}</b></div>
+      <div>${esc(lb.department)}: <b>${esc(v.department ?? "")}</b></div>
     </div>
     ${v.stages.map(stageBlock).join("")}
     <div class="note">Printed ${esc(dmy(opts.now ?? new Date()))}. Approval decisions above are the recorded electronic decisions for this requisition (status: ${esc(v.status.replace(/_/g, " "))}).</div>`;
