@@ -10,6 +10,9 @@ import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { UniformPpeNeeds } from "@/components/procurement/UniformPpeNeeds";
+import { useProcurementSummary } from "@/hooks/useRequisitions";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
+import { AlertTriangle, ClipboardCheck, Truck } from "lucide-react";
 
 export default function ProcurementOfficerDashboard() {
   const { navItems, groupLabel } = useRoleNavigation();
@@ -18,19 +21,27 @@ export default function ProcurementOfficerDashboard() {
   const { data: orders = [], isLoading: loadingOrders } = usePurchaseOrders();
   const { data: suppliers = [], isLoading: loadingSuppliers } = useSuppliers();
   const { data: profile } = useProfile();
+  const { organizationId } = useOrganizationContext();
+  const { data: sum } = useProcurementSummary(organizationId);
 
-  const awaitingProcurement = requisitions.filter(r => r.status === 'approved_awaiting_procurement').length;
   const activeOrders = orders.filter(o => o.status === 'sent' || o.status === 'acknowledged').length;
   const totalSpent = orders.reduce((sum, o) => sum + Number(o.grand_total), 0);
 
   const stats = [
     {
       title: "Approved: Awaiting Procurement",
-      value: awaitingProcurement,
+      value: sum?.awaiting_procurement ?? 0,
       icon: FileText,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
     },
+    { title: "Procurement in progress", value: sum?.in_progress ?? 0, icon: FileText, color: "text-blue-600", bgColor: "bg-blue-50" },
+    { title: "Orders awaiting delivery", value: sum?.orders_placed ?? 0, icon: Truck, color: "text-blue-600", bgColor: "bg-blue-50" },
+    { title: "Expected in the next 7 days", value: sum?.expected_next_7_days ?? 0, icon: Truck, color: "text-green-600", bgColor: "bg-green-50" },
+    { title: "Overdue deliveries", value: sum?.overdue ?? 0, icon: AlertTriangle, color: "text-red-600", bgColor: "bg-red-50" },
+    { title: "Units still outstanding", value: sum?.outstanding_units ?? 0, icon: Package, color: "text-orange-600", bgColor: "bg-orange-50" },
+    { title: "Open discrepancies", value: sum?.open_discrepancies ?? 0, icon: AlertTriangle, color: "text-orange-600", bgColor: "bg-orange-50" },
+    { title: "Ready for closure", value: sum?.ready_for_closure ?? 0, icon: ClipboardCheck, color: "text-green-600", bgColor: "bg-green-50" },
     {
       title: "Active Orders",
       value: activeOrders,
@@ -63,7 +74,7 @@ export default function ProcurementOfficerDashboard() {
     >
       <div className="space-y-6">
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

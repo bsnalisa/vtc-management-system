@@ -76,8 +76,9 @@ export default function Requisitions() {
   const [params, setParams] = useSearchParams();
   const showProcurement = role === "procurement_officer";
   const showCentre = role === "centre_manager";
+  const showReceiving = role === "stock_control_officer" || role === "asset_maintenance_coordinator";
   const canRequest = role !== "trainee";
-  const tab = params.get("tab") ?? (showProcurement ? "procurement" : "mine");
+  const tab = params.get("tab") ?? (showProcurement ? "procurement" : showReceiving ? "receiving" : "mine");
   const decideCount = useRequisitionList("to_decide", { pageSize: 1 }).data?.total ?? 0;
 
   return (
@@ -92,14 +93,17 @@ export default function Requisitions() {
             <TabsTrigger value="mine">My requisitions</TabsTrigger>
             <TabsTrigger value="to_decide">Awaiting my decision{decideCount > 0 ? ` (${decideCount})` : ""}</TabsTrigger>
             {showProcurement && <TabsTrigger value="procurement">Approved: procurement</TabsTrigger>}
+            {showReceiving && <TabsTrigger value="receiving">Deliveries to receive</TabsTrigger>}
             {showCentre && <TabsTrigger value="centre">All at this centre</TabsTrigger>}
           </TabsList>
           <TabsContent value="mine"><Card><CardHeader><CardTitle>My requisitions</CardTitle><CardDescription>Drafts, requests in the approval process, returned and completed ones.</CardDescription></CardHeader>
             <CardContent><List scope="mine" statusFilter emptyText="You have not made a requisition yet. Choose New requisition to start one." /></CardContent></Card></TabsContent>
           <TabsContent value="to_decide"><Card><CardHeader><CardTitle>Awaiting my decision</CardTitle><CardDescription>Requisitions whose current stage is assigned to you or delegated to you.</CardDescription></CardHeader>
             <CardContent><List scope="to_decide" emptyText="Nothing is waiting for your decision." /></CardContent></Card></TabsContent>
-          {showProcurement && <TabsContent value="procurement"><Card><CardHeader><CardTitle>Approved requisitions</CardTitle><CardDescription>Only fully approved requisitions reach procurement.</CardDescription></CardHeader>
+          {showProcurement && <TabsContent value="procurement"><Card><CardHeader><CardTitle>Approved requisitions</CardTitle><CardDescription>Only fully approved requisitions reach procurement. Open one to record the supplier, order, deliveries and closure.</CardDescription></CardHeader>
             <CardContent><List scope="procurement" statusFilter emptyText="No approved requisitions are waiting for procurement." /></CardContent></Card></TabsContent>}
+          {showReceiving && <TabsContent value="receiving"><Card><CardHeader><CardTitle>Deliveries to receive</CardTitle><CardDescription>Ordered requisitions waiting for goods, partly delivered, or fully received.</CardDescription></CardHeader>
+            <CardContent><List scope="receiving" statusFilter emptyText="Nothing is waiting to be received." /></CardContent></Card></TabsContent>}
           {showCentre && <TabsContent value="centre"><Card><CardHeader><CardTitle>Requisitions at this centre</CardTitle></CardHeader>
             <CardContent><List scope="centre" statusFilter emptyText="No requisitions have been submitted yet." /></CardContent></Card></TabsContent>}
         </Tabs>
