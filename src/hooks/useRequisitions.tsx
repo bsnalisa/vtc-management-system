@@ -46,7 +46,7 @@ export const useRequisitionLetterhead = (id: string | undefined, enabled: boolea
     },
   });
 
-export interface DraftInput { id: string | null; organizationId: string | null; purpose: string; department: string; items: { description: string; quantity: string; specifications: string }[] }
+export interface DraftInput { id: string | null; organizationId: string | null; purpose: string; department: string; items: { description: string; quantity: string; specifications: string; extra?: Record<string, string> }[]; fields?: Record<string, string> }
 
 export const useRequisitionActions = () => {
   const qc = useQueryClient();
@@ -56,7 +56,7 @@ export const useRequisitionActions = () => {
 
   const saveDraft = useMutation({
     mutationFn: async (d: DraftInput) => {
-      const { data, error } = await db.rpc("requisition_save_draft", { _id: d.id, _org: d.organizationId, _purpose: d.purpose, _department: d.department, _items: d.items.map((i) => ({ description: i.description, quantity: i.quantity, specifications: i.specifications })) });
+      const { data, error } = await db.rpc("requisition_save_draft", { _id: d.id, _org: d.organizationId, _purpose: d.purpose, _department: d.department, _items: d.items.map((i) => ({ description: i.description, quantity: i.quantity, specifications: i.specifications, extra: i.extra ?? {} })), _fields: d.fields ?? {} });
       if (error) throw error;
       return data as string;
     },
