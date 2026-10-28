@@ -47,7 +47,7 @@ const TraineeFinancePage = () => {
         .from("trainees")
         .select("id")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       if (!trainee) {
         // Try to get from application
@@ -55,7 +55,7 @@ const TraineeFinancePage = () => {
           .from("trainee_applications")
           .select("id")
           .eq("user_id", userId)
-          .single();
+          .maybeSingle();
 
         if (!application) return null;
 
@@ -63,7 +63,7 @@ const TraineeFinancePage = () => {
           .from("trainee_financial_accounts")
           .select("*")
           .eq("application_id", application.id)
-          .single();
+          .maybeSingle();
 
         if (error) return null;
         return appAccount;
@@ -73,7 +73,7 @@ const TraineeFinancePage = () => {
         .from("trainee_financial_accounts")
         .select("*")
         .eq("trainee_id", trainee.id)
-        .single();
+        .maybeSingle();
 
       if (error) return null;
       return traineeAccount;
