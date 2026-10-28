@@ -17,7 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { AssignmentsPanel } from "@/components/rolefactory/AssignmentsPanel";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
-import { type Capability, type FactoryRole, type FactoryVersion, useCatalogue, useFactoryActions, useFactoryEvents, useFactoryOverview, useOrganizations, useRoleOptionsForFactory } from "@/hooks/useRoleFactory";
+import { type Capability, type FactoryRole, type FactoryVersion, useCatalogue, useFactoryActions, useFactoryEvents, useFactoryOverview, useOrganizations, useRoleOptionsForFactory, useWidgetCatalogue } from "@/hooks/useRoleFactory";
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").replace(/^[^a-z]+/, "").slice(0, 40);
 const METHOD: Record<string, string> = { ai: "Proposed by AI", rules: "Proposed by the built-in rules (no AI)", manual: "Chosen by hand" };
@@ -59,7 +59,9 @@ function VersionPanel({ role, v, catalogue }: { role: FactoryRole; v: FactoryVer
   const [caps, setCaps] = useState<string[]>(v.selected_capabilities);
   const [note, setNote] = useState("");
   const [ack, setAck] = useState(false);
-  useEffect(() => { setDesc(v.job_description); setReports(v.reports_to_role ?? ""); setCaps(v.selected_capabilities); }, [v.id, v.job_description, v.reports_to_role, v.selected_capabilities]);
+  const { data: widgetDefs } = useWidgetCatalogue();
+  const [widgets, setWidgets] = useState<string[]>(v.dashboard_widgets);
+  useEffect(() => { setDesc(v.job_description); setReports(v.reports_to_role ?? ""); setCaps(v.selected_capabilities); setWidgets(v.dashboard_widgets); }, [v.id, v.job_description, v.reports_to_role, v.selected_capabilities, v.dashboard_widgets]);
   const draft = v.status === "draft";
   const edited = v.proposal_method && JSON.stringify([...v.proposal_capabilities].sort()) !== JSON.stringify([...v.selected_capabilities].sort());
   const sensitiveSelected = catalogue.some((c) => c.sensitive && (draft ? caps : v.selected_capabilities).includes(c.code));
@@ -106,10 +108,35 @@ function VersionPanel({ role, v, catalogue }: { role: FactoryRole; v: FactoryVer
           : <div className="flex flex-wrap gap-1">{(v.approved_capabilities ?? v.selected_capabilities).map((c) => <Badge key={c} variant="secondary">{label(c)}</Badge>)}{!(v.approved_capabilities ?? v.selected_capabilities).length && <span className="text-sm text-muted-foreground">None</span>}</div>}
       </div>
 
+      <div>
+        <div className="mb-2 text-sm font-medium">Dashboard widgets</div>
+        {draft ? (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">A widget needs the capability shown. Save the capabilities first, then choose the widgets; the person only ever sees figures for capabilities they hold.</p>
+            {widgetDefs?.map((w) => {
+              const available = v.selected_capabilities.includes(w.capability);
+              return (
+                <label key={w.code} className={`flex items-start gap-2 rounded border p-2 text-sm ${available ? "" : "opacity-60"}`}>
+                  <Checkbox checked={widgets.includes(w.code)} disabled={!available} onCheckedChange={() => setWidgets((x) => (x.includes(w.code) ? x.filter((c) => c !== w.code) : [...x, w.code]))} className="mt-0.5" />
+                  <span><span className="font-medium">{w.title}</span>{w.sensitive && <Badge variant="destructive" className="ml-2">Sensitive</Badge>}<span className="block text-muted-foreground">{w.description}</span>{!available && <span className="block text-xs">Needs: {label(w.capability)}</span>}</span>
+                </label>
+              );
+            })}
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" disabled={act.saveWidgets.isPending || JSON.stringify(widgets) === JSON.stringify(v.dashboard_widgets) || dirty} onClick={() => act.saveWidgets.mutate({ version: v.id, widgets })}>Save widgets</Button>
+              <Button size="sm" variant="ghost" disabled={dirty} onClick={() => setWidgets((widgetDefs ?? []).filter((w) => v.selected_capabilities.includes(w.capability)).map((w) => w.code))}>Select all available</Button>
+              {dirty && <span className="self-center text-xs text-muted-foreground">Save the draft first.</span>}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-1">{(v.approved_widgets ?? v.dashboard_widgets).map((c) => <Badge key={c} variant="secondary">{widgetDefs?.find((w) => w.code === c)?.title ?? c}</Badge>)}{!(v.approved_widgets ?? v.dashboard_widgets).length && <span className="text-sm text-muted-foreground">None</span>}</div>
+        )}
+      </div>
+
       {draft && (
         <div className="flex flex-wrap gap-2">
           <Button disabled={act.save.isPending || !dirty || desc.trim().length < MIN} onClick={save}>{act.save.isPending && <ButtonSpinner />}Save draft</Button>
-          <Button variant="secondary" disabled={act.submit.isPending || desc.trim().length < MIN || !caps.length} onClick={async () => { if (dirty) await save(); await act.submit.mutateAsync(v.id); }}>Send for review</Button>
+          <Button variant="secondary" disabled={act.submit.isPending || desc.trim().length < MIN || !caps.length} onClick={async () => { if (dirty) await save(); if (JSON.stringify(widgets) !== JSON.stringify(v.dashboard_widgets)) await act.saveWidgets.mutateAsync({ version: v.id, widgets }); await act.submit.mutateAsync(v.id); }}>Send for review</Button>
         </div>
       )}
 

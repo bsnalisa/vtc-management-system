@@ -66,6 +66,7 @@ const RequisitionTemplate = lazy(() => import("./pages/RequisitionTemplate"));
 const ReportingStructure = lazy(() => import("./pages/ReportingStructure"));
 const RoleFactory = lazy(() => import("./pages/RoleFactory"));
 const RoleAssignments = lazy(() => import("./pages/RoleAssignments"));
+const CustomRoleDashboard = lazy(() => import("./pages/CustomRoleDashboard"));
 const ReportingConfirmations = lazy(() => import("./pages/ReportingConfirmations"));
 const RequisitionDetail = lazy(() => import("./pages/RequisitionDetail"));
 const RequisitionByInstance = lazy(() => import("./pages/RequisitionByInstance"));
@@ -562,6 +563,7 @@ const App = () => (
           <Route path="/centre-targets" element={<ProtectedRoute><CentreTargets /></ProtectedRoute>} />
           <Route path="/staff-establishment" element={<ProtectedRoute><StaffEstablishment /></ProtectedRoute>} />
           <Route path="/requisitions" element={<ProtectedRoute><Requisitions /></ProtectedRoute>} />
+          <Route path="/my-role-dashboard" element={<ProtectedRoute><CustomRoleDashboard /></ProtectedRoute>} />
           <Route path="/role-factory" element={<ProtectedRoute><RoleFactory /></ProtectedRoute>} />
           <Route path="/role-assignments" element={<ProtectedRoute><RoleAssignments /></ProtectedRoute>} />
           <Route path="/reporting-structure" element={<ProtectedRoute><ReportingStructure /></ProtectedRoute>} />

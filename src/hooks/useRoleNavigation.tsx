@@ -33,10 +33,17 @@ import {
   type NavItem,
 } from "@/lib/navigationConfig";
 import { getRoleDashboardPath, getRoleDisplayName } from "@/lib/roleUtils";
-import { FileText } from "lucide-react";
+import { FileText, LayoutDashboard } from "lucide-react";
+import { useMyDashboard } from "@/hooks/useRoleFactory";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 
 export const useRoleNavigation = () => {
   const { role, loading } = useUserRole();
+  const { organizationId } = useOrganizationContext();
+  // people who hold a role made in the role factory also get that role's dashboard
+  const staff = !!role && role !== "trainee" && role !== "super_admin";
+  const custom = useMyDashboard(staff ? organizationId : null);
+  const hasCustomRole = (custom.data?.roles.length ?? 0) > 0;
 
   const roleNavItems = () => {
     switch (role) {
@@ -110,13 +117,19 @@ export const useRoleNavigation = () => {
 
   // Every staff role can make a requisition and decide the ones assigned to it
   const getNavItems = (): NavItem[] => {
-    const items: NavItem[] = roleNavItems();
-    if (!role || role === "trainee" || items.length === 0 || items.some((i) => i.url === "/requisitions")) return items;
-    const entry: NavItem = { title: "Requisitions", url: "/requisitions", icon: FileText };
-    const at = items.findIndex((i) => i.url === "/my-approvals");
-    const section = at >= 0 ? items[at].section : undefined;
-    const withSection: NavItem = section ? { ...entry, section } : entry;
-    return at >= 0 ? [...items.slice(0, at), withSection, ...items.slice(at)] : [...items, withSection];
+    let items: NavItem[] = roleNavItems();
+    if (role && role !== "trainee" && items.length > 0 && !items.some((i) => i.url === "/requisitions")) {
+      const entry: NavItem = { title: "Requisitions", url: "/requisitions", icon: FileText };
+      const at = items.findIndex((i) => i.url === "/my-approvals");
+      const section = at >= 0 ? items[at].section : undefined;
+      const withSection: NavItem = section ? { ...entry, section } : entry;
+      items = at >= 0 ? [...items.slice(0, at), withSection, ...items.slice(at)] : [...items, withSection];
+    }
+    if (hasCustomRole && items.length > 0 && !items.some((i) => i.url === "/my-role-dashboard")) {
+      const entry: NavItem = { title: "My Role Dashboard", url: "/my-role-dashboard", icon: LayoutDashboard };
+      items = [items[0], items[0].section ? { ...entry, section: items[0].section } : entry, ...items.slice(1)];
+    }
+    return items;
   };
 
   const getGroupLabel = () => {
