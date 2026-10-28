@@ -17,6 +17,7 @@ import { requisitionDocumentHtml } from "@/lib/requisitionDocument";
 import { RequisitionStatusBadge } from "@/components/requisitions/RequisitionStatusBadge";
 import { RequisitionHistory, RequisitionStages } from "@/components/requisitions/RequisitionTimeline";
 import { RequisitionDecisionPanel } from "@/components/requisitions/RequisitionDecisionPanel";
+import { RequisitionFulfilment } from "@/components/requisitions/RequisitionFulfilment";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -91,6 +92,8 @@ export default function RequisitionDetail() {
         <CardHeader><CardTitle>Approval stages</CardTitle><CardDescription>The order is fixed. The line supervisor is the one configured for the requester.</CardDescription></CardHeader>
         <CardContent><RequisitionStages view={v} /></CardContent>
       </Card>
+
+      <RequisitionFulfilment v={v} />
 
       <Card>
         <CardHeader><CardTitle>History</CardTitle></CardHeader>

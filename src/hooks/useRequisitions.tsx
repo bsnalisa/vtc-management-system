@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { RequisitionRow, RequisitionView } from "@/components/requisitions/status";
+import type { Fulfilment, RequisitionRow, RequisitionView } from "@/components/requisitions/status";
 
 // These functions are newer than the generated Supabase types.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
-export type RequisitionScope = "mine" | "to_decide" | "procurement" | "centre";
+export type RequisitionScope = "mine" | "to_decide" | "procurement" | "receiving" | "centre";
 
 export const useRequisitionList = (scope: RequisitionScope, opts: { status?: string; search?: string; page?: number; pageSize?: number; enabled?: boolean } = {}) => {
   const pageSize = opts.pageSize ?? 25;
@@ -87,4 +87,45 @@ export const useRequisitionActions = () => {
     onSuccess: refresh, onError: fail("Could not cancel the requisition"),
   });
   return { saveDraft, submit, decide, reopen, cancel };
+};
+
+export const useFulfilment = (id: string | undefined, enabled: boolean) =>
+  useQuery({
+    queryKey: ["requisition-fulfilment", id],
+    enabled: !!id && enabled,
+    queryFn: async () => {
+      const { data, error } = await db.rpc("requisition_fulfilment", { _id: id });
+      if (error) throw error;
+      return data as Fulfilment;
+    },
+  });
+
+export const useProcurementSummary = (organizationId: string | null | undefined) =>
+  useQuery({
+    queryKey: ["requisition-procurement-summary", organizationId],
+    enabled: !!organizationId,
+    queryFn: async () => {
+      const { data, error } = await db.rpc("requisition_procurement_summary", { _org: organizationId });
+      if (error) throw error;
+      return data as Record<string, number>;
+    },
+  });
+
+// One mutation helper for every procurement, receipt and closure call
+export const useFulfilmentAction = (requisitionId: string) => {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (a: { fn: string; args: Record<string, unknown>; done?: string }) => {
+      const { data, error } = await db.rpc(a.fn, a.args);
+      if (error) throw error;
+      return { data, done: a.done };
+    },
+    onSuccess: (r) => {
+      if (r.done) toast({ title: r.done });
+      ["requisition", "requisition-fulfilment", "requisitions", "requisition-procurement-summary"].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+    },
+    onError: (e: Error) => toast({ title: "Not saved", description: e.message, variant: "destructive" }),
+    meta: { requisitionId },
+  });
 };

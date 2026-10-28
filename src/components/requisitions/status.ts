@@ -57,3 +57,16 @@ export interface RequisitionRow {
   id: string; requisition_number: string; purpose: string | null; department: string | null; status: string; requester_name: string | null; submitted_at: string | null; created_at: string;
   round: number; item_count: number; next_action: string | null; task_id: string | null; total_count: number;
 }
+
+export interface FulfilmentItem { item_id: string; no: number; description: string; requested: number; cancelled: number; ordered: number; accepted: number; outstanding: number; damaged: number; incorrect: number; missing: number }
+export interface Fulfilment {
+  procurement: { supplier_id: string | null; supplier_name: string | null; quotation_reference: string | null; order_reference: string | null; order_date: string | null; expected_delivery: string | null; notes: string | null } | null;
+  overdue: boolean; items: FulfilmentItem[];
+  receipts: { id: string; receipt_no: string; delivery_date: string; comments: string | null; by: string; role: string | null; at: string;
+    lines: { item_id: string; no: number; description: string; accepted: number; damaged: number; incorrect: number; missing: number; note: string | null }[] }[];
+  discrepancies: { id: string; item_no: number; description: string; kind: string; quantity: number; note: string | null; status: string; resolution: string | null; resolution_note: string | null; raised_at: string; resolved_at: string | null }[];
+  events: { event: string; comment: string | null; details: Record<string, string>; by: string; role: string | null; at: string }[];
+  documents: { id: string; kind: string; file_path: string; file_name: string; at: string }[];
+  closed_at: string | null;
+  can_procure: boolean; can_place_order: boolean; can_delay: boolean; can_receive: boolean; can_resolve: boolean; can_close: boolean; can_cancel_order: boolean; can_add_documents: boolean;
+}
