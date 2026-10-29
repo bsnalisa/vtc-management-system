@@ -61,15 +61,23 @@ Deno.serve(async (req) => {
   const { data, error } = await supabase.rpc('claim_outbound_messages', { _limit: 50 });
   if (error) return json({ error: error.message }, 500);
 
-  // One lookup and one Microsoft sign-in per centre per run
-  const centres = new Map<string, { creds: (M365Credentials & { enabled: boolean }) | null; token?: string; tokenError?: string }>();
+  // One lookup per centre and one Microsoft sign-in per connection per run (centres on the same tenant share it)
+  type Creds = M365Credentials & { enabled: boolean; connection_id: string };
+  const tokens = new Map<string, { token?: string; error?: string }>();
+  const centres = new Map<string, { creds: Creds | null; token?: string; tokenError?: string }>();
   const centre = async (org: string) => {
     let c = centres.get(org);
     if (!c) {
       const { data: creds } = await supabase.rpc('email_settings_credentials', { _org: org });
-      c = { creds: (creds as (M365Credentials & { enabled: boolean }) | null) ?? null };
+      c = { creds: (creds as Creds | null) ?? null };
       if (c.creds?.enabled && c.creds.client_secret) {
-        try { c.token = await getM365Token(c.creds); } catch (e) { c.tokenError = e instanceof Error ? e.message : String(e); }
+        let t = tokens.get(c.creds.connection_id);
+        if (!t) {
+          t = {};
+          try { t.token = await getM365Token(c.creds); } catch (e) { t.error = e instanceof Error ? e.message : String(e); }
+          tokens.set(c.creds.connection_id, t);
+        }
+        c.token = t.token; c.tokenError = t.error;
       }
       centres.set(org, c);
     }
