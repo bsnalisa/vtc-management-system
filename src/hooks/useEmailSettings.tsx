@@ -7,15 +7,16 @@ import { useToast } from "@/hooks/use-toast";
 const db = supabase as any;
 
 export interface EmailSettings {
-  tenant_id: string; client_id: string; sender_address: string; sender_name: string | null; reply_to: string | null; enabled: boolean;
+  tenant_id: string | null; client_id: string | null; email_domain: string; sender_address: string; sender_name: string | null; reply_to: string | null; enabled: boolean;
   has_secret: boolean; secret_saved_at: string | null; last_test_at: string | null; last_test_ok: boolean | null; last_test_error: string | null; last_test_to: string | null; updated_at: string;
 }
 export interface EmailOverview {
-  configured: boolean; settings: EmailSettings | null;
+  configured: boolean; can_edit: boolean; centre: string | null; settings: EmailSettings | null;
   queue: { queued: number; sent: number; failed: number; last_error: string | null };
   events: { event: string; note: string | null; by: string | null; at: string }[];
 }
-export interface EmailForm { tenant: string; client: string; secret: string; sender: string; senderName: string; replyTo: string; enabled: boolean }
+export interface CentreEmailStatus { id: string; name: string; configured: boolean; enabled: boolean; email_domain: string | null; sender_address: string | null; last_test_ok: boolean | null; queued: number; failed: number }
+export interface EmailForm { tenant: string; client: string; secret: string; domain: string; sender: string; senderName: string; replyTo: string; enabled: boolean }
 
 export const useEmailOverview = (orgId: string | null | undefined) =>
   useQuery({
@@ -28,15 +29,26 @@ export const useEmailOverview = (orgId: string | null | undefined) =>
     },
   });
 
+export const useEmailCentres = (enabled: boolean) =>
+  useQuery({
+    queryKey: ["email-settings", "centres"],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await db.rpc("email_settings_centres");
+      if (error) throw error;
+      return data as CentreEmailStatus[];
+    },
+  });
+
 export const useEmailActions = (orgId: string | null | undefined) => {
   const qc = useQueryClient();
   const { toast } = useToast();
-  const refresh = () => qc.invalidateQueries({ queryKey: ["email-settings", orgId] });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["email-settings"] });
   const fail = (e: Error) => toast({ title: "Not saved", description: e.message, variant: "destructive" });
   return {
     save: useMutation({
       mutationFn: async (f: EmailForm) => {
-        const { error } = await db.rpc("email_settings_save", { _org: orgId, _tenant: f.tenant, _client: f.client, _secret: f.secret || null, _sender: f.sender, _sender_name: f.senderName || null, _reply_to: f.replyTo || null, _enabled: f.enabled });
+        const { error } = await db.rpc("email_settings_save", { _org: orgId, _tenant: f.tenant, _client: f.client, _secret: f.secret || null, _domain: f.domain, _sender: f.sender, _sender_name: f.senderName || null, _reply_to: f.replyTo || null, _enabled: f.enabled });
         if (error) throw error;
       },
       onSuccess: () => { refresh(); toast({ title: "Email settings saved" }); }, onError: fail,

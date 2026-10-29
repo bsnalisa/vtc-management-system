@@ -1,9 +1,9 @@
-import { identifyCaller, hasRoleAt, jsonResponse, serviceClient } from '../_shared/caller.ts';
+import { identifyCaller, jsonResponse, serviceClient } from '../_shared/caller.ts';
 import { getM365Token, sendM365Mail, type M365Credentials } from '../_shared/m365.ts';
 
 // Sends one test email through the centre's own Microsoft 365 settings and records the outcome.
-// Only that centre's Organization Admin (or platform staff) may call it, and only to their own address or the sender mailbox,
-// so it cannot be used to send mail to anyone else.
+// Only the Super Admin (platform staff) sets up email, so only they may call it, and only to their own address or the sender
+// mailbox, so it cannot be used to send mail to anyone else.
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
 
 Deno.serve(async (req) => {
@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   let body: { organization_id?: string; to?: string };
   try { body = await req.json(); } catch { return jsonResponse({ error: 'Invalid request' }, 400, cors); }
   const org = body.organization_id;
-  if (!org || !(caller.platform || hasRoleAt(caller, org, ['organization_admin', 'admin']))) return jsonResponse({ error: 'Not authorised' }, 403, cors);
+  if (!org || !caller.platform) return jsonResponse({ error: 'Not authorised' }, 403, cors);
 
   const { data: creds } = await admin.rpc('email_settings_credentials', { _org: org });
   const c = creds as (M365Credentials & { enabled: boolean }) | null;

@@ -68,6 +68,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "Escalated Tickets", url: "/escalated-tickets", icon: ArrowUpCircle },
+  { title: "Email Settings", url: "/email-settings", icon: Mail },
   { title: "Test Data Reset", url: "/test-data-reset", icon: Trash2 },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
