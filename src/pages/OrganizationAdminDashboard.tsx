@@ -17,6 +17,8 @@ import { PriorityBadge, StatusBadge } from "@/components/support/TicketThread";
 import { useRoleNavigation } from "@/hooks/useRoleNavigation";
 import { useProfile } from "@/hooks/useProfile";
 import { useItDashboard } from "@/hooks/useItSupport";
+import { useEmailOverview } from "@/hooks/useEmailSettings";
+import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 
 const ago = (iso: string) => formatDistanceToNow(new Date(iso), { addSuffix: true });
 const label = (v: string) => v.replace(/_/g, " ");
@@ -28,6 +30,8 @@ const OrganizationAdminDashboard = () => {
   const { navItems, groupLabel } = useRoleNavigation();
   const { data: profile } = useProfile();
   const { data: d, isLoading, error } = useItDashboard();
+  const { organizationId } = useOrganizationContext();
+  const { data: mail } = useEmailOverview(organizationId);
 
   useEffect(() => { if (error) toast.error(`Could not load the dashboard: ${(error as Error).message}`); }, [error]);
 
@@ -39,6 +43,7 @@ const OrganizationAdminDashboard = () => {
     ...(t!.escalated > 0 ? [{ tone: "info", text: `${t!.escalated} ticket${t!.escalated === 1 ? " is" : "s are"} with the Super Admin`, url: "/support-tickets?tab=escalated" }] : []),
     ...(t!.returned > 0 ? [{ tone: "warn", text: `${t!.returned} escalated ticket${t!.returned === 1 ? " was" : "s were"} returned to you with guidance`, url: "/support-tickets?tab=escalated" }] : []),
     ...(sys!.account_setup_failures_14d > 0 ? [{ tone: "warn", text: `${sys!.account_setup_failures_14d} trainee account set-up failure${sys!.account_setup_failures_14d === 1 ? "" : "s"} in the last 14 days`, url: "/system-status" }] : []),
+    ...(mail && !mail.settings?.enabled ? [{ tone: "warn", text: "Email is not switched on for this centre, so no email is being sent. Set up Microsoft 365 in Email Settings", url: "/email-settings" }] : []),
     ...(!sys!.delivery_configured ? [{ tone: "warn", text: "Message delivery is not set up, so no email or SMS is being sent. The Super Admin must complete the set-up", url: "/system-status" }] : []),
     ...(sys!.delivery_configured && sys!.messages_waiting > 0 ? [{ tone: "warn", text: `${sys!.messages_waiting} message${sys!.messages_waiting === 1 ? " has" : "s have"} been waiting to send for over an hour`, url: "/system-status" }] : []),
     ...(sys!.messages_failed_7d > 0 ? [{ tone: "warn", text: `${sys!.messages_failed_7d} message${sys!.messages_failed_7d === 1 ? "" : "s"} failed to send this week`, url: "/system-status" }] : []),
