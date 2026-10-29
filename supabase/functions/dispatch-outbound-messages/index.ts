@@ -1,17 +1,18 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
+import { getM365Token, sendM365Mail, type M365Credentials } from '../_shared/m365.ts';
 
-// Drains the outbound_messages queue: email through Resend, SMS through Twilio.
-// Call it on a schedule (e.g. every few minutes) with the header  x-dispatch-secret: $DISPATCH_SECRET.
+// Drains the outbound_messages queue: email through each centre's own Microsoft 365 settings (Microsoft Graph), SMS through Twilio.
+// Called on a schedule with the header  x-dispatch-secret  (the Vault job secret, or the DISPATCH_SECRET edge secret if one is set).
 //
-// Secrets:  DISPATCH_SECRET (required), RESEND_API_KEY + EMAIL_FROM (email),
-//           TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_FROM (SMS).
-// A channel without credentials is skipped and its messages stay queued.
+// Email: configured per centre by its Organization Admin (email_settings). A centre whose email is not set up or not switched on
+// keeps its messages queued. SMS secrets: TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_FROM.
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
 interface Message {
   id: string;
+  organization_id: string;
   channel: 'email' | 'sms';
   attempts: number;
   recipient: string;
@@ -29,24 +30,6 @@ function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-const escapeHtml = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-async function sendEmail(m: Message, apiKey: string, from: string): Promise<void> {
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to: [m.recipient],
-      subject: m.subject ?? 'Notification',
-      text: m.body,
-      html: `<div style="font-family:Arial,sans-serif;white-space:pre-line">${escapeHtml(m.body)}</div>`,
-    }),
-  });
-  if (!res.ok) throw new Error(`Resend ${res.status}: ${(await res.text()).slice(0, 300)}`);
-}
-
 async function sendSms(m: Message, sid: string, token: string, from: string): Promise<void> {
   const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
     method: 'POST',
@@ -60,35 +43,64 @@ async function sendSms(m: Message, sid: string, token: string, from: string): Pr
 }
 
 Deno.serve(async (req) => {
-  const secret = Deno.env.get('DISPATCH_SECRET');
-  if (!secret) return json({ error: 'DISPATCH_SECRET is not configured' }, 500);
-  if (!safeEqual(req.headers.get('x-dispatch-secret') ?? '', secret)) return json({ error: 'Unauthorized' }, 401);
+  const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  const sent = req.headers.get('x-dispatch-secret') ?? '';
+  const envSecret = Deno.env.get('DISPATCH_SECRET');
+  let allowed = !!envSecret && safeEqual(sent, envSecret);
+  if (!allowed && sent) {
+    const { data } = await supabase.rpc('verify_dispatch_secret', { _candidate: sent });
+    allowed = data === true;
+  }
+  if (!allowed) return json({ error: 'Unauthorized' }, 401);
 
-  const resendKey = Deno.env.get('RESEND_API_KEY');
-  const emailFrom = Deno.env.get('EMAIL_FROM') ?? 'onboarding@resend.dev';
   const twilioSid = Deno.env.get('TWILIO_ACCOUNT_SID');
   const twilioToken = Deno.env.get('TWILIO_AUTH_TOKEN');
   const twilioFrom = Deno.env.get('TWILIO_FROM');
-  const emailReady = !!resendKey;
   const smsReady = !!(twilioSid && twilioToken && twilioFrom);
 
-  const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const { data, error } = await supabase.rpc('claim_outbound_messages', { _limit: 50 });
   if (error) return json({ error: error.message }, 500);
 
-  const result = { sent: 0, failed: 0, deferred: 0 };
-  for (const m of (data ?? []) as Message[]) {
-    const ready = m.channel === 'email' ? emailReady : smsReady;
-    if (!ready) {
-      // No credentials for this channel: put it back without burning a retry
-      await supabase.from('outbound_messages')
-        .update({ status: 'queued', attempts: 0, error: `${m.channel} provider not configured` }).eq('id', m.id);
-      result.deferred++;
-      continue;
+  // One lookup per centre and one Microsoft sign-in per connection per run (centres on the same tenant share it)
+  type Creds = M365Credentials & { enabled: boolean; connection_id: string };
+  const tokens = new Map<string, { token?: string; error?: string }>();
+  const centres = new Map<string, { creds: Creds | null; token?: string; tokenError?: string }>();
+  const centre = async (org: string) => {
+    let c = centres.get(org);
+    if (!c) {
+      const { data: creds } = await supabase.rpc('email_settings_credentials', { _org: org });
+      c = { creds: (creds as Creds | null) ?? null };
+      if (c.creds?.enabled && c.creds.client_secret) {
+        let t = tokens.get(c.creds.connection_id);
+        if (!t) {
+          t = {};
+          try { t.token = await getM365Token(c.creds); } catch (e) { t.error = e instanceof Error ? e.message : String(e); }
+          tokens.set(c.creds.connection_id, t);
+        }
+        c.token = t.token; c.tokenError = t.error;
+      }
+      centres.set(org, c);
     }
+    return c;
+  };
+
+  const result = { sent: 0, failed: 0, deferred: 0 };
+  const defer = async (id: string, reason: string) => {
+    // Not set up for this channel/centre: put it back without burning a retry
+    await supabase.from('outbound_messages').update({ status: 'queued', attempts: 0, error: reason }).eq('id', id);
+    result.deferred++;
+  };
+  for (const m of (data ?? []) as Message[]) {
     try {
-      if (m.channel === 'email') await sendEmail(m, resendKey!, emailFrom);
-      else await sendSms(m, twilioSid!, twilioToken!, twilioFrom!);
+      if (m.channel === 'email') {
+        const c = await centre(m.organization_id);
+        if (!c.creds || !c.creds.enabled || !c.creds.client_secret) { await defer(m.id, 'Email is not switched on for this centre (Email Settings)'); continue; }
+        if (!c.token) throw new Error(c.tokenError ?? 'Could not sign in to Microsoft 365');
+        await sendM365Mail(c.token, c.creds, m.recipient, m.subject ?? 'Notification', m.body);
+      } else {
+        if (!smsReady) { await defer(m.id, 'sms provider not configured'); continue; }
+        await sendSms(m, twilioSid!, twilioToken!, twilioFrom!);
+      }
       await supabase.from('outbound_messages')
         .update({ status: 'sent', sent_at: new Date().toISOString(), error: null }).eq('id', m.id);
       result.sent++;

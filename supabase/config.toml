@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.analyse-job-description]
 verify_jwt = false
+
+[functions.send-test-email]
+verify_jwt = false

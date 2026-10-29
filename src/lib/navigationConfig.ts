@@ -1,4 +1,4 @@
-import {
+import { Mail,
   LayoutDashboard,
   Users,
   GraduationCap,
@@ -68,6 +68,7 @@ export const adminNavItems: NavItem[] = [
   { title: "Graduation & Surveys", url: "/graduation", icon: GraduationCap },
   { title: "Support Tickets", url: "/support-tickets", icon: MessageSquare },
   { title: "Escalated Tickets", url: "/escalated-tickets", icon: ArrowUpCircle },
+  { title: "Email Settings", url: "/email-settings", icon: Mail },
   { title: "Test Data Reset", url: "/test-data-reset", icon: Trash2 },
   { title: "My Approvals", url: "/my-approvals", icon: ClipboardCheck },
   { title: "Workflows", url: "/workflows", icon: Settings },
@@ -102,6 +103,7 @@ export const organizationAdminNavItems: NavItem[] = [
   { title: "Academic Calendar", url: "/academic-calendar", icon: Calendar, section: "Centre Setup" },
   { title: "Document Settings", url: "/document-settings", icon: FileText, section: "Centre Setup" },
   { title: "Proof of Registration", url: "/proof-of-registration-settings", icon: FileText, section: "Centre Setup" },
+  { title: "Email Settings", url: "/email-settings", icon: Mail, section: "Centre Setup" },
   { title: "Workflows", url: "/workflows", icon: Settings, section: "Centre Setup" },
   { title: "Reporting Structure", url: "/reporting-structure", icon: Users, section: "Centre Setup" },
   { title: "Custom Roles", url: "/role-assignments", icon: ShieldCheck, section: "Centre Setup" },
